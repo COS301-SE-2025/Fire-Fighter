@@ -1,0 +1,89 @@
+<ion-content class="bg-darkblue">
+  <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+      <!-- App Title -->
+      <h1 class="text-center text-3xl font-bold text-matisse-500 tracking-wider">FireFighter</h1>
+      
+      <!-- Flame Icon -->
+      <svg class="mx-auto h-16 w-16 text-matisse-400 mt-6" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 0 0 .495-7.468 5.99 5.99 0 0 0-1.925 3.547 5.975 5.975 0 0 1-2.133-1.001A3.75 3.75 0 0 0 12 18Z"></path>
+      </svg>
+      <h2 class="mt-6 text-center text-2xl/9 font-bold tracking-tight text-white">Sign in to your account</h2>
+    </div>
+
+    <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <div>
+          <label for="email" class="block text-sm/6 font-medium text-white">Email address</label>
+          <div class="mt-2">
+            <input 
+              type="email" 
+              id="email" 
+              formControlName="email" 
+              autocomplete="email" 
+              class="block w-full rounded-md bg-matisse-950 border-matisse-900 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-matisse-800 placeholder:text-matisse-500 focus:outline-2 focus:-outline-offset-2 focus:outline-matisse-600 sm:text-sm/6"
+              [ngClass]="{'outline-red-500': loginForm.get('email')?.touched && loginForm.get('email')?.invalid}"
+              placeholder="you@example.com"
+            >
+          </div>
+          <div *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.invalid" class="mt-1 text-sm text-red-400">
+            <small *ngIf="loginForm.get('email')?.errors?.['required']">
+              Email is required.
+            </small>
+            <small *ngIf="loginForm.get('email')?.errors?.['email']">
+              Enter a valid email.
+            </small>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between">
+            <label for="password" class="block text-sm/6 font-medium text-white">Password</label>
+            <div class="text-sm">
+              <a href="#" class="font-semibold text-matisse-400 hover:text-matisse-300">Forgot password?</a>
+            </div>
+          </div>
+          <div class="mt-2">
+            <input 
+              type="password" 
+              id="password" 
+              formControlName="password" 
+              autocomplete="current-password" 
+              class="block w-full rounded-md bg-matisse-950 border-matisse-900 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-matisse-800 placeholder:text-matisse-500 focus:outline-2 focus:-outline-offset-2 focus:outline-matisse-600 sm:text-sm/6"
+              [ngClass]="{'outline-red-500': loginForm.get('password')?.touched && loginForm.get('password')?.invalid}"
+              placeholder="••••••••"
+            >
+          </div>
+          <div *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid" class="mt-1 text-sm text-red-400">
+            <small *ngIf="loginForm.get('password')?.errors?.['required']">
+              Password is required.
+            </small>
+            <small *ngIf="loginForm.get('password')?.errors?.['minlength']">
+              Minimum 6 characters.
+            </small>
+          </div>
+        </div>
+
+        <div>
+          <button 
+            type="submit" 
+            [disabled]="loginForm.invalid || isSubmitting"
+            class="flex w-full justify-center rounded-md bg-matisse-700 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-matisse-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-matisse-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {{ isSubmitting ? 'Signing in...' : 'Sign in' }}
+          </button>
+        </div>
+        
+        <div *ngIf="errorMsg" class="text-sm text-center text-red-400">
+          {{ errorMsg }}
+        </div>
+      </form>
+
+      <p class="mt-10 text-center text-sm/6 text-matisse-500">
+        Not a member?
+        <a href="#" class="font-semibold text-matisse-400 hover:text-matisse-300">Register an account</a>
+      </p>
+    </div>
+  </div>
+</ion-content>
