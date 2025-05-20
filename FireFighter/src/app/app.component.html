@@ -1,3 +1,17 @@
 <ion-app>
-  <ion-router-outlet></ion-router-outlet>
+  <!-- loading spinner / text -->
+  <div *ngIf="!loaded" class="ion-padding">Loading…</div>
+
+  <!-- sign-in container is always in DOM but hidden once user is known -->
+  <div
+    #signInContainer
+    class="ion-padding"
+    [hidden]="!loaded || hasUser"
+  ></div>
+
+  <!-- user-button + router is always in DOM but hidden until user exists -->
+  <div [hidden]="!loaded || !hasUser">
+    <div #userBtnContainer class="ion-padding"></div>
+    <ion-router-outlet></ion-router-outlet>
+  </div>
 </ion-app>
