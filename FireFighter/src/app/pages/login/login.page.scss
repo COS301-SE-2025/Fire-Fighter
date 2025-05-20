@@ -5,12 +5,4 @@
 ion-content {
   --background: #080a1c; // Very dark blue, almost black
   height: 100vh;
-  width: 100%;
-}
-
-// Target Clerk component for custom styling
-::ng-deep .cl-component {
-  width: 100%;
-  max-width: 400px;
-  margin: 0 auto;
 }
