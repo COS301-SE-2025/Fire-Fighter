@@ -147,4 +147,14 @@ export class AuthService {
     // Always sign out on web layer
     await signOut(this.auth);
   }
+
+  /**
+   * Sign out and navigate to login page
+   */
+  async logout(): Promise<void> {
+    await this.signOut();
+    this.navCtrl.navigateRoot('/login', { 
+      animationDirection: 'back' 
+    });
+  }
 }

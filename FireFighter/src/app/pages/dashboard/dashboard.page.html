@@ -1,13 +1,30 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>dashboard</ion-title>
+    <ion-title>FireFighter Dashboard</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">dashboard</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" class="ion-padding">
+  <ng-container *ngIf="user$ | async as user">
+    <h1>Welcome, {{ user.displayName || user.email }}</h1>
+    <p>You are logged in!</p>
+    
+    <!-- Dashboard content goes here -->
+    <div class="mt-4">
+      <p>User ID: {{ user.uid }}</p>
+      <p>Email: {{ user.email }}</p>
+    </div>
+  </ng-container>
+
+  <div class="ion-text-center ion-padding-top">
+    <ion-button (click)="logout()" expand="block">
+      <ion-icon slot="start" name="log-out-outline"></ion-icon>
+      Logout
+    </ion-button>
+  </div>
 </ion-content>
