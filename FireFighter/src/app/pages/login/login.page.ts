@@ -2,7 +2,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IonContent } from '@ionic/angular/standalone';
+import { IonContent, IonButton } from '@ionic/angular/standalone';
+import { AuthService } from '../../services/auth.service';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -13,7 +15,9 @@ import { IonContent } from '@ionic/angular/standalone';
     CommonModule,
     ReactiveFormsModule,
     NgClass,
-    IonContent
+    IonContent,
+    IonButton,
+    RouterLink
   ]
 })
 export class LoginPage implements OnInit {
@@ -21,7 +25,23 @@ export class LoginPage implements OnInit {
   isSubmitting = false;
   errorMsg: string | null = null;
 
-  constructor(private fb: FormBuilder) {}
+  constructor(
+    private fb: FormBuilder,
+    private auth: AuthService,
+    private router: Router
+  ) {}
+
+  async login() {
+    try {
+      this.errorMsg = null;
+      const user = await this.auth.signInWithGoogle();
+      console.log('Logged in as', user.displayName);
+      this.router.navigate(['/dashboard']);
+    } catch (err) {
+      console.error('Login failed', err);
+      this.errorMsg = 'Google login failed. Please try again.';
+    }
+  }
 
   ngOnInit() {
     // we'll use this later for validation, but right now it's just for form state
@@ -31,15 +51,31 @@ export class LoginPage implements OnInit {
     });
   }
 
-  onSubmit() {
-    // stub: we're not doing real auth yet
+  async onSubmit() {
     if (this.loginForm.valid) {
-      this.isSubmitting = true;
-      // Simulate API call
-      setTimeout(() => {
-        console.log('Would submit', this.loginForm.value);
+      try {
+        this.isSubmitting = true;
+        this.errorMsg = null;
+        
+        const { email, password } = this.loginForm.value;
+        const user = await this.auth.signInWithEmail(email, password);
+        
+        console.log('Logged in as', user.email);
+        this.router.navigate(['/dashboard']);
+      } catch (err: any) {
+        console.error('Login failed', err);
+        
+        // Handle Firebase auth errors
+        if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+          this.errorMsg = 'Invalid email or password.';
+        } else if (err.code === 'auth/too-many-requests') {
+          this.errorMsg = 'Too many failed login attempts. Please try again later.';
+        } else {
+          this.errorMsg = 'Login failed. Please try again.';
+        }
+      } finally {
         this.isSubmitting = false;
-      }, 1500);
+      }
     }
   }
 }
