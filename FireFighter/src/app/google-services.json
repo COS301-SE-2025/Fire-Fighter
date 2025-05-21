@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "375672884424",
+    "project_id": "bwm-it-hub-firefighter",
+    "storage_bucket": "bwm-it-hub-firefighter.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:375672884424:android:5f10cb2f66126bd804e9fd",
+        "android_client_info": {
+          "package_name": "com.apex.firefighter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "375672884424-s59j204nfhc6rfphfpc8moglhfrspoo0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBl9MRD2KQCgrZ0QC_GAsz1-JBJloBt5O8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "375672884424-s59j204nfhc6rfphfpc8moglhfrspoo0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
