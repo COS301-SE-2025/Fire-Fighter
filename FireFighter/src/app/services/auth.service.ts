@@ -15,6 +15,8 @@ import { Observable }           from 'rxjs';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { Capacitor }            from '@capacitor/core';
 import { Platform }             from '@ionic/angular/standalone';
+import { Router, NavigationExtras } from '@angular/router';
+import { NavController }        from '@ionic/angular/standalone';
 
 @Injectable({
   providedIn: 'root'
@@ -23,9 +25,27 @@ export class AuthService {
   // Grab the injected Auth instance
   private auth = inject(Auth);
   private platform = inject(Platform);
+  private router = inject(Router);
+  private navCtrl = inject(NavController);
 
   // Expose an Observable of the current user (null if signed out)
   user$: Observable<User | null> = authState(this.auth);
+
+  /**
+   * Navigate to dashboard and prevent going back to login/register
+   */
+  navigateToDashboard(): void {
+    // Use Ionic NavController for better transition control
+    // Root navigation makes this the new history root - can't go back
+    this.navCtrl.navigateRoot('/dashboard', { 
+      animationDirection: 'forward'
+    });
+
+    // Alternative approach using Angular Router (if NavController doesn't work well)
+    // this.router.navigate(['/dashboard'], { 
+    //   replaceUrl: true // Replace URL in history instead of pushing
+    // });
+  }
 
   /**
    * Sign in with Google via a popup/webflow on web or native on mobile
