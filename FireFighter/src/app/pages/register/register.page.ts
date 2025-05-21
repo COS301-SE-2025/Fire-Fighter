@@ -61,7 +61,7 @@ export class RegisterPage implements OnInit {
         const user = await this.auth.createUserWithEmail(email, password);
         
         console.log('Account created for', user.email);
-        this.router.navigate(['/dashboard']);
+        this.auth.navigateToDashboard();
       } catch (err: any) {
         console.error('Registration failed', err);
         
@@ -84,7 +84,7 @@ export class RegisterPage implements OnInit {
       this.errorMsg = null;
       const user = await this.auth.signInWithGoogle();
       console.log('Registered as', user.displayName);
-      this.router.navigate(['/dashboard']);
+      this.auth.navigateToDashboard();
     } catch (err) {
       console.error('Google registration failed', err);
       this.errorMsg = 'Google registration failed. Please try again.';

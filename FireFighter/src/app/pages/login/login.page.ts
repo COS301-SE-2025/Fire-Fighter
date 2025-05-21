@@ -36,7 +36,7 @@ export class LoginPage implements OnInit {
       this.errorMsg = null;
       const user = await this.auth.signInWithGoogle();
       console.log('Logged in as', user.displayName);
-      this.router.navigate(['/dashboard']);
+      this.auth.navigateToDashboard();
     } catch (err) {
       console.error('Login failed', err);
       this.errorMsg = 'Google login failed. Please try again.';
@@ -61,7 +61,7 @@ export class LoginPage implements OnInit {
         const user = await this.auth.signInWithEmail(email, password);
         
         console.log('Logged in as', user.email);
-        this.router.navigate(['/dashboard']);
+        this.auth.navigateToDashboard();
       } catch (err: any) {
         console.error('Login failed', err);
         
