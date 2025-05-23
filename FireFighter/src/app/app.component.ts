@@ -3,6 +3,7 @@ import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { AuthService } from './services/auth.service';
 import { Capacitor } from '@capacitor/core';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
+import { initFlowbite } from 'flowbite';
 
 @Component({
   selector: 'app-root',
@@ -18,6 +19,8 @@ export class AppComponent implements OnInit {
     if (Capacitor.isNativePlatform()) {
       this.initializeCapacitorAuth();
     }
+
+    initFlowbite();
   }
 
   private async initializeCapacitorAuth() {
