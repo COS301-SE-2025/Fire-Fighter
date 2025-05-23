@@ -1,13 +1,4 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>FireFighter Dashboard</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="logout()">
-        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<app-navbar></app-navbar>
 
 <ion-content [fullscreen]="true" class="ion-padding">
   <ng-container *ngIf="user$ | async as user">
