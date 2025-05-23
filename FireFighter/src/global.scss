@@ -34,8 +34,13 @@
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
+/* @import '@ionic/angular/css/palettes/dark.system.css'; */
 
+
+/* 1) Flowbite theme vars + plugin via PostCSS directives */
+@import "flowbite/src/themes/default";  /* default CSS variables */  
+@plugin "flowbite/plugin";              /* makes data-attribute JS work */  
+@source "../node_modules/flowbite";     /* points PostCSS at Flowbite files */
 
 @tailwind base;
 @tailwind components;
