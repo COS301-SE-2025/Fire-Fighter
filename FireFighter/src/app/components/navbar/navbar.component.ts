@@ -16,10 +16,9 @@ import { AuthService } from '../../services/auth.service';
 export class NavbarComponent implements OnInit {
   mobileMenuOpen = false;
   profileMenuOpen = false;
+  isDarkMode = false;
 
   constructor(private authService: AuthService) { }
-
-  ngOnInit() {}
 
   toggleMobileMenu() {
     this.mobileMenuOpen = !this.mobileMenuOpen;
@@ -37,38 +36,28 @@ export class NavbarComponent implements OnInit {
     }
   }
 
-  ngAfterViewInit() {
-  const toggleBtn = document.getElementById('theme-toggle');
-  const darkIcon = document.getElementById('theme-toggle-dark-icon');
-  const lightIcon = document.getElementById('theme-toggle-light-icon');
+ngOnInit(): void {
+  const savedTheme = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  this.isDarkMode = savedTheme === 'dark' || (!savedTheme && prefersDark);
+  this.updateHtmlClass();
+}
 
-  if (!toggleBtn || !darkIcon || !lightIcon) return;
+toggleTheme(): void {
+  this.isDarkMode = !this.isDarkMode;
+  localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
+  this.updateHtmlClass();
+}
 
-  // Show correct icon on load
-  if (localStorage.getItem('color-theme') === 'dark' ||
-    (!localStorage.getItem('color-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    document.documentElement.classList.add('dark');
-    lightIcon.classList.remove('hidden');
-  } else {
-    document.documentElement.classList.remove('dark');
-    darkIcon.classList.remove('hidden');
-  }
-
-  toggleBtn.addEventListener('click', () => {
-    darkIcon.classList.toggle('hidden');
-    lightIcon.classList.toggle('hidden');
-
-    if (document.documentElement.classList.contains('dark')) {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('color-theme', 'light');
-    } else {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('color-theme', 'dark');
-    }
-  });
+updateHtmlClass(): void {
+  const html = document.documentElement;
+  html.classList.toggle('dark', this.isDarkMode);
 }
 
   async logout() {
     await this.authService.logout();
   }
 }
+
+
+
