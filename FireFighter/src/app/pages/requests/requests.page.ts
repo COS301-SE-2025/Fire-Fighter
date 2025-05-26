@@ -17,4 +17,20 @@ export class RequestsPage implements OnInit {
   ngOnInit() {
   }
 
+  requests = [
+    {
+      id: 'INC-1234',
+      status: 'Completed',
+      timeAgo: 'about 3 hours ago',
+      reason: 'Database server critical failure'
+    },
+    {
+      id: 'SEC-9012',
+      status: 'Completed',
+      timeAgo: 'about 2 hours ago',
+      reason: 'Security patch deployment'
+    }
+  ];
+
+
 }
