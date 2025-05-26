@@ -19,8 +19,6 @@ export class NavbarComponent implements OnInit {
 
   constructor(private authService: AuthService) { }
 
-  ngOnInit() {}
-
   toggleMobileMenu() {
     this.mobileMenuOpen = !this.mobileMenuOpen;
     // Close profile menu when opening mobile menu
@@ -37,16 +35,25 @@ export class NavbarComponent implements OnInit {
     }
   }
 
-  toggleTheme() {
+  isDarkMode = false;
+
+ngOnInit(): void {
+  const savedTheme = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  this.isDarkMode = savedTheme === 'dark' || (!savedTheme && prefersDark);
+  this.updateHtmlClass();
+}
+
+toggleTheme(): void {
+  this.isDarkMode = !this.isDarkMode;
+  localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
+  this.updateHtmlClass();
+}
+
+updateHtmlClass(): void {
   const html = document.documentElement;
-  if (html.classList.contains('dark')) {
-    html.classList.remove('dark');
-    localStorage.setItem('theme', 'light');
-  } else {
-    html.classList.add('dark');
-    localStorage.setItem('theme', 'dark');
-  }
-  } 
+  html.classList.toggle('dark', this.isDarkMode);
+}
 
   async logout() {
     await this.authService.logout();
