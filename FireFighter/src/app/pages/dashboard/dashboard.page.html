@@ -1,6 +1,6 @@
 <app-navbar></app-navbar>
 
-<ion-content [fullscreen]="true" class="ion-padding">
+<ion-content [fullscreen]="true" class="ion-padding bg-white text-black dark:bg-zinc-900 dark:text-white">
   <ng-container *ngIf="user$ | async as user">
     <h1 class="text-2xl font-sans font-bold">Welcome, {{ user.displayName || user.email }}</h1>
 
