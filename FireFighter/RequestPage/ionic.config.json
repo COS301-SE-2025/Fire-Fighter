@@ -1,0 +1,7 @@
+{
+  "name": "RequestPage",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
