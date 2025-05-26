@@ -5,6 +5,15 @@ ion-header {
   background-color: transparent;
 }
 
+/* Safe area utilities for status bar */
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 /* Fix size utility class */
 .size-6 {
   width: 1.5rem;
