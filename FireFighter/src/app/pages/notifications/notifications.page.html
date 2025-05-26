@@ -1,29 +1,34 @@
 <app-navbar></app-navbar>
 
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>notifications</ion-title>
+  <ion-toolbar class="bg-white shadow-md">
+    <ion-title class="text-xl font-bold px-4 py-2">Notifications</ion-title>
+    <p class="px-4 text-sm text-gray-500">Stay updated on FireFighter activity</p>
+    <div class="px-4 py-2 text-right">
+      <button class="px-4 py-1 text-sm font-medium text-white bg-blue-700 rounded hover:bg-blue-800">
+        ✔ Mark All as Read
+      </button>
+    </div>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">notifications</ion-title>      
+  <div class="space-y-4 mt-4 px-4">
 
-        <div class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
-            <a href="#">
-                <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">New FireFighter Request</h5>
-            </a>
-            <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">John Doe requested FireFighter access for ticket INC-1234</p>
-            <a href="#" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                View Details
-            </a>
-            <a href="#" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                Mark as Read
-            </a>
+    <!-- Notification: Request Completed -->
+    <div class="p-4 bg-blue-50 border-l-4 border-blue-400 rounded shadow-sm">
+      <div class="flex justify-between items-start">
+        <div>
+          <h3 class="font-bold text-red-600">Request Completed</h3>
+          <p class="text-gray-800">FireFighter access for ticket INC-1234 was completed</p>
+          <a href="#" class="text-blue-700 underline text-sm">View Details</a>
         </div>
-
-    </ion-toolbar>
-  </ion-header>
+        <div class="text-sm text-gray-500">1 minute ago</div>
+      </div>
+      <div class="mt-2 text-right">
+        <a href="#" class="text-sm text-blue-700 underline">Mark as Read</a>
+      </div>
+    </div>
+    
+  </div>
 </ion-content>
