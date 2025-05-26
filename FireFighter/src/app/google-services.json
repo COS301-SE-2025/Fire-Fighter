@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "375672884424-458pb0ghstm0tkk6ckv9h9sepvh02nc7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.apex.firefighter",
+            "certificate_hash": "620e64d84dd8d2a0dd984719c177d2cfcbd25b4e"
+          }
+        },
+        {
           "client_id": "375672884424-s59j204nfhc6rfphfpc8moglhfrspoo0.apps.googleusercontent.com",
           "client_type": 3
         }
