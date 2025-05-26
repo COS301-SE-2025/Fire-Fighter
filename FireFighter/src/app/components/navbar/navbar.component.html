@@ -32,33 +32,23 @@
             </div>
           </div>
         </div>
+<div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-2 sm:pr-0">
+        <button
+          type="button"
+          (click)="toggleTheme()"
+          class="relative rounded-full bg-matisse-950 p-1 text-white hover:text-matisse-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-matisse-950"
+          >
+        <span class="absolute -inset-1.5"></span>
+        <span class="sr-only">Toggle theme</span>
 
-        <div class="flex justify-end p-4">
-    <button id="theme-toggle" type="button"
-      class="inline-flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
-      
-      <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
-      </svg>
-
-      <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zM4.222 
-        5.636a1 1 0 011.415 0L7.05 7.05a1 1 0 11-1.415 1.415L4.222 
-        7.05a1 1 0 010-1.414zM2 10a1 1 0 011-1h1a1 1 0 110 
-        2H3a1 1 0 01-1-1zm2.222 4.364a1 1 0 010-1.414L5.636 
-        12.95a1 1 0 011.415 1.415l-1.414 1.414a1 1 0 
-        01-1.415 0zM10 18a1 1 0 01-1-1v-1a1 1 0 112 
-        0v1a1 1 0 01-1 1zm4.364-2.222a1 1 0 01-1.414 
-        0l-1.414-1.414a1 1 0 011.415-1.415l1.414 
-        1.414a1 1 0 010 1.415zM18 10a1 1 0 
-        01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zm-2.222-4.364a1 1 0 
-        010 1.414L14.95 7.05a1 1 0 11-1.415-1.415l1.414-1.414a1 1 
-        0 011.415 0z" clip-rule="evenodd"></path>
-      </svg>
-
-      Toggle Theme
-    </button>
-  </div>
+        <svg *ngIf="!isDarkMode" class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+        </svg>
+        <svg *ngIf="isDarkMode" class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+        </button>
+        </div>
         <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
           <button type="button" class="relative rounded-full bg-matisse-950 p-1 text-white hover:text-matisse-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-matisse-950">
             <span class="absolute -inset-1.5"></span>
