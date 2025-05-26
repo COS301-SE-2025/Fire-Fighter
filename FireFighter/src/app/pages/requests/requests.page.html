@@ -1,13 +1,46 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>requests</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="ion-padding">
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">requests</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>My FireFighter Requests</ion-card-title>
+      <ion-card-subtitle>Manage your access requests and session</ion-card-subtitle>
+    </ion-card-header>
+  </ion-card>
+
+  <ion-searchbar placeholder="Search by ticket ID or classification..." debounce="500" ></ion-searchbar>
+
+  <ion-segment [(ngModel)]="filter" value="all">
+    <ion-segment-button value="all">
+      <ion-label>All ({{requests.length}})</ion-label>
+    </ion-segment>
+    <ion-segment-button value="active">
+        <ion-label>Active (0)</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="pending">
+        <ion-label>Pending (0)</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="closed">
+        <ion-label>Closed (0)</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <ion-list *ngFor="let req of requests">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{req.title}}<ion-badge color="success" *ngIf="req.status === 'Completed'">Completed</ion-badge>"
+        </ion-card-title>
+        <ion-card-subtitle>Requested {{req.timeAgo}}</ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <strong>classification:</strong> {{req.classification}}
+      </ion-card-content>
+    </ion-card>
+  </ion-list>
+
+  <ion-fab vertical="top" horizontal="end" slot="fixed">
+    <ion-fab-button color="primary">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>
