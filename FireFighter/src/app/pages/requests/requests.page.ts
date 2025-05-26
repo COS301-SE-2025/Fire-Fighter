@@ -29,6 +29,9 @@ export class RequestsPage implements OnInit {
     this.presentToast();
   }
 
+  filter = 'all';
+  showToast = true;
+
   requests = [
     {
       id: 'INC-1234',
