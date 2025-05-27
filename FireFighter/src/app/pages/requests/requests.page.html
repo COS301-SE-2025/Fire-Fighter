@@ -1,0 +1,116 @@
+<app-navbar></app-navbar>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Header -->
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-gray-800 dark:text-white">
+        My FireFighter Requests
+      </h1>
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        Manage your access requests and sessions
+      </p>
+    </div>
+
+    <!-- Search -->
+    <div class="mb-4">
+      <input
+        type="text"
+        placeholder="Search by ticket ID or reason..."
+        class="w-full px-4 py-2 border border-gray-300 rounded-md
+               bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500
+               dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+      />
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex space-x-2 mb-4 text-sm font-medium">
+      <button
+        class="px-4 py-2 rounded-md"
+        [ngClass]="{
+          'bg-blue-600 text-white dark:bg-blue-500': filter === 'all',
+          'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300': filter !== 'all'
+        }"
+        (click)="filter = 'all'"
+      >
+        All ({{ requests.length }})
+      </button>
+      <button
+        class="px-4 py-2 rounded-md"
+        [ngClass]="{
+          'bg-blue-600 text-white dark:bg-blue-500': filter === 'active',
+          'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300': filter !== 'active'
+        }"
+        (click)="filter = 'active'"
+      >
+        Active (0)
+      </button>
+      <button
+        class="px-4 py-2 rounded-md"
+        [ngClass]="{
+          'bg-blue-600 text-white dark:bg-blue-500': filter === 'pending',
+          'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300': filter !== 'pending'
+        }"
+        (click)="filter = 'pending'"
+      >
+        Pending (0)
+      </button>
+      <button
+        class="px-4 py-2 rounded-md"
+        [ngClass]="{
+          'bg-blue-600 text-white dark:bg-blue-500': filter === 'completed',
+          'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300': filter !== 'completed'
+        }"
+        (click)="filter = 'completed'"
+      >
+        Completed (2)
+      </button>
+    </div>
+
+    <!-- Request Cards -->
+    <div
+      *ngFor="let req of requests"
+      class="bg-white p-4 rounded-lg shadow-md mb-4 border border-gray-200
+             dark:bg-gray-800 dark:border-gray-700"
+    >
+      <div class="flex justify-between items-center mb-1">
+        <div class="text-lg font-semibold text-gray-800 dark:text-white">
+          {{ req.id }}
+        </div>
+        <span
+          *ngIf="req.status === 'Completed'"
+          class="text-xs px-2 py-0.5 rounded-full
+                 bg-green-100 text-green-800
+                 dark:bg-green-900/50 dark:text-green-300"
+        >
+          Completed
+        </span>
+      </div>
+      <div class="text-sm mb-1 text-gray-500 dark:text-gray-400">
+        Requested {{ req.timeAgo }}
+      </div>
+      <div class="text-sm text-gray-700 dark:text-gray-300">
+        <strong>Reason:</strong> {{ req.reason }}
+      </div>
+    </div>
+
+    <!-- Floating Button -->
+    <div class="fixed bottom-6 right-6">
+      <button
+        class="bg-blue-600 text-white p-4 rounded-full shadow-lg
+               hover:bg-blue-700 dark:hover:bg-blue-600 transition"
+      >
+        +
+      </button>
+    </div>
+
+    <!-- Toast -->
+    <div
+      *ngIf="showToast"
+      class="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded shadow-lg
+             dark:bg-blue-500"
+    >
+      Access for ticket INC-1234 has been revoked
+    </div>
+  </div>
+</ion-content>
