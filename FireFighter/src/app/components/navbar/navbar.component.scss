@@ -3,6 +3,9 @@ ion-header {
   display: block;
   position: relative;
   background-color: transparent;
+  /* For even finer control, you can add a fixed value to the calculated padding */
+  padding-top: calc((var(--ion-safe-area-top, env(safe-area-inset-top)) * 0.85) + 24px);
+  z-index: 1000; /* Ensure it's above other content */
 }
 
 /* Safe area utilities for status bar */
@@ -12,6 +15,11 @@ ion-header {
 
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Remove duplicate padding - don't add padding to both ion-header and nav */
+nav.navbar {
+  /* No additional padding needed here since ion-header already has padding */
 }
 
 /* Fix size utility class */
