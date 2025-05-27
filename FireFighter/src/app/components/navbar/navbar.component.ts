@@ -1,6 +1,7 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonHeader } from '@ionic/angular/standalone';
+import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -18,7 +19,10 @@ export class NavbarComponent implements OnInit {
   profileMenuOpen = false;
   isDarkMode = false;
 
-  constructor(private authService: AuthService) { }
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) { }
 
   toggleMobileMenu() {
     this.mobileMenuOpen = !this.mobileMenuOpen;
@@ -36,23 +40,49 @@ export class NavbarComponent implements OnInit {
     }
   }
 
-ngOnInit(): void {
-  const savedTheme = localStorage.getItem('theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  this.isDarkMode = savedTheme === 'dark' || (!savedTheme && prefersDark);
-  this.updateHtmlClass();
-}
+  navigateToNotifications() {
+    this.router.navigate(['/notifications']);
+    this.closeMobileMenu();
+  }
 
-toggleTheme(): void {
-  this.isDarkMode = !this.isDarkMode;
-  localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
-  this.updateHtmlClass();
-}
+  navigateToDashboard() {
+    this.router.navigate(['/dashboard']);
+    this.closeMobileMenu();
+  }
 
-updateHtmlClass(): void {
-  const html = document.documentElement;
-  html.classList.toggle('dark', this.isDarkMode);
-}
+  navigateToRequests() {
+    this.router.navigate(['/requests']);
+    this.closeMobileMenu();
+  }
+
+  navigateToActivityLog() {
+    // This will navigate to activity log when the route is implemented
+    // For now, we can keep it as a placeholder or navigate to dashboard
+    this.router.navigate(['/dashboard']);
+    this.closeMobileMenu();
+  }
+
+  private closeMobileMenu() {
+    this.mobileMenuOpen = false;
+  }
+
+  ngOnInit(): void {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    this.isDarkMode = savedTheme === 'dark' || (!savedTheme && prefersDark);
+    this.updateHtmlClass();
+  }
+
+  toggleTheme(): void {
+    this.isDarkMode = !this.isDarkMode;
+    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
+    this.updateHtmlClass();
+  }
+
+  updateHtmlClass(): void {
+    const html = document.documentElement;
+    html.classList.toggle('dark', this.isDarkMode);
+  }
 
   async logout() {
     await this.authService.logout();

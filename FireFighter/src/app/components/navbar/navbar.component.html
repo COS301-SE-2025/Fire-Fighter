@@ -26,9 +26,9 @@
           </div>
           <div class="hidden sm:ml-6 sm:block">
             <div class="flex space-x-4">
-              <a href="#" class="rounded-md bg-matisse-500 dark:bg-matisse-600 px-3 py-2 text-sm font-medium text-white" aria-current="page">Dashboard</a>
-              <a href="/requests" class="rounded-md px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white">My Requests</a>
-              <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white">Activity Log</a>
+              <button (click)="navigateToDashboard()" class="rounded-md bg-matisse-500 dark:bg-matisse-600 px-3 py-2 text-sm font-medium text-white" aria-current="page">Dashboard</button>
+              <button (click)="navigateToRequests()" class="rounded-md px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white">My Requests</button>
+              <button (click)="navigateToActivityLog()" class="rounded-md px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white">Activity Log</button>
             </div>
           </div>
         </div>
@@ -52,7 +52,7 @@
           </button>
 
           <!-- Notification button -->
-          <button type="button" class="relative rounded-full bg-gray-100 dark:bg-gray-800 p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-matisse-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+          <button type="button" (click)="navigateToNotifications()" class="relative rounded-full bg-gray-100 dark:bg-gray-800 p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-matisse-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
             <span class="absolute -inset-1.5"></span>
             <span class="sr-only">View notifications</span>
             <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
@@ -86,9 +86,9 @@
     <!-- Mobile menu -->
     <div [class]="mobileMenuOpen ? 'block' : 'hidden'" class="sm:hidden" id="mobile-menu">
       <div class="space-y-1 px-2 pt-2 pb-3">
-        <a href="#" class="block rounded-md bg-matisse-500 dark:bg-matisse-600 px-3 py-2 text-base font-medium text-white" aria-current="page">Dashboard</a>
-        <a href="/requests" class="block rounded-md px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white">My Requests</a>
-        <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white">Activity Log</a>
+        <button (click)="navigateToDashboard()" class="w-full text-left block rounded-md bg-matisse-500 dark:bg-matisse-600 px-3 py-2 text-base font-medium text-white" aria-current="page">Dashboard</button>
+        <button (click)="navigateToRequests()" class="w-full text-left block rounded-md px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white">My Requests</button>
+        <button (click)="navigateToActivityLog()" class="w-full text-left block rounded-md px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white">Activity Log</button>
       </div>
     </div>
   </nav>
