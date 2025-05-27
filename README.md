@@ -7,7 +7,8 @@
 <p align="center"><img src="https://img.shields.io/badge/Angular-DD0031?logo=angular&amp;logoColor=white" alt="shields"><img src="https://img.shields.io/badge/Ionic-3880FF?logo=ionic&amp;logoColor=white" alt="shields"><img src="https://img.shields.io/badge/Capacitor-000000?logo=capacitor&amp;logoColor=white)" alt="shields"><img src="https://img.shields.io/badge/Maven-C71A36?logo=apache-maven&amp;logoColor=white" alt="shields"><img src="https://img.shields.io/badge/Spring_Boot-6DB33F?logo=springboot&amp;logoColor=white" alt="shields"><img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&amp;logoColor=white" alt="shields"><img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwind-css&amp;logoColor=white" alt="shields"></p>
 
 <h2>📃 Documentation</h2>
-- [Software Requirements Specification (PDF)](Documentation/FireFighter%20-%20Software%20Requirements%20Specification.pdf)
+
+- [Software Requirements Specification (PDF)](Documentation/FireFighter_Software_Requirements_Specification.pdf)
   
 <h2>🧐 Features</h2>
 
