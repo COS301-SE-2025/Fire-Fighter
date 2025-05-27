@@ -25,6 +25,11 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'notifications',
+    loadComponent: () => import('./pages/notifications/notifications.page').then( m => m.NotificationsPage),
+    canActivate: [authGuard]
+  },
+  {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full'
