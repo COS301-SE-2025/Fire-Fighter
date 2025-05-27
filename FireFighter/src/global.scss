@@ -44,6 +44,18 @@ ion-content {
 /* Ensure body background follows theme */
 body {
   background-color: var(--ion-background-color);
+  /* Add padding for the safe area on Android */
+  padding-top: var(--ion-safe-area-top, 0);
+  padding-bottom: var(--ion-safe-area-bottom, 0);
+}
+
+/* Utility classes for safe area insets */
+.ion-safe-area-top {
+  padding-top: var(--ion-safe-area-top, 0);
+}
+
+.ion-safe-area-bottom {
+  padding-bottom: var(--ion-safe-area-bottom, 0);
 }
 
 /**
