@@ -1,19 +1,16 @@
 <app-navbar></app-navbar>
 
-<ion-header [translucent]="true">
-  <ion-toolbar class="bg-white shadow-md dark:bg-gray-800">
-    <ion-title class="text-xl font-bold px-4 py-2 dark:text-white">Notifications</ion-title>
-    <p class="px-4 text-sm text-gray-500 dark:text-gray-400">Stay updated on FireFighter activity</p>
-    <div class="px-4 py-2 text-right">
-      <button class="px-4 py-1 text-sm font-medium text-white bg-blue-700 rounded hover:bg-blue-800">
-        ✔ Mark All as Read
-      </button>
-    </div>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content [fullscreen]="true" class="ion-padding dark:bg-gray-900">
   <div class="space-y-4 mt-4 px-4">
+    <ion-toolbar class="bg-white shadow-md dark:bg-gray-800">
+      <ion-title class="text-xl font-bold px-4 py-2 dark:text-white">Notifications</ion-title>
+      <p class="px-4 text-sm text-gray-500 dark:text-gray-400">Stay updated on FireFighter activity</p>
+      <div class="px-4 py-2 text-right">
+        <button class="px-4 py-1 text-sm font-medium text-white bg-blue-700 rounded hover:bg-blue-800">
+          ✔ Mark All as Read
+        </button>
+      </div>
+    </ion-toolbar>
 
     <!-- Notification: Request Completed -->
     <div class="p-4 bg-blue-50 border-l-4 border-blue-400 rounded shadow-sm dark:bg-blue-900/50 dark:border-blue-600">
