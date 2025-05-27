@@ -1,0 +1,81 @@
+<app-navbar></app-navbar>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">My FireFighter Requests</h1>
+      <p class="text-sm text-gray-500">Manage your access requests and sessions</p>
+    </div>
+
+    <!-- Search -->
+    <div class="mb-4">
+      <input
+        type="text"
+        placeholder="Search by ticket ID or reason..."
+        class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex space-x-2 mb-4 text-sm font-medium">
+      <button
+        class="px-4 py-2 rounded-md"
+        [ngClass]="{ 'bg-blue-600 text-white': filter === 'all', 'bg-gray-200 text-gray-700': filter !== 'all' }"
+        (click)="filter = 'all'"
+      >
+        All ({{ requests.length }})
+      </button>
+      <button
+        class="px-4 py-2 rounded-md"
+        [ngClass]="{ 'bg-blue-600 text-white': filter === 'active', 'bg-gray-200 text-gray-700': filter !== 'active' }"
+        (click)="filter = 'active'"
+      >
+        Active (0)
+      </button>
+      <button
+        class="px-4 py-2 rounded-md"
+        [ngClass]="{ 'bg-blue-600 text-white': filter === 'pending', 'bg-gray-200 text-gray-700': filter !== 'pending' }"
+        (click)="filter = 'pending'"
+      >
+        Pending (0)
+      </button>
+      <button
+        class="px-4 py-2 rounded-md"
+        [ngClass]="{ 'bg-blue-600 text-white': filter === 'completed', 'bg-gray-200 text-gray-700': filter !== 'completed' }"
+        (click)="filter = 'completed'"
+      >
+        Completed (2)
+      </button>
+    </div>
+
+    <!-- Request Cards -->
+    <div *ngFor="let req of requests" class="bg-white p-4 rounded-lg shadow-md mb-4 border border-gray-200">
+      <div class="flex justify-between items-center mb-1">
+        <div class="text-lg font-semibold text-gray-800">{{ req.id }}</div>
+        <span
+          *ngIf="req.status === 'Completed'"
+          class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full"
+        >
+          Completed
+        </span>
+      </div>
+      <div class="text-sm text-gray-500 mb-1">Requested {{ req.timeAgo }}</div>
+      <div class="text-gray-700 text-sm">
+        <strong>Reason:</strong> {{ req.reason }}
+      </div>
+    </div>
+
+    <!-- Floating Button -->
+    <div class="fixed bottom-6 right-6">
+      <button class="bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition">
+        +
+      </button>
+    </div>
+
+    <!-- Toast -->
+    <div *ngIf="showToast" class="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded shadow-lg">
+      Access for ticket INC-1234 has been revoked
+    </div>
+  </div>
+</ion-content>
