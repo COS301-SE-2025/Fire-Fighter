@@ -1,8 +1,9 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonHeader } from '@ionic/angular/standalone';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd} from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+
 
 @Component({
   selector: 'app-navbar',
@@ -15,6 +16,9 @@ import { AuthService } from '../../services/auth.service';
   ]
 })
 export class NavbarComponent implements OnInit {
+
+  currentURL = '';
+
   mobileMenuOpen = false;
   profileMenuOpen = false;
   isDarkMode = false;
@@ -67,10 +71,24 @@ export class NavbarComponent implements OnInit {
   }
 
   ngOnInit(): void {
+
     const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    this.isDarkMode = savedTheme === 'dark' || (!savedTheme && prefersDark);
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)')
+                              .matches;
+    this.isDarkMode = savedTheme === 'dark'
+      || (!savedTheme && prefersDark);
     this.updateHtmlClass();
+
+    this.currentURL = this.router.url;
+    this.router.events.subscribe(evt => {
+      if (evt instanceof NavigationEnd) {
+        this.currentURL = evt.urlAfterRedirects;
+      }
+    });
+  }
+
+  isActive(path: string): boolean {
+    return this.currentURL === path;
   }
 
   toggleTheme(): void {
