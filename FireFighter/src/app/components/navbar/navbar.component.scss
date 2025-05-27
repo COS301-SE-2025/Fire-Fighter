@@ -1,42 +1,8 @@
-/* Make sure the navbar is visible */
+/* Simple approach - let the navbar extend into the safe area */
 ion-header {
   display: block;
   position: relative;
-  background-color: transparent;
-  /* For even finer control, you can add a fixed value to the calculated padding */
-  padding-top: calc((var(--ion-safe-area-top, env(safe-area-inset-top)) * 0.85) + 24px);
-  z-index: 1000; /* Ensure it's above other content */
-  
-  /* Add a pseudo-element to create a solid background for the status bar area */
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: calc((var(--ion-safe-area-top, env(safe-area-inset-top)) * 0.85) + 24px);
-    background-color: #ffffff; /* Match the navbar bg-white color */
-    z-index: -1;
-  }
-}
-
-/* Compatibility with Tailwind dark mode */
-:root.dark ion-header::before {
-  background-color: #111827; /* Match the dark mode navbar bg-gray-900 color */
-}
-
-/* Safe area utilities for status bar */
-.pt-safe {
-  padding-top: env(safe-area-inset-top);
-}
-
-.pb-safe {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-/* Remove duplicate padding - don't add padding to both ion-header and nav */
-nav.navbar {
-  /* No additional padding needed here since ion-header already has padding */
+  z-index: 1000;
 }
 
 /* Fix size utility class */
