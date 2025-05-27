@@ -39,6 +39,27 @@
 /* Ensure content background follows theme */
 ion-content {
   --background: var(--ion-background-color);
+  --offset-top: 0px;
+  --offset-bottom: 0px;
+}
+
+/* Fix for ion-content padding */
+ion-content.ion-padding {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+}
+
+/* Override Ionic's default behavior for iOS status bar */
+.ios ion-header {
+  position: sticky;
+  top: 0;
+}
+
+/* Safe area utility class for Tailwind */
+.pt-safe {
+  padding-top: var(--ion-safe-area-top, env(safe-area-inset-top));
 }
 
 /* Ensure body background follows theme */
