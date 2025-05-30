@@ -37,6 +37,14 @@ class UserRepositoryTest {
 
         Optional<User> result = userRepository.findByUsername("testuser");
         assertThat(result).isPresent();
+        assertThat(result.get().getId()).isNotNull();
         assertThat(result.get().getEmail()).isEqualTo("test@example.com");
+
+        User user2 = new User("testuser2", "test2@example.com", "password456", Set.of(role));
+        userRepository.save(user2);
+        Optional<User> result2 = userRepository.findByUsername("testuser2");
+        assertThat(result2).isPresent();
+        assertThat(result2.get().getUsername()).isEqualTo("testuser2");
+        assertThat(result2.get().getRoles()).contains(role);
     }
 }
