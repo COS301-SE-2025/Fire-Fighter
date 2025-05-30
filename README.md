@@ -176,6 +176,10 @@ Override any of these per-environment via system properties, env vars or profile
    java -jar firefighter-platform-0.0.1-SNAPSHOT.jar \
      --spring.profiles.active=prod
    ```
+3. **Repositories Unit testing:**
+  ```bash
+  ./mvnw test
+  ```
 
 You can containerise with Docker later by adding a simple `Dockerfile`:
 
