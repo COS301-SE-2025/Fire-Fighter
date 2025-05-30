@@ -65,9 +65,9 @@ public class User {
         this.password = password;
     }
 
-    /* public String getPassword() {
+    public String getPassword() {
         return password;
-    } */
+    }
 
     public Set<Role> getRoles() {
         return roles;
