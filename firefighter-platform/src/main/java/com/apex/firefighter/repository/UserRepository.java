@@ -40,10 +40,10 @@ public interface UserRepository extends JpaRepository<User, String> {
     boolean existsByUsername(String username);
     
     // Custom query to find users with specific role
-    @Query("SELECT u FROM User u JOIN u.userRoles ur JOIN ur.role r WHERE r.name = :roleName")
+    @Query("SELECT u FROM User u JOIN u.userRoles ur JOIN ur.role r WHERE r.roleName = :roleName")
     List<User> findByRoleName(@Param("roleName") String roleName);
     
     // Custom query to find authorized users with specific role
-    @Query("SELECT u FROM User u JOIN u.userRoles ur JOIN ur.role r WHERE r.name = :roleName AND u.isAuthorized = true")
+    @Query("SELECT u FROM User u JOIN u.userRoles ur JOIN ur.role r WHERE r.roleName = :roleName AND u.isAuthorized = true")
     List<User> findAuthorizedUsersByRoleName(@Param("roleName") String roleName);
 }

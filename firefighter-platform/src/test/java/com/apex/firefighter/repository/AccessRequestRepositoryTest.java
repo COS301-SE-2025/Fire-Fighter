@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,19 +23,17 @@ class AccessRequestRepositoryTest {
 
     @Test
     void testFindByStatus() {
-        User user = new User();
-        user.setUsername("alice");
-        user.setPassword("123");
+        User user = new User("alice123", "alice", "alice@example.com", "Operations");
         user = userRepository.save(user);
 
         AccessRequest request = new AccessRequest();
         request.setTicketId("TCK-001");
-        request.setRequestTime(LocalDateTime.now());
+        request.setRequestTime(ZonedDateTime.now());
         request.setStatus(RequestStatus.PENDING);
         request.setUser(user);
         accessRequestRepository.save(request);
 
-        List<AccessRequest> results = accessRequestRepository.findByStatus("PENDING");
+        List<AccessRequest> results = accessRequestRepository.findByStatus(RequestStatus.PENDING);
         assertThat(results).isNotEmpty();
         assertThat(results.get(0).getTicketId()).isEqualTo("TCK-001");
     }
