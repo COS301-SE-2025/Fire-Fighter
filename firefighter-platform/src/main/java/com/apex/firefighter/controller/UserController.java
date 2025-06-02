@@ -196,4 +196,19 @@ public class UserController {
         List<User> users = userService.getAuthorizedUsersByRole(roleName);
         return ResponseEntity.ok(users);
     }
+
+    /**
+     * USER LOGIN ENDPOINT
+     * POST /api/users/login
+     * Update last login timestamp for user
+     */
+    @PostMapping("/login")
+    public ResponseEntity<User> loginUser(@RequestParam String firebaseUid) {
+        try {
+            User user = userService.loginUser(firebaseUid);
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 } 

@@ -27,6 +27,26 @@ public class UserService {
     }
 
     /**
+     * USER LOGIN
+     * Update last login timestamp when user logs in
+     */
+    public User loginUser(String firebaseUid) {
+        System.out.println("🔵 LOGIN: Processing login for UID - " + firebaseUid);
+        
+        Optional<User> userOpt = userRepository.findByUserId(firebaseUid);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.updateLastLogin();
+            User updatedUser = userRepository.save(user);
+            System.out.println("✅ LOGIN SUCCESS: Last login updated for user - " + updatedUser.getUsername());
+            return updatedUser;
+        } else {
+            System.out.println("❌ LOGIN FAILED: User not found for UID - " + firebaseUid);
+            throw new RuntimeException("User not found with Firebase UID: " + firebaseUid);
+        }
+    }
+
+    /**
      * FIREBASE USER VERIFICATION
      * Called when a Firebase-authenticated user accesses the system
      */
