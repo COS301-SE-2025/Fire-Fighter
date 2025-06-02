@@ -13,22 +13,22 @@ public class User {
     @Column(name = "user_id", nullable = false)
     private String userId; // Firebase UID
 
-    @Column(nullable = false)
+    @Column(name = "username", nullable = false)
     private String username;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "department")
+    @Column(name = "department", nullable = true)
     private String department;
 
-    @Column(name = "is_authorized", nullable = false)
+    @Column(name = "is_authorized", nullable = true, columnDefinition = "boolean default false")
     private Boolean isAuthorized = false;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = true, updatable = false, columnDefinition = "timestamp with time zone default CURRENT_TIMESTAMP")
     private ZonedDateTime createdAt;
 
-    @Column(name = "last_login")
+    @Column(name = "last_login", nullable = true)
     private ZonedDateTime lastLogin;
 
     // One-to-Many relationship with UserRole (instead of Many-to-Many)

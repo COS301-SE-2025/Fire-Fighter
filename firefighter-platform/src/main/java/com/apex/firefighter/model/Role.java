@@ -8,21 +8,67 @@ public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "role_id")
+    private Integer roleId;
 
-    @Column(nullable = false, unique = true)
-    private String name; // e.g., ADMIN, USER, FIREFIGHTER
+    @Column(name = "role_name", nullable = false)
+    private String roleName; // e.g., ADMIN, USER, FIREFIGHTER
+
+    @Column(name = "description", nullable = true)
+    private String description;
+
+    @Column(name = "id", nullable = false)
+    private Long id;
 
     // Default constructor (required by JPA)
     public Role() {
     }
 
-    // Constructor with name
-    public Role(String name) {
-        this.name = name;
+    // Constructor with role name
+    public Role(String roleName) {
+        this.roleName = roleName;
+    }
+
+    // Constructor with role name and description
+    public Role(String roleName, String description) {
+        this.roleName = roleName;
+        this.description = description;
     }
 
     // Getters and Setters
+    public Integer getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(Integer roleId) {
+        this.roleId = roleId;
+    }
+
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
+    // Keep getName() for backward compatibility with existing code
+    public String getName() {
+        return roleName;
+    }
+
+    public void setName(String roleName) {
+        this.roleName = roleName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public Long getId() {
         return id;
     }
@@ -31,19 +77,13 @@ public class Role {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     @Override
     public String toString() {
         return "Role{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
+                "roleId=" + roleId +
+                ", roleName='" + roleName + '\'' +
+                ", description='" + description + '\'' +
+                ", id=" + id +
                 '}';
     }
 
@@ -52,11 +92,11 @@ public class Role {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Role role = (Role) obj;
-        return name != null ? name.equals(role.name) : role.name == null;
+        return roleName != null ? roleName.equals(role.roleName) : role.roleName == null;
     }
 
     @Override
     public int hashCode() {
-        return name != null ? name.hashCode() : 0;
+        return roleName != null ? roleName.hashCode() : 0;
     }
 }

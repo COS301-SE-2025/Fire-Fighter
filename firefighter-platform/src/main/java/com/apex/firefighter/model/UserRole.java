@@ -9,20 +9,21 @@ public class UserRole {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // Composite key alternative
+    @Column(name = "id")
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "role_id", nullable = false)
+    @JoinColumn(name = "role_id", nullable = false, referencedColumnName = "role_id")
     private Role role;
 
-    @Column(name = "assigned_at", nullable = false)
+    @Column(name = "assigned_at", nullable = true, columnDefinition = "timestamp with time zone default CURRENT_TIMESTAMP")
     private ZonedDateTime assignedAt;
 
-    @Column(name = "assigned_by")
+    @Column(name = "assigned_by", nullable = true)
     private String assignedBy;
 
     // Default constructor
