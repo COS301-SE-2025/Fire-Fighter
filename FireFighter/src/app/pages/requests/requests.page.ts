@@ -23,9 +23,23 @@ export class RequestsPage implements OnInit {
   showToast = false;
   isModalOpen = false;
   isLoading = false;
-  searchQuery = '';
+  private _searchQuery = '';
   tickets: Ticket[] = [];
   error: string | null = null;
+
+  // Add getter and setter for searchQuery
+  get searchQuery(): string {
+    return this._searchQuery;
+  }
+
+  set searchQuery(value: string) {
+    this._searchQuery = value;
+    console.log('Search query updated:', {
+      query: value,
+      timestamp: new Date().toISOString(),
+      resultCount: this.filteredTickets.length
+    });
+  }
 
   newTicket = {
     requestDate: new Date().toISOString().split('T')[0],
@@ -115,6 +129,12 @@ export class RequestsPage implements OnInit {
       await toast.present();
       return;
     }
+
+    // Log the ticket request data
+    console.log('Creating new ticket with data:', {
+      ...this.newTicket,
+      timestamp: new Date().toISOString()
+    });
 
     this.isLoading = true;
     this.ticketService.createTicket(this.newTicket)
