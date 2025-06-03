@@ -2,6 +2,7 @@ package com.apex.firefighter.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "access_sessions")
@@ -10,6 +11,9 @@ public class AccessSession {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "session_token", unique = true, nullable = false)
+    private String sessionToken;
 
     private LocalDateTime startTime;
 
@@ -33,6 +37,7 @@ public class AccessSession {
         this.startTime = null;
         this.endTime = null;
         this.active = false;
+        this.sessionToken = generateSessionToken();
     }
 
     // Parameterized constructor
@@ -42,7 +47,14 @@ public class AccessSession {
         this.startTime = startTime;
         this.endTime = endTime;
         this.active = active;
+        this.sessionToken = generateSessionToken();
     }
+
+    // Helper method to generate unique session token
+    private String generateSessionToken() {
+        return UUID.randomUUID().toString();
+    }
+
     public void setUser(User user) {
         this.user = user;
     }
@@ -63,12 +75,20 @@ public class AccessSession {
         this.active = active;
     }
 
+    public void setSessionToken(String sessionToken) {
+        this.sessionToken = sessionToken;
+    }
+
     public boolean isActive() {
         return active;
     }
 
     public Long getId() {
         return id;
+    }
+
+    public String getSessionToken() {
+        return sessionToken;
     }
 
     public LocalDateTime getStartTime() {
@@ -94,6 +114,5 @@ public class AccessSession {
     public User getUser() {
         return user;
     }
-
 
 }

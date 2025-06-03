@@ -17,6 +17,9 @@ public class AccessLog {
 
     private String ticketId;
 
+    @Column(name = "session_id")
+    private Long sessionId; // Link to AccessSession
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -28,6 +31,7 @@ public class AccessLog {
         user = null;
         action = null;
         ticketId = null;
+        sessionId = null;
         //timestamp null or LocalDateTime.now()?
         timestamp = null;
     }
@@ -38,6 +42,16 @@ public class AccessLog {
         this.action = action;
         this.ticketId = ticketId;
         this.timestamp = timestamp;
+        this.sessionId = null;
+    }
+
+    // Constructor with session ID
+    public AccessLog(User user, String action, String ticketId, LocalDateTime timestamp, Long sessionId) {
+        this.user = user;
+        this.action = action;
+        this.ticketId = ticketId;
+        this.timestamp = timestamp;
+        this.sessionId = sessionId;
     }
 
     public void setUser(User user) {
@@ -56,6 +70,10 @@ public class AccessLog {
         this.timestamp = timestamp;
     }
 
+    public void setSessionId(Long sessionId) {
+        this.sessionId = sessionId;
+    }
+
     public Long getId() {
         return id;
     }
@@ -70,6 +88,10 @@ public class AccessLog {
 
     public String getTicketId() {
         return ticketId;
+    }
+
+    public Long getSessionId() {
+        return sessionId;
     }
 
     public User getUser() {

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,7 +38,11 @@ class AccessRequestRepositoryTest {
         assertThat(results).isNotEmpty();
         assertThat(results.get(0).getTicketId()).isEqualTo("TCK-001");
 
-        AccessRequest request2 = new AccessRequest(2L, "TCK-002", RequestStatus.APPROVED, LocalDateTime.now(), user);
+        AccessRequest request2 = new AccessRequest();
+        request2.setTicketId("TCK-002");
+        request2.setStatus(RequestStatus.APPROVED);
+        request2.setRequestTime(ZonedDateTime.now());
+        request2.setUser(user);
         accessRequestRepository.save(request2);
         List<AccessRequest> approvedResults = accessRequestRepository.findByStatus(RequestStatus.APPROVED);
         assertThat(approvedResults).isNotEmpty();
