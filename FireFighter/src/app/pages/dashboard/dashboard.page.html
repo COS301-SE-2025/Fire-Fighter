@@ -16,9 +16,9 @@
             </a>
           </div>
     
-          <h1 class="text-4xl font-sans font-bold text-gray-900 dark:text-white">1</h1>
+          <h1 class="text-4xl font-sans font-bold text-gray-900 dark:text-white">{{ activeTicketsCount }}</h1>
     
-          <p class="mb-3 font-sans text-gray-600 dark:text-gray-400">You have active FireFighter privelages</p>
+          <p class="mb-3 font-sans text-gray-600 dark:text-gray-400">You have active FireFighter privileges</p>
         </div>
     
         <div class="max-w-sm p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50 space-y-4">
@@ -31,9 +31,9 @@
             </a>
           </div>
     
-          <h1 class="text-4xl font-sans font-bold text-gray-900 dark:text-white">0</h1>
+          <h1 class="text-4xl font-sans font-bold text-gray-900 dark:text-white">{{ pendingTicketsCount }}</h1>
     
-          <p class="mb-3 font-sans text-gray-600 dark:text-gray-400">No pending approval requests</p>
+          <p class="mb-3 font-sans text-gray-600 dark:text-gray-400">{{ pendingTicketsCount === 0 ? 'No pending approval requests' : 'Pending approval requests' }}</p>
         </div>
     
         <div class="max-w-sm p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50 space-y-4">
@@ -46,81 +46,69 @@
             </a>
           </div>
     
-          <h1 class="text-4xl font-sans font-bold text-gray-900 dark:text-white">2</h1>
+          <h1 class="text-4xl font-sans font-bold text-gray-900 dark:text-white">{{ totalTicketsCount }}</h1>
     
           <p class="mb-3 font-sans text-gray-600 dark:text-gray-400">FireFighter requests this month</p>
         </div>
       </div>
 
+      <!-- Error Message -->
+      <div *ngIf="error" class="mt-4 p-4 bg-red-100 text-red-700 rounded-md dark:bg-red-900/50 dark:text-red-300">
+        {{ error }}
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="mt-4 flex justify-center items-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+
       <h2 class="mt-8 text-xl font-sans font-semibold text-gray-900 dark:text-white">Recent Activity</h2>
+
+      <!-- No Tickets Message -->
+      <div *ngIf="!isLoading && recentTickets.length === 0" class="mt-4 text-center py-8 text-gray-500 dark:text-gray-400">
+        <p class="text-lg">No recent activity</p>
+        <p class="text-sm mt-2">Create a new ticket to get started</p>
+      </div>
 
       <div class="mt-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-gray-900/50">
         <div class="divide-y divide-gray-200 dark:divide-gray-700">
-          <div class="flex flex-wrap items-center gap-y-4 p-6">
+          <div *ngFor="let ticket of recentTickets" class="flex flex-wrap items-center gap-y-4 p-6">
             <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
               <dt class="text-base font-medium text-gray-500 dark:text-gray-400">Ticket</dt>
               <dd class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">
-                <a href="#" class="hover:text-matisse-500 dark:hover:text-matisse-400">#FWB127364372</a>
+                <a [routerLink]="['/requests']" class="hover:text-matisse-500 dark:hover:text-matisse-400">{{ ticket.id }}</a>
               </dd>
             </dl>
 
             <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
               <dt class="text-base font-medium text-gray-500 dark:text-gray-400">Request Date</dt>
-              <dd class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">18.12.2023</dd>
+              <dd class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">{{ ticket.requestDate | date }}</dd>
             </dl>
 
             <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
               <dt class="text-base font-medium text-gray-500 dark:text-gray-400">Reason</dt>
-              <dd class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">Database server critical failure</dd>
+              <dd class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">{{ ticket.reason }}</dd>
             </dl>
 
             <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
               <dt class="text-base font-medium text-gray-500 dark:text-gray-400">Status</dt>
-              <dd class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">Pending</dd>
+              <dd class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">{{ ticket.status }}</dd>
             </dl>
 
             <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
               <dt class="text-base font-medium text-gray-500 dark:text-gray-400">Action</dt>
-              <dd class="me-2 mt-1.5 inline-flex items-center rounded bg-yellow-100 dark:bg-yellow-900/50 px-2.5 py-0.5 text-xs font-medium text-yellow-800 dark:text-yellow-300">
+              <dd class="me-2 mt-1.5 inline-flex items-center rounded px-2.5 py-0.5 text-xs font-medium"
+                [ngClass]="{
+                  'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300': ticket.status === 'Completed',
+                  'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300': ticket.status === 'Pending',
+                  'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300': ticket.status === 'Active',
+                  'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300': ticket.status === 'Rejected'
+                }">
                 <svg class="me-1 h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M12 9v2m0 4h.01M12 3a9 9 0 1 1-6.219 15.563" />
                 </svg>
-                Pending
-              </dd>
-            </dl>
-          </div>
-
-          <div class="flex flex-wrap items-center gap-y-4 p-6">
-            <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
-              <dt class="text-base font-medium text-gray-500 dark:text-gray-400">Ticket</dt>
-              <dd class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">
-                <a href="#" class="hover:text-matisse-500 dark:hover:text-matisse-400">#FWB127364373</a>
-              </dd>
-            </dl>
-
-            <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
-              <dt class="text-base font-medium text-gray-500 dark:text-gray-400">Request Date</dt>
-              <dd class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">22.05.2025</dd>
-            </dl>
-
-            <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
-              <dt class="text-base font-medium text-gray-500 dark:text-gray-400">Reason</dt>
-              <dd class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">Security patch deployment</dd>
-            </dl>
-
-            <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
-              <dt class="text-base font-medium text-gray-500 dark:text-gray-400">Status</dt>
-              <dd class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">Handled</dd>
-            </dl>
-
-            <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
-              <dt class="text-base font-medium text-gray-500 dark:text-gray-400">Action</dt>
-              <dd class="me-2 mt-1.5 inline-flex items-center rounded bg-green-100 dark:bg-green-900/50 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:text-green-300">
-                <svg class="me-1 h-3 w-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-                Approved
+                {{ ticket.status }}
               </dd>
             </dl>
           </div>
