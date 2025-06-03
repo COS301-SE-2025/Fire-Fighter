@@ -2,13 +2,13 @@ package com.apex.firefighter.repository;
 
 import com.apex.firefighter.model.Role;
 import com.apex.firefighter.model.User;
+import com.apex.firefighter.model.UserRole;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.Optional;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,11 +28,12 @@ class UserRepositoryTest {
         role.setName("USER");
         role = roleRepository.save(role);
 
-        User user = new User();
-        user.setUsername("testuser");
-        user.setEmail("test@example.com");
-        user.setPassword("password123");
-        user.setRoles(Set.of(role));
+        User user = new User("user123", "testuser", "test@example.com", "IT");
+        user = userRepository.save(user);
+        
+        // Create UserRole relationship
+        UserRole userRole = new UserRole(user, role, "admin");
+        user.addUserRole(userRole);
         userRepository.save(user);
 
         Optional<User> result = userRepository.findByUsername("testuser");

@@ -1,48 +1,62 @@
 package com.apex.firefighter.model;
 
 import jakarta.persistence.*;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "users") // 'user' is a reserved keyword in many DBs
+@Table(name = "users", schema = "firefighter")
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "user_id", nullable = false)
+    private String userId; // Firebase UID
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "username", nullable = false)
     private String username;
 
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    private String password;
+    @Column(name = "department", nullable = true)
+    private String department;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "user_roles", 
-        joinColumns = @JoinColumn(name = "user_id"), 
-        inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles = new HashSet<>();
+    @Column(name = "is_authorized", nullable = true, columnDefinition = "boolean default false")
+    private Boolean isAuthorized = false;
 
-    // Constructors, getters, setters
+    @Column(name = "created_at", nullable = true, updatable = false, columnDefinition = "timestamp with time zone default CURRENT_TIMESTAMP")
+    private ZonedDateTime createdAt;
+
+    @Column(name = "last_login", nullable = true)
+    private ZonedDateTime lastLogin;
+
+    // One-to-Many relationship with UserRole (instead of Many-to-Many)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Set<UserRole> userRoles = new HashSet<>();
+
+    // Default constructor
     public User() {
+        this.createdAt = ZonedDateTime.now();
+        this.isAuthorized = false;
     }
 
-    public User(String username, String email, String password, Set<Role> roles) {
+    // Constructor with Firebase UID
+    public User(String userId, String username, String email, String department) {
+        this();
+        this.userId = userId;
         this.username = username;
         this.email = email;
-        this.password = password;
-        this.roles = roles;
+        this.department = department;
     }
 
-    public Long getId() {
-        return id;
+    // Getters and Setters
+    public String getUserId() {
+        return userId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getUsername() {
@@ -61,19 +75,82 @@ public class User {
         this.email = email;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public String getDepartment() {
+        return department;
     }
 
-    public String getPassword() {
-        return password;
+    public void setDepartment(String department) {
+        this.department = department;
     }
 
-    public Set<Role> getRoles() {
-        return roles;
+    public Boolean getIsAuthorized() {
+        return isAuthorized;
     }
 
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
+    public void setIsAuthorized(Boolean isAuthorized) {
+        this.isAuthorized = isAuthorized;
+    }
+
+    public ZonedDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(ZonedDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public ZonedDateTime getLastLogin() {
+        return lastLogin;
+    }
+
+    public void setLastLogin(ZonedDateTime lastLogin) {
+        this.lastLogin = lastLogin;
+    }
+
+    public Set<UserRole> getUserRoles() {
+        return userRoles;
+    }
+
+    public void setUserRoles(Set<UserRole> userRoles) {
+        this.userRoles = userRoles;
+    }
+
+    // Helper methods for roles
+    public void addUserRole(UserRole userRole) {
+        this.userRoles.add(userRole);
+        userRole.setUser(this);
+    }
+
+    public void removeUserRole(UserRole userRole) {
+        this.userRoles.remove(userRole);
+        userRole.setUser(null);
+    }
+
+    public boolean hasRole(String roleName) {
+        return this.userRoles.stream()
+                .anyMatch(userRole -> userRole.getRole().getName().equals(roleName));
+    }
+
+    public boolean isAuthorized() {
+        return this.isAuthorized;
+    }
+
+    // Update last login timestamp
+    public void updateLastLogin() {
+        this.lastLogin = ZonedDateTime.now();
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "userId='" + userId + '\'' +
+                ", username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                ", department='" + department + '\'' +
+                ", isAuthorized=" + isAuthorized +
+                ", createdAt=" + createdAt +
+                ", lastLogin=" + lastLogin +
+                ", roles=" + userRoles.size() + " roles" +
+                '}';
     }
 }
