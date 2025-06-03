@@ -106,6 +106,10 @@ export class RequestsPage implements OnInit {
     return this.tickets.filter(t => t.status === 'Completed').length;
   }
 
+  get rejectedTicketsCount() {
+    return this.tickets.filter(t => t.status === 'Rejected').length;
+  }
+
   setOpen(isOpen: boolean) {
     this.isModalOpen = isOpen;
     if (!isOpen) {
