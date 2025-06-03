@@ -1,7 +1,5 @@
-import { Ticket } from './ticket.service';
-
-import express from 'express';
-import cors from 'cors';
+const express = require('express');
+const cors = require('cors');
 
 const app = express();
 const port = 3001;
@@ -10,11 +8,13 @@ const port = 3001;
 app.use(cors());
 app.use(express.json());
 
-
+// Test endpoint
+app.get('/test', (req: any, res: any) => {
+  res.json({ message: 'Server is running!' });
+});
 
 app.listen(port, () => {
-
-
   console.log(`Mock ticket database running on port ${port}`);
+});
 
-})
+export {};
