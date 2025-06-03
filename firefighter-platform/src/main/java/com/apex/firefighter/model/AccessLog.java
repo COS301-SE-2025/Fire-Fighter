@@ -22,4 +22,19 @@ public class AccessLog {
     private User user;
 
     // Constructors, getters, setters
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
+
+    public void setTicketId(String ticketId) {
+        this.ticketId = ticketId;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
 }
