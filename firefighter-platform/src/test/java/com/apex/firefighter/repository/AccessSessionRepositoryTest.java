@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,28 +27,26 @@ class AccessSessionRepositoryTest {
     private UserRepository userRepository;
 
     @Test
-    void testFindByRequestId() {
-        User user = new User();
-        user.setUsername("bob");
-        user.setPassword("pass");
+    void testFindByAccessRequestId() {
+        User user = new User("bob123", "bob", "bob@example.com", "Emergency");
         user = userRepository.save(user);
 
         AccessRequest request = new AccessRequest();
         request.setStatus(RequestStatus.APPROVED);
         request.setTicketId("TCK-002");
         request.setUser(user);
-        request.setRequestTime(LocalDateTime.now());
+        request.setRequestTime(ZonedDateTime.now());
         request = requestRepository.save(request);
 
         AccessSession session = new AccessSession();
         session.setUser(user);
         session.setAccessRequest(request);
-        session.setStartTime(LocalDateTime.now());
-        session.setEndTime(LocalDateTime.now().plusHours(1));
+        session.setStartTime(ZonedDateTime.now());
+        session.setEndTime(ZonedDateTime.now().plusHours(1));
         session.setActive(true);
         sessionRepository.save(session);
 
-        Optional<AccessSession> found = sessionRepository.findByRequestId(request.getId());
+        Optional<AccessSession> found = sessionRepository.findByAccessRequestId(request.getId());
         assertThat(found).isPresent();
         assertThat(found.get().isActive()).isTrue();
     }
