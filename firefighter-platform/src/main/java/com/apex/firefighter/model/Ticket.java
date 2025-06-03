@@ -18,4 +18,16 @@ public class Ticket {
     private boolean valid;
 
     // Constructors, getters, setters
+
+    public void setTicketId(String ticketId) {
+        this.ticketId = ticketId;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setValid(boolean valid) {
+        this.valid = valid;
+    }
 }
