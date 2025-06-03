@@ -62,10 +62,6 @@ export class DashboardPage implements OnInit {
     return this.tickets.filter(t => t.status === 'Active').length;
   }
 
-  get pendingTicketsCount() {
-    return this.tickets.filter(t => t.status === 'Pending').length;
-  }
-
   get totalTicketsCount() {
     return this.tickets.length;
   }
