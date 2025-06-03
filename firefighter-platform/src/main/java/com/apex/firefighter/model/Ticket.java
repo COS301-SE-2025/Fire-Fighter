@@ -17,7 +17,21 @@ public class Ticket {
 
     private boolean valid;
 
-    // Constructors, getters, setters
+    // Default constructor. Initializes a new instance of the Ticket class with empty(null) values.
+    public Ticket() {
+        ticketId = null;
+        description = null;
+        valid = false;
+    }
+
+    //paramterized constructor. Accepts values for every attribute that may need to be set via setters.
+    public Ticket(String ticketId, String description, boolean valid) {
+        this.ticketId = ticketId;
+        this.description = description;
+        this.valid = valid;
+    }
+
+    // getters & setters
 
     public void setTicketId(String ticketId) {
         this.ticketId = ticketId;
