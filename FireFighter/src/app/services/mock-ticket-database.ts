@@ -1,6 +1,15 @@
-const express = require('express');
-const cors = require('cors');
+import express from 'express';
+import cors from 'cors';
 import { Request, Response } from 'express';
+
+interface Ticket {
+  id: string;
+  status: string;
+  timeAgo: string;
+  reason: string;
+  requestDate: string;
+  userId: string;
+}
 
 const app = express();
 const port = 3001;
@@ -10,7 +19,7 @@ app.use(cors());
 app.use(express.json());
 
 // Mock database with initial tickets
-let tickets = [
+let tickets: Ticket[] = [
   {
     id: 'TICK-001',
     status: 'Pending',
@@ -37,22 +46,23 @@ const generateId = () => {
 };
 
 // Get all tickets
-app.get('/api/tickets', (req: Request, res: Response) => {
+app.get('/api/tickets', (req: Request, res: Response): void => {
   res.json(tickets);
 });
 
 // Get ticket by ID
-app.get('/api/tickets/:id', (req: Request, res: Response) => {
-  const ticket = tickets.find(t => t['id'] === req.params.id);
+app.get('/api/tickets/:id', (req: Request, res: Response): void => {
+  const ticket = tickets.find(t => t.id === req.params.id);
   if (!ticket) {
-    return res.status(404).json({ message: 'Ticket not found' });
+    res.status(404).json({ message: 'Ticket not found' });
+    return;
   }
   res.json(ticket);
 });
 
 // Create new ticket
-app.post('/api/tickets', (req: Request, res: Response) => {
-  const newTicket = {
+app.post('/api/tickets', (req: Request, res: Response): void => {
+  const newTicket: Ticket = {
     id: generateId(),
     status: 'Pending',
     timeAgo: 'Just now',
@@ -63,10 +73,11 @@ app.post('/api/tickets', (req: Request, res: Response) => {
 });
 
 // Update ticket status
-app.patch('/api/tickets/:id/status', (req: Request, res: Response) => {
-  const ticketIndex = tickets.findIndex(t => t['id'] === req.params.id);
+app.patch('/api/tickets/:id/status', (req: Request, res: Response): void => {
+  const ticketIndex = tickets.findIndex(t => t.id === req.params.id);
   if (ticketIndex === -1) {
-    return res.status(404).json({ message: 'Ticket not found' });
+    res.status(404).json({ message: 'Ticket not found' });
+    return;
   }
   
   tickets[ticketIndex] = {
