@@ -7,7 +7,7 @@ import { NotificationService } from './notification.service';
 
 export interface Ticket {
   id: string;
-  status: 'Pending' | 'Active' | 'Completed' | 'Rejected';
+  status: 'Active' | 'Completed' | 'Rejected';
   dateCreated: Date;
   reason: string;
   requestDate: string;

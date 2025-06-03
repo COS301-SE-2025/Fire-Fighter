@@ -102,10 +102,6 @@ export class RequestsPage implements OnInit {
     return this.tickets.filter(t => t.status === 'Active').length;
   }
 
-  get pendingTicketsCount() {
-    return this.tickets.filter(t => t.status === 'Pending').length;
-  }
-
   get completedTicketsCount() {
     return this.tickets.filter(t => t.status === 'Completed').length;
   }

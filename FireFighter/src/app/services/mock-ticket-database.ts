@@ -8,7 +8,7 @@ const AUTO_COMPLETE_DELAY = 15000;
 const initialMockTickets: Ticket[] = [
   {
     id: 'TICK-001',
-    status: 'Pending',
+    status: 'Active',
     dateCreated: new Date('2024-03-20T10:00:00'),
     reason: 'Request for annual leave',
     requestDate: '2024-03-20',
@@ -124,7 +124,7 @@ export class MockTicketDatabase {
   createTicket(ticketData: Omit<Ticket, 'id' | 'status' | 'dateCreated'>): Ticket {
     const newTicket: Ticket = {
       id: generateId(),
-      status: 'Pending',
+      status: 'Active',
       dateCreated: new Date(),
       ...ticketData
     };
@@ -135,7 +135,7 @@ export class MockTicketDatabase {
     // Schedule auto-completion after 60 seconds
     setTimeout(() => {
       const ticketIndex = this.tickets.findIndex(t => t.id === newTicket.id);
-      if (ticketIndex !== -1 && this.tickets[ticketIndex].status === 'Pending') {
+      if (ticketIndex !== -1 && this.tickets[ticketIndex].status === 'Active') {
         this.updateTicketStatus(newTicket.id, 'Completed');
       }
     }, AUTO_COMPLETE_DELAY);
