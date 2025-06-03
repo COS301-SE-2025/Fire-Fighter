@@ -36,6 +36,22 @@ const generateId = () => {
   return `TICK-${timestamp.slice(-4)}${random}`;
 };
 
+// Get all tickets
+app.get('/api/tickets', (req: Request, res: Response) => {
+  res.json(tickets);
+});
+
+// Get ticket by ID
+app.get('/api/tickets/:id', (req: Request, res: Response) => {
+  const ticket = tickets.find(t => t['id'] === req.params.id);
+  if (!ticket) {
+    return res.status(404).json({ message: 'Ticket not found' });
+  }
+  res.json(ticket);
+});
+
+
+
 app.listen(port, () => {
   console.log(`Mock ticket database running on port ${port}`);
 });
