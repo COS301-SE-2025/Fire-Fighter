@@ -1,7 +1,7 @@
 <app-navbar></app-navbar>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  <div class="min-h-full bg-gray-50 dark:bg-gray-900">
+<ion-content [fullscreen]="true" class="ion-padding pb-16">
+  <div class="min-h-full bg-gray-50 dark:bg-gray-900 mb-8">
     <ng-container *ngIf="user$ | async as user">
       <h1 class="text-2xl font-sans font-bold text-gray-900 dark:text-white">Welcome, {{ user.displayName || user.email }}</h1>
 
@@ -71,7 +71,7 @@
       </div>
 
       <div class="mt-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-gray-900/50">
-        <div class="divide-y divide-gray-200 dark:divide-gray-700">
+        <div class="divide-y divide-gray-200 dark:divide-gray-700 pb-4">
           <div *ngFor="let ticket of recentTickets" class="flex flex-wrap items-center gap-y-4 p-6">
             <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
               <dt class="text-base font-medium text-gray-500 dark:text-gray-400">Ticket</dt>
