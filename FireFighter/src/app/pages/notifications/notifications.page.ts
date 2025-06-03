@@ -1,11 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonButton, IonIcon } from '@ionic/angular/standalone';
+import { RouterModule } from '@angular/router';
+import { IonContent, IonToolbar, IonTitle } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
+import { NotificationService, Notification } from '../../services/notification.service';
 import { addIcons } from 'ionicons';
 import { logOutOutline } from 'ionicons/icons';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-notifications',
@@ -15,24 +18,26 @@ import { NavbarComponent } from '../../components/navbar/navbar.component';
   imports: [
     CommonModule, 
     FormsModule,
+    RouterModule,
     IonContent, 
-    IonHeader, 
-    IonTitle, 
-    IonToolbar, 
-    IonButtons, 
-    IonButton,
-    IonIcon,
+    IonToolbar,
+    IonTitle,
     NavbarComponent
   ]
 })
 export class NotificationsPage implements OnInit {
   user$ = this.authService.user$;
+  notifications$: Observable<Notification[]>;
   mobileMenuOpen = false;
   profileMenuOpen = false;
 
-  constructor(private authService: AuthService) {
+  constructor(
+    private authService: AuthService,
+    private notificationService: NotificationService
+  ) {
     // Register icons
     addIcons({ logOutOutline });
+    this.notifications$ = this.notificationService.getNotifications();
   }
 
   ngOnInit() {
@@ -56,5 +61,39 @@ export class NotificationsPage implements OnInit {
 
   async logout() {
     await this.authService.logout();
+  }
+
+  markAsRead(notificationId: string) {
+    this.notificationService.markAsRead(notificationId);
+  }
+
+  markAllAsRead() {
+    this.notificationService.markAllAsRead();
+  }
+
+  getTimeAgo(timestamp: Date): string {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - timestamp.getTime()) / 1000);
+
+    if (diffInSeconds < 60) {
+      return 'just now';
+    }
+
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes} minute${diffInMinutes === 1 ? '' : 's'} ago`;
+    }
+
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) {
+      return `${diffInHours} hour${diffInHours === 1 ? '' : 's'} ago`;
+    }
+
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) {
+      return `${diffInDays} day${diffInDays === 1 ? '' : 's'} ago`;
+    }
+
+    return timestamp.toLocaleDateString();
   }
 }
