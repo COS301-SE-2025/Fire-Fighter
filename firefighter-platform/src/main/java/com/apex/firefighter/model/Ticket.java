@@ -31,7 +31,7 @@ public class Ticket {
         this.valid = valid;
     }
 
-    // getters & setters
+    // setters
 
     public void setTicketId(String ticketId) {
         this.ticketId = ticketId;
@@ -47,5 +47,18 @@ public class Ticket {
 
     public boolean isValid() {
         return valid;
+    }
+
+    // getters
+    public Long getId() {
+        return id;
+    }
+
+    public String getTicketId() {
+        return ticketId;
+    }
+
+    public String getDescription() {
+        return description;
     }
 }
