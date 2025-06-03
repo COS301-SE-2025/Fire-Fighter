@@ -131,7 +131,7 @@ public class UserService {
         System.out.println("🔵 ASSIGN ROLE: Assigning role '" + roleName + "' to UID - " + firebaseUid);
         
         Optional<User> userOpt = userRepository.findByUserId(firebaseUid);
-        Optional<Role> roleOpt = roleRepository.findByRoleName(roleName);
+        Optional<Role> roleOpt = roleRepository.findByName(roleName);
         
         if (userOpt.isPresent() && roleOpt.isPresent()) {
             User user = userOpt.get();

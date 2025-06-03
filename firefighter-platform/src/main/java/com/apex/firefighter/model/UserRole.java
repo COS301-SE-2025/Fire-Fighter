@@ -17,7 +17,7 @@ public class UserRole {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "role_id", nullable = false, referencedColumnName = "role_id")
+    @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
     @Column(name = "assigned_at", nullable = true, columnDefinition = "timestamp with time zone default CURRENT_TIMESTAMP")
