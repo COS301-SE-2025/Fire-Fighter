@@ -1,20 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { 
-  IonContent, 
-  IonHeader, 
-  IonTitle, 
-  IonToolbar, 
-  IonButtons, 
-  IonButton,
-  IonIcon
-} from '@ionic/angular/standalone';
+import { IonContent } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { TicketService, Ticket } from '../../services/ticket.service';
-import { addIcons } from 'ionicons';
-import { logOutOutline } from 'ionicons/icons';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -25,16 +14,9 @@ import { of } from 'rxjs';
   styleUrls: ['./dashboard.page.scss'],
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule,
+    CommonModule,
     RouterModule,
-    IonContent, 
-    IonHeader, 
-    IonTitle, 
-    IonToolbar, 
-    IonButtons, 
-    IonButton,
-    IonIcon,
+    IonContent,
     NavbarComponent
   ]
 })
@@ -50,8 +32,6 @@ export class DashboardPage implements OnInit {
     private authService: AuthService,
     private ticketService: TicketService
   ) {
-    // Register icons
-    addIcons({ logOutOutline });
   }
 
   ngOnInit() {
