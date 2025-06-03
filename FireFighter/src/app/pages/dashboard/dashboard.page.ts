@@ -5,6 +5,7 @@ import { IonContent } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { TicketService, Ticket } from '../../services/ticket.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
+import { calculateTimeAgo } from '../../services/mock-ticket-database';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 
@@ -27,6 +28,9 @@ export class DashboardPage implements OnInit {
   tickets: Ticket[] = [];
   isLoading = false;
   error: string | null = null;
+
+  // Add calculateTimeAgo function
+  calculateTimeAgo = calculateTimeAgo;
 
   constructor(
     private authService: AuthService,
