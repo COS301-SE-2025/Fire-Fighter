@@ -22,6 +22,24 @@ public class AccessLog {
     private User user;
 
     // Constructors, getters, setters
+
+    // Default constructor
+    public AccessLog() {
+        user = null;
+        action = null;
+        ticketId = null;
+        //timestamp null or LocalDateTime.now()?
+        timestamp = null;
+    }
+
+    // Parameterized constructor
+    public AccessLog(User user, String action, String ticketId, LocalDateTime timestamp) {
+        this.user = user;
+        this.action = action;
+        this.ticketId = ticketId;
+        this.timestamp = timestamp;
+    }
+
     public void setUser(User user) {
         this.user = user;
     }
@@ -36,5 +54,25 @@ public class AccessLog {
 
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public String getTicketId() {
+        return ticketId;
+    }
+
+    public User getUser() {
+        return user;
     }
 }
