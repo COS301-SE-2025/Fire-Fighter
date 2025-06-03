@@ -95,7 +95,7 @@ export class RequestsPage implements OnInit {
   }
 
   get activeTicketsCount() {
-    return this.tickets.filter(t => t.status === 'Approved').length;
+    return this.tickets.filter(t => t.status === 'Active').length;
   }
 
   get pendingTicketsCount() {

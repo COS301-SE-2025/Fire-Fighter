@@ -12,7 +12,7 @@ const mockTickets: Ticket[] = [
   },
   {
     id: 'TICK-002',
-    status: 'Approved',
+    status: 'Active',
     timeAgo: '1 day ago',
     reason: 'Database server maintenance',
     requestDate: '2024-03-19',
