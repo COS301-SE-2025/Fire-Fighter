@@ -50,7 +50,33 @@ app.get('/api/tickets/:id', (req: Request, res: Response) => {
   res.json(ticket);
 });
 
+// Create new ticket
+app.post('/api/tickets', (req: Request, res: Response) => {
+  const newTicket = {
+    id: generateId(),
+    status: 'Pending',
+    timeAgo: 'Just now',
+    ...req.body
+  };
+  tickets.unshift(newTicket);
+  res.status(201).json(newTicket);
+});
 
+// Update ticket status
+app.patch('/api/tickets/:id/status', (req: Request, res: Response) => {
+  const ticketIndex = tickets.findIndex(t => t['id'] === req.params.id);
+  if (ticketIndex === -1) {
+    return res.status(404).json({ message: 'Ticket not found' });
+  }
+  
+  tickets[ticketIndex] = {
+    ...tickets[ticketIndex],
+    status: req.body.status,
+    timeAgo: 'Just now'
+  };
+  
+  res.json(tickets[ticketIndex]);
+});
 
 app.listen(port, () => {
   console.log(`Mock ticket database running on port ${port}`);
