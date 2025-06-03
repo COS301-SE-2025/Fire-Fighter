@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { IonHeader } from '@ionic/angular/standalone';
 import { Router, NavigationEnd} from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-
+import { NotificationService } from '../../services/notification.service';
+import { Observable, map } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
@@ -23,10 +24,17 @@ export class NavbarComponent implements OnInit {
   profileMenuOpen = false;
   isDarkMode = false;
 
+  hasUnreadNotifications$: Observable<boolean>;
+
   constructor(
     private authService: AuthService,
-    private router: Router
-  ) { }
+    private router: Router,
+    private notificationService: NotificationService
+  ) {
+    this.hasUnreadNotifications$ = this.notificationService.getNotifications().pipe(
+      map(notifications => notifications.some(notification => !notification.read))
+    );
+  }
 
   toggleMobileMenu() {
     this.mobileMenuOpen = !this.mobileMenuOpen;
