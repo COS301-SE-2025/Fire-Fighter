@@ -69,7 +69,7 @@
 
     <!-- Request Cards -->
     <div
-      *ngFor="let req of requests"
+      *ngFor="let req of filteredRequests"
       class="bg-white p-4 rounded-lg shadow-md mb-4 border border-gray-200
              dark:bg-gray-800 dark:border-gray-700"
     >
@@ -78,12 +78,15 @@
           {{ req.id }}
         </div>
         <span
-          *ngIf="req.status === 'Completed'"
-          class="text-xs px-2 py-0.5 rounded-full
-                 bg-green-100 text-green-800
-                 dark:bg-green-900/50 dark:text-green-300"
+          [ngClass]="{
+            'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300': req.status === 'Completed',
+            'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300': req.status === 'Pending',
+            'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300': req.status === 'Approved',
+            'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300': req.status === 'Rejected'
+          }"
+          class="text-xs px-2 py-0.5 rounded-full"
         >
-          Completed
+          {{ req.status }}
         </span>
       </div>
       <div class="text-sm mb-1 text-gray-500 dark:text-gray-400">
@@ -97,12 +100,55 @@
     <!-- Floating Button -->
     <div class="fixed bottom-6 right-6">
       <button
+        (click)="setOpen(true)"
         class="bg-blue-600 text-white p-4 rounded-full shadow-lg
                hover:bg-blue-700 dark:hover:bg-blue-600 transition"
       >
         +
       </button>
     </div>
+
+    <!-- Create Ticket Modal -->
+    <ion-modal [isOpen]="isModalOpen" (didDismiss)="setOpen(false)">
+      <ng-template>
+        <ion-header>
+          <ion-toolbar>
+            <ion-title>Create New Request</ion-title>
+            <ion-button slot="end" fill="clear" (click)="setOpen(false)">Close</ion-button>
+          </ion-toolbar>
+        </ion-header>
+        <ion-content class="ion-padding">
+          <form (ngSubmit)="createTicket()" class="space-y-4">
+            <div>
+              <ion-label position="stacked">Request Date</ion-label>
+              <ion-input
+                type="date"
+                [(ngModel)]="newTicket.requestDate"
+                name="requestDate"
+                required
+                class="mt-1"
+              ></ion-input>
+            </div>
+            
+            <div>
+              <ion-label position="stacked">Reason for Request</ion-label>
+              <ion-textarea
+                [(ngModel)]="newTicket.reason"
+                name="reason"
+                placeholder="Please provide a detailed reason for your request..."
+                required
+                rows="4"
+                class="mt-1"
+              ></ion-textarea>
+            </div>
+
+            <ion-button expand="block" type="submit" class="mt-4">
+              Submit Request
+            </ion-button>
+          </form>
+        </ion-content>
+      </ng-template>
+    </ion-modal>
 
     <!-- Toast -->
     <div
