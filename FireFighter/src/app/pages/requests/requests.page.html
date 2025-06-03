@@ -35,57 +35,59 @@
     </div>
 
     <!-- Tabs -->
-    <div class="flex space-x-2 mb-4 text-sm font-medium">
-      <button
-        class="px-4 py-2 rounded-md"
-        [ngClass]="{
-          'bg-blue-600 text-white dark:bg-blue-500': filter === 'all',
-          'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300': filter !== 'all'
-        }"
-        (click)="filter = 'all'"
-      >
-        All ({{ tickets.length }})
-      </button>
-      <button
-        class="px-4 py-2 rounded-md"
-        [ngClass]="{
-          'bg-blue-600 text-white dark:bg-blue-500': filter === 'active',
-          'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300': filter !== 'active'
-        }"
-        (click)="filter = 'active'"
-      >
-        Active ({{ activeTicketsCount }})
-      </button>
-      <button
-        class="px-4 py-2 rounded-md"
-        [ngClass]="{
-          'bg-blue-600 text-white dark:bg-blue-500': filter === 'pending',
-          'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300': filter !== 'pending'
-        }"
-        (click)="filter = 'pending'"
-      >
-        Pending ({{ pendingTicketsCount }})
-      </button>
-      <button
-        class="px-4 py-2 rounded-md"
-        [ngClass]="{
-          'bg-blue-600 text-white dark:bg-blue-500': filter === 'completed',
-          'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300': filter !== 'completed'
-        }"
-        (click)="filter = 'completed'"
-      >
-        Completed ({{ completedTicketsCount }})
-      </button>
-      <button
-        class="px-4 py-2 rounded-md"
-        [ngClass]="{
-          'bg-blue-600 text-white dark:bg-blue-500': filter === 'rejected',
-          'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300': filter !== 'rejected'
-        }"
-        (click)="filter = 'rejected'"
-      >
-        Rejected ({{ rejectedTicketsCount }})
-      </button>
+    <div class="flex space-x-2 mb-4 text-sm font-medium overflow-x-auto pb-2 -mx-4 px-4">
+      <div class="flex space-x-2 min-w-max">
+        <button
+          class="px-4 py-2 rounded-md whitespace-nowrap"
+          [ngClass]="{
+            'bg-blue-600 text-white dark:bg-blue-500': filter === 'all',
+            'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300': filter !== 'all'
+          }"
+          (click)="filter = 'all'"
+        >
+          All ({{ tickets.length }})
+        </button>
+        <button
+          class="px-4 py-2 rounded-md whitespace-nowrap"
+          [ngClass]="{
+            'bg-blue-600 text-white dark:bg-blue-500': filter === 'active',
+            'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300': filter !== 'active'
+          }"
+          (click)="filter = 'active'"
+        >
+          Active ({{ activeTicketsCount }})
+        </button>
+        <button
+          class="px-4 py-2 rounded-md whitespace-nowrap"
+          [ngClass]="{
+            'bg-blue-600 text-white dark:bg-blue-500': filter === 'pending',
+            'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300': filter !== 'pending'
+          }"
+          (click)="filter = 'pending'"
+        >
+          Pending ({{ pendingTicketsCount }})
+        </button>
+        <button
+          class="px-4 py-2 rounded-md whitespace-nowrap"
+          [ngClass]="{
+            'bg-blue-600 text-white dark:bg-blue-500': filter === 'completed',
+            'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300': filter !== 'completed'
+          }"
+          (click)="filter = 'completed'"
+        >
+          Completed ({{ completedTicketsCount }})
+        </button>
+        <button
+          class="px-4 py-2 rounded-md whitespace-nowrap"
+          [ngClass]="{
+            'bg-blue-600 text-white dark:bg-blue-500': filter === 'rejected',
+            'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300': filter !== 'rejected'
+          }"
+          (click)="filter = 'rejected'"
+        >
+          Rejected ({{ rejectedTicketsCount }})
+        </button>
+      </div>
     </div>
 
     <!-- No Tickets Message -->
