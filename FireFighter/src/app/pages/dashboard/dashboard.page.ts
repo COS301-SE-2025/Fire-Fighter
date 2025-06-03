@@ -1,19 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { 
-  IonContent, 
-  IonHeader, 
-  IonTitle, 
-  IonToolbar, 
-  IonButtons, 
-  IonButton,
-  IonIcon
-} from '@ionic/angular/standalone';
+import { RouterModule } from '@angular/router';
+import { IonContent } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
-import { addIcons } from 'ionicons';
-import { logOutOutline } from 'ionicons/icons';
+import { TicketService, Ticket } from '../../services/ticket.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
+import { calculateTimeAgo } from '../../services/mock-ticket-database';
+import { catchError, finalize } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -21,15 +15,9 @@ import { NavbarComponent } from '../../components/navbar/navbar.component';
   styleUrls: ['./dashboard.page.scss'],
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule,
-    IonContent, 
-    IonHeader, 
-    IonTitle, 
-    IonToolbar, 
-    IonButtons, 
-    IonButton,
-    IonIcon,
+    CommonModule,
+    RouterModule,
+    IonContent,
     NavbarComponent
   ]
 })
@@ -37,18 +25,53 @@ export class DashboardPage implements OnInit {
   user$ = this.authService.user$;
   mobileMenuOpen = false;
   profileMenuOpen = false;
+  tickets: Ticket[] = [];
+  isLoading = false;
+  error: string | null = null;
 
-  constructor(private authService: AuthService) {
-    // Register icons
-    addIcons({ logOutOutline });
+  // Add calculateTimeAgo function
+  calculateTimeAgo = calculateTimeAgo;
+
+  constructor(
+    private authService: AuthService,
+    private ticketService: TicketService
+  ) {
   }
 
   ngOnInit() {
+    this.loadTickets();
+  }
+
+  loadTickets() {
+    this.isLoading = true;
+    this.error = null;
+    this.ticketService.getTickets()
+      .pipe(
+        catchError(err => {
+          this.error = 'Failed to load tickets. Please try again later.';
+          return of([]);
+        }),
+        finalize(() => this.isLoading = false)
+      )
+      .subscribe(tickets => {
+        this.tickets = tickets;
+      });
+  }
+
+  get activeTicketsCount() {
+    return this.tickets.filter(t => t.status === 'Active').length;
+  }
+
+  get totalTicketsCount() {
+    return this.tickets.length;
+  }
+
+  get recentTickets() {
+    return this.tickets.slice(0, 5); // Get the 5 most recent tickets
   }
 
   toggleMobileMenu() {
     this.mobileMenuOpen = !this.mobileMenuOpen;
-    // Close profile menu when opening mobile menu
     if (this.mobileMenuOpen) {
       this.profileMenuOpen = false;
     }
@@ -56,7 +79,6 @@ export class DashboardPage implements OnInit {
 
   toggleProfileMenu() {
     this.profileMenuOpen = !this.profileMenuOpen;
-    // Close mobile menu when opening profile menu
     if (this.profileMenuOpen) {
       this.mobileMenuOpen = false;
     }
@@ -65,12 +87,6 @@ export class DashboardPage implements OnInit {
   async logout() {
     await this.authService.logout();
   }
-
-  
-
-
-
-
 }
 
 
