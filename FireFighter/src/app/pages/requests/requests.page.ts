@@ -5,6 +5,7 @@ import { IonContent, IonHeader, IonTitle, IonToolbar, IonModal, IonButton, IonIn
 import { ToastController } from '@ionic/angular';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { TicketService, Ticket } from '../../services/ticket.service';
+import { calculateTimeAgo } from '../../services/mock-ticket-database';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 
@@ -46,6 +47,9 @@ export class RequestsPage implements OnInit {
     reason: '',
     userId: '' // This should be set from the auth service
   };
+
+  // Add calculateTimeAgo function
+  calculateTimeAgo = calculateTimeAgo;
 
   constructor(
     private toastController: ToastController,

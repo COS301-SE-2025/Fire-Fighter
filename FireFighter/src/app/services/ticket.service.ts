@@ -8,7 +8,7 @@ import { NotificationService } from './notification.service';
 export interface Ticket {
   id: string;
   status: 'Pending' | 'Active' | 'Completed' | 'Rejected';
-  timeAgo: string;
+  dateCreated: Date;
   reason: string;
   requestDate: string;
   userId: string;
@@ -24,14 +24,28 @@ export class TicketService {
   constructor(
     private http: HttpClient,
     private notificationService: NotificationService
-  ) {}
+  ) {
+    // Subscribe to ticket status updates from mock database
+    if (this.useMockDatabase) {
+      mockTicketDb.onStatusUpdate$.subscribe(ticket => {
+        if (ticket.status === 'Completed') {
+          this.notificationService.addNotification({
+            type: 'request_completed',
+            title: 'Request Completed',
+            message: `Your request ${ticket.id} has been completed automatically`,
+            ticketId: ticket.id
+          });
+        }
+      });
+    }
+  }
 
   /**
    * Create a new ticket request
    * @param ticketData The ticket data to create
    * @returns Observable of the created ticket
    */
-  createTicket(ticketData: Omit<Ticket, 'id' | 'status' | 'timeAgo'>): Observable<Ticket> {
+  createTicket(ticketData: Omit<Ticket, 'id' | 'status' | 'dateCreated'>): Observable<Ticket> {
     const createTicket$ = this.useMockDatabase
       ? of(mockTicketDb.createTicket(ticketData))
       : this.http.post<Ticket>(this.apiUrl, ticketData);
