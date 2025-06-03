@@ -26,4 +26,29 @@ public class AccessSession {
     private User user;
 
     // Constructors, getters, setters
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setAccessRequest(AccessRequest accessRequest) {
+        this.accessRequest = accessRequest;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+
 }
