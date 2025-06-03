@@ -26,6 +26,23 @@ public class AccessSession {
     private User user;
 
     // Constructors, getters, setters
+    // Default constructor
+    public AccessSession() {
+        this.user = null;
+        this.accessRequest = null;
+        this.startTime = null;
+        this.endTime = null;
+        this.active = false;
+    }
+
+    // Parameterized constructor
+    public AccessSession(User user, AccessRequest accessRequest, LocalDateTime startTime, LocalDateTime endTime, boolean active) {
+        this.user = user;
+        this.accessRequest = accessRequest;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.active = active;
+    }
     public void setUser(User user) {
         this.user = user;
     }
@@ -48,6 +65,34 @@ public class AccessSession {
 
     public boolean isActive() {
         return active;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    //get duration of the session
+    public long getDurationInMinutes() {
+        if (startTime != null && endTime != null) {
+            return java.time.Duration.between(startTime, endTime).toMinutes();
+        }
+        return 0;
+    }
+
+    public AccessRequest getAccessRequest() {
+        return accessRequest;
+    }
+
+    public User getUser() {
+        return user;
     }
 
 
