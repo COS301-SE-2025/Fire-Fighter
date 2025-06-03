@@ -1,7 +1,7 @@
 import { Ticket } from './ticket.service';
 
-// Mock database with some initial tickets
-const mockTickets: Ticket[] = [
+// Initial mock tickets if none exist in storage
+const initialMockTickets: Ticket[] = [
   {
     id: 'TICK-001',
     status: 'Pending',
@@ -45,59 +45,115 @@ const generateId = (): string => {
 
 // Helper function to calculate time ago
 const calculateTimeAgo = (date: string): string => {
-  const requestDate = new Date(date);
   const now = new Date();
-  const diffInHours = Math.floor((now.getTime() - requestDate.getTime()) / (1000 * 60 * 60));
-  
-  if (diffInHours < 24) {
-    return `${diffInHours} hours ago`;
-  } else if (diffInHours < 48) {
-    return '1 day ago';
-  } else {
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays} days ago`;
+  const requestDate = new Date(date);
+  const diffInSeconds = Math.floor((now.getTime() - requestDate.getTime()) / 1000);
+
+  if (diffInSeconds < 60) {
+    return 'just now';
   }
+
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes} minute${diffInMinutes === 1 ? '' : 's'} ago`;
+  }
+
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) {
+    return `${diffInHours} hour${diffInHours === 1 ? '' : 's'} ago`;
+  }
+
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays < 7) {
+    return `${diffInDays} day${diffInDays === 1 ? '' : 's'} ago`;
+  }
+
+  return requestDate.toLocaleDateString();
 };
 
 export class MockTicketDatabase {
-  private tickets: Ticket[] = [...mockTickets];
+  private readonly STORAGE_KEY = 'mock_tickets';
+
+  constructor() {
+    // Initialize storage with mock data if empty
+    if (!localStorage.getItem(this.STORAGE_KEY)) {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(initialMockTickets));
+    }
+  }
+
+  private getTicketsFromStorage(): Ticket[] {
+    const storedTickets = localStorage.getItem(this.STORAGE_KEY);
+    if (!storedTickets) return [];
+    return JSON.parse(storedTickets);
+  }
+
+  private saveTicketsToStorage(tickets: Ticket[]): void {
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(tickets));
+  }
 
   // Get all tickets
   getAllTickets(): Ticket[] {
-    return [...this.tickets];
+    const tickets = this.getTicketsFromStorage();
+    // Update timeAgo for all tickets
+    return tickets.map(ticket => ({
+      ...ticket,
+      timeAgo: calculateTimeAgo(ticket.requestDate)
+    }));
   }
 
   // Get ticket by ID
   getTicketById(id: string): Ticket | undefined {
-    return this.tickets.find(ticket => ticket.id === id);
+    const tickets = this.getTicketsFromStorage();
+    const ticket = tickets.find(ticket => ticket.id === id);
+    if (!ticket) return undefined;
+    
+    return {
+      ...ticket,
+      timeAgo: calculateTimeAgo(ticket.requestDate)
+    };
   }
 
   // Create new ticket
   createTicket(ticketData: Omit<Ticket, 'id' | 'status' | 'timeAgo'>): Ticket {
+    const tickets = this.getTicketsFromStorage();
     const newTicket: Ticket = {
       id: generateId(),
       status: 'Pending',
-      timeAgo: 'Just now',
+      timeAgo: 'just now',
       ...ticketData
     };
     
-    this.tickets.unshift(newTicket);
+    tickets.unshift(newTicket);
+    this.saveTicketsToStorage(tickets);
     return { ...newTicket };
   }
 
   // Update ticket status
   updateTicketStatus(id: string, status: Ticket['status']): Ticket | undefined {
-    const ticketIndex = this.tickets.findIndex(ticket => ticket.id === id);
+    const tickets = this.getTicketsFromStorage();
+    const ticketIndex = tickets.findIndex(ticket => ticket.id === id);
     if (ticketIndex === -1) return undefined;
 
     const updatedTicket = {
-      ...this.tickets[ticketIndex],
+      ...tickets[ticketIndex],
       status,
-      timeAgo: calculateTimeAgo(this.tickets[ticketIndex].requestDate)
+      timeAgo: calculateTimeAgo(tickets[ticketIndex].requestDate)
     };
 
-    this.tickets[ticketIndex] = updatedTicket;
+    tickets[ticketIndex] = updatedTicket;
+    this.saveTicketsToStorage(tickets);
     return { ...updatedTicket };
+  }
+
+  // Delete ticket (optional, if needed)
+  deleteTicket(id: string): boolean {
+    const tickets = this.getTicketsFromStorage();
+    const ticketIndex = tickets.findIndex(ticket => ticket.id === id);
+    if (ticketIndex === -1) return false;
+
+    tickets.splice(ticketIndex, 1);
+    this.saveTicketsToStorage(tickets);
+    return true;
   }
 }
 
