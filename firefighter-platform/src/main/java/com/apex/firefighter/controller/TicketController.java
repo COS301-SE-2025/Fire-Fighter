@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -110,12 +111,14 @@ public class TicketController {
     public ResponseEntity<Map<String, Object>> verifyTicket(@PathVariable String ticketId) {
         boolean isValid = ticketService.verifyTicket(ticketId);
         return ticketService.getTicketByTicketId(ticketId)
-                .map(ticket -> ResponseEntity.ok(Map.of(
-                    "valid", isValid,
-                    "ticketId", ticket.getTicketId(),
-                    "lastVerifiedAt", ticket.getLastVerifiedAt(),
-                    "verificationCount", ticket.getVerificationCount()
-                )))
+                .map(ticket -> {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("valid", isValid);
+                    response.put("ticketId", ticket.getTicketId());
+                    response.put("lastVerifiedAt", ticket.getLastVerifiedAt());
+                    response.put("verificationCount", ticket.getVerificationCount());
+                    return ResponseEntity.ok(response);
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 }
