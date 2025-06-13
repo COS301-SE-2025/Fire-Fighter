@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.Optional;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,14 +40,18 @@ class UserRepositoryTest {
 
         Optional<User> result = userRepository.findByUsername("testuser");
         assertThat(result).isPresent();
-        assertThat(result.get().getId()).isNotNull();
+        assertThat(result.get().getUserId()).isNotNull();
         assertThat(result.get().getEmail()).isEqualTo("test@example.com");
 
-        User user2 = new User("testuser2", "test2@example.com", "password456", Set.of(role));
+        User user2 = new User("user456", "testuser2", "test2@example.com", "IT");
         userRepository.save(user2);
+        UserRole userRole2 = new UserRole(user2, role, "admin");
+        user2.addUserRole(userRole2);
+        userRepository.save(user2);
+        
         Optional<User> result2 = userRepository.findByUsername("testuser2");
         assertThat(result2).isPresent();
         assertThat(result2.get().getUsername()).isEqualTo("testuser2");
-        assertThat(result2.get().getRoles()).contains(role);
+        assertThat(result2.get().getUserRoles()).contains(userRole2);
     }
 }

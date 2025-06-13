@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,14 +35,14 @@ class AccessSessionRepositoryTest {
         request.setStatus(RequestStatus.APPROVED);
         request.setTicketId("TCK-002");
         request.setUser(user);
-        request.setRequestTime(ZonedDateTime.now());
+        request.setRequestTime(LocalDateTime.now().atZone(java.time.ZoneId.systemDefault()));
         request = requestRepository.save(request);
 
         AccessSession session = new AccessSession();
         session.setUser(user);
         session.setAccessRequest(request);
-        session.setStartTime(ZonedDateTime.now());
-        session.setEndTime(ZonedDateTime.now().plusHours(1));
+        session.setStartTime(LocalDateTime.now());
+        session.setEndTime(LocalDateTime.now().plusHours(1));
         session.setActive(true);
         sessionRepository.save(session);
 
