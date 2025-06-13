@@ -37,8 +37,13 @@ class AccessRequestRepositoryTest {
         assertThat(results).isNotEmpty();
         assertThat(results.get(0).getTicketId()).isEqualTo("TCK-001");
 
-        AccessRequest request2 = new AccessRequest(2L, "TCK-002", RequestStatus.APPROVED, LocalDateTime.now(), user);
+        AccessRequest request2 = new AccessRequest();
+        request2.setTicketId("TCK-002");
+        request2.setRequestTime(ZonedDateTime.now());
+        request2.setStatus(RequestStatus.APPROVED);
+        request2.setUser(user);
         accessRequestRepository.save(request2);
+
         List<AccessRequest> approvedResults = accessRequestRepository.findByStatus(RequestStatus.APPROVED);
         assertThat(approvedResults).isNotEmpty();
         assertThat(approvedResults.get(0).getTicketId()).isEqualTo("TCK-002");
