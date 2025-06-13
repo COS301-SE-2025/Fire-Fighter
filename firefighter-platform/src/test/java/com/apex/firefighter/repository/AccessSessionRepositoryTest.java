@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,8 +42,8 @@ class AccessSessionRepositoryTest {
         AccessSession session = new AccessSession();
         session.setUser(user);
         session.setAccessRequest(request);
-        session.setStartTime(ZonedDateTime.now());
-        session.setEndTime(ZonedDateTime.now().plusHours(1));
+        session.setStartTime(LocalDateTime.now());
+        session.setEndTime(LocalDateTime.now().plusHours(1));
         session.setActive(true);
         sessionRepository.save(session);
 

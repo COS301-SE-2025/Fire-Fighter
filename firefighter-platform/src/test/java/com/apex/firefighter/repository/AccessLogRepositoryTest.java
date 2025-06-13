@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,7 +28,7 @@ class AccessLogRepositoryTest {
         log.setUser(user);
         log.setAction("GRANTED_ACCESS");
         log.setTicketId("T-99");
-        log.setTimestamp(ZonedDateTime.now());
+        log.setTimestamp(LocalDateTime.now());
         logRepository.save(log);
 
         assertThat(logRepository.findAll()).hasSize(1);

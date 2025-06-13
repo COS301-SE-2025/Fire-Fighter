@@ -31,6 +31,9 @@ public class User {
     @Column(name = "last_login", nullable = true)
     private ZonedDateTime lastLogin;
 
+    @Column(name = "normal_role", nullable = true)
+    private String normalRole;
+
     // One-to-Many relationship with UserRole (instead of Many-to-Many)
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<UserRole> userRoles = new HashSet<>();
@@ -105,6 +108,14 @@ public class User {
 
     public void setLastLogin(ZonedDateTime lastLogin) {
         this.lastLogin = lastLogin;
+    }
+
+    public String getNormalRole() {
+        return normalRole;
+    }
+
+    public void setNormalRole(String normalRole) {
+        this.normalRole = normalRole;
     }
 
     public Set<UserRole> getUserRoles() {

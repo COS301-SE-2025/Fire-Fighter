@@ -9,6 +9,7 @@ public class AccessRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "request_id")
     private Long id;
 
     @Column(name = "ticket_id", nullable = false)
