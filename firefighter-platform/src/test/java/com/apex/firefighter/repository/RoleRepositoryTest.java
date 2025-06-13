@@ -18,11 +18,19 @@ class RoleRepositoryTest {
     @Test
     void testSaveAndFindByRoleName() {
         Role role = new Role();
-        role.setRoleName("ADMIN");
+        role.setName("ADMIN");
         roleRepository.save(role);
 
-        Optional<Role> found = roleRepository.findByRoleName("ADMIN");
+        Optional<Role> found = roleRepository.findByName("ADMIN");
         assertThat(found).isPresent();
-        assertThat(found.get().getRoleName()).isEqualTo("ADMIN");
+        assertThat(found.get().getName()).isEqualTo("ADMIN");
+
+        Role role2 = new Role();
+        role2.setName("USER");
+        roleRepository.save(role2);
+        Optional<Role> found2 = roleRepository.findByName("USER");
+        assertThat(found2).isPresent();
+        assertThat(found2.get().getName()).isEqualTo("USER");
+
     }
 }
