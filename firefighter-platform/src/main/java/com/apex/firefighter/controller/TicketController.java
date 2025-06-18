@@ -1,7 +1,7 @@
 package com.apex.firefighter.controller;
 
 import com.apex.firefighter.model.Ticket;
-import com.apex.firefighter.service.TicketService;
+import com.apex.firefighter.service.ticket.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
