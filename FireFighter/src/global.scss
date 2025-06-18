@@ -68,6 +68,13 @@ body {
   /* Add padding for the safe area on Android */
   padding-top: var(--ion-safe-area-top, 0);
   padding-bottom: var(--ion-safe-area-bottom, 0);
+  /* Apply BMW Type Next font globally */
+  font-family: 'BMWTypeNext Pro', Arial, sans-serif;
+}
+
+/* Apply BMW Type Next font to all Ionic components */
+* {
+  font-family: 'BMWTypeNext Pro', Arial, sans-serif;
 }
 
 /* Utility classes for safe area insets */
