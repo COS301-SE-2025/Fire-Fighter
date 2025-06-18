@@ -37,9 +37,17 @@ export class LoginPage implements OnInit {
       const user = await this.auth.signInWithGoogle();
       console.log('Logged in as', user.displayName);
       this.auth.navigateToDashboard();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Login failed', err);
-      this.errorMsg = 'Google login failed. Please try again.';
+      
+      // Handle specific backend verification errors
+      if (err.status === 400 || err.status === 401) {
+        this.errorMsg = 'Account verification failed. Please contact support.';
+      } else if (err.status === 500) {
+        this.errorMsg = 'Server error. Please try again later.';
+      } else {
+        this.errorMsg = 'Google login failed. Please try again.';
+      }
     }
   }
 
@@ -70,6 +78,10 @@ export class LoginPage implements OnInit {
           this.errorMsg = 'Invalid email or password.';
         } else if (err.code === 'auth/too-many-requests') {
           this.errorMsg = 'Too many failed login attempts. Please try again later.';
+        } else if (err.status === 400 || err.status === 401) {
+          this.errorMsg = 'Account verification failed. Please contact support.';
+        } else if (err.status === 500) {
+          this.errorMsg = 'Server error. Please try again later.';
         } else {
           this.errorMsg = 'Login failed. Please try again.';
         }
