@@ -1,7 +1,8 @@
-package com.apex.firefighter.service;
+package com.apex.firefighter.ticket;
 
 import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.repository.TicketRepository;
+import com.apex.firefighter.service.ticket.TicketService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

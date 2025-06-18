@@ -223,4 +223,62 @@ public class TicketService {
         System.out.println("❌ DELETE FAILED: Ticket not found with ticket ID - " + ticketId);
         return false;
     }
+
+    /**
+     * Verify a ticket (increment verification count and update last verified time)
+     */
+    public boolean verifyTicket(String ticketId) {
+        System.out.println("🔵 VERIFY TICKET: Verifying ticket - " + ticketId);
+        
+        Optional<Ticket> ticketOpt = ticketRepository.findByTicketId(ticketId);
+        if (ticketOpt.isPresent()) {
+            Ticket ticket = ticketOpt.get();
+            ticket.setVerificationCount(ticket.getVerificationCount() + 1);
+            ticket.setLastVerifiedAt(java.time.LocalDateTime.now());
+            ticketRepository.save(ticket);
+            System.out.println("✅ TICKET VERIFIED: " + ticket);
+            return ticket.isValid();
+        } else {
+            System.out.println("❌ VERIFY FAILED: Ticket not found with ID - " + ticketId);
+            return false;
+        }
+    }
+
+    /**
+     * Update ticket validity
+     */
+    public Ticket updateTicketValidity(String ticketId, boolean valid) {
+        System.out.println("🔵 UPDATE VALIDITY: Updating ticket validity - " + ticketId + " to " + valid);
+        
+        Optional<Ticket> ticketOpt = ticketRepository.findByTicketId(ticketId);
+        if (ticketOpt.isPresent()) {
+            Ticket ticket = ticketOpt.get();
+            ticket.setValid(valid);
+            Ticket updatedTicket = ticketRepository.save(ticket);
+            System.out.println("✅ VALIDITY UPDATED: " + updatedTicket);
+            return updatedTicket;
+        } else {
+            System.out.println("❌ UPDATE FAILED: Ticket not found with ID - " + ticketId);
+            throw new RuntimeException("Ticket not found with ID: " + ticketId);
+        }
+    }
+
+    /**
+     * Update ticket description
+     */
+    public Ticket updateTicketDescription(String ticketId, String description) {
+        System.out.println("🔵 UPDATE DESCRIPTION: Updating ticket description - " + ticketId);
+        
+        Optional<Ticket> ticketOpt = ticketRepository.findByTicketId(ticketId);
+        if (ticketOpt.isPresent()) {
+            Ticket ticket = ticketOpt.get();
+            ticket.setDescription(description);
+            Ticket updatedTicket = ticketRepository.save(ticket);
+            System.out.println("✅ DESCRIPTION UPDATED: " + updatedTicket);
+            return updatedTicket;
+        } else {
+            System.out.println("❌ UPDATE FAILED: Ticket not found with ID - " + ticketId);
+            throw new RuntimeException("Ticket not found with ID: " + ticketId);
+        }
+    }
 } 
