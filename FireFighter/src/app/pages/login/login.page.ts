@@ -1,10 +1,11 @@
 // src/app/pages/login/login.page.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IonContent, IonButton } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { Router, RouterLink } from '@angular/router';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-login',
@@ -20,10 +21,15 @@ import { Router, RouterLink } from '@angular/router';
     RouterLink
   ]
 })
-export class LoginPage implements OnInit {
+export class LoginPage implements OnInit, OnDestroy {
   loginForm!: FormGroup;
   isSubmitting = false;
   errorMsg: string | null = null;
+
+  // Add debugging properties
+  isSafari = false;
+  userAgent = '';
+  private authSubscription: any;
 
   constructor(
     private fb: FormBuilder,
@@ -40,6 +46,12 @@ export class LoginPage implements OnInit {
     } catch (err: any) {
       console.error('Login failed', err);
       
+      // Handle Safari redirect case (this is expected behavior)
+      if (err.message === 'Redirect initiated - should not reach this point') {
+        // This is normal for Safari - the redirect is happening
+        return;
+      }
+      
       // Handle specific backend verification errors
       if (err.status === 400 || err.status === 401) {
         this.errorMsg = 'Account verification failed. Please contact support.';
@@ -51,12 +63,53 @@ export class LoginPage implements OnInit {
     }
   }
 
-  ngOnInit() {
+  async ngOnInit() {
+    // Debug information
+    this.userAgent = navigator.userAgent;
+    this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) || 
+                   /(iPad|iPhone|iPod).*Safari/i.test(navigator.userAgent);
+    
+    console.log('Browser detection:', {
+      userAgent: this.userAgent,
+      isSafari: this.isSafari,
+      platform: navigator.platform
+    });
+
     // we'll use this later for validation, but right now it's just for form state
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
+
+    // Set up auth state subscription to automatically navigate when user is authenticated
+    this.authSubscription = this.auth.user$.subscribe(user => {
+      console.log('Auth state changed:', !!user, user?.email);
+      if (user) {
+        console.log('User is authenticated, navigating to dashboard...');
+        this.auth.navigateToDashboard();
+      }
+    });
+
+    // Check for redirect result (for Safari users returning from Google OAuth)
+    try {
+      console.log('Checking for redirect result...');
+      const user = await this.auth.checkForRedirectResult();
+      console.log('Redirect result:', user ? 'User found' : 'No user found');
+      
+      if (user) {
+        console.log('User signed in via redirect:', user.displayName, user.email);
+        // The auth state subscription will handle navigation
+      }
+    } catch (error) {
+      console.error('Error handling redirect result:', error);
+      this.errorMsg = 'Google login failed. Please try again.';
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
+    }
   }
 
   async onSubmit() {
@@ -87,6 +140,20 @@ export class LoginPage implements OnInit {
         }
       } finally {
         this.isSubmitting = false;
+      }
+    }
+  }
+
+  // Add Safari-specific test method
+  async testSafariLogin() {
+    try {
+      this.errorMsg = null;
+      console.log('Testing Safari-specific login method...');
+      await this.auth.signInWithGoogleSafariMode();
+    } catch (err: any) {
+      console.error('Safari test login failed', err);
+      if (err.message !== 'Redirect initiated - should not reach this point') {
+        this.errorMsg = 'Safari test login failed. Error: ' + err.message;
       }
     }
   }

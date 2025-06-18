@@ -8,6 +8,11 @@ module.exports = {
   ],
   theme: {
     extend: {
+      // Custom font families
+      fontFamily: {
+        'bmw': ['BMWTypeNext Pro', 'Arial', 'sans-serif'],
+        'sans': ['BMWTypeNext Pro', 'Arial', 'sans-serif'], // Override default sans font
+      },
       // Custom color palette
       colors: {
         'matisse': {
