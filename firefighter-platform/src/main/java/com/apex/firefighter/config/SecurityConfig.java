@@ -5,6 +5,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -13,33 +18,49 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enable CORS
             .csrf(csrf -> csrf.disable()) // Disable CSRF for API endpoints
             .authorizeHttpRequests(authz -> authz
-                // Database test endpoints - allow public access
-                .requestMatchers("/api/database/**").permitAll()
-                
-                // Admin endpoints - require authentication (more specific patterns first)
-                .requestMatchers("/api/users/*/authorize").hasRole("ADMIN")
-                .requestMatchers("/api/users/*/revoke").hasRole("ADMIN")
-                .requestMatchers("/api/users/authorized").hasRole("ADMIN")
-                .requestMatchers("/api/users/department/*").hasRole("ADMIN")
-                .requestMatchers("/api/users/role/*").hasRole("ADMIN")
-                .requestMatchers("/api/users/authorized/role/*").hasRole("ADMIN")
-                
-                // Role assignment endpoint (POST to /api/users/{id}/roles)
-                .requestMatchers("/api/users/*/roles").hasRole("ADMIN")
-                
-                // Public user endpoints - no authentication required
-                .requestMatchers("/api/users/verify").permitAll()
-                .requestMatchers("/api/users/*/authorized").permitAll()
-                .requestMatchers("/api/users/*/roles/*").permitAll() // GET role check
-                .requestMatchers("/api/users/email/*").permitAll()
-                .requestMatchers("/api/users/*").permitAll() // GET user info by ID
-                
-                // All other requests require authentication
-                .anyRequest().authenticated()
+                // Allow all API endpoints for development
+                .requestMatchers("/api/**").permitAll()
+                // Allow all other requests
+                .anyRequest().permitAll()
             );
             
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        
+        // Allow origins for Ionic development and Capacitor apps
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+            "http://localhost:8100",     // Ionic dev server
+            "http://127.0.0.1:8100",     // Alternative localhost
+            "https://localhost:8100",    // HTTPS version
+            "https://127.0.0.1:8100",    // HTTPS alternative
+            "ionic://localhost",         // Capacitor iOS
+            "http://localhost",          // General localhost (any port)
+            "capacitor://localhost"      // Capacitor Android
+        ));
+        
+        // Allow all common HTTP methods
+        configuration.setAllowedMethods(Arrays.asList(
+            "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
+        ));
+        
+        // Allow all headers
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        
+        // Allow credentials (important for Firebase authentication)
+        configuration.setAllowCredentials(true);
+        
+        // Cache preflight requests for 1 hour
+        configuration.setMaxAge(3600L);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/**", configuration);
+        return source;
     }
 } 
