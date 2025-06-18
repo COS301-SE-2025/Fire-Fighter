@@ -1,5 +1,6 @@
 // src/app/services/auth.service.ts
 import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Auth, authState }    from '@angular/fire/auth';
 import {
   GoogleAuthProvider,
@@ -17,6 +18,14 @@ import { Capacitor }            from '@capacitor/core';
 import { Platform }             from '@ionic/angular/standalone';
 import { Router, NavigationExtras } from '@angular/router';
 import { NavController }        from '@ionic/angular/standalone';
+import { environment }          from '../../environments/environment';
+
+interface UserVerificationPayload {
+  firebaseUid: string;
+  username: string;
+  email: string;
+  department: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +36,7 @@ export class AuthService {
   private platform = inject(Platform);
   private router = inject(Router);
   private navCtrl = inject(NavController);
+  private http = inject(HttpClient);
 
   // Expose an Observable of the current user (null if signed out)
   user$: Observable<User | null> = authState(this.auth);
@@ -48,9 +58,36 @@ export class AuthService {
   }
 
   /**
+   * Verify user with backend API
+   */
+  private async verifyUserWithBackend(user: User, department: string = 'Default Department'): Promise<void> {
+    // Create form data using HttpParams for application/x-www-form-urlencoded format
+    const params = new HttpParams()
+      .set('firebaseUid', user.uid)
+      .set('username', user.displayName || user.email?.split('@')[0] || 'Unknown User')
+      .set('email', user.email || '')
+      .set('department', department);
+
+    const headers = {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    };
+
+    try {
+      const response = await this.http.post(`${environment.apiUrl}/users/verify`, params.toString(), { headers }).toPromise();
+      console.log('User verified with backend:', response);
+    } catch (error) {
+      console.error('Failed to verify user with backend:', error);
+      console.error('Error details:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Sign in with Google via a popup/webflow on web or native on mobile
    */
   async signInWithGoogle(): Promise<User> {
+    let user: User;
+    
     // For mobile (Android/iOS) use the native Google Sign In
     if (Capacitor.isNativePlatform()) {
       // Sign in with Google on native platform
@@ -64,7 +101,7 @@ export class AuthService {
           result.credential.accessToken
         );
         const userCredential = await signInWithCredential(this.auth, credential);
-        return userCredential.user;
+        user = userCredential.user;
       } else {
         throw new Error('No credential returned from native Google sign-in');
       }
@@ -72,14 +109,21 @@ export class AuthService {
       // On web, use the Firebase popup sign-in
       const provider = new GoogleAuthProvider();
       const credential = await signInWithPopup(this.auth, provider);
-      return credential.user;
+      user = credential.user;
     }
+
+    // Verify user with backend after successful Firebase authentication
+    await this.verifyUserWithBackend(user);
+    
+    return user;
   }
 
   /**
    * Sign in with email and password
    */
   async signInWithEmail(email: string, password: string): Promise<User> {
+    let user: User;
+    
     if (Capacitor.isNativePlatform()) {
       // Use Capacitor plugin for native platforms
       const result = await FirebaseAuthentication.signInWithEmailAndPassword({
@@ -89,21 +133,28 @@ export class AuthService {
       // Return the Firebase user from the result
       if (result.user) {
         const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
-        return userCredential.user;
+        user = userCredential.user;
       } else {
         throw new Error('No user returned from native email/password sign-in');
       }
     } else {
       // Use Firebase web SDK for browser
       const credential = await signInWithEmailAndPassword(this.auth, email, password);
-      return credential.user;
+      user = credential.user;
     }
+
+    // Verify user with backend after successful Firebase authentication
+    await this.verifyUserWithBackend(user);
+    
+    return user;
   }
 
   /**
    * Create a new user with email and password
    */
   async createUserWithEmail(email: string, password: string): Promise<User> {
+    let user: User;
+    
     if (Capacitor.isNativePlatform()) {
       // Use Capacitor plugin for native platforms
       const result = await FirebaseAuthentication.createUserWithEmailAndPassword({
@@ -114,15 +165,20 @@ export class AuthService {
       if (result.user) {
         // Also create on web layer to keep them in sync
         const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
-        return userCredential.user;
+        user = userCredential.user;
       } else {
         throw new Error('No user returned from native account creation');
       }
     } else {
       // Use Firebase web SDK for browser
       const credential = await createUserWithEmailAndPassword(this.auth, email, password);
-      return credential.user;
+      user = credential.user;
     }
+
+    // Verify new user with backend after successful Firebase registration
+    await this.verifyUserWithBackend(user);
+    
+    return user;
   }
 
   /**

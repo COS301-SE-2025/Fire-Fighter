@@ -70,6 +70,10 @@ export class RegisterPage implements OnInit {
           this.errorMsg = 'Email is already in use.';
         } else if (err.code === 'auth/weak-password') {
           this.errorMsg = 'Password is too weak.';
+        } else if (err.status === 400 || err.status === 401) {
+          this.errorMsg = 'Account verification failed. Please contact support.';
+        } else if (err.status === 500) {
+          this.errorMsg = 'Server error. Please try again later.';
         } else {
           this.errorMsg = 'Registration failed. Please try again.';
         }
@@ -85,9 +89,17 @@ export class RegisterPage implements OnInit {
       const user = await this.auth.signInWithGoogle();
       console.log('Registered as', user.displayName);
       this.auth.navigateToDashboard();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Google registration failed', err);
-      this.errorMsg = 'Google registration failed. Please try again.';
+      
+      // Handle specific backend verification errors
+      if (err.status === 400 || err.status === 401) {
+        this.errorMsg = 'Account verification failed. Please contact support.';
+      } else if (err.status === 500) {
+        this.errorMsg = 'Server error. Please try again later.';
+      } else {
+        this.errorMsg = 'Google registration failed. Please try again.';
+      }
     }
   }
 }
