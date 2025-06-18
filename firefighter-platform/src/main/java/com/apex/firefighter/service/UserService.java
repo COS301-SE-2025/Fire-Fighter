@@ -1,200 +1,163 @@
 package com.apex.firefighter.service;
 
 import com.apex.firefighter.model.User;
-import com.apex.firefighter.model.Role;
-import com.apex.firefighter.model.UserRole;
-import com.apex.firefighter.repository.UserRepository;
-import com.apex.firefighter.repository.RoleRepository;
+import com.apex.firefighter.service.auth.AuthenticationService;
+import com.apex.firefighter.service.auth.AuthorizationService;
+import com.apex.firefighter.service.role.RoleService;
+import com.apex.firefighter.service.user.UserProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * UserService serves as a facade for user-related operations.
+ * This service delegates to specialized services for:
+ * - Authentication (AuthenticationService)
+ * - Authorization (AuthorizationService) 
+ * - Role Management (RoleService)
+ * - User Profile Management (UserProfileService)
+ * 
+ * This provides backward compatibility while maintaining modular architecture.
+ */
 @Service
 @Transactional
 public class UserService {
 
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
+    private final AuthenticationService authenticationService;
+    private final AuthorizationService authorizationService;
+    private final RoleService roleService;
+    private final UserProfileService userProfileService;
 
     @Autowired
-    public UserService(UserRepository userRepository, RoleRepository roleRepository) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
+    public UserService(AuthenticationService authenticationService,
+                      AuthorizationService authorizationService,
+                      RoleService roleService,
+                      UserProfileService userProfileService) {
+        this.authenticationService = authenticationService;
+        this.authorizationService = authorizationService;
+        this.roleService = roleService;
+        this.userProfileService = userProfileService;
     }
 
+    // DELEGATION METHODS FOR BACKWARD COMPATIBILITY
+
     /**
-     * FIREBASE USER VERIFICATION
-     * Called when a Firebase-authenticated user accesses the system
-     * This effectively serves as our "login" since Firebase handles authentication
+     * FIREBASE USER VERIFICATION - Delegates to AuthenticationService
      */
     public User verifyOrCreateUser(String firebaseUid, String username, String email, String department) {
-        System.out.println("🔵 VERIFY: Checking user with Firebase UID - " + firebaseUid);
-        
-        Optional<User> existingUser = userRepository.findByUserId(firebaseUid);
-        
-        if (existingUser.isPresent()) {
-            User user = existingUser.get();
-            // Always update last login when user accesses the system
-            user.updateLastLogin();
-            User updatedUser = userRepository.save(user);
-            System.out.println("✅ VERIFIED: Existing user accessed system - " + updatedUser.getUsername() + " (Last login updated)");
-            return updatedUser;
-        } else {
-            // Create new user from Firebase auth
-            User newUser = new User(firebaseUid, username, email, department);
-            // New users get their "first login" timestamp set in constructor
-            User savedUser = userRepository.save(newUser);
-            System.out.println("✅ CREATED: New user from Firebase - " + savedUser.getUsername() + " (First login recorded)");
-            return savedUser;
-        }
+        return authenticationService.verifyOrCreateUser(firebaseUid, username, email, department);
     }
 
     /**
-     * USER AUTHORIZATION CHECK
-     * Verify if a Firebase user is authorized to access protected resources
+     * USER AUTHORIZATION CHECK - Delegates to AuthorizationService
      */
     public boolean isUserAuthorized(String firebaseUid) {
-        System.out.println("🔵 AUTH CHECK: Verifying authorization for UID - " + firebaseUid);
-        
-        Optional<User> user = userRepository.findByUserId(firebaseUid);
-        if (user.isPresent()) {
-            boolean authorized = user.get().isAuthorized();
-            System.out.println("✅ AUTH RESULT: User authorization status - " + authorized);
-            return authorized;
-        }
-        
-        System.out.println("❌ AUTH FAILED: User not found for UID - " + firebaseUid);
-        return false;
+        return authorizationService.isUserAuthorized(firebaseUid);
     }
 
     /**
-     * ROLE VERIFICATION
-     * Check if user has specific role
+     * ROLE VERIFICATION - Delegates to AuthorizationService
      */
     public boolean hasRole(String firebaseUid, String roleName) {
-        System.out.println("🔵 ROLE CHECK: Verifying role '" + roleName + "' for UID - " + firebaseUid);
-        
-        Optional<User> user = userRepository.findByUserId(firebaseUid);
-        if (user.isPresent()) {
-            boolean hasRole = user.get().hasRole(roleName);
-            System.out.println("✅ ROLE RESULT: User has role '" + roleName + "' - " + hasRole);
-            return hasRole;
-        }
-        
-        System.out.println("❌ ROLE FAILED: User not found for UID - " + firebaseUid);
-        return false;
+        return authorizationService.hasRole(firebaseUid, roleName);
     }
 
     /**
-     * ADMIN OPERATIONS - Manage user authorization
+     * ADMIN OPERATIONS - Delegates to AuthorizationService
      */
     public User authorizeUser(String firebaseUid, String authorizedBy) {
-        System.out.println("🔵 AUTHORIZE: Authorizing user with UID - " + firebaseUid);
-        
-        Optional<User> userOpt = userRepository.findByUserId(firebaseUid);
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            user.setIsAuthorized(true);
-            User authorizedUser = userRepository.save(user);
-            System.out.println("✅ AUTHORIZED: User authorized by " + authorizedBy + " - " + authorizedUser);
-            return authorizedUser;
-        } else {
-            System.out.println("❌ AUTHORIZE FAILED: User not found for UID - " + firebaseUid);
-            throw new RuntimeException("User not found with Firebase UID: " + firebaseUid);
-        }
+        return authorizationService.authorizeUser(firebaseUid, authorizedBy);
     }
 
     public User revokeUserAuthorization(String firebaseUid, String revokedBy) {
-        System.out.println("🔵 REVOKE: Revoking authorization for UID - " + firebaseUid);
-        
-        Optional<User> userOpt = userRepository.findByUserId(firebaseUid);
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            user.setIsAuthorized(false);
-            User revokedUser = userRepository.save(user);
-            System.out.println("✅ REVOKED: User authorization revoked by " + revokedBy + " - " + revokedUser);
-            return revokedUser;
-        } else {
-            System.out.println("❌ REVOKE FAILED: User not found for UID - " + firebaseUid);
-            throw new RuntimeException("User not found with Firebase UID: " + firebaseUid);
-        }
+        return authorizationService.revokeUserAuthorization(firebaseUid, revokedBy);
     }
 
     /**
-     * ROLE MANAGEMENT
+     * ROLE MANAGEMENT - Delegates to RoleService
      */
     public User assignRole(String firebaseUid, String roleName, String assignedBy) {
-        System.out.println("🔵 ASSIGN ROLE: Assigning role '" + roleName + "' to UID - " + firebaseUid);
-        
-        Optional<User> userOpt = userRepository.findByUserId(firebaseUid);
-        Optional<Role> roleOpt = roleRepository.findByName(roleName);
-        
-        if (userOpt.isPresent() && roleOpt.isPresent()) {
-            User user = userOpt.get();
-            Role role = roleOpt.get();
-            
-            // Check if user already has this role
-            if (!user.hasRole(roleName)) {
-                UserRole userRole = new UserRole(user, role, assignedBy);
-                user.addUserRole(userRole);
-                User updatedUser = userRepository.save(user);
-                System.out.println("✅ ROLE ASSIGNED: Role '" + roleName + "' assigned to user by " + assignedBy);
-                return updatedUser;
-            } else {
-                System.out.println("⚠️ ROLE EXISTS: User already has role '" + roleName + "'");
-                return user;
-            }
-        } else {
-            System.out.println("❌ ASSIGN FAILED: User or role not found");
-            throw new RuntimeException("User or role not found");
-        }
+        return roleService.assignRole(firebaseUid, roleName, assignedBy);
     }
 
     /**
-     * QUERY OPERATIONS
+     * QUERY OPERATIONS - Delegates to UserProfileService
      */
     public Optional<User> getUserByFirebaseUid(String firebaseUid) {
-        return userRepository.findByUserId(firebaseUid);
+        return authenticationService.getUserByFirebaseUid(firebaseUid);
     }
 
     public Optional<User> getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+        return userProfileService.getUserByEmail(email);
     }
 
     public List<User> getAuthorizedUsers() {
-        return userRepository.findByIsAuthorizedTrue();
+        return userProfileService.getAuthorizedUsers();
     }
 
     public List<User> getUsersByDepartment(String department) {
-        return userRepository.findByDepartment(department);
+        return userProfileService.getUsersByDepartment(department);
     }
 
     public List<User> getUsersByRole(String roleName) {
-        return userRepository.findByRoleName(roleName);
+        return roleService.getUsersByRole(roleName);
     }
 
     public List<User> getAuthorizedUsersByRole(String roleName) {
-        return userRepository.findAuthorizedUsersByRoleName(roleName);
+        return roleService.getAuthorizedUsersByRole(roleName);
     }
 
     /**
-     * COMPREHENSIVE USER INFO
-     * Get complete user information including roles
+     * COMPREHENSIVE USER INFO - Delegates to UserProfileService
      */
     public Optional<User> getUserWithRoles(String firebaseUid) {
-        System.out.println("🔵 GET USER: Fetching complete user info for UID - " + firebaseUid);
-        
-        Optional<User> user = userRepository.findByUserId(firebaseUid);
-        if (user.isPresent()) {
-            System.out.println("✅ FOUND USER: " + user.get());
-            return user;
-        } else {
-            System.out.println("❌ USER NOT FOUND: UID - " + firebaseUid);
-            return Optional.empty();
-        }
+        return userProfileService.getUserWithRoles(firebaseUid);
+    }
+
+    // ADDITIONAL METHODS EXPOSING MODULAR FUNCTIONALITY
+
+    /**
+     * Update user profile - Delegates to UserProfileService
+     */
+    public User updateUserProfile(String firebaseUid, String username, String email, String department) {
+        return userProfileService.updateUserProfile(firebaseUid, username, email, department);
+    }
+
+    /**
+     * Remove role from user - Delegates to RoleService
+     */
+    public User removeRole(String firebaseUid, String roleName) {
+        return roleService.removeRole(firebaseUid, roleName);
+    }
+
+    /**
+     * Get all users - Delegates to UserProfileService
+     */
+    public List<User> getAllUsers() {
+        return userProfileService.getAllUsers();
+    }
+
+    /**
+     * Check if user exists - Delegates to AuthenticationService
+     */
+    public boolean userExists(String firebaseUid) {
+        return authenticationService.userExists(firebaseUid);
+    }
+
+    /**
+     * Get user count - Delegates to UserProfileService
+     */
+    public long getUserCount() {
+        return userProfileService.getUserCount();
+    }
+
+    /**
+     * Get authorized user count - Delegates to UserProfileService
+     */
+    public long getAuthorizedUserCount() {
+        return userProfileService.getAuthorizedUserCount();
     }
 } 
