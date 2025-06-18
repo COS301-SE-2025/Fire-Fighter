@@ -5,6 +5,8 @@ import { Auth, authState }    from '@angular/fire/auth';
 import {
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
   User,
   signInWithEmailAndPassword,
@@ -83,6 +85,15 @@ export class AuthService {
   }
 
   /**
+   * Detect if the user is on Safari browser
+   */
+  private isSafari(): boolean {
+    const userAgent = navigator.userAgent;
+    return /^((?!chrome|android).)*safari/i.test(userAgent) || 
+           /(iPad|iPhone|iPod).*Safari/i.test(userAgent);
+  }
+
+  /**
    * Sign in with Google via a popup/webflow on web or native on mobile
    */
   async signInWithGoogle(): Promise<User> {
@@ -106,16 +117,61 @@ export class AuthService {
         throw new Error('No credential returned from native Google sign-in');
       }
     } else {
-      // On web, use the Firebase popup sign-in
+      // On web, check if Safari and use appropriate method
       const provider = new GoogleAuthProvider();
-      const credential = await signInWithPopup(this.auth, provider);
-      user = credential.user;
+      // Add extra scopes for better compatibility
+      provider.addScope('email');
+      provider.addScope('profile');
+      
+      if (this.isSafari()) {
+        // Safari: Use redirect-based authentication for better compatibility
+        await signInWithRedirect(this.auth, provider);
+        // Note: This will cause a page redirect, so we won't reach the return statement
+        // The actual sign-in completion will be handled by checkForRedirectResult
+        throw new Error('Redirect initiated - should not reach this point');
+      } else {
+        // Other browsers: Use popup-based authentication
+        const credential = await signInWithPopup(this.auth, provider);
+        user = credential.user;
+      }
     }
 
     // Verify user with backend after successful Firebase authentication
     await this.verifyUserWithBackend(user);
     
     return user;
+  }
+
+  /**
+   * Check for redirect result when the page loads (for Safari redirect-based auth)
+   */
+  async checkForRedirectResult(): Promise<User | null> {
+    try {
+      console.log('Auth service: Getting redirect result...');
+      const result = await getRedirectResult(this.auth);
+      console.log('Auth service: Redirect result received:', !!result, !!result?.user);
+      
+      if (result?.user) {
+        console.log('Auth service: User from redirect:', {
+          uid: result.user.uid,
+          email: result.user.email,
+          displayName: result.user.displayName
+        });
+        
+        // Verify user with backend after successful Firebase authentication
+        console.log('Auth service: Verifying user with backend...');
+        await this.verifyUserWithBackend(result.user);
+        console.log('Auth service: User verified successfully');
+        
+        return result.user;
+      }
+      
+      console.log('Auth service: No redirect result found');
+      return null;
+    } catch (error) {
+      console.error('Auth service: Error checking redirect result:', error);
+      throw error;
+    }
   }
 
   /**
@@ -212,5 +268,29 @@ export class AuthService {
     this.navCtrl.navigateRoot('/login', { 
       animationDirection: 'back' 
     });
+  }
+
+  /**
+   * Alternative Google sign-in method specifically for troubleshooting Safari issues
+   * This method uses a more Safari-friendly approach
+   */
+  async signInWithGoogleSafariMode(): Promise<User> {
+    const provider = new GoogleAuthProvider();
+    
+    // Configure provider for maximum Safari compatibility
+    provider.addScope('email');
+    provider.addScope('profile');
+    provider.setCustomParameters({
+      prompt: 'select_account'
+    });
+
+    try {
+      // Always use redirect for Safari mode
+      await signInWithRedirect(this.auth, provider);
+      throw new Error('Redirect initiated - should not reach this point');
+    } catch (error) {
+      console.error('Safari Google sign-in error:', error);
+      throw error;
+    }
   }
 }
