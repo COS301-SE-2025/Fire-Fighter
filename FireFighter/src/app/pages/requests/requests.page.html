@@ -123,9 +123,10 @@
       <button
         (click)="setOpen(true)"
         [disabled]="isLoading"
-        class="bg-blue-600 text-white p-4 rounded-full shadow-lg
+        class="bg-blue-600 text-white w-14 h-14 rounded-full shadow-lg
                hover:bg-blue-700 dark:hover:bg-blue-600 transition
-               disabled:opacity-50 disabled:cursor-not-allowed"
+               disabled:opacity-50 disabled:cursor-not-allowed
+               flex items-center justify-center text-2xl font-light"
       >
         <span *ngIf="!isLoading">+</span>
         <div *ngIf="isLoading" class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>

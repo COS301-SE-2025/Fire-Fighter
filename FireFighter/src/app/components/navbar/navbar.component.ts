@@ -74,6 +74,12 @@ export class NavbarComponent implements OnInit {
     this.closeMobileMenu();
   }
 
+  navigateToAccount() {
+    this.router.navigate(['/account']);
+    this.closeMobileMenu();
+    this.profileMenuOpen = false; // Close profile menu after navigation
+  }
+
   private closeMobileMenu() {
     this.mobileMenuOpen = false;
   }
