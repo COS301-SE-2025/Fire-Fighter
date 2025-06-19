@@ -96,4 +96,20 @@ export class NotificationsPage implements OnInit {
 
     return timestamp.toLocaleDateString();
   }
+
+  trackByNotificationId(index: number, notification: Notification): string {
+    return notification.id;
+  }
+
+  hasUnreadNotifications(notifications: Notification[]): boolean {
+    return notifications.some(n => !n.read);
+  }
+
+  getUnreadCount(notifications: Notification[]): number {
+    return notifications.filter(n => !n.read).length;
+  }
+
+  getEmergencyCount(notifications: Notification[]): number {
+    return notifications.filter(n => n.type === 'request_completed' || n.type === 'new_request').length;
+  }
 }
