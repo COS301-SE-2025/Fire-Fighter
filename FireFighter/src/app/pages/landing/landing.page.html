@@ -1,0 +1,370 @@
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">landing</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <!-- Navigation Header -->
+  <nav class="bg-gray-900 border-b border-gray-800 px-4 lg:px-6 py-4">
+    <div class="max-w-screen-xl mx-auto flex flex-wrap items-center justify-between">
+      <!-- Logo -->
+      <div class="flex items-center">
+        <div class="flex items-center justify-center w-10 h-10 bg-red-600 rounded-lg mr-3">
+          <span class="text-white font-bold text-lg">FF</span>
+        </div>
+        <span class="text-white text-xl font-semibold">FireFighter</span>
+      </div>
+      
+      <!-- Navigation Actions -->
+      <div class="flex items-center lg:order-2 space-x-3">
+        <button (click)="navigateToLogin()" class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 transition-colors">
+          Sign Up
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-br from-red-800 via-red-700 to-orange-600 py-20 px-4">
+    <div class="max-w-screen-xl mx-auto text-center">
+      <!-- Critical System Access Badge -->
+      <div class="inline-flex items-center px-4 py-2 bg-red-900/50 border border-red-500/30 rounded-full text-red-200 text-sm font-medium mb-8">
+        <div class="w-2 h-2 bg-red-400 rounded-full mr-2"></div>
+        CRITICAL SYSTEM ACCESS
+      </div>
+      
+      <!-- Main Headline -->
+      <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">
+        Ready for Your Next <span class="text-red-300">Emergency?</span>
+      </h1>
+      
+      <!-- Subtitle -->
+      <p class="text-xl text-red-100 mb-8 max-w-3xl mx-auto leading-relaxed">
+        Don't let system access delays compromise your critical operations.<br>
+        FireFighter ensures you're always prepared for emergency situations.
+      </p>
+      
+      <!-- Action Buttons -->
+      <div class="flex flex-col justify-center items-center">
+        <button (click)="navigateToLogin()" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-4 px-8 rounded-lg text-lg transition-colors flex items-center mb-6">
+          Request Emergency Access
+          <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+          </svg>
+        </button>
+        
+        <!-- Scroll Down Indicator -->
+        <div class="flex flex-col items-center text-red-200">
+          <span class="text-sm font-medium mb-2">Scroll Down to Learn More</span>
+          <svg class="w-6 h-6 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+          </svg>
+        </div>
+      </div>
+      
+      <!-- Contact Information -->
+      <p class="text-red-200 mt-12 text-sm">
+        Need help or have questions? Contact the BMW IT Security team at 
+        <a href="mailto:emergency-access&#64;bmw.com" class="text-red-300 hover:text-white underline">emergency-access&#64;bmw.com</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- System Status Section -->
+  <section class="py-16 px-4 bg-gray-900">
+    <div class="max-w-screen-xl mx-auto">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-white mb-4">System Status</h2>
+        <p class="text-gray-400 text-lg">Real-time monitoring of critical access infrastructure</p>
+      </div>
+      
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- System Health -->
+        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <div class="flex items-center justify-center w-12 h-12 bg-green-600 rounded-lg mb-4 mx-auto">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-white text-center mb-2">System Health</h3>
+          <div class="text-center">
+            <span class="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-medium">Operational</span>
+          </div>
+        </div>
+        
+        <!-- Average Response Time -->
+        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <div class="flex items-center justify-center w-12 h-12 bg-blue-600 rounded-lg mb-4 mx-auto">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-white text-center mb-2">Average Response Time</h3>
+          <div class="text-center">
+            <span class="text-3xl font-bold text-blue-400">47 seconds</span>
+          </div>
+        </div>
+        
+        <!-- Active Firefighters -->
+        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <div class="flex items-center justify-center w-12 h-12 bg-yellow-600 rounded-lg mb-4 mx-auto">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-white text-center mb-2">Active Firefighters</h3>
+          <div class="text-center">
+            <span class="text-3xl font-bold text-yellow-400">3</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Emergency Access Metrics -->
+  <section class="py-16 px-4 bg-gray-800">
+    <div class="max-w-screen-xl mx-auto">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-white mb-4">Emergency Access Metrics</h2>
+        <p class="text-gray-400 text-lg max-w-3xl mx-auto">
+          Real-time insights into your emergency access management performance and security posture
+        </p>
+      </div>
+      
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Active Requests -->
+        <div class="bg-gray-900 rounded-lg p-6 border border-gray-700">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center justify-center w-10 h-10 bg-red-600 rounded-lg">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+              </svg>
+            </div>
+            <div class="flex items-center text-green-400 text-sm">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"></path>
+              </svg>
+            </div>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-1">Active Requests</h3>
+          <div class="text-3xl font-bold text-white mb-2">7</div>
+          <p class="text-gray-400 text-sm">+2 from yesterday</p>
+        </div>
+        
+        <!-- Monthly Requests -->
+        <div class="bg-gray-900 rounded-lg p-6 border border-gray-700">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-lg">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+              </svg>
+            </div>
+            <div class="flex items-center text-green-400 text-sm">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"></path>
+              </svg>
+            </div>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-1">Monthly Requests</h3>
+          <div class="text-3xl font-bold text-white mb-2">142</div>
+          <p class="text-gray-400 text-sm">+18% from last month</p>
+        </div>
+        
+        <!-- Security Incidents -->
+        <div class="bg-gray-900 rounded-lg p-6 border border-gray-700">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center justify-center w-10 h-10 bg-green-600 rounded-lg">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+              </svg>
+            </div>
+            <div class="flex items-center text-gray-400 text-sm">
+              -
+            </div>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-1">Security Incidents</h3>
+          <div class="text-3xl font-bold text-white mb-2">0</div>
+          <p class="text-gray-400 text-sm">No incidents this month</p>
+        </div>
+        
+        <!-- Avg. Resolution -->
+        <div class="bg-gray-900 rounded-lg p-6 border border-gray-700">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center justify-center w-10 h-10 bg-yellow-600 rounded-lg">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div class="flex items-center text-red-400 text-sm">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-8l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-1">Avg. Resolution</h3>
+          <div class="text-3xl font-bold text-white mb-2">12m</div>
+          <p class="text-gray-400 text-sm">-3m from last month</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Break Glass Section -->
+  <section class="py-16 px-4 bg-gradient-to-br from-red-900 via-red-800 to-red-700">
+    <div class="max-w-screen-xl mx-auto">
+      <div class="text-center mb-12">
+        <!-- Emergency Access Control System Badge -->
+        <div class="inline-flex items-center px-4 py-2 bg-red-700/50 border border-red-500/30 rounded-full text-red-200 text-sm font-medium mb-6">
+          EMERGENCY ACCESS CONTROL SYSTEM
+        </div>
+        
+        <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
+          Break Glass. <span class="text-red-300">Stay Secure.</span>
+        </h2>
+        <p class="text-xl text-red-100 max-w-4xl mx-auto leading-relaxed">
+          FireFighter delivers instant emergency access to critical BMW systems while maintaining 
+          enterprise-grade security, comprehensive auditing, and complete accountability.
+        </p>
+      </div>
+      
+      <div class="grid md:grid-cols-3 gap-8 mb-12">
+        <!-- Instant Response -->
+        <div class="text-center">
+          <div class="flex items-center justify-center w-16 h-16 bg-yellow-600 rounded-lg mb-6 mx-auto">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-white mb-4">Instant Response</h3>
+          <p class="text-red-100">Deploy emergency access in under 60 seconds</p>
+        </div>
+        
+        <!-- Full Accountability -->
+        <div class="text-center">
+          <div class="flex items-center justify-center w-16 h-16 bg-green-600 rounded-lg mb-6 mx-auto">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-white mb-4">Full Accountability</h3>
+          <p class="text-red-100">Complete audit trail for every action taken</p>
+        </div>
+        
+        <!-- Time-Bound Access -->
+        <div class="text-center">
+          <div class="flex items-center justify-center w-16 h-16 bg-blue-600 rounded-lg mb-6 mx-auto">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-white mb-4">Time-Bound Access</h3>
+          <p class="text-red-100">Automatic role revocation when emergency ends</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Choose FireFighter Section -->
+  <section class="py-16 px-4 bg-gray-900">
+    <div class="max-w-screen-xl mx-auto">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-white mb-6">Why Choose FireFighter?</h2>
+        <p class="text-gray-400 text-lg max-w-3xl mx-auto">
+          Built specifically for BMW's critical infrastructure, FireFighter combines emergency 
+          responsiveness with enterprise-grade security and comprehensive audit capabilities.
+        </p>
+      </div>
+      
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Instant Emergency Access -->
+        <div class="bg-gray-800 rounded-lg p-8 border border-gray-700">
+          <div class="flex items-center justify-center w-12 h-12 bg-yellow-600 rounded-lg mb-6">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-4">Instant Emergency Access</h3>
+          <p class="text-gray-400">
+            Request and receive FireFighter role privileges in under 60 seconds through our streamlined interface.
+          </p>
+        </div>
+        
+        <!-- Time-Bound Security -->
+        <div class="bg-gray-800 rounded-lg p-8 border border-gray-700">
+          <div class="flex items-center justify-center w-12 h-12 bg-red-600 rounded-lg mb-6">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-4">Time-Bound Security</h3>
+          <p class="text-gray-400">
+            All emergency access is automatically revoked after configurable time periods or issue resolution.
+          </p>
+        </div>
+        
+        <!-- Complete Audit Trail -->
+        <div class="bg-gray-800 rounded-lg p-8 border border-gray-700">
+          <div class="flex items-center justify-center w-12 h-12 bg-blue-600 rounded-lg mb-6">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-4">Complete Audit Trail</h3>
+          <p class="text-gray-400">
+            Comprehensive logging of all FireFighter activities with detailed attribution and timestamps.
+          </p>
+        </div>
+        
+        <!-- Real-Time Notifications -->
+        <div class="bg-gray-800 rounded-lg p-8 border border-gray-700">
+          <div class="flex items-center justify-center w-12 h-12 bg-green-600 rounded-lg mb-6">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM12 21H7a4 4 0 01-4-4V7a4 4 0 014-4h10a4 4 0 014 4v4M9 9h6M9 13h3"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-4">Real-Time Notifications</h3>
+          <p class="text-gray-400">
+            Instant alerts to administrators for role requests, activations, and revocations.
+          </p>
+        </div>
+        
+        <!-- Action Attribution -->
+        <div class="bg-gray-800 rounded-lg p-8 border border-gray-700">
+          <div class="flex items-center justify-center w-12 h-12 bg-purple-600 rounded-lg mb-6">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-4">Action Attribution</h3>
+          <p class="text-gray-400">
+            Every change made under FireFighter role is clearly identified and attributed to the user.
+          </p>
+        </div>
+        
+        <!-- Enterprise Security -->
+        <div class="bg-gray-800 rounded-lg p-8 border border-gray-700">
+          <div class="flex items-center justify-center w-12 h-12 bg-indigo-600 rounded-lg mb-6">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-4">Enterprise Security</h3>
+          <p class="text-gray-400">
+            Maintains strict security controls while enabling emergency access to critical systems.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 border-t border-gray-700 py-8 px-4">
+    <div class="max-w-screen-xl mx-auto text-center">
+      <p class="text-gray-400">
+        © 2025 FireFighter Emergency Access Management. Built for BMW's critical infrastructure.
+      </p>
+    </div>
+  </footer>
+</ion-content>

@@ -102,4 +102,8 @@ export class RegisterPage implements OnInit {
       }
     }
   }
+
+  navigateToAbout() {
+    this.router.navigate(['/landing']);
+  }
 }
