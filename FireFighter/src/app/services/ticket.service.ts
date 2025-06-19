@@ -12,6 +12,8 @@ export interface Ticket {
   reason: string;
   requestDate: string;
   userId: string;
+  emergencyType?: string;
+  emergencyContact?: string;
 }
 
 @Injectable({

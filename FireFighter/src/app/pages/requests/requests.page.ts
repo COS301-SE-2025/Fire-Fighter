@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonModal, IonButton, IonInput, IonTextarea, IonLabel } from '@ionic/angular/standalone';
+import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
 import { ToastController } from '@ionic/angular';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { TicketService, Ticket } from '../../services/ticket.service';
@@ -15,8 +15,8 @@ import { of } from 'rxjs';
   styleUrls: ['./requests.page.scss'],
   standalone: true,
   imports: [
-    IonContent, IonHeader, IonTitle, IonToolbar, IonModal, IonButton, 
-    IonInput, IonTextarea, IonLabel, CommonModule, FormsModule, NavbarComponent
+    IonContent, IonHeader, IonTitle, IonToolbar, 
+    CommonModule, FormsModule, NavbarComponent
   ]
 })
 export class RequestsPage implements OnInit {
@@ -45,7 +45,9 @@ export class RequestsPage implements OnInit {
   newTicket = {
     requestDate: new Date().toISOString().split('T')[0],
     reason: '',
-    userId: '' // This should be set from the auth service
+    userId: '', // This should be set from the auth service
+    emergencyType: '',
+    emergencyContact: ''
   };
 
   // Add calculateTimeAgo function
@@ -117,7 +119,9 @@ export class RequestsPage implements OnInit {
       this.newTicket = {
         requestDate: new Date().toISOString().split('T')[0],
         reason: '',
-        userId: '' // This should be set from the auth service
+        userId: '', // This should be set from the auth service
+        emergencyType: '',
+        emergencyContact: ''
       };
     }
   }
@@ -174,5 +178,9 @@ export class RequestsPage implements OnInit {
       color: 'success',
     });
     await toast.present();
+  }
+
+  trackByTicketId(index: number, ticket: Ticket): string {
+    return ticket.id;
   }
 }

@@ -45,6 +45,28 @@ export class DashboardPage implements OnInit, OnDestroy {
   // Add calculateTimeAgo function
   calculateTimeAgo = calculateTimeAgo;
 
+  // Helper method to extract display name from email
+  private extractUserName(email: string): string {
+    if (!email || !email.includes('@')) return 'BMW User';
+    
+    const localPart = email.split('@')[0];
+    const nameParts = localPart.split('.');
+    
+    if (nameParts.length >= 2) {
+      const firstName = nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1);
+      const lastName = nameParts[1].charAt(0).toUpperCase() + nameParts[1].slice(1);
+      return `${firstName} ${lastName}`;
+    }
+    
+    return localPart.charAt(0).toUpperCase() + localPart.slice(1);
+  }
+
+  // Helper method to truncate long descriptions
+  private truncateDescription(text: string, maxLength: number): string {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  }
+
   constructor(
     private authService: AuthService,
     private ticketService: TicketService,
@@ -164,14 +186,14 @@ export class DashboardPage implements OnInit, OnDestroy {
     );
 
     sortedTickets.slice(0, 4).forEach(ticket => {
-      const ticketId = ticket.id.split('-').pop() || ticket.id;
+      const ticketId = ticket.id;
       
       if (ticket.status === 'Active') {
         activities.push({
           type: 'granted',
-          title: `Emergency access granted for BMW-PROD-${ticketId}`,
-          description: ticket.reason,
-          user: 'Max Müller',
+          title: `Emergency access granted for ${ticketId}`,
+          description: this.truncateDescription(ticket.reason, 80),
+          user: this.extractUserName(ticket.userId),
           timeAgo: this.calculateTimeAgo(ticket.dateCreated),
           status: 'active',
           timestamp: ticket.dateCreated
@@ -179,9 +201,9 @@ export class DashboardPage implements OnInit, OnDestroy {
       } else if (ticket.status === 'Completed') {
         activities.push({
           type: 'revoked',
-          title: `Access automatically revoked for BMW-SEC-${ticketId}`,
-          description: ticket.reason,
-          user: 'Sarah Johnson',
+          title: `Emergency access completed for ${ticketId}`,
+          description: this.truncateDescription(ticket.reason, 80),
+          user: this.extractUserName(ticket.userId),
           timeAgo: this.calculateTimeAgo(ticket.dateCreated),
           status: 'completed',
           timestamp: ticket.dateCreated
@@ -189,9 +211,9 @@ export class DashboardPage implements OnInit, OnDestroy {
       } else if (ticket.status === 'Rejected') {
         activities.push({
           type: 'denied',
-          title: `Emergency access request denied`,
-          description: 'Insufficient justification provided',
-          user: 'Thomas Weber',
+          title: `Emergency access request ${ticketId} denied`,
+          description: 'Request did not meet emergency access criteria',
+          user: 'BMW Security Team',
           timeAgo: this.calculateTimeAgo(ticket.dateCreated),
           status: 'denied',
           timestamp: ticket.dateCreated
