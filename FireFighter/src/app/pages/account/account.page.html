@@ -18,7 +18,7 @@
               
               <!-- Profile Picture/Avatar -->
               <div class="flex-shrink-0">
-                <div class="relative">
+                <div class="relative inline-block">
                   <div *ngIf="user.photoURL; else initialsAvatar" class="w-20 h-20 rounded-full overflow-hidden border-4 border-gray-200 dark:border-gray-600">
                     <img [src]="user.photoURL" [alt]="user.displayName || user.email" class="w-full h-full object-cover">
                   </div>
@@ -29,7 +29,7 @@
                   </ng-template>
                   
                   <!-- Online Status Indicator -->
-                  <div class="absolute bottom-0 right-0 w-6 h-6 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full flex items-center justify-center">
+                  <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full flex items-center justify-center">
                     <div class="w-3 h-3 bg-green-400 rounded-full"></div>
                   </div>
                 </div>
