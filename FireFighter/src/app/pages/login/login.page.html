@@ -95,20 +95,6 @@
         <div *ngIf="errorMsg" class="mt-4 text-sm text-center text-red-400">
           {{ errorMsg }}
         </div>
-
-        <!-- Debug information for Safari -->
-        <div *ngIf="isSafari" class="mt-4 p-3 bg-yellow-900/20 border border-yellow-700 rounded-md">
-          <p class="text-xs text-yellow-300 mb-2">Safari Detected - Using Redirect Auth</p>
-          <ion-button 
-            (click)="testSafariLogin()" 
-            expand="block" 
-            fill="outline" 
-            size="small"
-            color="warning"
-          >
-            Test Safari Login Method
-          </ion-button>
-        </div>
       </form>
 
       <p class="mt-10 text-center text-sm/6 text-matisse-500">

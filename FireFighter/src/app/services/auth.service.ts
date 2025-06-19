@@ -147,29 +147,17 @@ export class AuthService {
    */
   async checkForRedirectResult(): Promise<User | null> {
     try {
-      console.log('Auth service: Getting redirect result...');
       const result = await getRedirectResult(this.auth);
-      console.log('Auth service: Redirect result received:', !!result, !!result?.user);
       
       if (result?.user) {
-        console.log('Auth service: User from redirect:', {
-          uid: result.user.uid,
-          email: result.user.email,
-          displayName: result.user.displayName
-        });
-        
         // Verify user with backend after successful Firebase authentication
-        console.log('Auth service: Verifying user with backend...');
         await this.verifyUserWithBackend(result.user);
-        console.log('Auth service: User verified successfully');
-        
         return result.user;
       }
       
-      console.log('Auth service: No redirect result found');
       return null;
     } catch (error) {
-      console.error('Auth service: Error checking redirect result:', error);
+      console.error('Error checking redirect result:', error);
       throw error;
     }
   }
@@ -270,27 +258,5 @@ export class AuthService {
     });
   }
 
-  /**
-   * Alternative Google sign-in method specifically for troubleshooting Safari issues
-   * This method uses a more Safari-friendly approach
-   */
-  async signInWithGoogleSafariMode(): Promise<User> {
-    const provider = new GoogleAuthProvider();
-    
-    // Configure provider for maximum Safari compatibility
-    provider.addScope('email');
-    provider.addScope('profile');
-    provider.setCustomParameters({
-      prompt: 'select_account'
-    });
 
-    try {
-      // Always use redirect for Safari mode
-      await signInWithRedirect(this.auth, provider);
-      throw new Error('Redirect initiated - should not reach this point');
-    } catch (error) {
-      console.error('Safari Google sign-in error:', error);
-      throw error;
-    }
-  }
 }
