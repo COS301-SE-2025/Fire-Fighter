@@ -112,5 +112,9 @@ export class LoginPage implements OnInit {
     }
   }
 
+  navigateToAbout() {
+    this.router.navigate(['/landing']);
+  }
+
 
 }
