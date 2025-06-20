@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "access_logs")
-public class AccessLog {
+public class LogEntry {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +27,7 @@ public class AccessLog {
     // Constructors, getters, setters
 
     // Default constructor
-    public AccessLog() {
+    public LogEntry() {
         user = null;
         action = null;
         ticketId = null;
@@ -37,7 +37,7 @@ public class AccessLog {
     }
 
     // Parameterized constructor
-    public AccessLog(User user, String action, String ticketId, LocalDateTime timestamp) {
+    public LogEntry(User user, String action, String ticketId, LocalDateTime timestamp) {
         this.user = user;
         this.action = action;
         this.ticketId = ticketId;
@@ -46,7 +46,7 @@ public class AccessLog {
     }
 
     // Constructor with session ID
-    public AccessLog(User user, String action, String ticketId, LocalDateTime timestamp, Long sessionId) {
+    public LogEntry(User user, String action, String ticketId, LocalDateTime timestamp, Long sessionId) {
         this.user = user;
         this.action = action;
         this.ticketId = ticketId;

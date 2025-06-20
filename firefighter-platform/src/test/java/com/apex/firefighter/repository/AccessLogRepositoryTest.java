@@ -1,6 +1,6 @@
 package com.apex.firefighter.repository;
 
-import com.apex.firefighter.model.AccessLog;
+import com.apex.firefighter.model.LogEntry;
 import com.apex.firefighter.model.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ class AccessLogRepositoryTest {
         User user = new User("logger123", "logger", "logger@example.com", "Security");
         user = userRepository.save(user);
 
-        AccessLog log = new AccessLog();
+        LogEntry log = new LogEntry();
         log.setUser(user);
         log.setAction("GRANTED_ACCESS");
         log.setTicketId("T-99");
