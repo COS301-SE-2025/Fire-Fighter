@@ -362,6 +362,36 @@ export class AdminPage {
     document.body.removeChild(link);
   }
 
+  exportActiveToCSV() {
+    const headers = [
+      'ID', 'Requester', 'Reason', 'Status', 'Access Start', 'Access End', 'System/Resource', 'Justification/Notes', 'Revoked By', 'Revoked At', 'Email', 'Phone'
+    ];
+    const rows = this.filteredAndSortedRequests.map(req => [
+      req.id,
+      req.requester,
+      req.reason,
+      req.status,
+      req.accessStart,
+      req.accessEnd,
+      req.system,
+      req.justification,
+      req.revokedBy || '',
+      req.revokedAt || '',
+      req.email,
+      req.phone
+    ]);
+    const csvContent = [headers, ...rows].map(e => e.map(field => '"' + String(field).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'active-emergency-requests.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
   // --- Action stubs for new buttons ---
   extendAccess(id: string) {
     alert('Extend Access for request ' + id + ' (stub)');
