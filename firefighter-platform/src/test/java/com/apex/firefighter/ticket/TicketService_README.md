@@ -17,8 +17,8 @@ The `TicketServiceTest` class provides comprehensive unit tests for the `TicketS
 **Purpose**: Tests basic ticket creation and retrieval functionality.
 
 **Test Steps**:
-- Creates a new ticket with ID "JIRA-123"
-- Verifies ticket properties (ID, description, validity)
+- Creates a new ticket with ID "JIRA-123" and all new fields
+- Verifies all ticket properties (ID, description, validity, userId, etc.)
 - Tests retrieval by database ID
 - Tests retrieval by ticket ID
 
@@ -28,17 +28,15 @@ The `TicketServiceTest` class provides comprehensive unit tests for the `TicketS
 - Ticket can be retrieved by both ID types
 
 ### 2. `testUpdateTicket()`
-**Purpose**: Tests ticket update operations for description and validity.
+**Purpose**: Tests the consolidated ticket update operation.
 
 **Test Steps**:
-- Creates a ticket with original description
-- Updates the description
-- Updates the validity status
+- Creates a ticket with original data
+- Updates multiple fields including description, validity, status, emergencyType, and emergencyContact in a single call.
 - Verifies changes persist in database
 
 **Expected Results**:
-- Description updates successfully
-- Validity status updates successfully
+- All specified fields are updated successfully
 - Changes are persisted and retrievable
 
 ### 3. `testDeleteTicket()`
@@ -87,11 +85,10 @@ The `TicketServiceTest` class provides comprehensive unit tests for the `TicketS
 **Purpose**: Tests error handling for operations on non-existent tickets.
 
 **Test Steps**:
-- Attempts to update description of non-existent ticket
-- Attempts to update validity of non-existent ticket
+- Attempts to update a non-existent ticket using the consolidated `updateTicket` method.
 
 **Expected Results**:
-- Both operations throw `RuntimeException`
+- The operation throws `RuntimeException`
 - Error handling works correctly
 
 ## Running the Tests

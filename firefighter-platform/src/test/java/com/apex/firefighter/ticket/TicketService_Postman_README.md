@@ -55,8 +55,7 @@ mvn spring-boot:run -Dspring.profiles.active=dev
 - **Get Non-existent Ticket (Error Test)** - Tests 404 handling
 
 ### 3. UPDATE Operations
-- **Update Ticket Validity** - Changes ticket validity status
-- **Update Ticket Description** - Updates ticket description
+- **Update Existing Ticket** - Updates multiple fields of a ticket by its database ID.
 - **Update Non-existent Ticket (Error Test)** - Tests update error handling
 
 ### 4. DELETE Operations
@@ -86,7 +85,10 @@ mvn spring-boot:run -Dspring.profiles.active=dev
        "ticketId": "JIRA-123",
        "description": "Test ticket for API testing",
        "valid": true,
-       "createdBy": "test-user"
+       "createdBy": "test-user",
+       "userId": "user1",
+       "emergencyType": "critical-system-failure",
+       "emergencyContact": "12345"
    }
    ```
 
@@ -94,35 +96,29 @@ mvn spring-boot:run -Dspring.profiles.active=dev
    - Method: `GET`
    - URL: `{{baseUrl}}/api/tickets`
 
-3. **Update Ticket Description**
-   - Method: `PATCH`
-   - URL: `{{baseUrl}}/api/tickets/JIRA-123/description`
+3. **Update Existing Ticket**
+   - Method: `PUT`
+   - URL: `{{baseUrl}}/api/tickets/1`
    - Body:
    ```json
    {
-       "description": "Updated description for testing"
+       "description": "Updated ticket description",
+       "valid": false,
+       "status": "Completed",
+       "emergencyType": "security-incident",
+       "emergencyContact": "09876"
    }
    ```
 
-4. **Update Ticket Validity**
-   - Method: `PATCH`
-   - URL: `{{baseUrl}}/api/tickets/JIRA-123/validity`
-   - Body:
-   ```json
-   {
-       "valid": false
-   }
-   ```
-
-5. **Verify Ticket**
+4. **Verify Ticket**
    - Method: `GET`
    - URL: `{{baseUrl}}/api/tickets/JIRA-123/verify`
 
-6. **Delete Ticket**
+5. **Delete Ticket**
    - Method: `DELETE`
    - URL: `{{baseUrl}}/api/tickets/ticket-id/JIRA-123`
 
-7. **Get All Tickets** (verify deletion)
+6. **Get All Tickets** (verify deletion)
    - Method: `GET`
    - URL: `{{baseUrl}}/api/tickets`
 
@@ -156,7 +152,13 @@ mvn spring-boot:run -Dspring.profiles.active=dev
     "valid": true,
     "createdBy": "test-user",
     "lastVerifiedAt": null,
-    "verificationCount": 0
+    "verificationCount": 0,
+    "status": "Active",
+    "dateCreated": "...",
+    "requestDate": "...",
+    "userId": "user1",
+    "emergencyType": "critical-system-failure",
+    "emergencyContact": "12345"
 }
 ```
 
@@ -170,7 +172,13 @@ mvn spring-boot:run -Dspring.profiles.active=dev
         "valid": true,
         "createdBy": "test-user",
         "lastVerifiedAt": null,
-        "verificationCount": 0
+        "verificationCount": 0,
+        "status": "Active",
+        "dateCreated": "...",
+        "requestDate": "...",
+        "userId": "user1",
+        "emergencyType": "critical-system-failure",
+        "emergencyContact": "12345"
     }
 ]
 ```
