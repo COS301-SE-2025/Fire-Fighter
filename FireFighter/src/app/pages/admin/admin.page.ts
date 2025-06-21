@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IonContent } from '@ionic/angular/standalone';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 interface EmergencyRequest {
   id: string;
@@ -29,7 +30,7 @@ interface EmergencyRequestHistory {
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, IonContent, NavbarComponent, RouterLink],
+  imports: [CommonModule, IonContent, NavbarComponent, RouterLink, FormsModule],
   templateUrl: './admin.page.html',
   styleUrls: ['./admin.page.scss']
 })
@@ -103,6 +104,57 @@ export class AdminPage {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  // Search, filter, and sort state
+  searchQuery: string = '';
+  statusFilter: string = '';
+  sortOption: string = 'date';
+
+  statusOptions = [
+    { value: '', label: 'All Statuses' },
+    { value: 'Open', label: 'Open' },
+    { value: 'In Progress', label: 'In Progress' },
+    { value: 'Closed', label: 'Closed' },
+    { value: 'Resolved', label: 'Resolved' }
+  ];
+
+  sortOptions = [
+    { value: 'date', label: 'Request Date' },
+    { value: 'requester', label: 'Requester' },
+    { value: 'urgency', label: 'Urgency' }
+  ];
+
+  // Computed filtered and sorted requests
+  get filteredAndSortedRequests() {
+    let filtered = this.activeEmergencyRequests;
+    // Search
+    if (this.searchQuery.trim()) {
+      const q = this.searchQuery.trim().toLowerCase();
+      filtered = filtered.filter(req =>
+        req.id.toLowerCase().includes(q) ||
+        req.requester.toLowerCase().includes(q) ||
+        req.reason.toLowerCase().includes(q) ||
+        req.status.toLowerCase().includes(q)
+      );
+    }
+    // Filter by status
+    if (this.statusFilter) {
+      filtered = filtered.filter(req => req.status === this.statusFilter);
+    }
+    // Sort
+    if (this.sortOption === 'date') {
+      filtered = filtered.slice().sort((a, b) => a.accessStart.localeCompare(b.accessStart));
+    } else if (this.sortOption === 'requester') {
+      filtered = filtered.slice().sort((a, b) => a.requester.localeCompare(b.requester));
+    } else if (this.sortOption === 'urgency') {
+      // For demo, sort by status: Open > In Progress > Resolved > Closed
+      const order = { 'Open': 1, 'In Progress': 2, 'Resolved': 3, 'Closed': 4 };
+      filtered = filtered.slice().sort((a, b) =>
+        (order[a.status as keyof typeof order] ?? 99) - (order[b.status as keyof typeof order] ?? 99)
+      );
+    }
+    return filtered;
   }
 
   // Expanded row state

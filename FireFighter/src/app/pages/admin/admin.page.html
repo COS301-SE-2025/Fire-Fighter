@@ -30,6 +30,27 @@
           </button>
         </div>
       </div>
+      <!-- Controls above the table headers -->
+      <div class="px-4 pt-4 pb-2 mb-4">
+        <div class="flex flex-col sm:flex-row sm:items-end gap-4">
+          <div class="flex-1">
+            <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
+            <input id="search" type="text" [(ngModel)]="searchQuery" placeholder="Search by name, ID, reason, or status..." class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" />
+          </div>
+          <div>
+            <label for="statusFilter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+            <select id="statusFilter" [(ngModel)]="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+              <option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</option>
+            </select>
+          </div>
+          <div>
+            <label for="sortOption" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sort By</label>
+            <select id="sortOption" [(ngModel)]="sortOption" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+              <option *ngFor="let opt of sortOptions" [value]="opt.value">{{ opt.label }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
       <!-- Table of active requests -->
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -43,7 +64,7 @@
             </tr>
           </thead>
           <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            <ng-container *ngFor="let req of activeEmergencyRequests">
+            <ng-container *ngFor="let req of filteredAndSortedRequests">
               <tr>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.id }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.requester }}</td>
