@@ -216,7 +216,21 @@
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.id }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.requester }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.reason }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.status }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span
+                    class="inline-block align-middle rounded-full px-3 py-1 text-xs font-semibold uppercase"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300': req.status === 'Open',
+                      'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300': req.status === 'In Progress',
+                      'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300': req.status === 'Revoked',
+                      'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300': req.status === 'Closed',
+                      'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300': req.status === 'Resolved',
+                      'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200': req.status !== 'Open' && req.status !== 'In Progress' && req.status !== 'Revoked' && req.status !== 'Closed' && req.status !== 'Resolved'
+                    }"
+                  >
+                    {{ req.status }}
+                  </span>
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.completedAt }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.lastAction }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.actionBy }}</td>
