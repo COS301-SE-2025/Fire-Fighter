@@ -214,4 +214,51 @@ export class AdminPage {
   toggleExpandHistory(id: string) {
     this.expandedHistoryId = this.expandedHistoryId === id ? null : id;
   }
+
+  // Bulk selection state for active requests
+  selectedActiveIds: Set<string> = new Set();
+
+  isAllActiveSelected() {
+    return this.filteredAndSortedRequests.length > 0 && this.filteredAndSortedRequests.every(req => this.selectedActiveIds.has(req.id));
+  }
+
+  toggleSelectAllActive(event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    if (checked) {
+      this.filteredAndSortedRequests.forEach(req => this.selectedActiveIds.add(req.id));
+    } else {
+      this.filteredAndSortedRequests.forEach(req => this.selectedActiveIds.delete(req.id));
+    }
+  }
+
+  toggleSelectActive(id: string, event: Event) {
+    const checked = (event.target as HTMLInputElement).checked;
+    if (checked) {
+      this.selectedActiveIds.add(id);
+    } else {
+      this.selectedActiveIds.delete(id);
+    }
+  }
+
+  bulkRevokeSelected() {
+    this.activeEmergencyRequests = this.activeEmergencyRequests.filter(req => !this.selectedActiveIds.has(req.id));
+    this.selectedActiveIds.clear();
+  }
+
+  bulkExportSelected() {
+    const selected = this.filteredAndSortedRequests.filter(req => this.selectedActiveIds.has(req.id));
+    if (selected.length === 0) return;
+    const headers = ['ID', 'Requester', 'Reason', 'Status', 'Access Start', 'Access End', 'System', 'Justification', 'Email', 'Phone'];
+    const rows = selected.map(req => [req.id, req.requester, req.reason, req.status, req.accessStart, req.accessEnd, req.system, req.justification, req.email, req.phone]);
+    const csvContent = [headers, ...rows].map(e => e.map(field => '"' + String(field).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'selected-active-requests.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 }

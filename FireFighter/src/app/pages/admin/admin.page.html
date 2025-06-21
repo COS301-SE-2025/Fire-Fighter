@@ -33,7 +33,15 @@
       <!-- Controls above the table headers -->
       <div class="px-4 pt-4 pb-2 mb-4">
         <div class="flex flex-col sm:flex-row sm:items-end gap-4">
-          <div class="flex-1">
+          <div class="flex-1 flex flex-col gap-2">
+            <div class="flex gap-2">
+              <button (click)="bulkRevokeSelected()" [disabled]="selectedActiveIds.size === 0" class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                Bulk Revoke
+              </button>
+              <button (click)="bulkExportSelected()" [disabled]="selectedActiveIds.size === 0" class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                Bulk Export
+              </button>
+            </div>
             <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
             <input id="search" type="text" [(ngModel)]="searchQuery" placeholder="Search by name, ID, reason, or status..." class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" />
           </div>
@@ -56,6 +64,9 @@
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-700">
             <tr>
+              <th class="px-4 py-3 text-center">
+                <input type="checkbox" [checked]="isAllActiveSelected()" (change)="toggleSelectAllActive($event)" />
+              </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Requester</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Reason</th>
@@ -66,6 +77,9 @@
           <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             <ng-container *ngFor="let req of filteredAndSortedRequests">
               <tr>
+                <td class="px-4 py-4 text-center">
+                  <input type="checkbox" [checked]="selectedActiveIds.has(req.id)" (change)="toggleSelectActive(req.id, $event)" />
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.id }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.requester }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.reason }}</td>
