@@ -1,7 +1,15 @@
 <app-navbar></app-navbar>
 <ion-content [fullscreen]="true" class="ion-padding">
   <div class="min-h-full bg-gray-50 dark:bg-gray-900 mb-8">
-    <h1 class="text-2xl font-sans font-bold text-gray-900 dark:text-white">Admin Page</h1>
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-2xl font-sans font-bold text-gray-900 dark:text-white">Admin Page</h1>
+      <button class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-700 dark:hover:bg-green-800 dark:focus:ring-green-900">
+        Export to CSV File
+        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+      </button>
+    </div>
     <p class="text-gray-600 dark:text-gray-400">Welcome to the admin page!</p>
 
     <!-- Active Emergency Requests Card -->
