@@ -189,8 +189,19 @@ export class AdminPage {
   ];
 
   exportHistoryToCSV() {
-    const headers = ['ID', 'Requester', 'Reason', 'Status', 'Completed At'];
-    const rows = this.requestHistory.map(req => [req.id, req.requester, req.reason, req.status, req.completedAt]);
+    const headers = [
+      'ID', 'Requester', 'Reason', 'Status', 'Completed At', 'Last Action', 'Action By', 'Action At'
+    ];
+    const rows = this.filteredAndSortedHistory.map(req => [
+      req.id,
+      req.requester,
+      req.reason,
+      req.status,
+      req.completedAt,
+      req.lastAction || '',
+      req.actionBy || '',
+      req.actionAt || ''
+    ]);
     const csvContent = [headers, ...rows].map(e => e.map(field => '"' + String(field).replace(/"/g, '""') + '"').join(',')).join('\r\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
