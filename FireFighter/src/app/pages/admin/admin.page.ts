@@ -17,6 +17,9 @@ interface EmergencyRequest {
   logs: string[];
   email: string;
   phone: string;
+  revokedBy?: string;
+  revokedAt?: string;
+  revocationReason?: string;
 }
 
 interface EmergencyRequestHistory {
@@ -81,8 +84,50 @@ export class AdminPage {
     return this.activeEmergencyRequests.length;
   }
 
-  revokeAccess(id: string) {
-    this.activeEmergencyRequests = this.activeEmergencyRequests.filter(req => req.id !== id);
+  // Modal state for revocation reason
+  showRevocationModal = false;
+  revocationReason = '';
+  revocationTarget: string | 'bulk' | null = null;
+
+  // Open modal for single revoke
+  openRevokeModal(id: string) {
+    this.revocationTarget = id;
+    this.revocationReason = '';
+    this.showRevocationModal = true;
+  }
+
+  // Open modal for bulk revoke
+  openBulkRevokeModal() {
+    this.revocationTarget = 'bulk';
+    this.revocationReason = '';
+    this.showRevocationModal = true;
+  }
+
+  // Confirm revocation (single or bulk)
+  confirmRevocation() {
+    if (!this.revocationReason.trim()) return;
+    if (this.revocationTarget === 'bulk') {
+      this.activeEmergencyRequests = this.activeEmergencyRequests.map(req => {
+        if (this.selectedActiveIds.has(req.id)) {
+          return { ...req, status: 'revoked', revocationReason: this.revocationReason };
+        }
+        return req;
+      });
+      this.selectedActiveIds.clear();
+    } else if (typeof this.revocationTarget === 'string') {
+      this.activeEmergencyRequests = this.activeEmergencyRequests.map(req =>
+        req.id === this.revocationTarget ? { ...req, status: 'revoked', revocationReason: this.revocationReason } : req
+      );
+    }
+    this.showRevocationModal = false;
+    this.revocationTarget = null;
+    this.revocationReason = '';
+  }
+
+  cancelRevocation() {
+    this.showRevocationModal = false;
+    this.revocationTarget = null;
+    this.revocationReason = '';
   }
 
   requestHistory: EmergencyRequestHistory[] = [
@@ -240,9 +285,12 @@ export class AdminPage {
     }
   }
 
+  // Update revokeAccess and bulkRevokeSelected to use modal
+  revokeAccess(id: string) {
+    this.openRevokeModal(id);
+  }
   bulkRevokeSelected() {
-    this.activeEmergencyRequests = this.activeEmergencyRequests.filter(req => !this.selectedActiveIds.has(req.id));
-    this.selectedActiveIds.clear();
+    this.openBulkRevokeModal();
   }
 
   bulkExportSelected() {
@@ -260,5 +308,28 @@ export class AdminPage {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  // --- Action stubs for new buttons ---
+  extendAccess(id: string) {
+    alert('Extend Access for request ' + id + ' (stub)');
+  }
+
+  viewAccessLogs(id: string) {
+    alert('View Access Logs for request ' + id + ' (stub)');
+  }
+
+  contactRequester(id: string) {
+    alert('Contact Requester for request ' + id + ' (stub)');
+  }
+
+  // --- Ensure mock data for new columns ---
+  ngOnInit() {
+    // Add default values for new columns if missing
+    this.activeEmergencyRequests.forEach(req => {
+      if (!('revokedBy' in req)) req.revokedBy = '';
+      if (!('revokedAt' in req)) req.revokedAt = '';
+      if (!('revocationReason' in req)) req.revocationReason = '';
+    });
   }
 }
