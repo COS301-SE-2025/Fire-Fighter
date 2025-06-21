@@ -159,18 +159,39 @@
             </tr>
           </thead>
           <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            <tr *ngFor="let req of requestHistory">
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.id }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.requester }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.reason }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.status }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.completedAt }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-right">
-                <button class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-gray-600 rounded-lg hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-300 dark:bg-gray-700 dark:hover:bg-gray-800 dark:focus:ring-gray-900">
-                  Details
-                </button>
-              </td>
-            </tr>
+            <ng-container *ngFor="let req of requestHistory">
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.id }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.requester }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.reason }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.status }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.completedAt }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-right">
+                  <button (click)="toggleExpandHistory(req.id)" class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-gray-600 rounded-lg hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-300 dark:bg-gray-700 dark:hover:bg-gray-800 dark:focus:ring-gray-900">
+                    Details
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="expandedHistoryId === req.id">
+                <td colspan="6" class="bg-gray-50 dark:bg-gray-800 px-0 py-3 border-t border-gray-200 dark:border-gray-700">
+                  <div class="w-[98%] mx-auto rounded-lg shadow-md bg-white dark:bg-gray-900 px-6 py-2 flex flex-col sm:flex-row gap-6">
+                    <div class="flex-1 min-w-0">
+                      <h3 class="text-lg font-bold mb-2 text-gray-900 dark:text-white flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-yellow-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"/></svg>
+                        Request History Details
+                      </h3>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1 mb-2">
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">ID:</span> <span class="text-gray-900 dark:text-white">{{ req.id }}</span></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">Requester:</span> <span class="text-gray-900 dark:text-white">{{ req.requester }}</span></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">Reason:</span> <span class="text-gray-900 dark:text-white">{{ req.reason }}</span></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">Status:</span> <span class="text-gray-900 dark:text-white">{{ req.status }}</span></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">Completed At:</span> <span class="text-gray-900 dark:text-white">{{ req.completedAt }}</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
           </tbody>
         </table>
       </div>

@@ -163,4 +163,11 @@ export class AdminPage {
   toggleExpandRequest(id: string) {
     this.expandedRequestId = this.expandedRequestId === id ? null : id;
   }
+
+  // Expanded row state for Requests History
+  expandedHistoryId: string | null = null;
+
+  toggleExpandHistory(id: string) {
+    this.expandedHistoryId = this.expandedHistoryId === id ? null : id;
+  }
 }
