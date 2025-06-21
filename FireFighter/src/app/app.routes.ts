@@ -46,7 +46,11 @@ export const routes: Routes = [
   {
     path: '**',
     redirectTo: 'landing'
+  },  {
+    path: 'help',
+    loadComponent: () => import('./pages/help/help.page').then( m => m.HelpPage)
   }
+
 
 
 ];
