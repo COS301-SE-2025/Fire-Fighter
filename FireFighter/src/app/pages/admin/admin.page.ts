@@ -106,7 +106,11 @@ export class AdminPage {
   // Confirm revocation (single or bulk)
   confirmRevocation() {
     if (!this.revocationReason.trim()) return;
+    let revokedIds: string[] = [];
     if (this.revocationTarget === 'bulk') {
+      revokedIds = this.activeEmergencyRequests
+        .filter(req => this.selectedActiveIds.has(req.id))
+        .map(req => req.id);
       this.activeEmergencyRequests = this.activeEmergencyRequests.map(req => {
         if (this.selectedActiveIds.has(req.id)) {
           return { ...req, status: 'revoked', revocationReason: this.revocationReason };
@@ -115,10 +119,13 @@ export class AdminPage {
       });
       this.selectedActiveIds.clear();
     } else if (typeof this.revocationTarget === 'string') {
+      revokedIds = [this.revocationTarget];
       this.activeEmergencyRequests = this.activeEmergencyRequests.map(req =>
         req.id === this.revocationTarget ? { ...req, status: 'revoked', revocationReason: this.revocationReason } : req
       );
     }
+    // Remove revoked requests from the table
+    this.activeEmergencyRequests = this.activeEmergencyRequests.filter(req => !revokedIds.includes(req.id));
     this.showRevocationModal = false;
     this.revocationTarget = null;
     this.revocationReason = '';
