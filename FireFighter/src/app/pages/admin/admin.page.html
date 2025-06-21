@@ -146,6 +146,27 @@
           </button>
         </div>
       </div>
+      <!-- Controls above the table headers -->
+      <div class="px-4 pt-4 pb-2 mb-4">
+        <div class="flex flex-col sm:flex-row sm:items-end gap-4">
+          <div class="flex-1">
+            <label for="historySearch" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
+            <input id="historySearch" type="text" [(ngModel)]="historySearchQuery" placeholder="Search by name, ID, reason, or status..." class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" />
+          </div>
+          <div>
+            <label for="historyStatusFilter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+            <select id="historyStatusFilter" [(ngModel)]="historyStatusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+              <option *ngFor="let opt of historyStatusOptions" [value]="opt.value">{{ opt.label }}</option>
+            </select>
+          </div>
+          <div>
+            <label for="historySortOption" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sort By</label>
+            <select id="historySortOption" [(ngModel)]="historySortOption" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+              <option *ngFor="let opt of historySortOptions" [value]="opt.value">{{ opt.label }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
       <div class="overflow-x-auto">
         <table class="min-w-full w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-700">
@@ -159,7 +180,7 @@
             </tr>
           </thead>
           <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            <ng-container *ngFor="let req of requestHistory">
+            <ng-container *ngFor="let req of filteredAndSortedHistory">
               <tr>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.id }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.requester }}</td>

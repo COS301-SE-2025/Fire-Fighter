@@ -164,6 +164,50 @@ export class AdminPage {
     this.expandedRequestId = this.expandedRequestId === id ? null : id;
   }
 
+  // Search, filter, and sort state for Requests History
+  historySearchQuery: string = '';
+  historyStatusFilter: string = '';
+  historySortOption: string = 'date';
+
+  historyStatusOptions = [
+    { value: '', label: 'All Statuses' },
+    { value: 'Closed', label: 'Closed' },
+    { value: 'Resolved', label: 'Resolved' }
+  ];
+
+  historySortOptions = [
+    { value: 'date', label: 'Completed Date' },
+    { value: 'requester', label: 'Requester' },
+    { value: 'reason', label: 'Reason' }
+  ];
+
+  get filteredAndSortedHistory() {
+    let filtered = this.requestHistory;
+    // Search
+    if (this.historySearchQuery.trim()) {
+      const q = this.historySearchQuery.trim().toLowerCase();
+      filtered = filtered.filter(req =>
+        req.id.toLowerCase().includes(q) ||
+        req.requester.toLowerCase().includes(q) ||
+        req.reason.toLowerCase().includes(q) ||
+        req.status.toLowerCase().includes(q)
+      );
+    }
+    // Filter by status
+    if (this.historyStatusFilter) {
+      filtered = filtered.filter(req => req.status === this.historyStatusFilter);
+    }
+    // Sort
+    if (this.historySortOption === 'date') {
+      filtered = filtered.slice().sort((a, b) => a.completedAt.localeCompare(b.completedAt));
+    } else if (this.historySortOption === 'requester') {
+      filtered = filtered.slice().sort((a, b) => a.requester.localeCompare(b.requester));
+    } else if (this.historySortOption === 'reason') {
+      filtered = filtered.slice().sort((a, b) => a.reason.localeCompare(b.reason));
+    }
+    return filtered;
+  }
+
   // Expanded row state for Requests History
   expandedHistoryId: string | null = null;
 
