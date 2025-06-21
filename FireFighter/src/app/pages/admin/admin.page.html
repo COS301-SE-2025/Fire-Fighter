@@ -16,16 +16,16 @@
           <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Active Emergency Requests</h2>
         </div>
         <div class="flex items-center space-x-2">
-          <button [routerLink]="['/requests']" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-            View All
-            <svg class="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-            </svg>
-          </button>
           <button class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-700 dark:hover:bg-green-800 dark:focus:ring-green-900">
             Export to CSV File
             <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18v-1.5M7.5 12l4.5 4.5m0 0l4.5-4.5m-4.5 4.5V3"/>
+            </svg>
+          </button>
+          <button [routerLink]="['/requests']" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            View All
+            <svg class="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
             </svg>
           </button>
         </div>
@@ -43,17 +43,57 @@
             </tr>
           </thead>
           <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            <tr *ngFor="let req of activeEmergencyRequests">
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.id }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.requester }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.reason }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.status }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-right">
-                <button (click)="revokeAccess(req.id)" class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-700 dark:hover:bg-red-800 dark:focus:ring-red-900">
-                  Revoke Access
-                </button>
-              </td>
-            </tr>
+            <ng-container *ngFor="let req of activeEmergencyRequests">
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.id }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.requester }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.reason }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.status }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-right">
+                  <button (click)="revokeAccess(req.id)" class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-700 dark:hover:bg-red-800 dark:focus:ring-red-900">
+                    Revoke Access
+                  </button>
+                  <button (click)="toggleExpandRequest(req.id)" class="inline-flex items-center px-3 py-2 ml-2 text-sm font-medium text-white bg-gray-600 rounded-lg hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-300 dark:bg-gray-700 dark:hover:bg-gray-800 dark:focus:ring-gray-900">
+                    Details
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="expandedRequestId === req.id">
+                <td colspan="6" class="bg-gray-50 dark:bg-gray-800 px-0 py-3 border-t border-gray-200 dark:border-gray-700">
+                  <div class="w-[98%] mx-auto rounded-lg shadow-md bg-white dark:bg-gray-900 px-6 py-2 flex flex-col sm:flex-row gap-6">
+                    <div class="flex-1 min-w-0">
+                      <h3 class="text-lg font-bold mb-2 text-gray-900 dark:text-white flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 19.5a7.5 7.5 0 0115 0v.75A2.25 2.25 0 0117.25 22.5h-10.5A2.25 2.25 0 014.5 20.25v-.75z"/></svg>
+                        Request Details
+                      </h3>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1 mb-2">
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">ID:</span> <span class="text-gray-900 dark:text-white">{{ req.id }}</span></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">Requester:</span> <span class="text-gray-900 dark:text-white">{{ req.requester }}</span></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">Email:</span> <a href="mailto:{{ req.email }}" class="text-blue-600 underline">{{ req.email }}</a></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">Phone:</span> <a href="tel:{{ req.phone }}" class="text-blue-600 underline">{{ req.phone }}</a></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">Reason:</span> <span class="text-gray-900 dark:text-white">{{ req.reason }}</span></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">Status:</span> <span class="text-gray-900 dark:text-white">{{ req.status }}</span></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">System:</span> <span class="text-gray-900 dark:text-white">{{ req.system }}</span></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">Access Start:</span> <span class="text-gray-900 dark:text-white">{{ req.accessStart }}</span></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">Access End:</span> <span class="text-gray-900 dark:text-white">{{ req.accessEnd }}</span></div>
+                      </div>
+                    </div>
+                    <div class="flex-1 min-w-0 flex flex-col justify-between">
+                      <div class="mb-2">
+                        <span class="font-semibold text-gray-700 dark:text-gray-300">Justification:</span>
+                        <div class="text-gray-900 dark:text-white mt-1">{{ req.justification }}</div>
+                      </div>
+                      <div class="mb-2">
+                        <span class="font-semibold text-gray-700 dark:text-gray-300">Logs:</span>
+                        <ul class="list-disc list-inside text-sm text-gray-700 dark:text-gray-300 mt-1">
+                          <li *ngFor="let log of req.logs">{{ log }}</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
           </tbody>
         </table>
       </div>
@@ -64,13 +104,26 @@
     <!-- Requests History Table -->
     <div class="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50 mt-10">
       <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Requests History</h2>
-        <button class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-700 dark:hover:bg-green-800 dark:focus:ring-green-900">
-          Export to CSV File
-          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18v-1.5M7.5 12l4.5 4.5m0 0l4.5-4.5m-4.5 4.5V3"/>
+        <div class="flex items-center space-x-2">
+          <svg class="w-6 h-6 text-yellow-500 dark:text-yellow-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"/>
           </svg>
-        </button>
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Requests History</h2>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-700 dark:hover:bg-green-800 dark:focus:ring-green-900">
+            Export to CSV File
+            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18v-1.5M7.5 12l4.5 4.5m0 0l4.5-4.5m-4.5 4.5V3"/>
+            </svg>
+          </button>
+          <button [routerLink]="['/requests']" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            View All
+            <svg class="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+            </svg>
+          </button>
+        </div>
       </div>
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
