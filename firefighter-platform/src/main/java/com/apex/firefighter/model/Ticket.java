@@ -2,6 +2,7 @@ package com.apex.firefighter.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "tickets", schema = "firefighter")
@@ -24,23 +25,46 @@ public class Ticket {
 
     private int verificationCount;
 
+    @Column(nullable = false)
+    private String status;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime dateCreated;
+
+    @Column(nullable = false)
+    private LocalDate requestDate;
+
+    @Column(nullable = false)
+    private String userId;
+
+    @Column(nullable = false)
+    private String emergencyType;
+
+    @Column(nullable = false)
+    private String emergencyContact;
+
     // Default constructor. Initializes a new instance of the Ticket class with empty(null) values.
     public Ticket() {
-        ticketId = null;
-        description = null;
-        valid = false;
-        createdBy = null;
-        lastVerifiedAt = null;
-        verificationCount = 0;
+        this.dateCreated = LocalDateTime.now();
+        this.requestDate = LocalDate.now();
+        this.status = "Active";
+        this.valid = false;
+        this.verificationCount = 0;
     }
 
     //paramterized constructor. Accepts values for every attribute that may need to be set via setters.
-    public Ticket(String ticketId, String description, boolean valid) {
+    public Ticket(String ticketId, String description, boolean valid, String userId, String emergencyType, String emergencyContact, String createdBy) {
         this.ticketId = ticketId;
         this.description = description;
         this.valid = valid;
-        this.createdBy = null;
-        this.lastVerifiedAt = null;
+        this.userId = userId;
+        this.emergencyType = emergencyType;
+        this.emergencyContact = emergencyContact;
+        this.createdBy = createdBy;
+
+        this.dateCreated = LocalDateTime.now();
+        this.requestDate = LocalDate.now();
+        this.status = "Active";
         this.verificationCount = 0;
     }
 
@@ -70,6 +94,30 @@ public class Ticket {
         this.verificationCount = verificationCount;
     }
 
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setDateCreated(LocalDateTime dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public void setRequestDate(LocalDate requestDate) {
+        this.requestDate = requestDate;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public void setEmergencyType(String emergencyType) {
+        this.emergencyType = emergencyType;
+    }
+
+    public void setEmergencyContact(String emergencyContact) {
+        this.emergencyContact = emergencyContact;
+    }
+
     public boolean isValid() {
         return valid;
     }
@@ -97,5 +145,29 @@ public class Ticket {
 
     public int getVerificationCount() {
         return verificationCount;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public LocalDateTime getDateCreated() {
+        return dateCreated;
+    }
+
+    public LocalDate getRequestDate() {
+        return requestDate;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public String getEmergencyType() {
+        return emergencyType;
+    }
+
+    public String getEmergencyContact() {
+        return emergencyContact;
     }
 }

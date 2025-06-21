@@ -35,11 +35,11 @@ public class TicketController {
         String description = (String) payload.get("description");
         Boolean valid = (Boolean) payload.get("valid");
         String createdBy = (String) payload.get("createdBy");
+        String userId = (String) payload.get("userId");
+        String emergencyType = (String) payload.get("emergencyType");
+        String emergencyContact = (String) payload.get("emergencyContact");
 
-        Ticket ticket = ticketService.createTicket(ticketId, description, valid != null ? valid : false);
-        if (createdBy != null) {
-            ticket.setCreatedBy(createdBy);
-        }
+        Ticket ticket = ticketService.createTicket(ticketId, description, valid != null ? valid : false, userId, emergencyType, emergencyContact, createdBy);
         
         return ResponseEntity.ok(ticket);
     }
@@ -64,6 +64,23 @@ public class TicketController {
         return ticketService.getTicketByTicketId(ticketId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Update a ticket
+    @PutMapping("/{id}")
+    public ResponseEntity<Ticket> updateTicket(@PathVariable Long id, @RequestBody Map<String, Object> payload) {
+        String description = (String) payload.get("description");
+        Boolean valid = (Boolean) payload.get("valid");
+        String status = (String) payload.get("status");
+        String emergencyType = (String) payload.get("emergencyType");
+        String emergencyContact = (String) payload.get("emergencyContact");
+
+        try {
+            Ticket updatedTicket = ticketService.updateTicket(id, description, valid, status, emergencyType, emergencyContact);
+            return ResponseEntity.ok(updatedTicket);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     // Update ticket validity
