@@ -386,10 +386,10 @@
     <div *ngIf="isModalOpen" class="fixed inset-0 z-[9999] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
       <!-- Background overlay -->
       <div class="flex items-center justify-center min-h-screen pt-20 pb-4 px-4 text-center">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" (click)="setOpen(false)"></div>
+        <div [@modalBackdrop]="modalAnimationState" class="fixed inset-0 bg-gray-500 bg-opacity-75" aria-hidden="true" (click)="setOpen(false)"></div>
 
         <!-- Modal panel -->
-        <div class="relative bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all w-full max-w-md mx-auto p-5 border border-gray-200 dark:border-gray-700 z-10">
+        <div [@modalPanel]="modalAnimationState" class="relative bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl w-full max-w-md mx-auto p-5 border border-gray-200 dark:border-gray-700 z-10">
           
           <!-- Modal Header -->
           <div class="flex items-center justify-between pb-3 mb-3 border-b border-gray-200 dark:border-gray-600">

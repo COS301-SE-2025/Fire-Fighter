@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
+import { VersionService } from '../../services/version.service';
 
 interface NotificationSettings {
   criticalAlerts: boolean;
@@ -25,6 +26,7 @@ interface NotificationSettings {
 export class SettingsPage implements OnInit {
 
   isSaving = false;
+  appVersion: string = '';
 
   notificationSettings: NotificationSettings = {
     criticalAlerts: true,
@@ -37,10 +39,11 @@ export class SettingsPage implements OnInit {
     emailEnabled: true
   };
 
-  constructor() { }
+  constructor(private versionService: VersionService) { }
 
   ngOnInit() {
     this.loadNotificationSettings();
+    this.appVersion = this.versionService.getVersion();
   }
 
   private loadNotificationSettings() {
