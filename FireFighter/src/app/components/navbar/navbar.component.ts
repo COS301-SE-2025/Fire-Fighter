@@ -74,8 +74,20 @@ export class NavbarComponent implements OnInit {
     this.closeMobileMenu();
   }
 
+  navigateToHelp() {
+    this.router.navigate(['/help']);
+    this.closeMobileMenu();
+    this.profileMenuOpen = false; // Close profile menu after navigation
+  }
+
   navigateToAccount() {
     this.router.navigate(['/account']);
+    this.closeMobileMenu();
+    this.profileMenuOpen = false; // Close profile menu after navigation
+  }
+
+  navigateToSettings() {
+    this.router.navigate(['/settings']);
     this.closeMobileMenu();
     this.profileMenuOpen = false; // Close profile menu after navigation
   }

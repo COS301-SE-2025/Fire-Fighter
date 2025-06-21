@@ -35,6 +35,16 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'help',
+    loadComponent: () => import('./pages/help/help.page').then( m => m.HelpPage),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'settings',
+    loadComponent: () => import('./pages/settings/settings.page').then( m => m.SettingsPage),
+    canActivate: [authGuard]
+  },
+  {
     path: 'landing',
     loadComponent: () => import('./pages/landing/landing.page').then( m => m.LandingPage)
   },
@@ -46,10 +56,8 @@ export const routes: Routes = [
   {
     path: '**',
     redirectTo: 'landing'
-  },  {
-    path: 'help',
-    loadComponent: () => import('./pages/help/help.page').then( m => m.HelpPage)
   }
+
 
 
 
