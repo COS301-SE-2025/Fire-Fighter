@@ -28,6 +28,18 @@ interface EmergencyRequestHistory {
   reason: string;
   status: string;
   completedAt: string;
+  auditLog?: AuditLogEntry[];
+  lastAction?: string;
+  actionBy?: string;
+  actionAt?: string;
+}
+
+// Add to the interface for history records (if not already present)
+interface AuditLogEntry {
+  action: string;
+  by: string;
+  at: string;
+  reason?: string;
 }
 
 @Component({
@@ -138,9 +150,42 @@ export class AdminPage {
   }
 
   requestHistory: EmergencyRequestHistory[] = [
-    { id: 'REQ-004', requester: 'David Kim', reason: 'False alarm', status: 'Closed', completedAt: '2024-06-01 10:15' },
-    { id: 'REQ-005', requester: 'Eva Green', reason: 'Routine drill', status: 'Closed', completedAt: '2024-06-02 14:30' },
-    { id: 'REQ-006', requester: 'Frank Moore', reason: 'Fire in kitchen', status: 'Resolved', completedAt: '2024-06-03 09:45' }
+    {
+      id: 'REQ-004',
+      requester: 'David Kim',
+      reason: 'False alarm',
+      status: 'Closed',
+      completedAt: '2024-06-01 10:15',
+      auditLog: [
+        { action: 'Created', by: 'David Kim', at: '2024-06-01 09:00' },
+        { action: 'Reviewed', by: 'Admin Alice', at: '2024-06-01 09:30' },
+        { action: 'Closed', by: 'Admin Bob', at: '2024-06-01 10:15', reason: 'Confirmed false alarm' }
+      ]
+    },
+    {
+      id: 'REQ-005',
+      requester: 'Eva Green',
+      reason: 'Routine drill',
+      status: 'Closed',
+      completedAt: '2024-06-02 14:30',
+      auditLog: [
+        { action: 'Created', by: 'Eva Green', at: '2024-06-02 13:00' },
+        { action: 'Approved', by: 'Admin Alice', at: '2024-06-02 13:10' },
+        { action: 'Closed', by: 'Admin Bob', at: '2024-06-02 14:30', reason: 'Drill completed' }
+      ]
+    },
+    {
+      id: 'REQ-006',
+      requester: 'Frank Moore',
+      reason: 'Fire in kitchen',
+      status: 'Resolved',
+      completedAt: '2024-06-03 09:45',
+      auditLog: [
+        { action: 'Created', by: 'Frank Moore', at: '2024-06-03 08:30' },
+        { action: 'Dispatched', by: 'Admin Alice', at: '2024-06-03 08:35' },
+        { action: 'Resolved', by: 'Admin Bob', at: '2024-06-03 09:45', reason: 'Fire extinguished, area cleared' }
+      ]
+    }
   ];
 
   exportHistoryToCSV() {
@@ -338,5 +383,21 @@ export class AdminPage {
       if (!('revokedAt' in req)) req.revokedAt = '';
       if (!('revocationReason' in req)) req.revocationReason = '';
     });
+    // Ensure audit log and derived properties for history records
+    if (this.requestHistory) {
+      this.requestHistory.forEach((req: any) => {
+        if (Array.isArray(req.auditLog) && req.auditLog.length > 0) {
+          const last = req.auditLog[req.auditLog.length - 1];
+          req.lastAction = last.action;
+          req.actionBy = last.by;
+          req.actionAt = last.at;
+        } else {
+          req.lastAction = '-';
+          req.actionBy = '-';
+          req.actionAt = '-';
+          req.auditLog = [];
+        }
+      });
+    }
   }
 }
