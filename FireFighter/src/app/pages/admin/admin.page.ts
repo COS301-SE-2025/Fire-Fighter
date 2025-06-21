@@ -403,6 +403,35 @@ export class AdminPage {
     document.body.removeChild(link);
   }
 
+  exportFullAuditLogs() {
+    const headers = ['Request ID', 'Requester', 'Action', 'By', 'At', 'Reason'];
+    const rows: string[][] = [];
+    this.requestHistory.forEach(req => {
+      if (Array.isArray(req.auditLog)) {
+        req.auditLog.forEach(log => {
+          rows.push([
+            req.id,
+            req.requester,
+            log.action,
+            log.by,
+            log.at,
+            log.reason || ''
+          ]);
+        });
+      }
+    });
+    const csvContent = [headers, ...rows].map(e => e.map(field => '"' + String(field).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'full-audit-logs.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
   // --- Action stubs for new buttons ---
   extendAccess(id: string) {
     alert('Extend Access for request ' + id + ' (stub)');

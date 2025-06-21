@@ -1,10 +1,19 @@
 <app-navbar></app-navbar>
 <ion-content [fullscreen]="true" class="ion-padding">
   <div class="min-h-full bg-gray-50 dark:bg-gray-900 mb-8">
-    <div class="flex items-center justify-between mb-4">
-      <h1 class="text-2xl font-sans font-bold text-gray-900 dark:text-white">Admin Page</h1>
+    <!-- Replace the heading/welcome/button section with a flex row -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 mt-2 gap-2">
+      <div>
+        <h1 class="text-2xl font-sans font-bold text-gray-900 dark:text-white">Admin Page</h1>
+        <p class="text-gray-600 dark:text-gray-400">Welcome to the admin page!</p>
+      </div>
+      <button (click)="exportFullAuditLogs()" class="inline-flex items-center px-5 py-2 text-sm font-medium text-white bg-green-600 rounded-lg shadow hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-700 dark:hover:bg-green-800 dark:focus:ring-green-900">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18v-1.5M7.5 12l4.5 4.5m0 0l4.5-4.5m-4.5 4.5V3"/>
+        </svg>
+        Download Full Audit Logs
+      </button>
     </div>
-    <p class="text-gray-600 dark:text-gray-400">Welcome to the admin page!</p>
 
     <!-- Active Emergency Requests Card -->
     <div class="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50 mt-6">
