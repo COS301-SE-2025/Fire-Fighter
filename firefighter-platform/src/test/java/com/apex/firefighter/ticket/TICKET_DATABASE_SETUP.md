@@ -17,7 +17,13 @@ CREATE TABLE firefighter.tickets (
     valid BOOLEAN DEFAULT false,
     created_by VARCHAR(255),
     last_verified_at TIMESTAMP,
-    verification_count INTEGER DEFAULT 0
+    verification_count INTEGER DEFAULT 0,
+    status VARCHAR(255) NOT NULL DEFAULT 'Active',
+    date_created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    request_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    user_id VARCHAR(255) NOT NULL,
+    emergency_type VARCHAR(255) NOT NULL,
+    emergency_contact VARCHAR(255) NOT NULL
 );
 ```
 
@@ -29,6 +35,12 @@ CREATE TABLE firefighter.tickets (
 - **`created_by`**: User who created the ticket
 - **`last_verified_at`**: Timestamp of last verification
 - **`verification_count`**: Number of times the ticket has been verified
+- **`status`**: The current status of the ticket (e.g., 'Active', 'Completed').
+- **`date_created`**: The timestamp when the ticket was created.
+- **`request_date`**: The date the request was made.
+- **`user_id`**: The ID of the user associated with the ticket.
+- **`emergency_type`**: The type of emergency (e.g., 'critical-system-failure').
+- **`emergency_contact`**: The contact information for the emergency.
 
 ## 🚀 Quick Setup
 
@@ -60,7 +72,13 @@ CREATE TABLE firefighter.tickets (
        valid BOOLEAN DEFAULT false,
        created_by VARCHAR(255),
        last_verified_at TIMESTAMP,
-       verification_count INTEGER DEFAULT 0
+       verification_count INTEGER DEFAULT 0,
+       status VARCHAR(255) NOT NULL DEFAULT 'Active',
+       date_created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+       request_date DATE NOT NULL DEFAULT CURRENT_DATE,
+       user_id VARCHAR(255) NOT NULL,
+       emergency_type VARCHAR(255) NOT NULL,
+       emergency_contact VARCHAR(255) NOT NULL
    );
    ```
 
@@ -73,10 +91,10 @@ CREATE TABLE firefighter.tickets (
 
 4. **Insert sample data**
    ```sql
-   INSERT INTO firefighter.tickets (ticket_id, description, valid, created_by, verification_count) VALUES 
-   ('SAMPLE-001', 'Sample ticket for testing', true, 'test-user', 0),
-   ('SAMPLE-002', 'Another sample ticket', false, 'test-user', 0),
-   ('SAMPLE-003', 'Valid ticket for verification', true, 'admin-user', 0)
+   INSERT INTO firefighter.tickets (ticket_id, description, valid, created_by, verification_count, status, date_created, request_date, user_id, emergency_type, emergency_contact) VALUES 
+   ('SAMPLE-001', 'Sample ticket for testing', true, 'test-user', 0, 'Active', CURRENT_TIMESTAMP, CURRENT_DATE, 'user1', 'critical-system-failure', '12345'),
+   ('SAMPLE-002', 'Another sample ticket', false, 'test-user', 0, 'Completed', CURRENT_TIMESTAMP, CURRENT_DATE, 'user2', 'network-outage', '67890'),
+   ('SAMPLE-003', 'Valid ticket for verification', true, 'admin-user', 0, 'Active', CURRENT_TIMESTAMP, CURRENT_DATE, 'user3', 'security-incident', '11223')
    ON CONFLICT (ticket_id) DO NOTHING;
    ```
 
@@ -118,7 +136,10 @@ curl -X POST "http://localhost:8080/api/tickets" \
     "ticketId": "TEST-001",
     "description": "Test ticket from API",
     "valid": true,
-    "createdBy": "test-user"
+    "createdBy": "test-user",
+    "userId": "user-test",
+    "emergencyType": "test-emergency",
+    "emergencyContact": "555-1234"
   }'
 ```
 
@@ -131,7 +152,13 @@ curl -X POST "http://localhost:8080/api/tickets" \
     "valid": true,
     "createdBy": "test-user",
     "lastVerifiedAt": null,
-    "verificationCount": 0
+    "verificationCount": 0,
+    "status": "Active",
+    "dateCreated": "...",
+    "requestDate": "...",
+    "userId": "user-test",
+    "emergencyType": "test-emergency",
+    "emergencyContact": "555-1234"
 }
 ```
 
