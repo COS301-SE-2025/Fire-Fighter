@@ -11,6 +11,14 @@ interface EmergencyRequest {
   status: string;
 }
 
+interface EmergencyRequestHistory {
+  id: string;
+  requester: string;
+  reason: string;
+  status: string;
+  completedAt: string;
+}
+
 @Component({
   selector: 'app-admin',
   standalone: true,
@@ -32,4 +40,11 @@ export class AdminPage {
   revokeAccess(id: string) {
     this.activeEmergencyRequests = this.activeEmergencyRequests.filter(req => req.id !== id);
   }
+
+  requestHistory: EmergencyRequestHistory[] = [
+    { id: 'REQ-004', requester: 'David Kim', reason: 'False alarm', status: 'Closed', completedAt: '2024-06-01 10:15' },
+    { id: 'REQ-005', requester: 'Eva Green', reason: 'Routine drill', status: 'Closed', completedAt: '2024-06-02 14:30' },
+    { id: 'REQ-006', requester: 'Frank Moore', reason: 'Fire in kitchen', status: 'Resolved', completedAt: '2024-06-03 09:45' }
+  ];
+
 }
