@@ -8,6 +8,7 @@ import { TicketService, Ticket } from '../../services/ticket.service';
 import { calculateTimeAgo } from '../../services/mock-ticket-database';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-requests',
@@ -17,6 +18,38 @@ import { of } from 'rxjs';
   imports: [
     IonContent, IonHeader, IonTitle, IonToolbar, 
     CommonModule, FormsModule, NavbarComponent
+  ],
+  animations: [
+    trigger('modalBackdrop', [
+      state('hidden', style({
+        opacity: 0
+      })),
+      state('visible', style({
+        opacity: 1
+      })),
+      transition('hidden => visible', [
+        animate('200ms ease-out')
+      ]),
+      transition('visible => hidden', [
+        animate('150ms ease-in')
+      ])
+    ]),
+    trigger('modalPanel', [
+      state('hidden', style({
+        opacity: 0,
+        transform: 'scale(0.95) translateY(-10px)'
+      })),
+      state('visible', style({
+        opacity: 1,
+        transform: 'scale(1) translateY(0)'
+      })),
+      transition('hidden => visible', [
+        animate('250ms cubic-bezier(0.34, 1.56, 0.64, 1)')
+      ]),
+      transition('visible => hidden', [
+        animate('200ms cubic-bezier(0.25, 0.46, 0.45, 0.94)')
+      ])
+    ])
   ]
 })
 export class RequestsPage implements OnInit {
@@ -24,6 +57,7 @@ export class RequestsPage implements OnInit {
   showToast = false;
   isModalOpen = false;
   isLoading = false;
+  modalAnimationState: string = 'hidden';
   private _searchQuery = '';
   tickets: Ticket[] = [];
   error: string | null = null;
@@ -113,16 +147,26 @@ export class RequestsPage implements OnInit {
   }
 
   setOpen(isOpen: boolean) {
-    this.isModalOpen = isOpen;
-    if (!isOpen) {
-      // Reset form when modal is closed
-      this.newTicket = {
-        requestDate: new Date().toISOString().split('T')[0],
-        reason: '',
-        userId: '', // This should be set from the auth service
-        emergencyType: '',
-        emergencyContact: ''
-      };
+    if (isOpen) {
+      this.isModalOpen = true;
+      // Small delay to ensure the modal is rendered before animating
+      setTimeout(() => {
+        this.modalAnimationState = 'visible';
+      }, 10);
+    } else {
+      this.modalAnimationState = 'hidden';
+      // Wait for animation to complete before hiding the modal
+      setTimeout(() => {
+        this.isModalOpen = false;
+        // Reset form when modal is closed
+        this.newTicket = {
+          requestDate: new Date().toISOString().split('T')[0],
+          reason: '',
+          userId: '', // This should be set from the auth service
+          emergencyType: '',
+          emergencyContact: ''
+        };
+      }, 200);
     }
   }
 
