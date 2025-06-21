@@ -19,11 +19,17 @@ interface EmergencyRequest {
   styleUrls: ['./admin.page.scss']
 })
 export class AdminPage {
-  activeTicketsCount = 3; // Number of mock records
-
   activeEmergencyRequests: EmergencyRequest[] = [
     { id: 'REQ-001', requester: 'Alice Smith', reason: 'Fire in server room', status: 'Open' },
     { id: 'REQ-002', requester: 'Bob Johnson', reason: 'Smoke detected in lab', status: 'In Progress' },
     { id: 'REQ-003', requester: 'Carol Lee', reason: 'Sprinkler malfunction', status: 'Open' }
   ];
+
+  get activeTicketsCount() {
+    return this.activeEmergencyRequests.length;
+  }
+
+  revokeAccess(id: string) {
+    this.activeEmergencyRequests = this.activeEmergencyRequests.filter(req => req.id !== id);
+  }
 }
