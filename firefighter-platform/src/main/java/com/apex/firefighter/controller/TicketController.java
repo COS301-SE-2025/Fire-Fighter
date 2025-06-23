@@ -29,8 +29,9 @@ public class TicketController {
         String userId = (String) payload.get("userId");
         String emergencyType = (String) payload.get("emergencyType");
         String emergencyContact = (String) payload.get("emergencyContact");
+        Integer duration = payload.get("duration") != null ? ((Number) payload.get("duration")).intValue() : null;
 
-        Ticket ticket = ticketService.createTicket(ticketId, description, userId, emergencyType, emergencyContact);
+        Ticket ticket = ticketService.createTicket(ticketId, description, userId, emergencyType, emergencyContact, duration);
         return ResponseEntity.ok(ticket);
     }
 
@@ -63,8 +64,9 @@ public class TicketController {
         String status = (String) payload.get("status");
         String emergencyType = (String) payload.get("emergencyType");
         String emergencyContact = (String) payload.get("emergencyContact");
+        Integer duration = payload.get("duration") != null ? ((Number) payload.get("duration")).intValue() : null;
         try {
-            Ticket updatedTicket = ticketService.updateTicket(id, description, status, emergencyType, emergencyContact);
+            Ticket updatedTicket = ticketService.updateTicket(id, description, status, emergencyType, emergencyContact, duration);
             return ResponseEntity.ok(updatedTicket);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
