@@ -80,10 +80,12 @@ export class TicketService {
       );
     } else {
       // Get current user info from AuthService
+      let currentUserId = '';
       let currentUserEmail = '';
       let currentUserName = '';
       const user = (this.authService as any).auth.currentUser;
       if (user) {
+        currentUserId = user.uid || '';
         currentUserEmail = user.email || '';
         currentUserName = user.displayName || user.email?.split('@')[0] || '';
       }
@@ -92,7 +94,7 @@ export class TicketService {
         ticketId: generateTicketId(),
         description: ticketData.reason,
         requestDate: ticketData.requestDate || new Date().toISOString().split('T')[0],
-        userId: ticketData.userId || currentUserEmail || currentUserName || 'unknown',
+        userId: currentUserId || currentUserEmail || currentUserName || 'unknown',
         emergencyType: ticketData.emergencyType || 'critical-system-failure',
         emergencyContact: ticketData.emergencyContact || ''
       };
