@@ -33,14 +33,11 @@ public class TicketController {
     public ResponseEntity<Ticket> createTicket(@RequestBody Map<String, Object> payload) {
         String ticketId = (String) payload.get("ticketId");
         String description = (String) payload.get("description");
-        Boolean valid = (Boolean) payload.get("valid");
-        String createdBy = (String) payload.get("createdBy");
         String userId = (String) payload.get("userId");
         String emergencyType = (String) payload.get("emergencyType");
         String emergencyContact = (String) payload.get("emergencyContact");
 
-        Ticket ticket = ticketService.createTicket(ticketId, description, valid != null ? valid : false, userId, emergencyType, emergencyContact, createdBy);
-        
+        Ticket ticket = ticketService.createTicket(ticketId, description, userId, emergencyType, emergencyContact);
         return ResponseEntity.ok(ticket);
     }
 
@@ -70,46 +67,12 @@ public class TicketController {
     @PutMapping("/{id}")
     public ResponseEntity<Ticket> updateTicket(@PathVariable Long id, @RequestBody Map<String, Object> payload) {
         String description = (String) payload.get("description");
-        Boolean valid = (Boolean) payload.get("valid");
         String status = (String) payload.get("status");
         String emergencyType = (String) payload.get("emergencyType");
         String emergencyContact = (String) payload.get("emergencyContact");
-
         try {
-            Ticket updatedTicket = ticketService.updateTicket(id, description, valid, status, emergencyType, emergencyContact);
+            Ticket updatedTicket = ticketService.updateTicket(id, description, status, emergencyType, emergencyContact);
             return ResponseEntity.ok(updatedTicket);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    // Update ticket validity
-    @PatchMapping("/{ticketId}/validity")
-    public ResponseEntity<Ticket> updateTicketValidity(
-            @PathVariable String ticketId,
-            @RequestBody Map<String, Boolean> payload) {
-        try {
-            Boolean valid = payload.get("valid");
-            if (valid == null) {
-                return ResponseEntity.badRequest().build();
-            }
-            return ResponseEntity.ok(ticketService.updateTicketValidity(ticketId, valid));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    // Update ticket description
-    @PatchMapping("/{ticketId}/description")
-    public ResponseEntity<Ticket> updateTicketDescription(
-            @PathVariable String ticketId,
-            @RequestBody Map<String, String> payload) {
-        try {
-            String description = payload.get("description");
-            if (description == null) {
-                return ResponseEntity.badRequest().build();
-            }
-            return ResponseEntity.ok(ticketService.updateTicketDescription(ticketId, description));
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
@@ -127,21 +90,5 @@ public class TicketController {
     public ResponseEntity<Void> deleteTicketByTicketId(@PathVariable String ticketId) {
         boolean deleted = ticketService.deleteTicketByTicketId(ticketId);
         return deleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
-    }
-
-    // Verify ticket
-    @GetMapping("/{ticketId}/verify")
-    public ResponseEntity<Map<String, Object>> verifyTicket(@PathVariable String ticketId) {
-        boolean isValid = ticketService.verifyTicket(ticketId);
-        return ticketService.getTicketByTicketId(ticketId)
-                .map(ticket -> {
-                    Map<String, Object> response = new HashMap<>();
-                    response.put("valid", isValid);
-                    response.put("ticketId", ticket.getTicketId());
-                    response.put("lastVerifiedAt", ticket.getLastVerifiedAt());
-                    response.put("verificationCount", ticket.getVerificationCount());
-                    return ResponseEntity.ok(response);
-                })
-                .orElse(ResponseEntity.notFound().build());
     }
 }

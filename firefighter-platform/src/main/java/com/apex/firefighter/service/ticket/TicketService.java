@@ -32,7 +32,7 @@ public class TicketService {
     /**
      * Create a new ticket
      */
-    public Ticket createTicket(String ticketId, String description, boolean valid, String userId, String emergencyType, String emergencyContact, String createdBy) {
+    public Ticket createTicket(String ticketId, String description, String userId, String emergencyType, String emergencyContact) {
         System.out.println("🔵 CREATE TICKET: Creating ticket - " + ticketId);
         
         // Check if ticket ID already exists
@@ -42,7 +42,7 @@ public class TicketService {
             throw new RuntimeException("Ticket with ID '" + ticketId + "' already exists");
         }
         
-        Ticket ticket = new Ticket(ticketId, description, valid, userId, emergencyType, emergencyContact, createdBy);
+        Ticket ticket = new Ticket(ticketId, description, userId, emergencyType, emergencyContact);
         Ticket savedTicket = ticketRepository.save(ticket);
         System.out.println("✅ TICKET CREATED: " + savedTicket);
         return savedTicket;
@@ -51,7 +51,7 @@ public class TicketService {
     /**
      * Update ticket information
      */
-    public Ticket updateTicket(Long id, String description, Boolean valid, String status, String emergencyType, String emergencyContact) {
+    public Ticket updateTicket(Long id, String description, String status, String emergencyType, String emergencyContact) {
         System.out.println("🔵 UPDATE TICKET: Updating ticket ID - " + id);
         
         Optional<Ticket> ticketOpt = ticketRepository.findById(id);
@@ -60,9 +60,6 @@ public class TicketService {
             
             if (description != null) {
                 ticket.setDescription(description);
-            }
-            if (valid != null) {
-                ticket.setValid(valid);
             }
             if (status != null) {
                 ticket.setStatus(status);
@@ -81,55 +78,6 @@ public class TicketService {
             System.out.println("❌ UPDATE FAILED: Ticket not found with ID - " + id);
             throw new RuntimeException("Ticket not found with ID: " + id);
         }
-    }
-
-    /**
-     * Validate a ticket (mark as valid)
-     */
-    public Ticket validateTicket(String ticketId) {
-        System.out.println("🔵 VALIDATE TICKET: Validating ticket - " + ticketId);
-        
-        Optional<Ticket> ticketOpt = ticketRepository.findByTicketId(ticketId);
-        if (ticketOpt.isPresent()) {
-            Ticket ticket = ticketOpt.get();
-            ticket.setValid(true);
-            Ticket validatedTicket = ticketRepository.save(ticket);
-            System.out.println("✅ TICKET VALIDATED: " + validatedTicket);
-            return validatedTicket;
-        } else {
-            System.out.println("❌ VALIDATE FAILED: Ticket not found with ID - " + ticketId);
-            throw new RuntimeException("Ticket not found with ID: " + ticketId);
-        }
-    }
-
-    /**
-     * Invalidate a ticket (mark as invalid)
-     */
-    public Ticket invalidateTicket(String ticketId) {
-        System.out.println("🔵 INVALIDATE TICKET: Invalidating ticket - " + ticketId);
-        
-        Optional<Ticket> ticketOpt = ticketRepository.findByTicketId(ticketId);
-        if (ticketOpt.isPresent()) {
-            Ticket ticket = ticketOpt.get();
-            ticket.setValid(false);
-            Ticket invalidatedTicket = ticketRepository.save(ticket);
-            System.out.println("✅ TICKET INVALIDATED: " + invalidatedTicket);
-            return invalidatedTicket;
-        } else {
-            System.out.println("❌ INVALIDATE FAILED: Ticket not found with ID - " + ticketId);
-            throw new RuntimeException("Ticket not found with ID: " + ticketId);
-        }
-    }
-
-    /**
-     * Check if a ticket is valid
-     */
-    public boolean isTicketValid(String ticketId) {
-        Optional<Ticket> ticketOpt = ticketRepository.findByTicketId(ticketId);
-        if (ticketOpt.isPresent()) {
-            return ticketOpt.get().isValid();
-        }
-        return false;
     }
 
     /**
