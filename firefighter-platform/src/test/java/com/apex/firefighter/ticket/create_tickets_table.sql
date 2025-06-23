@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS firefighter.tickets (
     request_date DATE NOT NULL DEFAULT CURRENT_DATE,
     user_id VARCHAR(255) NOT NULL,
     emergency_type VARCHAR(255) NOT NULL,
-    emergency_contact VARCHAR(255) NOT NULL
+    emergency_contact VARCHAR(255) NOT NULL,
+    duration INTEGER
 );
 
 -- Create index on ticket_id for faster lookups

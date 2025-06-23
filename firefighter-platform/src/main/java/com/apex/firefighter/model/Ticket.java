@@ -53,15 +53,20 @@ public class Ticket {
     @JsonProperty("dateCompleted")
     private LocalDateTime dateCompleted;
 
+    @Column(name = "duration")
+    @JsonProperty("duration")
+    private Integer duration; // duration in minutes
+
     // Default constructor
     public Ticket() {
         this.dateCreated = LocalDateTime.now();
         this.requestDate = LocalDate.now();
         this.status = "Active";
+        this.duration = null;
     }
 
     // Parameterized constructor
-    public Ticket(String ticketId, String description, String userId, String emergencyType, String emergencyContact) {
+    public Ticket(String ticketId, String description, String userId, String emergencyType, String emergencyContact, Integer duration) {
         this.ticketId = ticketId;
         this.description = description;
         this.userId = userId;
@@ -70,6 +75,12 @@ public class Ticket {
         this.dateCreated = LocalDateTime.now();
         this.requestDate = LocalDate.now();
         this.status = "Active";
+        this.duration = duration;
+    }
+
+    // Legacy constructor for backward compatibility
+    public Ticket(String ticketId, String description, String userId, String emergencyType, String emergencyContact) {
+        this(ticketId, description, userId, emergencyType, emergencyContact, null);
     }
 
     // setters
@@ -83,6 +94,7 @@ public class Ticket {
     public void setEmergencyContact(String emergencyContact) { this.emergencyContact = emergencyContact; }
     public void setRejectReason(String rejectReason) { this.rejectReason = rejectReason; }
     public void setDateCompleted(LocalDateTime dateCompleted) { this.dateCompleted = dateCompleted; }
+    public void setDuration(Integer duration) { this.duration = duration; }
 
     // getters
     public Long getId() { return id; }
@@ -96,4 +108,5 @@ public class Ticket {
     public String getEmergencyContact() { return emergencyContact; }
     public String getRejectReason() { return rejectReason; }
     public LocalDateTime getDateCompleted() { return dateCompleted; }
+    public Integer getDuration() { return duration; }
 }

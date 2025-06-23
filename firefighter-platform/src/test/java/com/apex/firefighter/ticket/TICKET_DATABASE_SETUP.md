@@ -19,7 +19,8 @@ CREATE TABLE firefighter.tickets (
     request_date DATE NOT NULL DEFAULT CURRENT_DATE,
     user_id VARCHAR(255) NOT NULL,
     emergency_type VARCHAR(255) NOT NULL,
-    emergency_contact VARCHAR(255) NOT NULL
+    emergency_contact VARCHAR(255) NOT NULL,
+    duration INTEGER
 );
 ```
 
@@ -33,6 +34,7 @@ CREATE TABLE firefighter.tickets (
 - **`user_id`**: The ID of the user associated with the ticket.
 - **`emergency_type`**: The type of emergency (e.g., 'critical-system-failure').
 - **`emergency_contact`**: The contact information for the emergency.
+- **`duration`**: Duration of the ticket in minutes (integer, optional).
 
 ## 🚀 Quick Setup
 
@@ -66,7 +68,8 @@ CREATE TABLE firefighter.tickets (
        request_date DATE NOT NULL DEFAULT CURRENT_DATE,
        user_id VARCHAR(255) NOT NULL,
        emergency_type VARCHAR(255) NOT NULL,
-       emergency_contact VARCHAR(255) NOT NULL
+       emergency_contact VARCHAR(255) NOT NULL,
+       duration INTEGER
    );
    ```
 

@@ -37,7 +37,7 @@ public class TicketService {
     /**
      * Create a new ticket
      */
-    public Ticket createTicket(String ticketId, String description, String userId, String emergencyType, String emergencyContact) {
+    public Ticket createTicket(String ticketId, String description, String userId, String emergencyType, String emergencyContact, Integer duration) {
         System.out.println("🔵 CREATE TICKET: Creating ticket - " + ticketId);
         
         // Check if ticket ID already exists
@@ -47,7 +47,7 @@ public class TicketService {
             throw new RuntimeException("Ticket with ID '" + ticketId + "' already exists");
         }
         
-        Ticket ticket = new Ticket(ticketId, description, userId, emergencyType, emergencyContact);
+        Ticket ticket = new Ticket(ticketId, description, userId, emergencyType, emergencyContact, duration);
         Ticket savedTicket = ticketRepository.save(ticket);
         System.out.println("✅ TICKET CREATED: " + savedTicket);
         return savedTicket;
@@ -56,7 +56,7 @@ public class TicketService {
     /**
      * Update ticket information
      */
-    public Ticket updateTicket(Long id, String description, String status, String emergencyType, String emergencyContact) {
+    public Ticket updateTicket(Long id, String description, String status, String emergencyType, String emergencyContact, Integer duration) {
         System.out.println("🔵 UPDATE TICKET: Updating ticket ID - " + id);
         
         Optional<Ticket> ticketOpt = ticketRepository.findById(id);
@@ -74,6 +74,9 @@ public class TicketService {
             }
             if (emergencyContact != null) {
                 ticket.setEmergencyContact(emergencyContact);
+            }
+            if (duration != null) {
+                ticket.setDuration(duration);
             }
             
             Ticket updatedTicket = ticketRepository.save(ticket);
