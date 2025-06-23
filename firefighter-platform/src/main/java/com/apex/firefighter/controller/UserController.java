@@ -11,13 +11,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = {
-    "http://localhost:8100", 
-    "http://127.0.0.1:8100", 
-    "https://localhost:8100",
-    "ionic://localhost",
-    "capacitor://localhost"
-}, allowCredentials = "true")
 public class UserController {
 
     private final UserService userService;

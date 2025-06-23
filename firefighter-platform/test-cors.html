@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fire-Fighter API CORS Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #d32f2f;
+            text-align: center;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        button {
+            background-color: #d32f2f;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #b71c1c;
+        }
+        input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Fire-Fighter API CORS Test</h1>
+        
+        <div class="test-section">
+            <h3>🌐 Server Configuration</h3>
+            <label for="serverIP">Server IP:</label>
+            <input type="text" id="serverIP" placeholder="e.g., 192.168.1.100" />
+            <label for="serverPort">Port:</label>
+            <input type="text" id="serverPort" value="8080" />
+            <button onclick="updateServerURL()">Update Server URL</button>
+            <div id="currentServer" class="result">Current Server: <span id="serverURL">http://localhost:8080</span></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 CORS Test</h3>
+            <button onclick="testCORS()">Test CORS</button>
+            <div id="corsResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 API Endpoints Test</h3>
+            <button onclick="testDatabaseConnection()">Test Database Connection</button>
+            <button onclick="testGetAllTickets()">Test Get Tickets</button>
+            <button onclick="testGetUsers()">Test Get Users</button>
+            <div id="apiResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>ℹ️ Network Information</h3>
+            <div id="networkInfo">
+                <p><strong>Your IP:</strong> <span id="clientIP">Loading...</span></p>
+                <p><strong>User Agent:</strong> <span id="userAgent"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let baseURL = 'http://localhost:8080';
+
+        function updateServerURL() {
+            const ip = document.getElementById('serverIP').value;
+            const port = document.getElementById('serverPort').value;
+            
+            if (ip) {
+                baseURL = `http://${ip}:${port}`;
+            } else {
+                baseURL = `http://localhost:${port}`;
+            }
+            
+            document.getElementById('serverURL').textContent = baseURL;
+        }
+
+        async function testCORS() {
+            const resultDiv = document.getElementById('corsResult');
+            resultDiv.innerHTML = '<p>Testing CORS...</p>';
+            
+            try {
+                const response = await fetch(`${baseURL}/api/test/cors`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                
+                if (response.ok) {
+                    const data = await response.text();
+                    resultDiv.innerHTML = `<div class="result success">✅ CORS Test Successful!<br>Response: ${data}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">❌ CORS Test Failed: ${response.status} ${response.statusText}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">❌ CORS Test Failed: ${error.message}</div>`;
+            }
+        }
+
+        async function testDatabaseConnection() {
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.innerHTML = '<p>Testing Database Connection...</p>';
+            
+            try {
+                const response = await fetch(`${baseURL}/api/test/run`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                
+                if (response.ok) {
+                    const data = await response.text();
+                    resultDiv.innerHTML = `<div class="result success">✅ Database Test Successful!<br>Response: ${data}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">❌ Database Test Failed: ${response.status} ${response.statusText}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">❌ Database Test Failed: ${error.message}</div>`;
+            }
+        }
+
+        async function testGetAllTickets() {
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.innerHTML = '<p>Testing Get All Tickets...</p>';
+            
+            try {
+                const response = await fetch(`${baseURL}/api/tickets`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `<div class="result success">✅ Tickets API Test Successful!<br>Found ${data.length} tickets</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">❌ Tickets API Test Failed: ${response.status} ${response.statusText}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">❌ Tickets API Test Failed: ${error.message}</div>`;
+            }
+        }
+
+        async function testGetUsers() {
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.innerHTML = '<p>Testing Get Authorized Users...</p>';
+            
+            try {
+                const response = await fetch(`${baseURL}/api/users/authorized`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `<div class="result success">✅ Users API Test Successful!<br>Found ${data.length} authorized users</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">❌ Users API Test Failed: ${response.status} ${response.statusText}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">❌ Users API Test Failed: ${error.message}</div>`;
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('userAgent').textContent = navigator.userAgent;
+            
+            // Try to get client IP
+            fetch('https://api.ipify.org?format=json')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('clientIP').textContent = data.ip;
+                })
+                .catch(() => {
+                    document.getElementById('clientIP').textContent = 'Unable to detect';
+                });
+        });
+    </script>
+</body>
+</html> 
