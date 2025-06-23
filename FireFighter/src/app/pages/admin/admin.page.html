@@ -587,7 +587,7 @@
               <tr>
                 <td class="px-4 py-4 text-sm text-gray-900 dark:text-white font-mono">{{ req.id }}</td>
                 <td class="px-4 py-4 text-sm text-gray-900 dark:text-white">
-                  <div class="truncate" [title]="req.requester">{{ req.requester }}</div>
+                  <div class="truncate" [title]="req.requester">{{ usernames[req.requester] || req.requester }}</div>
                 </td>
                 <td class="px-4 py-4 text-sm text-gray-900 dark:text-white">
                   <div class="line-clamp-2" [title]="req.reason">{{ req.reason }}</div>
@@ -611,8 +611,8 @@
                     <div class="text-gray-500 dark:text-gray-400 truncate" [title]="req.lastAction + ' by ' + req.actionBy">
                       {{ req.lastAction }}
                     </div>
-                    <div class="text-gray-500 dark:text-gray-400 truncate" [title]="'by ' + req.actionBy + ' at ' + req.actionAt">
-                      by {{ req.actionBy }}
+                    <div class="text-gray-500 dark:text-gray-400 truncate" [title]="'by ' + (req.actionBy ? usernames[req.actionBy] : undefined) || req.actionBy + ' at ' + req.actionAt">
+                      by {{ (req.actionBy ? usernames[req.actionBy] : undefined) || req.actionBy }}
                     </div>
                   </div>
                 </td>
@@ -635,7 +635,7 @@
                         <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Request Details</h4>
                         <div class="space-y-2 text-sm">
                           <div><span class="font-medium text-gray-700 dark:text-gray-300">ID:</span> <span class="text-gray-900 dark:text-white">{{ req.id }}</span></div>
-                          <div><span class="font-medium text-gray-700 dark:text-gray-300">Requester:</span> <span class="text-gray-900 dark:text-white">{{ req.requester }}</span></div>
+                          <div><span class="font-medium text-gray-700 dark:text-gray-300">Requester:</span> <span class="text-gray-900 dark:text-white">{{ usernames[req.requester] || req.requester }}</span></div>
                           <div><span class="font-medium text-gray-700 dark:text-gray-300">Status:</span> <span class="text-gray-900 dark:text-white">{{ req.status }}</span></div>
                         </div>
                       </div>
@@ -751,7 +751,7 @@
             <div class="p-4 border-b border-gray-200 dark:border-gray-700">
               <div class="flex items-center justify-between">
                 <div>
-                  <div class="font-semibold text-gray-900 dark:text-white">{{ req.requester }}</div>
+                  <div class="font-semibold text-gray-900 dark:text-white">{{ usernames[req.requester] || req.requester }}</div>
                   <div class="text-sm text-gray-600 dark:text-gray-400">ID: {{ req.id }}</div>
                 </div>
                 <span
@@ -790,7 +790,7 @@
                 <div class="grid grid-cols-2 gap-4">
                   <div>
                     <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Action By</div>
-                    <div class="text-sm text-gray-900 dark:text-white">{{ req.actionBy }}</div>
+                    <div class="text-sm text-gray-900 dark:text-white">{{ (req.actionBy ? usernames[req.actionBy] : undefined) || req.actionBy }}</div>
                   </div>
                   <div>
                     <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Action At</div>
