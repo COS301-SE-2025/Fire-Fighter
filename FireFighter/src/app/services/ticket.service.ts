@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, tap } from 'rxjs';
+import { Observable, of, tap, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { mockTicketDb } from './mock-ticket-database';
 import { NotificationService } from './notification.service';
+import { AuthService } from './auth.service';
 
 export interface Ticket {
   id: string;
@@ -21,11 +22,12 @@ export interface Ticket {
 })
 export class TicketService {
   private apiUrl = `${environment.apiUrl}/tickets`;
-  private useMockDatabase = true; // Set to false when using real API
+  private useMockDatabase = false; // Set to false when using real API
 
   constructor(
     private http: HttpClient,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private authService: AuthService
   ) {
     // Subscribe to ticket status updates from mock database
     if (this.useMockDatabase) {
@@ -43,26 +45,69 @@ export class TicketService {
   }
 
   /**
+   * Map backend ticket object to frontend Ticket interface
+   */
+  private mapBackendTicketToFrontend(ticket: any): Ticket {
+    return {
+      id: ticket.ticketId, // Use ticketId from backend as id in frontend
+      status: ticket.status as 'Active' | 'Completed' | 'Rejected',
+      dateCreated: ticket.dateCreated ? new Date(ticket.dateCreated) : new Date(),
+      reason: ticket.description, // Map description to reason
+      requestDate: typeof ticket.requestDate === 'string' ? ticket.requestDate : (ticket.requestDate ? ticket.requestDate.toString().split('T')[0] : new Date().toISOString().split('T')[0]),
+      userId: ticket.userId,
+      emergencyType: ticket.emergencyType,
+      emergencyContact: ticket.emergencyContact
+    };
+  }
+
+  /**
    * Create a new ticket request
    * @param ticketData The ticket data to create
    * @returns Observable of the created ticket
    */
   createTicket(ticketData: Omit<Ticket, 'id' | 'status' | 'dateCreated'>): Observable<Ticket> {
-    const createTicket$ = this.useMockDatabase
-      ? of(mockTicketDb.createTicket(ticketData))
-      : this.http.post<Ticket>(this.apiUrl, ticketData);
-
-    return createTicket$.pipe(
-      tap(ticket => {
-        // Create a notification for the new ticket
-        this.notificationService.addNotification({
-          type: 'ticket_created',
-          title: 'New Ticket Created',
-          message: `A new ticket ${ticket.id} has been created`,
-          ticketId: ticket.id
-        });
-      })
-    );
+    if (this.useMockDatabase) {
+      const createTicket$ = of(mockTicketDb.createTicket(ticketData));
+      return createTicket$.pipe(
+        tap(ticket => {
+          this.notificationService.addNotification({
+            type: 'ticket_created',
+            title: 'New Ticket Created',
+            message: `A new ticket ${ticket.id} has been created`,
+            ticketId: ticket.id
+          });
+        })
+      );
+    } else {
+      // Get current user info from AuthService
+      let currentUserEmail = '';
+      let currentUserName = '';
+      const user = (this.authService as any).auth.currentUser;
+      if (user) {
+        currentUserEmail = user.email || '';
+        currentUserName = user.displayName || user.email?.split('@')[0] || '';
+      }
+      // Only send the fields that exist in the mock-ticket-database
+      const backendTicketData: any = {
+        ticketId: generateTicketId(),
+        description: ticketData.reason,
+        requestDate: ticketData.requestDate || new Date().toISOString().split('T')[0],
+        userId: ticketData.userId || currentUserEmail || currentUserName || 'unknown',
+        emergencyType: ticketData.emergencyType || 'critical-system-failure',
+        emergencyContact: ticketData.emergencyContact || ''
+      };
+      return this.http.post<any>(this.apiUrl, backendTicketData).pipe(
+        map(ticket => this.mapBackendTicketToFrontend(ticket)),
+        tap(ticket => {
+          this.notificationService.addNotification({
+            type: 'ticket_created',
+            title: 'New Ticket Created',
+            message: `A new ticket ${ticket.id} has been created`,
+            ticketId: ticket.id
+          });
+        })
+      );
+    }
   }
 
   /**
@@ -74,8 +119,9 @@ export class TicketService {
       const tickets = mockTicketDb.getAllTickets();
       return of(tickets);
     }
-    // Original implementation
-    return this.http.get<Ticket[]>(this.apiUrl);
+    return this.http.get<any[]>(this.apiUrl).pipe(
+      map(tickets => tickets.map(ticket => this.mapBackendTicketToFrontend(ticket)))
+    );
   }
 
   /**
@@ -91,8 +137,9 @@ export class TicketService {
       }
       return of(ticket);
     }
-    // Original implementation
-    return this.http.get<Ticket>(`${this.apiUrl}/${ticketId}`);
+    return this.http.get<any>(`${this.apiUrl}/${ticketId}`).pipe(
+      map(ticket => this.mapBackendTicketToFrontend(ticket))
+    );
   }
 
   /**
@@ -109,7 +156,13 @@ export class TicketService {
       }
       return of(ticket);
     }
-    // Original implementation
-    return this.http.patch<Ticket>(`${this.apiUrl}/${ticketId}`, { status });
+    return this.http.patch<any>(`${this.apiUrl}/${ticketId}`, { status }).pipe(
+      map(ticket => this.mapBackendTicketToFrontend(ticket))
+    );
   }
+}
+
+function generateTicketId(): string {
+  // Example: BMW-FF-<timestamp>
+  return `BMW-FF-${Date.now()}`;
 }
