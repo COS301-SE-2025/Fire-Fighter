@@ -104,7 +104,35 @@ export class DashboardPage implements OnInit, OnDestroy {
         finalize(() => this.isLoading = false)
       )
       .subscribe(tickets => {
-        this.tickets = tickets;
+        // Sort tickets: non-expired Active with least time remaining first, then Completed/Rejected, then Expired
+        const now = new Date();
+        const durationInHours = 2;
+        const getRemainingMs = (ticket: Ticket) => {
+          const createdTime = new Date(ticket.dateCreated);
+          const endTime = new Date(createdTime.getTime() + durationInHours * 60 * 60 * 1000);
+          return endTime.getTime() - now.getTime();
+        };
+        this.tickets = [...tickets].sort((a, b) => {
+          // Expired = Active but remaining time <= 0
+          const aRem = getRemainingMs(a);
+          const bRem = getRemainingMs(b);
+          const aExpired = a.status === 'Active' && aRem <= 0;
+          const bExpired = b.status === 'Active' && bRem <= 0;
+          // 1. Non-expired Active first, sorted by least time remaining
+          if (a.status === 'Active' && !aExpired && (b.status !== 'Active' || bExpired)) return -1;
+          if (b.status === 'Active' && !bExpired && (a.status !== 'Active' || aExpired)) return 1;
+          if (a.status === 'Active' && !aExpired && b.status === 'Active' && !bExpired) {
+            return aRem - bRem; // Least time remaining first
+          }
+          // 2. Completed/Rejected next (keep their order)
+          if ((a.status === 'Completed' || a.status === 'Rejected') && (b.status !== 'Completed' && b.status !== 'Rejected')) return 1;
+          if ((b.status === 'Completed' || b.status === 'Rejected') && (a.status !== 'Completed' && a.status !== 'Rejected')) return -1;
+          // 3. Expired Active last
+          if (aExpired && !bExpired) return 1;
+          if (bExpired && !aExpired) return -1;
+          // Otherwise, keep original order
+          return 0;
+        });
       });
   }
 
