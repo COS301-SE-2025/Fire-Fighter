@@ -412,7 +412,9 @@ export class AuthService {
    */
   getUserProfileById(userId: string): Observable<UserVerificationResponse> {
     return this.http.get<UserVerificationResponse>(`${environment.apiUrl}/users/${userId}`);
-=======
+  }
+
+  /**
    * Initialize auth state restoration when the service is created
    * This handles the case where the user refreshes the page but Firebase auth persists
    */
