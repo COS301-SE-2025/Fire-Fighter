@@ -70,6 +70,8 @@ export class AuthService {
   private userProfileSubject = new BehaviorSubject<UserVerificationResponse | null>(null);
   public userProfile$ = this.userProfileSubject.asObservable();
 
+  usernames: { [userId: string]: string } = {};
+
   // Initialization flag to prevent multiple init calls
   private initialized = false;
 
@@ -405,6 +407,12 @@ export class AuthService {
   }
 
   /**
+   * Get user profile by userId
+   * Endpoint: GET /api/users/{userId}
+   */
+  getUserProfileById(userId: string): Observable<UserVerificationResponse> {
+    return this.http.get<UserVerificationResponse>(`${environment.apiUrl}/users/${userId}`);
+=======
    * Initialize auth state restoration when the service is created
    * This handles the case where the user refreshes the page but Firebase auth persists
    */
