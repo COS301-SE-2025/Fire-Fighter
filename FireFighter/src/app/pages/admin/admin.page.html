@@ -1,0 +1,301 @@
+<app-navbar></app-navbar>
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="min-h-full bg-gray-50 dark:bg-gray-900 mb-8">
+    <!-- Replace the heading/welcome/button section with a flex row -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 mt-2 gap-2">
+      <div>
+        <h1 class="text-2xl font-sans font-bold text-gray-900 dark:text-white">Admin Page</h1>
+        <p class="text-gray-600 dark:text-gray-400">Welcome to the admin page!</p>
+      </div>
+      <button (click)="exportFullAuditLogs()" class="inline-flex items-center px-5 py-2 text-sm font-medium text-white bg-green-600 rounded-lg shadow hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-700 dark:hover:bg-green-800 dark:focus:ring-green-900">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18v-1.5M7.5 12l4.5 4.5m0 0l4.5-4.5m-4.5 4.5V3"/>
+        </svg>
+        Download Full Audit Logs
+      </button>
+    </div>
+
+    <!-- Active Emergency Requests Card -->
+    <div class="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50 mt-6">
+      <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center space-x-2">
+          <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Active Emergency Requests</h2>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button (click)="exportActiveToCSV()" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-700 dark:hover:bg-green-800 dark:focus:ring-green-900">
+            Export to CSV File
+            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18v-1.5M7.5 12l4.5 4.5m0 0l4.5-4.5m-4.5 4.5V3"/>
+            </svg>
+          </button>
+          <button class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            View All
+            <svg class="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <!-- Controls above the table headers -->
+      <div class="px-4 pt-4 pb-2 mb-4">
+        <div class="flex flex-col sm:flex-row sm:items-end gap-4">
+          <div class="flex-1 flex flex-col gap-2">
+            <div class="flex gap-2">
+              <button (click)="bulkRevokeSelected()" [disabled]="selectedActiveIds.size === 0" class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                Bulk Revoke
+              </button>
+              <button (click)="bulkExportSelected()" [disabled]="selectedActiveIds.size === 0" class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                Bulk Export
+              </button>
+            </div>
+            <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
+            <input id="search" type="text" [(ngModel)]="searchQuery" placeholder="Search by name, ID, reason, or status..." class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" />
+          </div>
+          <div>
+            <label for="statusFilter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+            <select id="statusFilter" [(ngModel)]="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+              <option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</option>
+            </select>
+          </div>
+          <div>
+            <label for="sortOption" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sort By</label>
+            <select id="sortOption" [(ngModel)]="sortOption" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+              <option *ngFor="let opt of sortOptions" [value]="opt.value">{{ opt.label }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <!-- Table of active requests -->
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead class="bg-gray-50 dark:bg-gray-700">
+            <tr>
+              <th class="px-4 py-3 text-center">
+                <input type="checkbox" [checked]="isAllActiveSelected()" (change)="toggleSelectAllActive($event)" />
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Requester</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Reason</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3"></th>
+            </tr>
+          </thead>
+          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <ng-container *ngFor="let req of filteredAndSortedRequests">
+              <tr>
+                <td class="px-4 py-4 text-center">
+                  <input type="checkbox" [checked]="selectedActiveIds.has(req.id)" (change)="toggleSelectActive(req.id, $event)" />
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.id }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.requester }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.reason }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span
+                    class="inline-block align-middle rounded-full px-3 py-1 text-xs font-semibold uppercase"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300': req.status === 'Open',
+                      'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300': req.status === 'In Progress',
+                      'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300': req.status === 'Revoked',
+                      'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300': req.status === 'Closed',
+                      'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300': req.status === 'Resolved',
+                      'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200': req.status !== 'Open' && req.status !== 'In Progress' && req.status !== 'Revoked' && req.status !== 'Closed' && req.status !== 'Resolved'
+                    }"
+                  >
+                    {{ req.status }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right">
+                  <button (click)="revokeAccess(req.id)" class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-700 dark:hover:bg-red-800 dark:focus:ring-red-900">
+                    Revoke Access
+                  </button>
+                  <button (click)="toggleExpandRequest(req.id)" class="inline-flex items-center px-3 py-2 ml-2 text-sm font-medium text-white bg-gray-600 rounded-lg hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-300 dark:bg-gray-700 dark:hover:bg-gray-800 dark:focus:ring-gray-900">
+                    Details
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="expandedRequestId === req.id">
+                <td colspan="6" class="bg-gray-50 dark:bg-gray-800 px-0 py-3 border-t border-gray-200 dark:border-gray-700">
+                  <div class="w-[98%] mx-auto rounded-lg shadow-md bg-white dark:bg-gray-900 px-6 py-2 flex flex-col sm:flex-row gap-6">
+                    <div class="flex-1 min-w-0">
+                      <h3 class="text-lg font-bold mb-2 text-gray-900 dark:text-white flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 19.5a7.5 7.5 0 0115 0v.75A2.25 2.25 0 0117.25 22.5h-10.5A2.25 2.25 0 014.5 20.25v-.75z"/></svg>
+                        Request Details
+                      </h3>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1 mb-2">
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">ID:</span> <span class="text-gray-900 dark:text-white">{{ req.id }}</span></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">Requester:</span> <span class="text-gray-900 dark:text-white">{{ req.requester }}</span></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">Email:</span> <a href="mailto:{{ req.email }}" class="text-blue-600 underline">{{ req.email }}</a></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">Phone:</span> <a href="tel:{{ req.phone }}" class="text-blue-600 underline">{{ req.phone }}</a></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">Reason:</span> <span class="text-gray-900 dark:text-white">{{ req.reason }}</span></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">Status:</span> <span class="text-gray-900 dark:text-white">{{ req.status }}</span></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">System:</span> <span class="text-gray-900 dark:text-white">{{ req.system }}</span></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">Access Start:</span> <span class="text-gray-900 dark:text-white">{{ req.accessStart }}</span></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">Access End:</span> <span class="text-gray-900 dark:text-white">{{ req.accessEnd }}</span></div>
+                      </div>
+                    </div>
+                    <div class="flex-1 min-w-0 flex flex-col justify-between">
+                      <div class="mb-2">
+                        <span class="font-semibold text-gray-700 dark:text-gray-300">Justification:</span>
+                        <div class="text-gray-900 dark:text-white mt-1">{{ req.justification }}</div>
+                      </div>
+                      <div class="mb-2">
+                        <span class="font-semibold text-gray-700 dark:text-gray-300">Logs:</span>
+                        <ul class="list-disc list-inside text-sm text-gray-700 dark:text-gray-300 mt-1">
+                          <li *ngFor="let log of req.logs">{{ log }}</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+      </div>
+      <!-- End Table -->
+    </div>
+    <!-- End Card -->
+
+    <!-- Requests History Table -->
+    <div class="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50 mt-10">
+      <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center space-x-2">
+          <svg class="w-6 h-6 text-yellow-500 dark:text-yellow-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"/>
+          </svg>
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Requests History</h2>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button (click)="exportHistoryToCSV()" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-700 dark:hover:bg-green-800 dark:focus:ring-green-900">
+            Export to CSV File
+            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18v-1.5M7.5 12l4.5 4.5m0 0l4.5-4.5m-4.5 4.5V3"/>
+            </svg>
+          </button>
+          <button class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            View All
+            <svg class="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <!-- Controls above the table headers -->
+      <div class="px-4 pt-4 pb-2 mb-4">
+        <div class="flex flex-col sm:flex-row sm:items-end gap-4">
+          <div class="flex-1">
+            <label for="historySearch" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
+            <input id="historySearch" type="text" [(ngModel)]="historySearchQuery" placeholder="Search by name, ID, reason, or status..." class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" />
+          </div>
+          <div>
+            <label for="historyStatusFilter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+            <select id="historyStatusFilter" [(ngModel)]="historyStatusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+              <option *ngFor="let opt of historyStatusOptions" [value]="opt.value">{{ opt.label }}</option>
+            </select>
+          </div>
+          <div>
+            <label for="historySortOption" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sort By</label>
+            <select id="historySortOption" [(ngModel)]="historySortOption" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+              <option *ngFor="let opt of historySortOptions" [value]="opt.value">{{ opt.label }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead class="bg-gray-50 dark:bg-gray-700">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Requester</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Reason</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Completed At</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Last Action</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Action By</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Action At</th>
+              <th class="px-6 py-3"></th>
+            </tr>
+          </thead>
+          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <ng-container *ngFor="let req of filteredAndSortedHistory">
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.id }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.requester }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.reason }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span
+                    class="inline-block align-middle rounded-full px-3 py-1 text-xs font-semibold uppercase"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300': req.status === 'Open',
+                      'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300': req.status === 'In Progress',
+                      'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300': req.status === 'Revoked',
+                      'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300': req.status === 'Closed',
+                      'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300': req.status === 'Resolved',
+                      'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200': req.status !== 'Open' && req.status !== 'In Progress' && req.status !== 'Revoked' && req.status !== 'Closed' && req.status !== 'Resolved'
+                    }"
+                  >
+                    {{ req.status }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.completedAt }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.lastAction }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.actionBy }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.actionAt }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-right">
+                  <button (click)="toggleExpandHistory(req.id)" class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-gray-600 rounded-lg hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-300 dark:bg-gray-700 dark:hover:bg-gray-800 dark:focus:ring-gray-900">
+                    Details
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="expandedHistoryId === req.id">
+                <td colspan="8" class="bg-gray-50 dark:bg-gray-800 px-0 py-3 border-t border-gray-200 dark:border-gray-700">
+                  <div class="w-[98%] mx-auto rounded-lg shadow-md bg-white dark:bg-gray-900 px-6 py-2 flex flex-col sm:flex-row gap-6">
+                    <div class="flex-1 min-w-0">
+                      <h3 class="text-lg font-bold mb-2 text-gray-900 dark:text-white flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-yellow-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"/></svg>
+                        Request History Details
+                      </h3>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1 mb-2">
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">ID:</span> <span class="text-gray-900 dark:text-white">{{ req.id }}</span></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">Requester:</span> <span class="text-gray-900 dark:text-white">{{ req.requester }}</span></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">Reason:</span> <span class="text-gray-900 dark:text-white">{{ req.reason }}</span></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">Status:</span> <span class="text-gray-900 dark:text-white">{{ req.status }}</span></div>
+                        <div><span class="font-semibold text-gray-700 dark:text-gray-300">Completed At:</span> <span class="text-gray-900 dark:text-white">{{ req.completedAt }}</span></div>
+                      </div>
+                    </div>
+                    <div class="flex-1 min-w-0 flex flex-col justify-between">
+                      <div class="mb-2">
+                        <span class="font-semibold text-gray-700 dark:text-gray-300">Audit Log:</span>
+                        <ul class="list-disc list-inside text-sm text-gray-700 dark:text-gray-300 mt-1">
+                          <li *ngFor="let log of req.auditLog">
+                            <span class="font-bold">{{ log.action }}</span> by <span>{{ log.by }}</span> at <span>{{ log.at }}</span>
+                            <span *ngIf="log.reason">— <span class="italic">{{ log.reason }}</span></span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- End Requests History Table -->
+  </div>
+  <!-- Revocation Reason Modal -->
+  <div *ngIf="showRevocationModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md">
+      <h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Reason for Revocation</h3>
+      <textarea [(ngModel)]="revocationReason" rows="3" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Enter reason for revocation (required)"></textarea>
+      <div class="flex justify-end gap-2 mt-4">
+        <button (click)="cancelRevocation()" class="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600">Cancel</button>
+        <button (click)="confirmRevocation()" [disabled]="!revocationReason.trim()" class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50">Confirm</button>
+      </div>
+    </div>
+  </div>
+</ion-content>

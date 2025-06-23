@@ -49,6 +49,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/landing/landing.page').then( m => m.LandingPage)
   },
   {
+    path: 'admin',
+    loadComponent: () => import('./pages/admin/admin.page').then( m => m.AdminPage),
+  },
+  {
     path: '',
     redirectTo: 'landing',
     pathMatch: 'full'
