@@ -31,8 +31,11 @@ public class User {
     @Column(name = "last_login", nullable = true)
     private ZonedDateTime lastLogin;
 
-    @Column(name = "normal_role", nullable = true)
-    private String normalRole;
+    @Column(name = "role", nullable = true)
+    private String role;
+
+    @Column(name = "is_admin", nullable = true, columnDefinition = "boolean default false")
+    private Boolean isAdmin = false;
 
     // One-to-Many relationship with UserRole (instead of Many-to-Many)
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -42,6 +45,7 @@ public class User {
     public User() {
         this.createdAt = ZonedDateTime.now();
         this.isAuthorized = false;
+        this.isAdmin = false;
     }
 
     // Constructor with Firebase UID
@@ -110,12 +114,20 @@ public class User {
         this.lastLogin = lastLogin;
     }
 
-    public String getNormalRole() {
-        return normalRole;
+    public String getRole() {
+        return role;
     }
 
-    public void setNormalRole(String normalRole) {
-        this.normalRole = normalRole;
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public Boolean getIsAdmin() {
+        return isAdmin;
+    }
+
+    public void setIsAdmin(Boolean isAdmin) {
+        this.isAdmin = isAdmin;
     }
 
     public Set<UserRole> getUserRoles() {
@@ -146,6 +158,10 @@ public class User {
         return this.isAuthorized;
     }
 
+    public boolean isAdmin() {
+        return this.isAdmin != null && this.isAdmin;
+    }
+
     // Update last login timestamp
     public void updateLastLogin() {
         this.lastLogin = ZonedDateTime.now();
@@ -159,6 +175,7 @@ public class User {
                 ", email='" + email + '\'' +
                 ", department='" + department + '\'' +
                 ", isAuthorized=" + isAuthorized +
+                ", isAdmin=" + isAdmin +
                 ", createdAt=" + createdAt +
                 ", lastLogin=" + lastLogin +
                 ", roles=" + userRoles.size() + " roles" +
