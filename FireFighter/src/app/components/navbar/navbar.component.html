@@ -93,8 +93,9 @@
                 </button>
                 
 
-                <!-- Admin Console -->
+                <!-- Admin Console (only shown to admins) -->
                 <button
+                  *ngIf="isAdmin$ | async"
                   (click)="navigateToAdmin()"
                   [ngClass]="{
                     'bg-red-600 text-white shadow-sm': isActive('/admin'),
@@ -258,6 +259,7 @@
           
 
           <button
+            *ngIf="isAdmin$ | async"
             (click)="navigateToAdmin()"
             [ngClass]="{
               'bg-red-600 text-white shadow-sm': isActive('/admin'),

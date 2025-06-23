@@ -14,7 +14,7 @@ import {
   sendPasswordResetEmail,
   signInWithCredential
 }                               from 'firebase/auth';
-import { Observable }           from 'rxjs';
+import { Observable, BehaviorSubject }           from 'rxjs';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { Capacitor }            from '@capacitor/core';
 import { Platform }             from '@ionic/angular/standalone';
@@ -27,6 +27,27 @@ interface UserVerificationPayload {
   username: string;
   email: string;
   department: string;
+}
+
+interface UserVerificationResponse {
+  userId: string;
+  username: string;
+  email: string;
+  department: string;
+  isAuthorized: boolean;
+  isAdmin: boolean;
+  role: string;
+  createdAt: string;
+  lastLogin: string;
+  userRoles: Array<{
+    id: number;
+    role: {
+      id: number;
+      name: string;
+    };
+    assignedAt: string;
+    assignedBy: string;
+  }>;
 }
 
 @Injectable({
@@ -42,6 +63,36 @@ export class AuthService {
 
   // Expose an Observable of the current user (null if signed out)
   user$: Observable<User | null> = authState(this.auth);
+
+  // Admin status tracking
+  private isAdminSubject = new BehaviorSubject<boolean>(false);
+  public isAdmin$ = this.isAdminSubject.asObservable();
+
+  // User profile data
+  private userProfileSubject = new BehaviorSubject<UserVerificationResponse | null>(null);
+  public userProfile$ = this.userProfileSubject.asObservable();
+
+  /**
+   * Check if current user is an admin
+   */
+  isCurrentUserAdmin(): boolean {
+    return this.isAdminSubject.value;
+  }
+
+  /**
+   * Get current user profile
+   */
+  getCurrentUserProfile(): UserVerificationResponse | null {
+    return this.userProfileSubject.value;
+  }
+
+  /**
+   * Clear admin status and user profile on logout
+   */
+  private clearUserData(): void {
+    this.isAdminSubject.next(false);
+    this.userProfileSubject.next(null);
+  }
 
   /**
    * Navigate to dashboard and prevent going back to login/register
@@ -60,9 +111,9 @@ export class AuthService {
   }
 
   /**
-   * Verify user with backend API
+   * Verify user with backend API and store admin status
    */
-  private async verifyUserWithBackend(user: User, department: string = 'Default Department'): Promise<void> {
+  private async verifyUserWithBackend(user: User, department: string = 'Default Department'): Promise<UserVerificationResponse> {
     // Create form data using HttpParams for application/x-www-form-urlencoded format
     const params = new HttpParams()
       .set('firebaseUid', user.uid)
@@ -75,11 +126,24 @@ export class AuthService {
     };
 
     try {
-      const response = await this.http.post(`${environment.apiUrl}/users/verify`, params.toString(), { headers }).toPromise();
+      const response = await this.http.post<UserVerificationResponse>(`${environment.apiUrl}/users/verify`, params.toString(), { headers }).toPromise();
       console.log('User verified with backend:', response);
+      
+      if (response) {
+        // Store the admin status and user profile
+        this.isAdminSubject.next(response.isAdmin);
+        this.userProfileSubject.next(response);
+        
+        console.log('User admin status:', response.isAdmin);
+        return response;
+      }
+      
+      throw new Error('No response from backend verification');
     } catch (error) {
       console.error('Failed to verify user with backend:', error);
       console.error('Error details:', error);
+      // Clear user data on verification failure
+      this.clearUserData();
       throw error;
     }
   }
@@ -246,6 +310,9 @@ export class AuthService {
     }
     // Always sign out on web layer
     await signOut(this.auth);
+    
+    // Clear user data on sign out
+    this.clearUserData();
   }
 
   /**

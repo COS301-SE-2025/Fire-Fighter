@@ -25,6 +25,7 @@ export class NavbarComponent implements OnInit {
   isDarkMode = false;
 
   hasUnreadNotifications$: Observable<boolean>;
+  isAdmin$: Observable<boolean>;
 
   constructor(
     private authService: AuthService,
@@ -34,6 +35,7 @@ export class NavbarComponent implements OnInit {
     this.hasUnreadNotifications$ = this.notificationService.getNotifications().pipe(
       map(notifications => notifications.some(notification => !notification.read))
     );
+    this.isAdmin$ = this.authService.isAdmin$;
   }
 
   toggleMobileMenu() {
@@ -66,8 +68,6 @@ export class NavbarComponent implements OnInit {
     this.router.navigate(['/requests']);
     this.closeMobileMenu();
   }
-
-
 
   navigateToHelp() {
     this.router.navigate(['/help']);

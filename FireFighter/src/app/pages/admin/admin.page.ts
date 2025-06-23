@@ -1,9 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonContent } from '@ionic/angular/standalone';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../services/auth.service';
+import { Observable } from 'rxjs';
 
 interface EmergencyRequest {
   id: string;
@@ -49,7 +51,15 @@ interface AuditLogEntry {
   templateUrl: './admin.page.html',
   styleUrls: ['./admin.page.scss']
 })
-export class AdminPage {
+export class AdminPage implements OnInit {
+  isAdmin$: Observable<boolean>;
+  userProfile$: Observable<any>;
+
+  constructor(private authService: AuthService) {
+    this.isAdmin$ = this.authService.isAdmin$;
+    this.userProfile$ = this.authService.userProfile$;
+  }
+
   activeEmergencyRequests: EmergencyRequest[] = [
     {
       id: 'REQ-001',
@@ -447,6 +457,12 @@ export class AdminPage {
 
   // --- Ensure mock data for new columns ---
   ngOnInit() {
+    // The admin guard should prevent non-admins from reaching this page,
+    // but we can also log the current user's admin status for debugging
+    this.authService.isAdmin$.subscribe(isAdmin => {
+      console.log('Current user admin status:', isAdmin);
+    });
+
     // Add default values for new columns if missing
     this.activeEmergencyRequests.forEach(req => {
       if (!('revokedBy' in req)) req.revokedBy = '';

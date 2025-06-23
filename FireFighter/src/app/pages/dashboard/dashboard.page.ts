@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { IonContent } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { TicketService, Ticket } from '../../services/ticket.service';
@@ -40,6 +40,7 @@ export class DashboardPage implements OnInit, OnDestroy {
   isLoading = false;
   error: string | null = null;
   unreadNotificationsCount = 0;
+  adminAccessDeniedMessage: string | null = null;
   private notificationSubscription?: Subscription;
 
   // Add calculateTimeAgo function
@@ -70,13 +71,27 @@ export class DashboardPage implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private ticketService: TicketService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private route: ActivatedRoute
   ) {
   }
 
   ngOnInit() {
     this.loadTickets();
     this.subscribeToNotifications();
+    this.checkForAdminAccessError();
+  }
+
+  checkForAdminAccessError() {
+    this.route.queryParams.subscribe(params => {
+      if (params['error'] === 'admin_access_denied') {
+        this.adminAccessDeniedMessage = 'Access denied: You do not have administrator privileges to access the admin panel.';
+        // Clear the error message after 5 seconds
+        setTimeout(() => {
+          this.adminAccessDeniedMessage = null;
+        }, 5000);
+      }
+    });
   }
 
   ngOnDestroy() {
