@@ -21,7 +21,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"ticketId\": \"JIRA-123\",\n    \"description\": \"Test ticket for API testing\",\n    \"valid\": true,\n    \"createdBy\": \"test-user\",\n    \"userId\": \"user1\",\n    \"emergencyType\": \"critical-system-failure\",\n    \"emergencyContact\": \"12345\"\n}"
+							"raw": "{\n    \"ticketId\": \"JIRA-123\",\n    \"description\": \"Test ticket for API testing\",\n    \"userId\": \"user1\",\n    \"emergencyType\": \"critical-system-failure\",\n    \"emergencyContact\": \"12345\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/tickets",
@@ -49,7 +49,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"ticketId\": \"JIRA-456\",\n    \"description\": \"Invalid ticket for testing\",\n    \"valid\": false,\n    \"createdBy\": \"test-user\",\n    \"userId\": \"user2\",\n    \"emergencyType\": \"network-outage\",\n    \"emergencyContact\": \"67890\"\n}"
+							"raw": "{\n    \"ticketId\": \"JIRA-456\",\n    \"description\": \"Invalid ticket for testing\",\n    \"userId\": \"user2\",\n    \"emergencyType\": \"network-outage\",\n    \"emergencyContact\": \"67890\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/tickets",
@@ -77,7 +77,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"ticketId\": \"JIRA-123\",\n    \"description\": \"Duplicate ticket test\",\n    \"valid\": true,\n    \"createdBy\": \"test-user\",\n    \"userId\": \"user1\",\n    \"emergencyType\": \"critical-system-failure\",\n    \"emergencyContact\": \"12345\"\n}"
+							"raw": "{\n    \"ticketId\": \"JIRA-123\",\n    \"description\": \"Duplicate ticket test\",\n    \"userId\": \"user1\",\n    \"emergencyType\": \"critical-system-failure\",\n    \"emergencyContact\": \"12345\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/tickets",
@@ -198,7 +198,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"description\": \"Updated ticket description\",\n    \"valid\": false,\n    \"status\": \"Completed\",\n    \"emergencyType\": \"security-incident\",\n    \"emergencyContact\": \"09876\"\n}"
+							"raw": "{\n    \"description\": \"Updated ticket description\",\n    \"status\": \"Completed\",\n    \"emergencyType\": \"security-incident\",\n    \"emergencyContact\": \"09876\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/tickets/1",
