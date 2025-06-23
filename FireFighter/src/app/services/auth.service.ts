@@ -70,6 +70,14 @@ export class AuthService {
   private userProfileSubject = new BehaviorSubject<UserVerificationResponse | null>(null);
   public userProfile$ = this.userProfileSubject.asObservable();
 
+  // Initialization flag to prevent multiple init calls
+  private initialized = false;
+
+  constructor() {
+    // Initialize auth state restoration when service is created
+    this.initializeAuthState();
+  }
+
   /**
    * Check if current user is an admin
    */
@@ -90,6 +98,54 @@ export class AuthService {
   private clearUserData(): void {
     this.isAdminSubject.next(false);
     this.userProfileSubject.next(null);
+    // Clear localStorage data
+    localStorage.removeItem('firebase_user_profile');
+    localStorage.removeItem('firebase_user_admin_status');
+  }
+
+  /**
+   * Store user data in localStorage for persistence across page refreshes
+   */
+  private storeUserData(profile: UserVerificationResponse): void {
+    try {
+      localStorage.setItem('firebase_user_profile', JSON.stringify(profile));
+      localStorage.setItem('firebase_user_admin_status', JSON.stringify(profile.isAdmin));
+    } catch (error) {
+      console.warn('Failed to store user data in localStorage:', error);
+    }
+  }
+
+  /**
+   * Restore user data from localStorage
+   */
+  private restoreUserData(): UserVerificationResponse | null {
+    try {
+      const profileData = localStorage.getItem('firebase_user_profile');
+      const adminStatus = localStorage.getItem('firebase_user_admin_status');
+      
+      if (profileData && adminStatus) {
+        const profile = JSON.parse(profileData) as UserVerificationResponse;
+        const isAdmin = JSON.parse(adminStatus) as boolean;
+        
+        // Update the subjects with restored data
+        this.userProfileSubject.next(profile);
+        this.isAdminSubject.next(isAdmin);
+        
+        console.log('✅ User data restored from localStorage:', {
+          userId: profile.userId,
+          username: profile.username,
+          isAdmin: isAdmin
+        });
+        
+        return profile;
+      }
+    } catch (error) {
+      console.warn('Failed to restore user data from localStorage:', error);
+      // Clear potentially corrupted data
+      this.clearUserData();
+    }
+    
+    return null;
   }
 
   /**
@@ -166,6 +222,9 @@ export class AuthService {
         // Store the admin status and user profile
         this.isAdminSubject.next(response.isAdmin);
         this.userProfileSubject.next(response);
+        
+        // Persist to localStorage
+        this.storeUserData(response);
         
         console.log('👤 User profile loaded:', {
           userId: response.userId,
@@ -245,8 +304,6 @@ export class AuthService {
     console.log('Backend verification successful');
     return user;
   }
-
-
 
   /**
    * Sign in with email and password
@@ -347,5 +404,57 @@ export class AuthService {
     });
   }
 
+  /**
+   * Initialize auth state restoration when the service is created
+   * This handles the case where the user refreshes the page but Firebase auth persists
+   */
+  private initializeAuthState(): void {
+    if (this.initialized) return;
+    this.initialized = true;
 
+    console.log('🔄 Initializing auth state...');
+
+    // Subscribe to Firebase auth state changes
+    this.user$.subscribe(async (firebaseUser) => {
+      if (firebaseUser) {
+        console.log('🔥 Firebase user found on init:', firebaseUser.email);
+        
+        // Try to restore from localStorage first
+        const restoredProfile = this.restoreUserData();
+        
+        if (restoredProfile) {
+          // We have cached data, verify it's still valid by checking with backend
+          console.log('📋 User data restored from cache, verifying with backend...');
+          
+          try {
+            // Re-verify with backend to ensure data is current
+            const freshProfile = await this.verifyUserWithBackend(firebaseUser);
+            
+            // Update cache with fresh data
+            this.storeUserData(freshProfile);
+            
+            console.log('✅ User data verified and updated');
+          } catch (error) {
+            console.warn('⚠️ Backend verification failed during init, using cached data');
+            // Keep using restored data if backend is temporarily unavailable
+          }
+        } else {
+          // No cached data, verify with backend
+          console.log('🌐 No cached data found, verifying with backend...');
+          
+          try {
+            await this.verifyUserWithBackend(firebaseUser);
+          } catch (error) {
+            console.error('❌ Failed to verify user during initialization:', error);
+            // Clear any partial state
+            this.clearUserData();
+          }
+        }
+      } else {
+        console.log('👋 No Firebase user found, clearing user data');
+        // No Firebase user, clear all data
+        this.clearUserData();
+      }
+    });
+  }
 }
