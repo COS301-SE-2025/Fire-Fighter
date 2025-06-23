@@ -1,0 +1,115 @@
+/* Help Page Styles */
+.help-container {
+  .quick-actions-grid {
+    @apply gap-4 md:gap-6;
+    
+    .action-card {
+      @apply transition-all duration-300 ease-in-out;
+      
+      &:hover {
+        @apply shadow-lg;
+        transform: translateY(-2px);
+      }
+      
+      .action-icon {
+        @apply transition-transform duration-200;
+      }
+      
+      &:hover .action-icon {
+        @apply scale-110;
+      }
+    }
+  }
+  
+  .documentation-section {
+    .doc-card {
+      @apply transition-all duration-200 ease-in-out;
+      
+      &:hover {
+        @apply shadow-md;
+      }
+      
+      .doc-item {
+        @apply transition-all duration-200 ease-in-out;
+        
+        &:hover {
+          @apply transform scale-[1.02];
+        }
+      }
+    }
+  }
+  
+  .faq-section {
+    .faq-item {
+      @apply transition-all duration-200 ease-in-out;
+      
+      &:hover {
+        @apply shadow-md transform translate-y-[-1px];
+      }
+    }
+  }
+}
+
+/* Custom scrollbar for better aesthetics */
+.help-content {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-800;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400 dark:bg-gray-500;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .help-container {
+    .quick-actions-grid {
+      @apply grid-cols-1 gap-3;
+    }
+    
+    .documentation-section {
+      .doc-card .doc-item {
+        @apply text-xs;
+      }
+    }
+  }
+}
+
+/* Dark mode enhancements */
+@media (prefers-color-scheme: dark) {
+  .help-container {
+    .action-card {
+      &:hover {
+        @apply shadow-gray-900/50;
+      }
+    }
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    @apply transition-none;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus states for better keyboard navigation */
+.help-container {
+  button, [role="button"] {
+    &:focus-visible {
+      @apply ring-2 ring-blue-500 ring-offset-2 ring-offset-white dark:ring-offset-gray-900;
+    }
+  }
+}
