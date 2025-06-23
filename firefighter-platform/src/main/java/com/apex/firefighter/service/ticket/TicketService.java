@@ -1,7 +1,9 @@
 package com.apex.firefighter.service.ticket;
 
 import com.apex.firefighter.model.Ticket;
+import com.apex.firefighter.model.User;
 import com.apex.firefighter.repository.TicketRepository;
+import com.apex.firefighter.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,10 +25,12 @@ import java.util.stream.Collectors;
 public class TicketService {
 
     private final TicketRepository ticketRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public TicketService(TicketRepository ticketRepository) {
+    public TicketService(TicketRepository ticketRepository, UserRepository userRepository) {
         this.ticketRepository = ticketRepository;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -173,5 +177,134 @@ public class TicketService {
             System.out.println("❌ UPDATE FAILED: Ticket not found with ID - " + ticketId);
             throw new RuntimeException("Ticket not found with ID: " + ticketId);
         }
+    }
+
+    /**
+     * ADMIN OPERATIONS
+     */
+
+    /**
+     * Get all active tickets (Admin function)
+     * Returns tickets with status = "Active" sorted by creation date descending
+     */
+    public List<Ticket> getActiveTickets() {
+        System.out.println("🔵 ADMIN: Getting all active tickets");
+        List<Ticket> activeTickets = ticketRepository.findActiveTickets();
+        System.out.println("✅ ADMIN: Found " + activeTickets.size() + " active tickets");
+        return activeTickets;
+    }
+
+    /**
+     * Get ticket history (Admin function)
+     * Returns all tickets sorted by creation date descending
+     */
+    public List<Ticket> getTicketHistory() {
+        System.out.println("🔵 ADMIN: Getting ticket history");
+        List<Ticket> ticketHistory = ticketRepository.findAllByOrderByDateCreatedDesc();
+        System.out.println("✅ ADMIN: Found " + ticketHistory.size() + " tickets in history");
+        return ticketHistory;
+    }
+
+    /**
+     * Revoke/Close a ticket (Admin function)
+     * Only users with admin flag can revoke tickets
+     */
+    public Ticket revokeTicket(Long ticketId, String adminUserId, String rejectReason) {
+        System.out.println("🔵 ADMIN REVOKE: Attempting to revoke ticket ID - " + ticketId + " by admin - " + adminUserId);
+        
+        // Verify admin privileges
+        Optional<User> adminUser = userRepository.findById(adminUserId);
+        if (adminUser.isEmpty()) {
+            System.out.println("❌ REVOKE FAILED: Admin user not found - " + adminUserId);
+            throw new RuntimeException("Admin user not found: " + adminUserId);
+        }
+        
+        if (!adminUser.get().isAdmin()) {
+            System.out.println("❌ REVOKE FAILED: User does not have admin privileges - " + adminUserId);
+            throw new RuntimeException("User does not have admin privileges: " + adminUserId);
+        }
+        
+        // Find and update the ticket
+        Optional<Ticket> ticketOpt = ticketRepository.findById(ticketId);
+        if (ticketOpt.isEmpty()) {
+            System.out.println("❌ REVOKE FAILED: Ticket not found with ID - " + ticketId);
+            throw new RuntimeException("Ticket not found with ID: " + ticketId);
+        }
+        
+        Ticket ticket = ticketOpt.get();
+        
+        // Check if ticket is already closed
+        if ("Closed".equalsIgnoreCase(ticket.getStatus())) {
+            System.out.println("⚠️ REVOKE WARNING: Ticket is already closed - " + ticketId);
+            throw new RuntimeException("Ticket is already closed: " + ticketId);
+        }
+        
+        // Update ticket status and rejection reason
+        ticket.setStatus("Closed");
+        ticket.setRejectReason(rejectReason);
+        
+        Ticket revokedTicket = ticketRepository.save(ticket);
+        System.out.println("✅ TICKET REVOKED: " + revokedTicket.getTicketId() + " by admin " + adminUserId);
+        return revokedTicket;
+    }
+
+    /**
+     * Revoke ticket by ticket ID (Admin function)
+     */
+    public Ticket revokeTicketByTicketId(String ticketId, String adminUserId, String rejectReason) {
+        System.out.println("🔵 ADMIN REVOKE: Attempting to revoke ticket - " + ticketId + " by admin - " + adminUserId);
+        
+        // Verify admin privileges
+        Optional<User> adminUser = userRepository.findById(adminUserId);
+        if (adminUser.isEmpty()) {
+            System.out.println("❌ REVOKE FAILED: Admin user not found - " + adminUserId);
+            throw new RuntimeException("Admin user not found: " + adminUserId);
+        }
+        
+        if (!adminUser.get().isAdmin()) {
+            System.out.println("❌ REVOKE FAILED: User does not have admin privileges - " + adminUserId);
+            throw new RuntimeException("User does not have admin privileges: " + adminUserId);
+        }
+        
+        // Find and update the ticket
+        Optional<Ticket> ticketOpt = ticketRepository.findByTicketId(ticketId);
+        if (ticketOpt.isEmpty()) {
+            System.out.println("❌ REVOKE FAILED: Ticket not found with ticket ID - " + ticketId);
+            throw new RuntimeException("Ticket not found with ticket ID: " + ticketId);
+        }
+        
+        Ticket ticket = ticketOpt.get();
+        
+        // Check if ticket is already closed
+        if ("Closed".equalsIgnoreCase(ticket.getStatus())) {
+            System.out.println("⚠️ REVOKE WARNING: Ticket is already closed - " + ticketId);
+            throw new RuntimeException("Ticket is already closed: " + ticketId);
+        }
+        
+        // Update ticket status and rejection reason
+        ticket.setStatus("Closed");
+        ticket.setRejectReason(rejectReason);
+        
+        Ticket revokedTicket = ticketRepository.save(ticket);
+        System.out.println("✅ TICKET REVOKED: " + revokedTicket.getTicketId() + " by admin " + adminUserId);
+        return revokedTicket;
+    }
+
+    /**
+     * Check if user is admin
+     */
+    public boolean isUserAdmin(String userId) {
+        Optional<User> user = userRepository.findById(userId);
+        return user.isPresent() && user.get().isAdmin();
+    }
+
+    /**
+     * Get tickets by status
+     */
+    public List<Ticket> getTicketsByStatus(String status) {
+        System.out.println("🔵 QUERY: Getting tickets with status - " + status);
+        List<Ticket> tickets = ticketRepository.findByStatus(status);
+        System.out.println("✅ QUERY: Found " + tickets.size() + " tickets with status " + status);
+        return tickets;
     }
 } 
