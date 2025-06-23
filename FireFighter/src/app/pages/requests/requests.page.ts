@@ -108,7 +108,8 @@ export class RequestsPage implements OnInit {
         finalize(() => this.isLoading = false)
       )
       .subscribe(tickets => {
-        this.tickets = tickets;
+        // Sort tickets by most recently requested (dateCreated) at the top
+        this.tickets = [...tickets].sort((a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime());
       });
   }
 
