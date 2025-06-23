@@ -106,3 +106,11 @@ body {
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom utility classes */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

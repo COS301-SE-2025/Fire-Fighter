@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { map, take } from 'rxjs/operators';
-import { combineLatest } from 'rxjs';
+import { map, take, filter, timeout, catchError } from 'rxjs/operators';
+import { combineLatest, of, timer } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { NavController } from '@ionic/angular/standalone';
 
@@ -51,7 +51,19 @@ export const adminGuard: CanActivateFn = () => {
   const navCtrl = inject(NavController);
 
   return combineLatest([authService.user$, authService.isAdmin$]).pipe(
+    // Wait for the auth state to be properly initialized
+    // Skip initial emissions where user exists but admin status might not be loaded yet
+    filter(([user, isAdmin]) => {
+      // If no user, we can proceed (will redirect to login)
+      if (!user) return true;
+      
+      // If user exists, wait for admin status to be determined
+      // This prevents the race condition where user is loaded but admin status is still false
+      const userProfile = authService.getCurrentUserProfile();
+      return userProfile !== null || isAdmin === true;
+    }),
     take(1),
+    timeout(10000), // 10 second timeout to prevent infinite waiting
     map(([user, isAdmin]) => {
       // First check if user is authenticated
       if (!user) {
@@ -71,6 +83,15 @@ export const adminGuard: CanActivateFn = () => {
 
       // User is authenticated and is admin, allow access
       return true;
+    }),
+    catchError((error) => {
+      console.error('Admin guard timeout or error:', error);
+      // On timeout or error, redirect to dashboard for safety
+      navCtrl.navigateRoot('/dashboard', { 
+        animationDirection: 'forward',
+        queryParams: { error: 'auth_timeout' }
+      });
+      return of(false);
     })
   );
 }; 

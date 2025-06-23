@@ -114,25 +114,45 @@
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-700">
             <tr>
-              <th class="px-4 py-3 text-center">
-                <div class="flex items-center justify-center">
-                  <input 
-                    id="select-all-active" 
-                    type="checkbox" 
-                    [checked]="isAllActiveSelected()" 
-                    (change)="toggleSelectAllActive($event)"
-                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                  >
-                </div>
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Requester</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Reason</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-              <th class="px-6 py-3"></th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Requester</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Reason</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date & Action</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Details</th>
             </tr>
           </thead>
           <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <!-- Loading skeleton rows for active requests -->
+            <ng-container *ngIf="activeTicketsLoading">
+              <tr *ngFor="let i of [1,2,3,4,5]" class="animate-pulse">
+                <td class="px-4 py-4 text-center">
+                  <div class="flex items-center justify-center">
+                    <div class="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  </div>
+                </td>
+                <td class="px-4 py-4">
+                  <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                </td>
+                <td class="px-4 py-4">
+                  <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                </td>
+                <td class="px-4 py-4">
+                  <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
+                </td>
+                <td class="px-4 py-4">
+                  <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-full w-16"></div>
+                </td>
+                <td class="px-4 py-4 text-right">
+                  <div class="flex justify-end space-x-2">
+                    <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+                    <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+            
+            <!-- Actual data rows -->
             <ng-container *ngFor="let req of filteredAndSortedRequests">
               <tr>
                 <td class="px-4 py-4 text-center">
@@ -237,7 +257,7 @@
                     <div *ngIf="req.status === 'Revoked' && req.rejectReason" class="mb-4">
                       <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
                         <svg class="w-4 h-4 mr-2 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
                         </svg>
                         Revocation Reason
                       </h4>
@@ -284,6 +304,36 @@
             {{ filteredAndSortedRequests.length }} requests
           </div>
         </div>
+
+        <!-- Loading skeleton cards for active requests -->
+        <ng-container *ngIf="activeTicketsLoading">
+          <div *ngFor="let i of [1,2,3,4,5]" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50 overflow-hidden animate-pulse">
+            <!-- Card Header -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <div class="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  <div>
+                    <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-1"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                  </div>
+                </div>
+                <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-full w-16"></div>
+              </div>
+            </div>
+            <!-- Card Body -->
+            <div class="p-4">
+              <div class="mb-3">
+                <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-12 mb-1"></div>
+                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
+              </div>
+              <div class="flex flex-col space-y-2">
+                <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
 
         <!-- Request Cards -->
         <ng-container *ngFor="let req of filteredAndSortedRequests">
@@ -371,8 +421,8 @@
               <!-- Access Details -->
               <div class="mb-4">
                 <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
-                  <svg class="w-4 h-4 mr-2 text-green-500" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z"></path>
+                  <svg class="w-4 h-4 mr-2 text-green-500" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121.75 8.25Z"></path>
                   </svg>
                   Access Information
                 </h4>
@@ -396,7 +446,7 @@
                   </svg>
                   Justification
                 </h4>
-                <p class="text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 p-3 rounded-md border border-gray-200 dark:border-gray-700">{{ req.justification }}</p>
+                <p class="text-sm text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 p-3 rounded-md border border-gray-200 dark:border-gray-700">{{ req.justification }}</p>
               </div>
 
               <!-- Revocation Reason (if revoked) -->
@@ -419,7 +469,7 @@
                   Activity Log
                 </h4>
                 <div class="space-y-1">
-                  <div *ngFor="let log of req.logs" class="text-xs text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-900 p-2 rounded border border-gray-200 dark:border-gray-700">
+                  <div *ngFor="let log of req.logs" class="text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-2 rounded border border-gray-200 dark:border-gray-700">
                     {{ log }}
                   </div>
                 </div>
@@ -482,29 +532,61 @@
       </div>
       <!-- Desktop Table View (hidden on mobile) -->
       <div class="hidden lg:block overflow-x-auto">
-        <table class="min-w-full w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <table class="min-w-full w-full divide-y divide-gray-200 dark:divide-gray-700 table-fixed">
           <thead class="bg-gray-50 dark:bg-gray-700">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Requester</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Reason</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Final Date</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Last Action</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Action By</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Action At</th>
-              <th class="px-6 py-3"></th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Requester</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Reason</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date & Action</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Details</th>
             </tr>
           </thead>
           <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <!-- Loading skeleton rows for history -->
+            <ng-container *ngIf="historyLoading">
+              <tr *ngFor="let i of [1,2,3,4,5,6]" class="animate-pulse">
+                <td class="px-4 py-4">
+                  <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-12"></div>
+                </td>
+                <td class="px-4 py-4">
+                  <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                </td>
+                <td class="px-4 py-4">
+                  <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-36"></div>
+                </td>
+                <td class="px-4 py-4">
+                  <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-full w-16"></div>
+                </td>
+                <td class="px-4 py-4">
+                  <div class="space-y-1">
+                    <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-18"></div>
+                  </div>
+                </td>
+                <td class="px-4 py-4 text-center">
+                  <div class="flex justify-center">
+                    <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+            
+            <!-- Actual data rows -->
             <ng-container *ngFor="let req of filteredAndSortedHistory">
               <tr>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.id }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.requester }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.reason }}</td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-4 py-4 text-sm text-gray-900 dark:text-white font-mono">{{ req.id }}</td>
+                <td class="px-4 py-4 text-sm text-gray-900 dark:text-white">
+                  <div class="truncate" [title]="req.requester">{{ req.requester }}</div>
+                </td>
+                <td class="px-4 py-4 text-sm text-gray-900 dark:text-white">
+                  <div class="line-clamp-2" [title]="req.reason">{{ req.reason }}</div>
+                </td>
+                <td class="px-4 py-4">
                   <span
-                    class="inline-block align-middle rounded-full px-3 py-1 text-xs font-semibold uppercase"
+                    class="inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase"
                     [ngClass]="{
                       'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300': req.status === 'Open',
                       'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300': req.status === 'Revoked',
@@ -515,43 +597,59 @@
                     {{ req.status }}
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                  <div class="text-sm">
+                <td class="px-4 py-4 text-sm text-gray-900 dark:text-white">
+                  <div class="space-y-1">
                     <div class="font-medium">{{ req.completedAt }}</div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">
-                      {{ req.status === 'Revoked' ? 'Date Rejected' : req.status === 'Resolved' ? 'Date Completed' : 'Created' }}
+                    <div class="text-gray-500 dark:text-gray-400 truncate" [title]="req.lastAction + ' by ' + req.actionBy">
+                      {{ req.lastAction }}
+                    </div>
+                    <div class="text-gray-500 dark:text-gray-400 truncate" [title]="'by ' + req.actionBy + ' at ' + req.actionAt">
+                      by {{ req.actionBy }}
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.lastAction }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.actionBy }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.actionAt }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-right">
-                  <button (click)="toggleExpandHistory(req.id)" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors duration-200 whitespace-nowrap">
-                    Details
+                <td class="px-4 py-4 text-center">
+                  <button (click)="toggleExpandHistory(req.id)" class="inline-flex items-center justify-center px-3 py-2 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors duration-200" [title]="'View details for ' + req.requester">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span class="hidden xl:inline">Details</span>
+                    <span class="sr-only">View Details</span>
                   </button>
                 </td>
               </tr>
               <tr *ngIf="expandedHistoryId === req.id">
-                <td colspan="9" class="bg-gray-50 dark:bg-gray-800 px-4 py-4 border-t border-gray-200 dark:border-gray-700">
-                  <div class="bg-white dark:bg-gray-900 rounded-lg p-4 shadow-sm">
-                    <!-- Timeline Section -->
-                    <div class="mb-4">
-                      <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
-                        <svg class="w-4 h-4 mr-2 text-yellow-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"/>
-                        </svg>
-                        Request Timeline
-                      </h4>
-                      <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        Final Status: <span class="font-semibold">{{ req.status }}</span> • 
-                    {{ req.status === 'Revoked' ? 'Date Rejected' : req.status === 'Resolved' ? 'Date Completed' : 'Created' }}: {{ req.completedAt }}
+                <td colspan="6" class="bg-gray-50 dark:bg-gray-800 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+                  <div class="bg-white dark:bg-gray-900 rounded-lg p-6 shadow-sm">
+                    <!-- Request Summary -->
+                    <div class="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div>
+                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Request Details</h4>
+                        <div class="space-y-2 text-sm">
+                          <div><span class="font-medium text-gray-700 dark:text-gray-300">ID:</span> <span class="text-gray-900 dark:text-white">{{ req.id }}</span></div>
+                          <div><span class="font-medium text-gray-700 dark:text-gray-300">Requester:</span> <span class="text-gray-900 dark:text-white">{{ req.requester }}</span></div>
+                          <div><span class="font-medium text-gray-700 dark:text-gray-300">Status:</span> <span class="text-gray-900 dark:text-white">{{ req.status }}</span></div>
+                        </div>
+                      </div>
+                      <div>
+                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Timeline</h4>
+                        <div class="space-y-2 text-sm">
+                          <div><span class="font-medium text-gray-700 dark:text-gray-300">Final Date:</span> <span class="text-gray-900 dark:text-white">{{ req.completedAt }}</span></div>
+                          <div><span class="font-medium text-gray-700 dark:text-gray-300">Last Action:</span> <span class="text-gray-900 dark:text-white">{{ req.lastAction }}</span></div>
+                          <div><span class="font-medium text-gray-700 dark:text-gray-300">Action At:</span> <span class="text-gray-900 dark:text-white">{{ req.actionAt }}</span></div>
+                        </div>
+                      </div>
+                      <div>
+                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Reason</h4>
+                        <div class="text-sm text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 p-4 rounded-md">
+                          {{ req.reason }}
+                        </div>
                       </div>
                     </div>
 
                     <!-- Audit Log -->
                     <div *ngIf="req.auditLog && req.auditLog.length > 0">
-                      <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                      <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
                         <svg class="w-4 h-4 mr-2 text-purple-500" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"></path>
                         </svg>
@@ -589,6 +687,54 @@
             {{ filteredAndSortedHistory.length }} historical requests
           </div>
         </div>
+
+        <!-- Loading skeleton cards for history -->
+        <ng-container *ngIf="historyLoading">
+          <div *ngFor="let i of [1,2,3,4,5,6]" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50 overflow-hidden animate-pulse">
+            <!-- Card Header -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-1"></div>
+                  <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                </div>
+                <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-full w-16"></div>
+              </div>
+            </div>
+            <!-- Card Body -->
+            <div class="p-4">
+              <div class="space-y-3">
+                <div>
+                  <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-12 mb-1"></div>
+                  <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-1"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+                  </div>
+                  <div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-1"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-18"></div>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-1"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+                  </div>
+                  <div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-1"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-18"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-4">
+                <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
 
         <!-- History Cards -->
         <ng-container *ngFor="let req of filteredAndSortedHistory">
@@ -659,7 +805,7 @@
             <!-- Expanded Details (Mobile) -->
             <div *ngIf="expandedHistoryId === req.id" class="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4">
               <h3 class="text-lg font-bold mb-3 text-gray-900 dark:text-white flex items-center">
-                <svg class="w-5 h-5 mr-2 text-purple-500" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <svg class="w-4 h-4 mr-2 text-purple-500" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"></path>
                 </svg>
                 Audit Trail
