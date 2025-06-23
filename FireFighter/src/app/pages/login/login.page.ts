@@ -2,7 +2,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IonContent, IonButton } from '@ionic/angular/standalone';
+import { IonContent } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { Router, RouterLink } from '@angular/router';
 import { take } from 'rxjs/operators';
@@ -17,7 +17,6 @@ import { take } from 'rxjs/operators';
     ReactiveFormsModule,
     NgClass,
     IonContent,
-    IonButton,
     RouterLink
   ]
 })
@@ -35,13 +34,47 @@ export class LoginPage implements OnInit {
   async login() {
     try {
       this.errorMsg = null;
-      console.log('Starting Google login process...');
+      console.log('=== FIREBASE AUTH DEBUG START ===');
+      console.log('1. Starting Google login process...');
+      console.log('2. Current window location:', window.location.href);
+      console.log('3. User agent:', navigator.userAgent);
+      
+      // Test if AuthService is properly initialized
+      console.log('4. Testing AuthService initialization...');
+      if (!this.auth) {
+        console.error('❌ AuthService is not properly injected');
+        this.errorMsg = 'Authentication service error. Please check console.';
+        return;
+      }
+      console.log('✅ AuthService is initialized');
+      
+      // Test if Google Auth Provider is available
+      console.log('5. Testing Google Auth Provider...');
+      try {
+        const { GoogleAuthProvider } = await import('firebase/auth');
+        const testProvider = new GoogleAuthProvider();
+        console.log('✅ Google Auth Provider is available');
+      } catch (providerError) {
+        console.error('❌ Google Auth Provider failed to initialize:', providerError);
+        this.errorMsg = 'Google authentication provider error. Please check console.';
+        return;
+      }
+      
+      console.log('6. Calling auth service signInWithGoogle method...');
       const user = await this.auth.signInWithGoogle();
-      console.log('Logged in as', user.displayName);
+      console.log('7. ✅ Login successful:', user.displayName || user.email);
+      console.log('=== FIREBASE AUTH DEBUG END ===');
+      
       this.auth.navigateToDashboard();
     } catch (err: any) {
-      console.error('Login failed', err);
-      console.error('Error object:', JSON.stringify(err, null, 2));
+      console.error('=== FIREBASE AUTH ERROR ===');
+      console.error('Error object:', err);
+      console.error('Error type:', typeof err);
+      console.error('Error constructor:', err.constructor.name);
+      console.error('Error message:', err.message);
+      console.error('Error code:', err.code);
+      console.error('Error stack:', err.stack);
+      console.error('Full error JSON:', JSON.stringify(err, Object.getOwnPropertyNames(err)));
       
       // Handle Safari redirect case (this is expected behavior)
       if (err.message === 'Redirect initiated - should not reach this point') {
@@ -56,8 +89,12 @@ export class LoginPage implements OnInit {
           this.errorMsg = 'Sign-in was cancelled. Please try again.';
         } else if (err.code === 'auth/popup-blocked') {
           this.errorMsg = 'Pop-up was blocked. Please allow pop-ups and try again.';
+        } else if (err.code === 'auth/unauthorized-domain') {
+          this.errorMsg = 'This domain is not authorized for Firebase authentication. Please contact support.';
+        } else if (err.code === 'auth/operation-not-allowed') {
+          this.errorMsg = 'Google Sign-In is not enabled. Please contact support.';
         } else {
-          this.errorMsg = 'Google authentication failed. Please try again.';
+          this.errorMsg = `Google authentication failed: ${err.code}. Please try again.`;
         }
         return;
       }
@@ -70,8 +107,10 @@ export class LoginPage implements OnInit {
       } else if (err.message && err.message.includes('backend')) {
         this.errorMsg = 'Account verification failed. Please check your connection and try again.';
       } else {
-        this.errorMsg = 'Google login failed. Please try again.';
+        this.errorMsg = `Google login failed: ${err.message || 'Unknown error'}. Please try again.`;
       }
+      
+      console.error('=== END FIREBASE AUTH ERROR ===');
     }
   }
 
@@ -112,8 +151,6 @@ export class LoginPage implements OnInit {
       }
     }
   }
-
-
 
   async onSubmit() {
     if (this.loginForm.valid) {
@@ -189,6 +226,4 @@ export class LoginPage implements OnInit {
   navigateToAbout() {
     this.router.navigate(['/landing']);
   }
-
-
 }

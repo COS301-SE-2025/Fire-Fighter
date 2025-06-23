@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonContent } from '@ionic/angular/standalone';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
-import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { Observable } from 'rxjs';
@@ -47,7 +46,7 @@ interface AuditLogEntry {
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, IonContent, NavbarComponent, RouterLink, FormsModule],
+  imports: [CommonModule, IonContent, NavbarComponent, FormsModule],
   templateUrl: './admin.page.html',
   styleUrls: ['./admin.page.scss']
 })

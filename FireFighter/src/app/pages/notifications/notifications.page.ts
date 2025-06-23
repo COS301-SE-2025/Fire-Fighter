@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { IonContent, IonToolbar, IonTitle } from '@ionic/angular/standalone';
+import { IonContent } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService, Notification } from '../../services/notification.service';
 import { addIcons } from 'ionicons';
@@ -20,8 +20,6 @@ import { Observable } from 'rxjs';
     FormsModule,
     RouterModule,
     IonContent, 
-    IonToolbar,
-    IonTitle,
     NavbarComponent
   ]
 })

@@ -112,49 +112,91 @@ export class AuthService {
 
   /**
    * Verify user with backend API and store admin status
+   * Endpoint: POST /api/users/verify
+   * Content-Type: application/x-www-form-urlencoded
    */
   private async verifyUserWithBackend(user: User, department: string = 'Default Department'): Promise<UserVerificationResponse> {
+    console.log('🔄 Starting backend user verification...');
+    console.log('User data from Firebase:', {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName,
+      emailVerified: user.emailVerified
+    });
+
+    // Validate required fields according to API documentation
+    if (!user.uid) {
+      throw new Error('Firebase UID is required but missing');
+    }
+    if (!user.email) {
+      throw new Error('User email is required but missing');
+    }
+
+    // Prepare username - ensure it's not empty
+    const username = user.displayName || user.email.split('@')[0] || 'FireFighter User';
+    
     // Create form data using HttpParams for application/x-www-form-urlencoded format
+    // Matching the API documentation exactly:
     const params = new HttpParams()
-      .set('firebaseUid', user.uid)
-      .set('username', user.displayName || user.email?.split('@')[0] || 'Unknown User')
-      .set('email', user.email || '')
-      .set('department', department);
+      .set('firebaseUid', user.uid)           // Required: Firebase User ID (UID)
+      .set('username', username)              // Required: User's display name
+      .set('email', user.email)               // Required: User's email address
+      .set('department', department);         // Optional: User's department/division
 
     const headers = {
       'Content-Type': 'application/x-www-form-urlencoded'
     };
 
+    console.log('📤 Sending verification request to:', `${environment.apiUrl}/users/verify`);
+    console.log('Request parameters:', {
+      firebaseUid: user.uid,
+      username: username,
+      email: user.email,
+      department: department
+    });
+
     try {
-      const response = await this.http.post<UserVerificationResponse>(`${environment.apiUrl}/users/verify`, params.toString(), { headers }).toPromise();
-      console.log('User verified with backend:', response);
+      const response = await this.http.post<UserVerificationResponse>(
+        `${environment.apiUrl}/users/verify`, 
+        params.toString(), 
+        { headers }
+      ).toPromise();
+      
+      console.log('✅ User verified successfully with backend:', response);
       
       if (response) {
         // Store the admin status and user profile
         this.isAdminSubject.next(response.isAdmin);
         this.userProfileSubject.next(response);
         
-        console.log('User admin status:', response.isAdmin);
+        console.log('👤 User profile loaded:', {
+          userId: response.userId,
+          username: response.username,
+          email: response.email,
+          department: response.department,
+          isAdmin: response.isAdmin,
+          role: response.role,
+          rolesCount: response.userRoles?.length || 0
+        });
+        
         return response;
       }
       
-      throw new Error('No response from backend verification');
-    } catch (error) {
-      console.error('Failed to verify user with backend:', error);
-      console.error('Error details:', error);
+      throw new Error('No response received from backend verification');
+    } catch (error: any) {
+      console.error('❌ Backend verification failed:', error);
+      
+      // Log detailed error information for debugging
+      if (error.status) {
+        console.error(`HTTP ${error.status}: ${error.statusText}`);
+        console.error('Error URL:', error.url);
+        if (error.error) {
+          console.error('Error details:', error.error);
+        }
+      }
+      
       // Clear user data on verification failure
       this.clearUserData();
-      
-      // IMPORTANT: Sign out the user from Firebase if backend verification fails
-      // This ensures Firebase auth state stays consistent with our app state
-      try {
-        if (Capacitor.isNativePlatform()) {
-          await FirebaseAuthentication.signOut();
-        }
-        await signOut(this.auth);
-      } catch (signOutError) {
-        console.error('Error signing out after backend verification failure:', signOutError);
-      }
       
       throw error;
     }

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import { IonContent } from '@ionic/angular/standalone';
 import { ToastController } from '@ionic/angular';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { TicketService, Ticket } from '../../services/ticket.service';
@@ -16,7 +16,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
   styleUrls: ['./requests.page.scss'],
   standalone: true,
   imports: [
-    IonContent, IonHeader, IonTitle, IonToolbar, 
+    IonContent, 
     CommonModule, FormsModule, NavbarComponent
   ],
   animations: [

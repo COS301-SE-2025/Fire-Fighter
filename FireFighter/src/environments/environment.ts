@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8080/api', // Backend API URL (proxied through Angular dev server)
+  apiUrl: 'http://localhost:8080/api', // Backend API URL
   appVersion: '2.0.0-alpha.1',
   appName: 'FireFighter'
 };

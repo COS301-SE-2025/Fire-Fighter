@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IonContent, IonButton } from '@ionic/angular/standalone';
+import { IonContent } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { Router, RouterLink } from '@angular/router';
 
@@ -15,7 +15,6 @@ import { Router, RouterLink } from '@angular/router';
     ReactiveFormsModule,
     NgClass,
     IonContent,
-    IonButton,
     RouterLink
   ]
 })

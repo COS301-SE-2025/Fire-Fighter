@@ -17,6 +17,24 @@ export class AppComponent implements OnInit {
   constructor(private authService: AuthService) {}
 
   ngOnInit() {
+    console.log('=== APP INITIALIZATION DEBUG ===');
+    console.log('1. App component initialized');
+    console.log('2. Platform:', Capacitor.getPlatform());
+    console.log('3. Is native platform:', Capacitor.isNativePlatform());
+    
+    // Test Firebase initialization
+    console.log('4. Testing Firebase Auth service injection...');
+    if (this.authService) {
+      console.log('✅ Auth service injected successfully');
+      
+      // Subscribe to auth state to see if Firebase is working
+      this.authService.user$.subscribe(user => {
+        console.log('5. Firebase auth state change:', user ? `User: ${user.uid}` : 'No user');
+      });
+    } else {
+      console.error('❌ Auth service injection failed');
+    }
+    
     // Initialize Firebase Authentication with Capacitor on mobile platforms
     if (Capacitor.isNativePlatform()) {
       this.initializeCapacitorAuth();
@@ -24,6 +42,7 @@ export class AppComponent implements OnInit {
     }
 
     initFlowbite();
+    console.log('=== END APP INITIALIZATION DEBUG ===');
   }
 
   private async initializeCapacitorAuth() {

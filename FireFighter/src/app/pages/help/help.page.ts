@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import { IonContent } from '@ionic/angular/standalone';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { VersionService } from '../../services/version.service';
 import { trigger, state, style, transition, animate } from '@angular/animations';
@@ -11,7 +11,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
   templateUrl: './help.page.html',
   styleUrls: ['./help.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, NavbarComponent],
+  imports: [IonContent, CommonModule, FormsModule, NavbarComponent],
   animations: [
     trigger('modalBackdrop', [
       state('hidden', style({
