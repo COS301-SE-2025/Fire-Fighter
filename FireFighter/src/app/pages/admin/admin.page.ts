@@ -4,10 +4,13 @@ import { IonContent } from '@ionic/angular/standalone';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
-import { Observable } from 'rxjs';
+import { AdminService, AdminTicket } from '../../services/admin.service';
+import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
+import { map, catchError, startWith, switchMap } from 'rxjs/operators';
 
 interface EmergencyRequest {
   id: string;
+  databaseId?: number; // Added for API revocation
   requester: string;
   reason: string;
   status: string;
@@ -21,6 +24,7 @@ interface EmergencyRequest {
   revokedBy?: string;
   revokedAt?: string;
   revocationReason?: string;
+  rejectReason?: string; // Added for displaying reject reason from API
 }
 
 interface EmergencyRequestHistory {
@@ -53,53 +57,35 @@ interface AuditLogEntry {
 export class AdminPage implements OnInit {
   isAdmin$: Observable<boolean>;
   userProfile$: Observable<any>;
+  
+  // Loading and error states
+  loading = false;
+  error: string | null = null;
+  
+  // Data refresh trigger
+  private refreshSubject = new BehaviorSubject<void>(undefined);
 
-  constructor(private authService: AuthService) {
+  constructor(
+    private authService: AuthService,
+    private adminService: AdminService
+  ) {
     this.isAdmin$ = this.authService.isAdmin$;
     this.userProfile$ = this.authService.userProfile$;
   }
 
-  activeEmergencyRequests: EmergencyRequest[] = [
-    {
-      id: 'REQ-001',
-      requester: 'Alice Smith',
-      reason: 'Fire in server room',
-      status: 'Open',
-      accessStart: '2024-06-10 09:00',
-      accessEnd: '2024-06-10 12:00',
-      system: 'Server Room A',
-      justification: 'Critical server overheating, needs immediate fix.',
-      logs: ['2024-06-10 09:01: Access granted', '2024-06-10 09:15: Entered server room'],
-      email: 'alice.smith@example.com',
-      phone: '555-123-4567'
-    },
-    {
-      id: 'REQ-002',
-      requester: 'Bob Johnson',
-      reason: 'Smoke detected in lab',
-      status: 'In Progress',
-      accessStart: '2024-06-10 10:00',
-      accessEnd: '2024-06-10 13:00',
-      system: 'Lab 2B',
-      justification: 'Investigate smoke alarm and ensure safety.',
-      logs: ['2024-06-10 10:01: Access granted'],
-      email: 'bob.johnson@example.com',
-      phone: '555-987-6543'
-    },
-    {
-      id: 'REQ-003',
-      requester: 'Carol Lee',
-      reason: 'Sprinkler malfunction',
-      status: 'Open',
-      accessStart: '2024-06-10 11:00',
-      accessEnd: '2024-06-10 14:00',
-      system: 'Main Hall',
-      justification: 'Sprinkler system not activating, needs repair.',
-      logs: ['2024-06-10 11:01: Access granted'],
-      email: 'carol.lee@example.com',
-      phone: '555-555-5555'
-    }
-  ];
+  activeEmergencyRequests: EmergencyRequest[] = [];
+  
+  // Observable for active tickets from API
+  activeTickets$: Observable<EmergencyRequest[]> = this.refreshSubject.pipe(
+    switchMap(() => this.adminService.getActiveTickets()),
+    map(tickets => tickets.map(ticket => this.adminService.mapAdminTicketToEmergencyRequest(ticket))),
+    catchError(err => {
+      this.error = err.message;
+      console.error('Error loading active tickets:', err);
+      return [];
+    }),
+    startWith([])
+  );
 
   get activeTicketsCount() {
     return this.activeEmergencyRequests.length;
@@ -126,30 +112,98 @@ export class AdminPage implements OnInit {
 
   // Confirm revocation (single or bulk)
   confirmRevocation() {
-    if (!this.revocationReason.trim()) return;
-    let revokedIds: string[] = [];
-    if (this.revocationTarget === 'bulk') {
-      revokedIds = this.activeEmergencyRequests
-        .filter(req => this.selectedActiveIds.has(req.id))
-        .map(req => req.id);
-      this.activeEmergencyRequests = this.activeEmergencyRequests.map(req => {
-        if (this.selectedActiveIds.has(req.id)) {
-          return { ...req, status: 'revoked', revocationReason: this.revocationReason };
-        }
-        return req;
-      });
-      this.selectedActiveIds.clear();
-    } else if (typeof this.revocationTarget === 'string') {
-      revokedIds = [this.revocationTarget];
-      this.activeEmergencyRequests = this.activeEmergencyRequests.map(req =>
-        req.id === this.revocationTarget ? { ...req, status: 'revoked', revocationReason: this.revocationReason } : req
-      );
+    if (!this.revocationReason.trim()) {
+      this.error = 'Revocation reason is required';
+      return;
     }
-    // Remove revoked requests from the table
-    this.activeEmergencyRequests = this.activeEmergencyRequests.filter(req => !revokedIds.includes(req.id));
+    
+    this.loading = true;
+    this.error = null;
+    
+    if (this.revocationTarget === 'bulk') {
+      // Handle bulk revocation
+      this.handleBulkRevocation();
+    } else if (typeof this.revocationTarget === 'string') {
+      // Handle single revocation
+      this.handleSingleRevocation(this.revocationTarget);
+    }
+  }
+  
+  private handleSingleRevocation(ticketId: string) {
+    // Find the ticket to get its database ID from the populated array
+    const ticket = this.activeEmergencyRequests.find(t => t.id === ticketId);
+    if (!ticket || !ticket.databaseId) {
+      this.error = 'Ticket not found or missing database ID';
+      this.loading = false;
+      return;
+    }
+    
+    console.log('Revoking ticket:', { ticketId, databaseId: ticket.databaseId, reason: this.revocationReason });
+    
+    this.adminService.revokeTicketById(ticket.databaseId, this.revocationReason).subscribe({
+      next: (response) => {
+        console.log('Ticket revoked successfully:', response);
+        this.refreshData();
+        this.closeRevocationModal();
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error revoking ticket:', err);
+        this.error = err.message || 'Failed to revoke ticket';
+        this.loading = false;
+      }
+    });
+  }
+  
+  private handleBulkRevocation() {
+    // Get selected tickets from the populated array
+    const selectedTickets = this.activeEmergencyRequests.filter(t => this.selectedActiveIds.has(t.id) && t.databaseId);
+    
+    if (selectedTickets.length === 0) {
+      this.error = 'No valid tickets selected for revocation';
+      this.loading = false;
+      return;
+    }
+    
+    console.log('Bulk revoking tickets:', selectedTickets.map(t => ({ ticketId: t.id, databaseId: t.databaseId })));
+    
+    // Revoke each selected ticket
+    let completedCount = 0;
+    let hasError = false;
+    
+    selectedTickets.forEach(ticket => {
+      this.adminService.revokeTicketById(ticket.databaseId!, this.revocationReason).subscribe({
+        next: (response) => {
+          console.log('Ticket revoked successfully:', response);
+          completedCount++;
+          
+          if (completedCount === selectedTickets.length && !hasError) {
+            this.refreshData();
+            this.closeRevocationModal();
+            this.selectedActiveIds.clear();
+            this.loading = false;
+          }
+        },
+        error: (err) => {
+          console.error('Error revoking ticket:', err);
+          if (!hasError) {
+            hasError = true;
+            this.error = `Failed to revoke some tickets: ${err.message}`;
+            this.loading = false;
+          }
+        }
+      });
+    });
+  }
+  
+  private closeRevocationModal() {
     this.showRevocationModal = false;
     this.revocationTarget = null;
     this.revocationReason = '';
+  }
+  
+  refreshData() {
+    this.refreshSubject.next();
   }
 
   cancelRevocation() {
@@ -158,44 +212,55 @@ export class AdminPage implements OnInit {
     this.revocationReason = '';
   }
 
-  requestHistory: EmergencyRequestHistory[] = [
-    {
-      id: 'REQ-004',
-      requester: 'David Kim',
-      reason: 'False alarm',
-      status: 'Closed',
-      completedAt: '2024-06-01 10:15',
-      auditLog: [
-        { action: 'Created', by: 'David Kim', at: '2024-06-01 09:00' },
-        { action: 'Reviewed', by: 'Admin Alice', at: '2024-06-01 09:30' },
-        { action: 'Closed', by: 'Admin Bob', at: '2024-06-01 10:15', reason: 'Confirmed false alarm' }
-      ]
-    },
-    {
-      id: 'REQ-005',
-      requester: 'Eva Green',
-      reason: 'Routine drill',
-      status: 'Closed',
-      completedAt: '2024-06-02 14:30',
-      auditLog: [
-        { action: 'Created', by: 'Eva Green', at: '2024-06-02 13:00' },
-        { action: 'Approved', by: 'Admin Alice', at: '2024-06-02 13:10' },
-        { action: 'Closed', by: 'Admin Bob', at: '2024-06-02 14:30', reason: 'Drill completed' }
-      ]
-    },
-    {
-      id: 'REQ-006',
-      requester: 'Frank Moore',
-      reason: 'Fire in kitchen',
-      status: 'Resolved',
-      completedAt: '2024-06-03 09:45',
-      auditLog: [
-        { action: 'Created', by: 'Frank Moore', at: '2024-06-03 08:30' },
-        { action: 'Dispatched', by: 'Admin Alice', at: '2024-06-03 08:35' },
-        { action: 'Resolved', by: 'Admin Bob', at: '2024-06-03 09:45', reason: 'Fire extinguished, area cleared' }
-      ]
+  requestHistory: EmergencyRequestHistory[] = [];
+  
+  // Observable for ticket history from API
+  ticketHistory$: Observable<EmergencyRequestHistory[]> = this.refreshSubject.pipe(
+    switchMap(() => this.adminService.getTicketHistory()),
+    map(tickets => tickets.map(ticket => this.mapAdminTicketToHistory(ticket))),
+    catchError(err => {
+      this.error = err.message;
+      console.error('Error loading ticket history:', err);
+      return [];
+    }),
+    startWith([])
+  );
+  
+  // Helper method to map AdminTicket to EmergencyRequestHistory
+  private mapAdminTicketToHistory(ticket: AdminTicket): EmergencyRequestHistory {
+    // Use dateCompleted for completed/rejected tickets, otherwise use dateCreated
+    const completedTimestamp = ticket.dateCompleted || ticket.dateCreated;
+    
+    // Build audit log based on ticket status
+    const auditLog: AuditLogEntry[] = [
+      { action: 'Created', by: ticket.userId, at: ticket.dateCreated }
+    ];
+    
+    // Add completion/rejection entry if ticket is not active
+    if (ticket.status === 'Rejected' && ticket.dateCompleted) {
+      auditLog.push({ 
+        action: 'Rejected', 
+        by: 'Admin', 
+        at: ticket.dateCompleted, 
+        reason: ticket.rejectReason || 'No reason provided' 
+      });
+    } else if (ticket.status === 'Completed' && ticket.dateCompleted) {
+      auditLog.push({ 
+        action: 'Completed', 
+        by: 'System', 
+        at: ticket.dateCompleted 
+      });
     }
-  ];
+    
+    return {
+      id: ticket.ticketId,
+      requester: ticket.userId,
+      reason: ticket.description,
+      status: this.adminService.mapTicketStatus(ticket.status),
+      completedAt: completedTimestamp,
+      auditLog: auditLog
+    };
+  }
 
   exportHistoryToCSV() {
     const headers = [
@@ -231,8 +296,7 @@ export class AdminPage implements OnInit {
   statusOptions = [
     { value: '', label: 'All Statuses' },
     { value: 'Open', label: 'Open' },
-    { value: 'In Progress', label: 'In Progress' },
-    { value: 'Closed', label: 'Closed' },
+    { value: 'Revoked', label: 'Revoked' },
     { value: 'Resolved', label: 'Resolved' }
   ];
 
@@ -265,8 +329,8 @@ export class AdminPage implements OnInit {
     } else if (this.sortOption === 'requester') {
       filtered = filtered.slice().sort((a, b) => a.requester.localeCompare(b.requester));
     } else if (this.sortOption === 'urgency') {
-      // For demo, sort by status: Open > In Progress > Resolved > Closed
-      const order = { 'Open': 1, 'In Progress': 2, 'Resolved': 3, 'Closed': 4 };
+      // For demo, sort by status: Open > Revoked > Resolved
+      const order = { 'Open': 1, 'Revoked': 2, 'Resolved': 3 };
       filtered = filtered.slice().sort((a, b) =>
         (order[a.status as keyof typeof order] ?? 99) - (order[b.status as keyof typeof order] ?? 99)
       );
@@ -288,7 +352,7 @@ export class AdminPage implements OnInit {
 
   historyStatusOptions = [
     { value: '', label: 'All Statuses' },
-    { value: 'Closed', label: 'Closed' },
+    { value: 'Revoked', label: 'Revoked' },
     { value: 'Resolved', label: 'Resolved' }
   ];
 
@@ -368,8 +432,8 @@ export class AdminPage implements OnInit {
   bulkExportSelected() {
     const selected = this.filteredAndSortedRequests.filter(req => this.selectedActiveIds.has(req.id));
     if (selected.length === 0) return;
-    const headers = ['ID', 'Requester', 'Reason', 'Status', 'Access Start', 'Access End', 'System', 'Justification', 'Email', 'Phone'];
-    const rows = selected.map(req => [req.id, req.requester, req.reason, req.status, req.accessStart, req.accessEnd, req.system, req.justification, req.email, req.phone]);
+    const headers = ['ID', 'Requester', 'Reason', 'Status', 'Access Start', 'Access End', 'System', 'Justification', 'Reject Reason', 'Email', 'Phone'];
+    const rows = selected.map(req => [req.id, req.requester, req.reason, req.status, req.accessStart, req.accessEnd, req.system, req.justification, req.rejectReason || '', req.email, req.phone]);
     const csvContent = [headers, ...rows].map(e => e.map(field => '"' + String(field).replace(/"/g, '""') + '"').join(',')).join('\r\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -384,7 +448,7 @@ export class AdminPage implements OnInit {
 
   exportActiveToCSV() {
     const headers = [
-      'ID', 'Requester', 'Reason', 'Status', 'Access Start', 'Access End', 'System/Resource', 'Justification/Notes', 'Revoked By', 'Revoked At', 'Email', 'Phone'
+      'ID', 'Requester', 'Reason', 'Status', 'Access Start', 'Access End', 'System/Resource', 'Justification/Notes', 'Revoked By', 'Revoked At', 'Reject Reason', 'Email', 'Phone'
     ];
     const rows = this.filteredAndSortedRequests.map(req => [
       req.id,
@@ -397,6 +461,7 @@ export class AdminPage implements OnInit {
       req.justification,
       req.revokedBy || '',
       req.revokedAt || '',
+      req.rejectReason || '',
       req.email,
       req.phone
     ]);
@@ -454,35 +519,49 @@ export class AdminPage implements OnInit {
     alert('Contact Requester for request ' + id + ' (stub)');
   }
 
-  // --- Ensure mock data for new columns ---
   ngOnInit() {
+    console.log('AdminPage initialized');
+    
     // The admin guard should prevent non-admins from reaching this page,
     // but we can also log the current user's admin status for debugging
     this.authService.isAdmin$.subscribe(isAdmin => {
       console.log('Current user admin status:', isAdmin);
     });
 
-    // Add default values for new columns if missing
-    this.activeEmergencyRequests.forEach(req => {
-      if (!('revokedBy' in req)) req.revokedBy = '';
-      if (!('revokedAt' in req)) req.revokedAt = '';
-      if (!('revocationReason' in req)) req.revocationReason = '';
-    });
-    // Ensure audit log and derived properties for history records
-    if (this.requestHistory) {
-      this.requestHistory.forEach((req: any) => {
-        if (Array.isArray(req.auditLog) && req.auditLog.length > 0) {
-          const last = req.auditLog[req.auditLog.length - 1];
-          req.lastAction = last.action;
-          req.actionBy = last.by;
-          req.actionAt = last.at;
-        } else {
-          req.lastAction = '-';
-          req.actionBy = '-';
-          req.actionAt = '-';
-          req.auditLog = [];
-        }
+    // Subscribe to active tickets to populate the local array for filtering
+    this.activeTickets$.subscribe(tickets => {
+      console.log('Admin page received tickets:', tickets);
+      console.log('Database IDs:', tickets.map(t => ({ id: t.id, databaseId: t.databaseId })));
+      this.activeEmergencyRequests = tickets;
+      
+      // Add default values for new columns if missing
+      this.activeEmergencyRequests.forEach(req => {
+        if (!('revokedBy' in req)) req.revokedBy = '';
+        if (!('revokedAt' in req)) req.revokedAt = '';
+        if (!('revocationReason' in req)) req.revocationReason = '';
       });
-    }
+    });
+    
+    // Subscribe to ticket history to populate the local array for filtering
+    this.ticketHistory$.subscribe(history => {
+      this.requestHistory = history;
+      
+      // Ensure audit log and derived properties for history records
+      if (this.requestHistory) {
+        this.requestHistory.forEach((req: any) => {
+          if (Array.isArray(req.auditLog) && req.auditLog.length > 0) {
+            const last = req.auditLog[req.auditLog.length - 1];
+            req.lastAction = last.action;
+            req.actionBy = last.by;
+            req.actionAt = last.at;
+          } else {
+            req.lastAction = '-';
+            req.actionBy = '-';
+            req.actionAt = '-';
+            req.auditLog = req.auditLog || [];
+          }
+        });
+      }
+    });
   }
 }

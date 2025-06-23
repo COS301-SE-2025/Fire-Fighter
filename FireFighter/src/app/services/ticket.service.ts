@@ -15,6 +15,7 @@ export interface Ticket {
   userId: string;
   emergencyType?: string;
   emergencyContact?: string;
+  duration: number; // Duration in minutes
 }
 
 @Injectable({
@@ -56,7 +57,8 @@ export class TicketService {
       requestDate: typeof ticket.requestDate === 'string' ? ticket.requestDate : (ticket.requestDate ? ticket.requestDate.toString().split('T')[0] : new Date().toISOString().split('T')[0]),
       userId: ticket.userId,
       emergencyType: ticket.emergencyType,
-      emergencyContact: ticket.emergencyContact
+      emergencyContact: ticket.emergencyContact,
+      duration: ticket.duration || 60 // Default to 60 if not present
     };
   }
 
@@ -80,10 +82,12 @@ export class TicketService {
       );
     } else {
       // Get current user info from AuthService
+      let currentUserId = '';
       let currentUserEmail = '';
       let currentUserName = '';
       const user = (this.authService as any).auth.currentUser;
       if (user) {
+        currentUserId = user.uid || '';
         currentUserEmail = user.email || '';
         currentUserName = user.displayName || user.email?.split('@')[0] || '';
       }
@@ -92,9 +96,10 @@ export class TicketService {
         ticketId: generateTicketId(),
         description: ticketData.reason,
         requestDate: ticketData.requestDate || new Date().toISOString().split('T')[0],
-        userId: ticketData.userId || currentUserEmail || currentUserName || 'unknown',
+        userId: currentUserId || currentUserEmail || currentUserName || 'unknown',
         emergencyType: ticketData.emergencyType || 'critical-system-failure',
-        emergencyContact: ticketData.emergencyContact || ''
+        emergencyContact: ticketData.emergencyContact || '',
+        duration: ticketData.duration || 60
       };
       return this.http.post<any>(this.apiUrl, backendTicketData).pipe(
         map(ticket => this.mapBackendTicketToFrontend(ticket)),

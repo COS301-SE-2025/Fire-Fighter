@@ -9,6 +9,7 @@ import { calculateTimeAgo } from '../../services/mock-ticket-database';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { trigger, state, style, transition, animate } from '@angular/animations';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-requests',
@@ -61,6 +62,7 @@ export class RequestsPage implements OnInit {
   private _searchQuery = '';
   tickets: Ticket[] = [];
   error: string | null = null;
+  private currentUid: string = '';
 
   // Add getter and setter for searchQuery
   get searchQuery(): string {
@@ -135,11 +137,18 @@ export class RequestsPage implements OnInit {
 
   constructor(
     private toastController: ToastController,
-    private ticketService: TicketService
+    private ticketService: TicketService,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
     this.loadTickets();
+    this.authService.user$.subscribe(user => {
+      if (user) {
+        this.currentUid = user.uid;
+        this.loadTickets();
+      }
+    });
   }
 
   loadTickets() {
@@ -154,8 +163,10 @@ export class RequestsPage implements OnInit {
         finalize(() => this.isLoading = false)
       )
       .subscribe(tickets => {
+        // Filter tickets for current user only using user.uid
+        const userTickets = tickets.filter(ticket => ticket.userId === this.currentUid);
         // Sort: Active first, then Completed, then Rejected, each by most recent dateCreated
-        this.tickets = [...tickets].sort((a, b) => {
+        this.tickets = [...userTickets].sort((a, b) => {
           const statusOrder = (status: string) => status === 'Active' ? 0 : status === 'Completed' ? 1 : 2;
           const statusDiff = statusOrder(a.status) - statusOrder(b.status);
           if (statusDiff !== 0) return statusDiff;
@@ -235,6 +246,9 @@ export class RequestsPage implements OnInit {
       return;
     }
 
+     // Set userId to current user's uid
+     this.newTicket.userId = this.currentUid;
+
     if (!this.isDurationValid()) {
       const toast = await this.toastController.create({
         message: this.getDurationErrorMessage(),
@@ -288,7 +302,13 @@ export class RequestsPage implements OnInit {
     await toast.present();
   }
 
+  
+
   trackByTicketId(index: number, ticket: Ticket): string {
     return ticket.id;
   }
+
+  
 }
+
+

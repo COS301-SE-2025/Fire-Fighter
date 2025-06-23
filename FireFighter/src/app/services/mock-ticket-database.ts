@@ -61,7 +61,8 @@ const initialMockTickets: Ticket[] = [
     requestDate: new Date().toISOString().split('T')[0],
     userId: 'max.mueller@bmw.de',
     emergencyType: 'critical-system-failure',
-    emergencyContact: '+49 89 382 12345'
+    emergencyContact: '+49 89 382 12345',
+    duration: 60
   },
   {
     id: 'BMW-FF-739456',
@@ -71,7 +72,8 @@ const initialMockTickets: Ticket[] = [
     requestDate: new Date().toISOString().split('T')[0],
     userId: 'sarah.weber@bmw.de',
     emergencyType: 'critical-system-failure',
-    emergencyContact: '+49 89 382 67890'
+    emergencyContact: '+49 89 382 67890',
+    duration: 60
   },
   {
     id: 'BMW-FF-682157',
@@ -81,7 +83,8 @@ const initialMockTickets: Ticket[] = [
     requestDate: new Date().toISOString().split('T')[0],
     userId: 'thomas.schmidt@bmw.de',
     emergencyType: 'network-outage',
-    emergencyContact: '+49 89 382 54321'
+    emergencyContact: '+49 89 382 54321',
+    duration: 60
   },
   {
     id: 'BMW-FF-591834',
@@ -91,7 +94,8 @@ const initialMockTickets: Ticket[] = [
     requestDate: new Date().toISOString().split('T')[0],
     userId: 'anna.fischer@bmw.de',
     emergencyType: 'security-incident',
-    emergencyContact: '+49 89 382 98765'
+    emergencyContact: '+49 89 382 98765',
+    duration: 60
   },
   {
     id: 'BMW-FF-463729',
@@ -101,7 +105,8 @@ const initialMockTickets: Ticket[] = [
     requestDate: new Date().toISOString().split('T')[0],
     userId: 'michael.hoffman@bmw.de',
     emergencyType: 'critical-system-failure',
-    emergencyContact: '+49 89 382 13579'
+    emergencyContact: '+49 89 382 13579',
+    duration: 60
   },
   {
     id: 'BMW-FF-357291',
@@ -111,7 +116,8 @@ const initialMockTickets: Ticket[] = [
     requestDate: new Date().toISOString().split('T')[0],
     userId: 'petra.lang@bmw.de',
     emergencyType: 'user-lockout',
-    emergencyContact: '+49 89 382 24680'
+    emergencyContact: '+49 89 382 24680',
+    duration: 60
   }
 ];
 
@@ -155,7 +161,8 @@ const loadFromStorage = (): Ticket[] => {
   const parsedTickets = JSON.parse(stored);
   return parsedTickets.map((ticket: any) => ({
     ...ticket,
-    dateCreated: new Date(ticket.dateCreated)
+    dateCreated: new Date(ticket.dateCreated),
+    duration: ticket.duration || 60
   }));
 };
 
@@ -194,7 +201,8 @@ export class MockTicketDatabase {
       id: generateBmwTicketId(),
       status: 'Active',
       dateCreated: new Date(),
-      ...ticketData
+      ...ticketData,
+      duration: ticketData.duration || 60
     };
     
     this.tickets.unshift(newTicket);
@@ -243,7 +251,8 @@ export class MockTicketDatabase {
       requestDate: new Date().toISOString().split('T')[0],
       userId: 'system.generated@bmw.de',
       emergencyType: randomEmergencyType,
-      emergencyContact: '+49 89 382 00000'
+      emergencyContact: '+49 89 382 00000',
+      duration: 60
     };
 
     this.tickets.unshift(randomTicket);
