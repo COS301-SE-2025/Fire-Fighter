@@ -35,36 +35,6 @@ export class RegisterPage implements OnInit {
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]]
     }, { validator: this.passwordMatchValidator });
-
-    // Check for redirect result (for Safari users returning from Google OAuth)
-    try {
-      const user = await this.auth.checkForRedirectResult();
-      if (user) {
-        // User successfully signed in via redirect, navigate to dashboard
-        console.log('Redirect registration successful, navigating to dashboard');
-        this.auth.navigateToDashboard();
-      }
-    } catch (error: any) {
-      console.error('Error handling redirect result:', error);
-      
-      // Handle specific errors from redirect flow
-      if (error.status === 400 || error.status === 401) {
-        this.errorMsg = 'Account verification failed. Your Google account may not be authorized. Please contact support.';
-      } else if (error.status === 500) {
-        this.errorMsg = 'Server error during account verification. Please try again later.';
-      } else if (error.code && error.code.startsWith('auth/')) {
-        if (error.code === 'auth/popup-closed-by-user') {
-          // This shouldn't happen with redirect, but just in case
-          this.errorMsg = 'Sign-in was cancelled. Please try again.';
-        } else {
-          this.errorMsg = 'Google authentication failed. Please try again.';
-        }
-      } else if (error.message && error.message.includes('backend')) {
-        this.errorMsg = 'Account verification failed. Please check your connection and try again.';
-      } else {
-        this.errorMsg = 'Google registration failed. Please try again.';
-      }
-    }
   }
 
   passwordMatchValidator(form: FormGroup) {
@@ -121,14 +91,6 @@ export class RegisterPage implements OnInit {
       this.auth.navigateToDashboard();
     } catch (err: any) {
       console.error('Google registration failed', err);
-      console.error('Error object:', JSON.stringify(err, null, 2));
-      
-      // Handle Safari redirect case (this is expected behavior)
-      if (err.message === 'Redirect initiated - should not reach this point') {
-        console.log('Safari redirect initiated - this is expected');
-        // This is normal for Safari - the redirect is happening
-        return;
-      }
       
       // Handle Firebase authentication errors (before backend verification)
       if (err.code && err.code.startsWith('auth/')) {
@@ -155,44 +117,7 @@ export class RegisterPage implements OnInit {
     }
   }
 
-  async tryPopupRegister() {
-    try {
-      this.errorMsg = null;
-      console.log('Trying popup registration as fallback...');
-      
-      // Clear the redirect processing flag to allow a fresh start
-      this.auth.clearRedirectProcessingFlag();
-      
-      const user = await this.auth.signInWithGooglePopup();
-      console.log('Popup registration successful, registered as', user.displayName);
-      this.auth.navigateToDashboard();
-    } catch (err: any) {
-      console.error('Popup registration failed', err);
-      
-      // Handle Firebase authentication errors (before backend verification)
-      if (err.code && err.code.startsWith('auth/')) {
-        if (err.code === 'auth/popup-closed-by-user') {
-          this.errorMsg = 'Sign-in was cancelled. Please try again.';
-        } else if (err.code === 'auth/popup-blocked') {
-          this.errorMsg = 'Pop-up was blocked. Please allow pop-ups and try again.';
-        } else {
-          this.errorMsg = 'Google authentication failed. Please try again.';
-        }
-        return;
-      }
-      
-      // Handle backend verification errors
-      if (err.status === 400 || err.status === 401) {
-        this.errorMsg = 'Account verification failed. Your Google account may not be authorized. Please contact support.';
-      } else if (err.status === 500) {
-        this.errorMsg = 'Server error during account verification. Please try again later.';
-      } else if (err.message && err.message.includes('backend')) {
-        this.errorMsg = 'Account verification failed. Please check your connection and try again.';
-      } else {
-        this.errorMsg = 'Popup registration failed. Please try again.';
-      }
-    }
-  }
+
 
   navigateToAbout() {
     this.router.navigate(['/landing']);
