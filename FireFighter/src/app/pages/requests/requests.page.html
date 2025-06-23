@@ -1,0 +1,555 @@
+<app-navbar></app-navbar>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
+    
+    <!-- Header Section -->
+    <div class="mb-6">
+      <div class="flex items-center space-x-3">
+        <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-red-600 rounded-lg">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h1 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
+            Emergency Requests
+          </h1>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Manage your FireFighter emergency access requests and sessions
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      
+      <!-- Total Requests -->
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50 p-4">
+        <div class="flex items-center">
+          <div class="flex items-center justify-center w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-full">
+            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ tickets.length }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Requests -->
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50 p-4">
+        <div class="flex items-center">
+          <div class="flex items-center justify-center w-10 h-10 bg-green-100 dark:bg-green-900/50 rounded-full">
+            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ activeTicketsCount }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Completed Requests -->
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50 p-4">
+        <div class="flex items-center">
+          <div class="flex items-center justify-center w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-full">
+            <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Completed</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ completedTicketsCount }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rejected Requests -->
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50 p-4">
+        <div class="flex items-center">
+          <div class="flex items-center justify-center w-10 h-10 bg-red-100 dark:bg-red-900/50 rounded-full">
+            <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Rejected</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ rejectedTicketsCount }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50 mb-6">
+      <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+          
+          <!-- Search Bar -->
+          <div class="flex-1 lg:max-w-md">
+            <label for="search" class="sr-only">Search requests</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </div>
+              <input
+                id="search"
+                type="text"
+                [(ngModel)]="searchQuery"
+                placeholder="Search by ticket ID or reason..."
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-red-500 dark:focus:border-red-500"
+              />
+            </div>
+          </div>
+
+          <!-- Status Filter Tabs -->
+          <div class="flex space-x-1 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+            <button
+              class="px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200"
+              [ngClass]="{
+                'bg-white text-red-600 shadow-sm dark:bg-gray-800 dark:text-red-400': filter === 'all',
+                'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300': filter !== 'all'
+              }"
+              (click)="filter = 'all'"
+            >
+              All
+            </button>
+            <button
+              class="px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200"
+              [ngClass]="{
+                'bg-white text-red-600 shadow-sm dark:bg-gray-800 dark:text-red-400': filter === 'active',
+                'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300': filter !== 'active'
+              }"
+              (click)="filter = 'active'"
+            >
+              Active
+            </button>
+            <button
+              class="px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200"
+              [ngClass]="{
+                'bg-white text-red-600 shadow-sm dark:bg-gray-800 dark:text-red-400': filter === 'completed',
+                'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300': filter !== 'completed'
+              }"
+              (click)="filter = 'completed'"
+            >
+              Completed
+            </button>
+            <button
+              class="px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200"
+              [ngClass]="{
+                'bg-white text-red-600 shadow-sm dark:bg-gray-800 dark:text-red-400': filter === 'rejected',
+                'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300': filter !== 'rejected'
+              }"
+              (click)="filter = 'rejected'"
+            >
+              Rejected
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+        <span class="ml-2 text-sm text-gray-500 dark:text-gray-400">Loading requests...</span>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="error && !isLoading" class="p-4">
+        <div class="flex p-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-300 border border-red-200 dark:border-red-800">
+          <svg class="flex-shrink-0 inline w-4 h-4 mr-3 mt-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+          </svg>
+          <div>
+            <span class="font-medium">Error!</span> {{ error }}
+          </div>
+        </div>
+      </div>
+
+      <!-- No Tickets Message -->
+      <div *ngIf="!isLoading && !error && filteredTickets.length === 0" class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">No requests found</h3>
+        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+          {{ searchQuery ? 'Try adjusting your search criteria' : 'Create your first emergency access request to get started' }}
+        </p>
+        <div class="mt-6" *ngIf="!searchQuery">
+          <button
+            (click)="setOpen(true)"
+            class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800 transition-colors duration-200"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Create New Request
+          </button>
+        </div>
+      </div>
+
+      <!-- Request Cards -->
+      <div class="divide-y divide-gray-200 dark:divide-gray-700" *ngIf="!isLoading && !error && filteredTickets.length > 0">
+                 <div 
+           *ngFor="let ticket of filteredTickets; trackBy: trackByTicketId"
+           class="px-4 sm:px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200"
+         >
+           <!-- Mobile Layout: Stack everything vertically -->
+           <div class="sm:hidden">
+             <!-- Header with Status -->
+             <div class="flex items-center justify-between mb-3">
+               <div class="flex items-center space-x-2">
+                 <div [ngClass]="{
+                   'bg-green-100 dark:bg-green-900/50': ticket.status === 'Completed',
+                   'bg-blue-100 dark:bg-blue-900/50': ticket.status === 'Active',
+                   'bg-red-100 dark:bg-red-900/50': ticket.status === 'Rejected'
+                 }" class="flex items-center justify-center w-8 h-8 rounded-full">
+                   
+                   <!-- Completed Icon -->
+                   <svg *ngIf="ticket.status === 'Completed'" class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                   </svg>
+                   
+                   <!-- Active Icon -->
+                   <svg *ngIf="ticket.status === 'Active'" class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                   </svg>
+                   
+                   <!-- Rejected Icon -->
+                   <svg *ngIf="ticket.status === 'Rejected'" class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                   </svg>
+                 </div>
+                 
+                 <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ ticket.id }}</h3>
+               </div>
+               
+               <span
+                 [ngClass]="{
+                   'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300': ticket.status === 'Completed',
+                   'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300': ticket.status === 'Active',
+                   'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300': ticket.status === 'Rejected'
+                 }"
+                 class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+               >
+                 {{ ticket.status }}
+               </span>
+             </div>
+             
+             <!-- Time -->
+             <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+               Requested {{ calculateTimeAgo(ticket.dateCreated) }}
+             </p>
+             
+             <!-- Details -->
+             <div class="space-y-2 mb-4">
+               <p class="text-sm text-gray-600 dark:text-gray-300">
+                 <span class="font-medium">Reason:</span> {{ ticket.reason }}
+               </p>
+               <p class="text-sm text-gray-500 dark:text-gray-400">
+                 <span class="font-medium">Request Date:</span> {{ ticket.requestDate | date }}
+               </p>
+             </div>
+             
+             <!-- Actions - Full width buttons on mobile -->
+             <div class="flex flex-col space-y-2">
+               <button
+                 *ngIf="ticket.status === 'Active'"
+                 class="w-full inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 focus:ring-4 focus:ring-red-300 dark:bg-red-900/50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/70 transition-colors duration-200"
+               >
+                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                 </svg>
+                 Revoke Access
+               </button>
+               <button
+                 class="w-full inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors duration-200"
+               >
+                 View Details
+               </button>
+             </div>
+           </div>
+
+           <!-- Desktop Layout: Side by side -->
+           <div class="hidden sm:block">
+             <div class="flex items-start justify-between">
+               <!-- Ticket Info -->
+               <div class="flex-1 min-w-0">
+                 <div class="flex items-center space-x-3 mb-2">
+                   <!-- Status Icon -->
+                   <div class="flex-shrink-0">
+                     <div [ngClass]="{
+                       'bg-green-100 dark:bg-green-900/50': ticket.status === 'Completed',
+                       'bg-blue-100 dark:bg-blue-900/50': ticket.status === 'Active',
+                       'bg-red-100 dark:bg-red-900/50': ticket.status === 'Rejected'
+                     }" class="flex items-center justify-center w-10 h-10 rounded-full">
+                       
+                       <!-- Completed Icon -->
+                       <svg *ngIf="ticket.status === 'Completed'" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                       </svg>
+                       
+                       <!-- Active Icon -->
+                       <svg *ngIf="ticket.status === 'Active'" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                       </svg>
+                       
+                       <!-- Rejected Icon -->
+                       <svg *ngIf="ticket.status === 'Rejected'" class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                       </svg>
+                     </div>
+                   </div>
+
+                   <!-- Ticket Details -->
+                   <div class="flex-1 min-w-0">
+                     <div class="flex items-center space-x-2">
+                       <h3 class="text-lg font-semibold text-gray-900 dark:text-white truncate">{{ ticket.id }}</h3>
+                       <span
+                         [ngClass]="{
+                           'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300': ticket.status === 'Completed',
+                           'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300': ticket.status === 'Active',
+                           'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300': ticket.status === 'Rejected'
+                         }"
+                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap"
+                       >
+                         {{ ticket.status }}
+                       </span>
+                     </div>
+                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                       Requested {{ calculateTimeAgo(ticket.dateCreated) }}
+                     </p>
+                   </div>
+                 </div>
+                 
+                 <!-- Reason -->
+                 <div class="mt-3">
+                   <p class="text-sm text-gray-600 dark:text-gray-300">
+                     <span class="font-medium">Reason:</span> {{ ticket.reason }}
+                   </p>
+                   <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                     <span class="font-medium">Request Date:</span> {{ ticket.requestDate | date }}
+                   </p>
+                 </div>
+               </div>
+
+               <!-- Actions -->
+               <div class="flex items-center space-x-2 ml-6 flex-shrink-0">
+                 <button
+                   *ngIf="ticket.status === 'Active'"
+                   class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 focus:ring-4 focus:ring-red-300 dark:bg-red-900/50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/70 transition-colors duration-200 whitespace-nowrap"
+                 >
+                   <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                   </svg>
+                   Revoke Access
+                 </button>
+                 <button
+                   class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors duration-200 whitespace-nowrap"
+                 >
+                   View Details
+                 </button>
+               </div>
+             </div>
+           </div>
+         </div>
+      </div>
+    </div>
+
+    <!-- Sticky Footer with New Request Button -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-3 shadow-lg z-50">
+      <div class="max-w-md mx-auto">
+        <button
+          (click)="setOpen(true)"
+          [disabled]="isLoading"
+          class="w-full inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+        >
+          <svg *ngIf="!isLoading" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+          <div *ngIf="isLoading" class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+          <span *ngIf="!isLoading">New Emergency Request</span>
+          <span *ngIf="isLoading">Loading...</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Create Ticket Modal -->
+    <div *ngIf="isModalOpen" class="fixed inset-0 z-[9999] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <!-- Background overlay -->
+      <div class="flex items-center justify-center min-h-screen pt-20 pb-4 px-4 text-center">
+        <div [@modalBackdrop]="modalAnimationState" class="fixed inset-0 bg-gray-500 bg-opacity-75" aria-hidden="true" (click)="setOpen(false)"></div>
+
+        <!-- Modal panel -->
+        <div [@modalPanel]="modalAnimationState" class="relative bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl w-full max-w-md mx-auto p-5 border border-gray-200 dark:border-gray-700 z-10">
+          
+          <!-- Modal Header -->
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-gray-200 dark:border-gray-600">
+            <div class="flex items-center space-x-3">
+              <div class="flex items-center justify-center w-10 h-10 bg-red-100 dark:bg-red-900/50 rounded-full">
+                <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="modal-title">
+                  Create Emergency Request
+                </h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  Submit a new FireFighter emergency access request
+                </p>
+              </div>
+            </div>
+            <button 
+              (click)="setOpen(false)" 
+              [disabled]="isLoading"
+              class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white transition-colors duration-200"
+            >
+              <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+              </svg>
+              <span class="sr-only">Close modal</span>
+            </button>
+          </div>
+
+          <!-- Modal Body -->
+          <form (ngSubmit)="createTicket()" class="space-y-4">
+            
+            <!-- Request Date Field -->
+            <div>
+              <label for="request-date" class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                Request Date
+                <span class="text-red-500">*</span>
+              </label>
+              <input
+                id="request-date"
+                type="date"
+                [(ngModel)]="newTicket.requestDate"
+                name="requestDate"
+                required
+                [disabled]="isLoading"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-red-500 dark:focus:border-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+            </div>
+
+            <!-- Emergency Type Selection -->
+            <div>
+              <label for="emergency-type" class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                Emergency Type
+              </label>
+              <select
+                id="emergency-type"
+                [(ngModel)]="newTicket.emergencyType"
+                name="emergencyType"
+                [disabled]="isLoading"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-red-500 dark:focus:border-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option value="">Select emergency type</option>
+                <option value="critical-system-failure">Critical System Failure</option>
+                <option value="security-incident">Security Incident</option>
+                <option value="data-recovery">Data Recovery</option>
+                <option value="network-outage">Network Outage</option>
+                <option value="user-lockout">User Lockout</option>
+                <option value="other">Other Emergency</option>
+              </select>
+            </div>
+
+            <!-- Reason Field -->
+            <div>
+              <label for="reason" class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                Reason for Emergency Access
+                <span class="text-red-500">*</span>
+              </label>
+              <textarea
+                id="reason"
+                [(ngModel)]="newTicket.reason"
+                name="reason"
+                placeholder="Please provide a detailed explanation of the emergency situation and why immediate access is required. Include specific systems, users, or data affected..."
+                required
+                [disabled]="isLoading"
+                rows="4"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-red-500 dark:focus:border-red-500 disabled:opacity-50 disabled:cursor-not-allowed resize-none"
+              ></textarea>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Be specific about the nature of the emergency and systems requiring access.
+              </p>
+            </div>
+
+            <!-- Emergency Contact -->
+            <div>
+              <label for="contact" class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                Emergency Contact
+              </label>
+              <input
+                id="contact"
+                type="text"
+                [(ngModel)]="newTicket.emergencyContact"
+                name="emergencyContact"
+                placeholder="Phone number or email for urgent contact"
+                [disabled]="isLoading"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-red-500 dark:focus:border-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+            </div>
+
+            <!-- Warning Notice -->
+            <div class="flex p-3 text-sm text-amber-800 rounded-lg bg-amber-50 dark:bg-gray-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+              <svg class="flex-shrink-0 inline w-4 h-4 mr-3 mt-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+              </svg>
+              <div>
+                <span class="font-medium">Emergency Access Notice:</span>
+                <ul class="mt-1 space-y-1 list-disc list-inside">
+                  <li>Emergency access is granted for 2 hours maximum</li>
+                  <li>All activities are logged and audited</li>
+                  <li>Misuse may result in disciplinary action</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex items-center justify-end space-x-3 pt-3 mt-4 border-t border-gray-200 dark:border-gray-600">
+              <button
+                type="button"
+                (click)="setOpen(false)"
+                [disabled]="isLoading"
+                class="py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                [disabled]="isLoading || !newTicket.reason?.trim()"
+                class="inline-flex items-center py-2.5 px-5 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-700 dark:hover:bg-red-800 dark:focus:ring-red-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg *ngIf="!isLoading" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                </svg>
+                <div *ngIf="isLoading" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                <span *ngIf="!isLoading">Submit Emergency Request</span>
+                <span *ngIf="isLoading">Submitting...</span>
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div
+      *ngIf="showToast"
+      class="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded shadow-lg
+             dark:bg-blue-500"
+    >
+      Access for ticket INC-1234 has been revoked
+    </div>
+  </div>
+</ion-content>
