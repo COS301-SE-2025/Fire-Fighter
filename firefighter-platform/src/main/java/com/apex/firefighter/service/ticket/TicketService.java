@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -206,7 +207,7 @@ public class TicketService {
     }
 
     /**
-     * Revoke/Close a ticket (Admin function)
+     * Revoke/Reject a ticket (Admin function)
      * Only users with admin flag can revoke tickets
      */
     public Ticket revokeTicket(Long ticketId, String adminUserId, String rejectReason) {
@@ -233,15 +234,16 @@ public class TicketService {
         
         Ticket ticket = ticketOpt.get();
         
-        // Check if ticket is already closed
-        if ("Closed".equalsIgnoreCase(ticket.getStatus())) {
-            System.out.println("⚠️ REVOKE WARNING: Ticket is already closed - " + ticketId);
-            throw new RuntimeException("Ticket is already closed: " + ticketId);
+        // Check if ticket is already completed or rejected
+        if ("Completed".equalsIgnoreCase(ticket.getStatus()) || "Rejected".equalsIgnoreCase(ticket.getStatus())) {
+            System.out.println("⚠️ REVOKE WARNING: Ticket is already " + ticket.getStatus().toLowerCase() + " - " + ticketId);
+            throw new RuntimeException("Ticket is already " + ticket.getStatus().toLowerCase() + ": " + ticketId);
         }
         
-        // Update ticket status and rejection reason
-        ticket.setStatus("Closed");
+        // Update ticket status, rejection reason, and completion date
+        ticket.setStatus("Rejected");
         ticket.setRejectReason(rejectReason);
+        ticket.setDateCompleted(LocalDateTime.now());
         
         Ticket revokedTicket = ticketRepository.save(ticket);
         System.out.println("✅ TICKET REVOKED: " + revokedTicket.getTicketId() + " by admin " + adminUserId);
@@ -275,15 +277,16 @@ public class TicketService {
         
         Ticket ticket = ticketOpt.get();
         
-        // Check if ticket is already closed
-        if ("Closed".equalsIgnoreCase(ticket.getStatus())) {
-            System.out.println("⚠️ REVOKE WARNING: Ticket is already closed - " + ticketId);
-            throw new RuntimeException("Ticket is already closed: " + ticketId);
+        // Check if ticket is already completed or rejected
+        if ("Completed".equalsIgnoreCase(ticket.getStatus()) || "Rejected".equalsIgnoreCase(ticket.getStatus())) {
+            System.out.println("⚠️ REVOKE WARNING: Ticket is already " + ticket.getStatus().toLowerCase() + " - " + ticketId);
+            throw new RuntimeException("Ticket is already " + ticket.getStatus().toLowerCase() + ": " + ticketId);
         }
         
-        // Update ticket status and rejection reason
-        ticket.setStatus("Closed");
+        // Update ticket status, rejection reason, and completion date
+        ticket.setStatus("Rejected");
         ticket.setRejectReason(rejectReason);
+        ticket.setDateCompleted(LocalDateTime.now());
         
         Ticket revokedTicket = ticketRepository.save(ticket);
         System.out.println("✅ TICKET REVOKED: " + revokedTicket.getTicketId() + " by admin " + adminUserId);
