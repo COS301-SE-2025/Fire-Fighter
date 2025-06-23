@@ -43,6 +43,9 @@ export class DashboardPage implements OnInit, OnDestroy {
   adminAccessDeniedMessage: string | null = null;
   private notificationSubscription?: Subscription;
 
+  // Add a public usernames map for template access
+  public usernames: { [userId: string]: string } = {};
+
   // Add calculateTimeAgo function
   calculateTimeAgo = calculateTimeAgo;
 
@@ -147,6 +150,18 @@ export class DashboardPage implements OnInit, OnDestroy {
           if (bExpired && !aExpired) return -1;
           // Otherwise, keep original order
           return 0;
+        });
+
+        // Fetch usernames for unique userIds
+        const uniqueUserIds = Array.from(new Set(this.tickets.map(t => t.userId)));
+        uniqueUserIds.forEach(userId => {
+          if (!this.usernames[userId]) {
+            this.authService.getUserProfileById(userId).subscribe(profile => {
+              this.usernames[userId] = profile.username || profile.email || userId;
+            }, () => {
+              this.usernames[userId] = userId; // fallback if error
+            });
+          }
         });
       });
   }

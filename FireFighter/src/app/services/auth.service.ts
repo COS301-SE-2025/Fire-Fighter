@@ -70,6 +70,8 @@ export class AuthService {
   private userProfileSubject = new BehaviorSubject<UserVerificationResponse | null>(null);
   public userProfile$ = this.userProfileSubject.asObservable();
 
+  usernames: { [userId: string]: string } = {};
+
   /**
    * Check if current user is an admin
    */
@@ -347,5 +349,11 @@ export class AuthService {
     });
   }
 
-
+  /**
+   * Get user profile by userId
+   * Endpoint: GET /api/users/{userId}
+   */
+  getUserProfileById(userId: string): Observable<UserVerificationResponse> {
+    return this.http.get<UserVerificationResponse>(`${environment.apiUrl}/users/${userId}`);
+  }
 }

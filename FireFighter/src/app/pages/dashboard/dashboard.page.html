@@ -103,7 +103,7 @@
                    <tr *ngFor="let ticket of activeTicketsForDisplay">
                      <td class="px-3 lg:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ ticket.id }}</td>
                      <td class="px-3 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                       <div class="truncate max-w-24 lg:max-w-none">{{ ticket.userId }}</div>
+                       <div class="truncate max-w-24 lg:max-w-none">{{ usernames[ticket.userId] || ticket.userId }}</div>
                      </td>
                      <td class="hidden lg:table-cell px-6 py-4 text-sm text-gray-900 dark:text-white max-w-xs truncate">{{ ticket.reason }}</td>
                      <td class="px-3 lg:px-6 py-4 whitespace-nowrap">
@@ -140,7 +140,7 @@
                      <div class="flex items-center space-x-3">
                        <div>
                          <div class="font-semibold text-gray-900 dark:text-white">{{ ticket.id }}</div>
-                         <div class="text-sm text-gray-600 dark:text-gray-400">{{ ticket.userId }}</div>
+                         <div class="text-sm text-gray-600 dark:text-gray-400">{{ usernames[ticket.userId] || ticket.userId }}</div>
                        </div>
                      </div>
                      <div class="flex flex-col items-end space-y-2">
