@@ -12,13 +12,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tickets")
-@CrossOrigin(origins = {
-    "http://localhost:8100", 
-    "http://127.0.0.1:8100", 
-    "https://localhost:8100",
-    "ionic://localhost",
-    "capacitor://localhost"
-}, allowCredentials = "true")
 public class TicketController {
 
     private final TicketService ticketService;
