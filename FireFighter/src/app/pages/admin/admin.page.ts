@@ -62,6 +62,10 @@ export class AdminPage implements OnInit {
   loading = false;
   error: string | null = null;
   
+  // Specific loading states for different data
+  activeTicketsLoading = true;
+  historyLoading = true;
+  
   // Data refresh trigger
   private refreshSubject = new BehaviorSubject<void>(undefined);
 
@@ -77,9 +81,16 @@ export class AdminPage implements OnInit {
   
   // Observable for active tickets from API
   activeTickets$: Observable<EmergencyRequest[]> = this.refreshSubject.pipe(
-    switchMap(() => this.adminService.getActiveTickets()),
-    map(tickets => tickets.map(ticket => this.adminService.mapAdminTicketToEmergencyRequest(ticket))),
+    switchMap(() => {
+      this.activeTicketsLoading = true;
+      return this.adminService.getActiveTickets();
+    }),
+    map(tickets => {
+      this.activeTicketsLoading = false;
+      return tickets.map(ticket => this.adminService.mapAdminTicketToEmergencyRequest(ticket));
+    }),
     catchError(err => {
+      this.activeTicketsLoading = false;
       this.error = err.message;
       console.error('Error loading active tickets:', err);
       return [];
@@ -216,9 +227,16 @@ export class AdminPage implements OnInit {
   
   // Observable for ticket history from API
   ticketHistory$: Observable<EmergencyRequestHistory[]> = this.refreshSubject.pipe(
-    switchMap(() => this.adminService.getTicketHistory()),
-    map(tickets => tickets.map(ticket => this.mapAdminTicketToHistory(ticket))),
+    switchMap(() => {
+      this.historyLoading = true;
+      return this.adminService.getTicketHistory();
+    }),
+    map(tickets => {
+      this.historyLoading = false;
+      return tickets.map(ticket => this.mapAdminTicketToHistory(ticket));
+    }),
     catchError(err => {
+      this.historyLoading = false;
       this.error = err.message;
       console.error('Error loading ticket history:', err);
       return [];
