@@ -37,11 +37,12 @@
 
               <!-- User Information -->
               <div class="flex-1 min-w-0">
-                <div class="flex items-center space-x-3 mb-2">
+                <!-- Desktop: Username and role tag in same line, Mobile: Role tag underneath -->
+                <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-3 mb-2">
                   <h2 class="text-2xl font-bold text-gray-900 dark:text-white truncate">
                     {{ getUserDisplayName(user) }}
                   </h2>
-                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-2 sm:mt-0 self-start"
                         [ngClass]="{
                           'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300': getUserRole() === 'Administrator',
                           'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300': getUserRole() === 'User'
