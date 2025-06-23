@@ -49,6 +49,10 @@ public class Ticket {
     @JsonProperty("rejectReason")
     private String rejectReason;
 
+    @Column(name = "date_completed")
+    @JsonProperty("dateCompleted")
+    private LocalDateTime dateCompleted;
+
     // Default constructor
     public Ticket() {
         this.dateCreated = LocalDateTime.now();
@@ -78,6 +82,7 @@ public class Ticket {
     public void setEmergencyType(String emergencyType) { this.emergencyType = emergencyType; }
     public void setEmergencyContact(String emergencyContact) { this.emergencyContact = emergencyContact; }
     public void setRejectReason(String rejectReason) { this.rejectReason = rejectReason; }
+    public void setDateCompleted(LocalDateTime dateCompleted) { this.dateCompleted = dateCompleted; }
 
     // getters
     public Long getId() { return id; }
@@ -90,4 +95,5 @@ public class Ticket {
     public String getEmergencyType() { return emergencyType; }
     public String getEmergencyContact() { return emergencyContact; }
     public String getRejectReason() { return rejectReason; }
+    public LocalDateTime getDateCompleted() { return dateCompleted; }
 }

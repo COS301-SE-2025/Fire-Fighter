@@ -10,6 +10,18 @@ This document describes the admin-specific endpoints for ticket management in th
 - **User Validation**: The system validates admin status before allowing ticket revocation
 - **Security**: Admin user ID must be provided and validated for revocation operations
 
+## Important: Unified dateCompleted Field
+
+The API uses a **unified `dateCompleted` field** for both completed and rejected tickets:
+- **Active tickets**: `dateCompleted` is `null`
+- **Completed tickets**: `dateCompleted` contains the completion timestamp
+- **Rejected tickets**: `dateCompleted` contains the rejection timestamp
+
+**Frontend Display Logic**: 
+- Show as **"Date Rejected"** when `status = "Rejected"`
+- Show as **"Date Completed"** when `status = "Completed"`
+- Don't show when `status = "Active"` (field is null)
+
 ---
 
 ## 📋 Admin Endpoints
@@ -33,7 +45,8 @@ This document describes the admin-specific endpoints for ticket management in th
         "userId": "user123",
         "emergencyType": "critical-system-failure",
         "emergencyContact": "12345",
-        "rejectReason": null
+        "rejectReason": null,
+        "dateCompleted": null
     }
 ]
 ```
@@ -65,9 +78,9 @@ This document describes the admin-specific endpoints for ticket management in th
 **Description**: Retrieves tickets filtered by specific status
 
 **Parameters**:
-- `status` (path): Status to filter by (e.g., "Active", "Closed", "Pending")
+- `status` (path): Status to filter by (e.g., "Active", "Completed", "Rejected")
 
-**Example**: `GET /api/tickets/admin/status/Closed`
+**Example**: `GET /api/tickets/admin/status/Completed`
 
 **Response**: Array of tickets with the specified status
 
@@ -81,7 +94,7 @@ This document describes the admin-specific endpoints for ticket management in th
 
 **Endpoint**: `PUT /api/tickets/admin/revoke/{id}`
 
-**Description**: Revokes (closes) a ticket by its database ID. Only admin users can perform this action.
+**Description**: Revokes (rejects) a ticket by its database ID. Only admin users can perform this action.
 
 **Parameters**:
 - `id` (path): Database ID of the ticket to revoke
@@ -103,13 +116,14 @@ This document describes the admin-specific endpoints for ticket management in th
         "id": 1,
         "ticketId": "JIRA-123",
         "description": "Critical system failure",
-        "status": "Closed",
+        "status": "Rejected",
         "dateCreated": "2024-01-15T10:30:00",
         "requestDate": "2024-01-15",
         "userId": "user123",
         "emergencyType": "critical-system-failure",
         "emergencyContact": "12345",
-        "rejectReason": "Duplicate request - resolved via phone call"
+        "rejectReason": "Duplicate request - resolved via phone call",
+        "dateCompleted": "2024-01-15T11:45:30"
     }
 }
 ```
@@ -141,9 +155,9 @@ This document describes the admin-specific endpoints for ticket management in th
     "error": "Ticket not found with ID: 123"
 }
 
-// Ticket already closed
+// Ticket already completed or rejected
 {
-    "error": "Ticket is already closed: 123"
+    "error": "Ticket is already completed: 123"
 }
 ```
 
@@ -158,7 +172,7 @@ This document describes the admin-specific endpoints for ticket management in th
 
 **Endpoint**: `PUT /api/tickets/admin/revoke/ticket-id/{ticketId}`
 
-**Description**: Revokes (closes) a ticket by its ticket ID. Only admin users can perform this action.
+**Description**: Revokes (rejects) a ticket by its ticket ID. Only admin users can perform this action.
 
 **Parameters**:
 - `ticketId` (path): Ticket ID (e.g., "JIRA-123")
@@ -196,15 +210,24 @@ This document describes the admin-specific endpoints for ticket management in th
 
 ### Required SQL Migration
 
-Run this SQL script to add the `reject_reason` column:
+Run these SQL scripts to set up the required columns:
 
 ```sql
--- Add reject_reason column to tickets table
+-- Add reject_reason column to tickets table (if not exists)
 ALTER TABLE firefighter.tickets 
-ADD COLUMN reject_reason TEXT;
+ADD COLUMN IF NOT EXISTS reject_reason TEXT;
 
--- Add comment to the column for documentation
+-- Add date_completed column to tickets table (if not exists)
+ALTER TABLE firefighter.tickets 
+ADD COLUMN IF NOT EXISTS date_completed TIMESTAMP;
+
+-- Remove redundant date_rejected column (if exists)
+ALTER TABLE firefighter.tickets 
+DROP COLUMN IF EXISTS date_rejected;
+
+-- Add comments to the columns for documentation
 COMMENT ON COLUMN firefighter.tickets.reject_reason IS 'Reason provided when a ticket is rejected or revoked by an admin';
+COMMENT ON COLUMN firefighter.tickets.date_completed IS 'Timestamp when the ticket reached its final state (completed normally or rejected by admin)';
 ```
 
 ---
@@ -312,14 +335,74 @@ const revokeTicket = async (ticketId, adminUserId, rejectReason) => {
 };
 ```
 
+### Frontend Display Logic for dateCompleted Field
+
+The `dateCompleted` field serves as a unified timestamp for when tickets reach their final state. The frontend should display this field differently based on the ticket status:
+
+```javascript
+// Function to get the appropriate label for the completion date
+const getCompletionDateLabel = (ticket) => {
+    if (!ticket.dateCompleted) {
+        return null; // Active ticket - no completion date
+    }
+    
+    return ticket.status === 'Rejected' ? 'Date Rejected' : 'Date Completed';
+};
+
+// Function to format ticket completion information for display
+const formatTicketCompletion = (ticket) => {
+    const label = getCompletionDateLabel(ticket);
+    
+    if (!label) {
+        return 'Active'; // Or any other indicator for active tickets
+    }
+    
+    const formattedDate = new Date(ticket.dateCompleted).toLocaleString();
+    return `${label}: ${formattedDate}`;
+};
+
+// Example usage in ticket display
+const renderTicketStatus = (ticket) => {
+    const completionInfo = formatTicketCompletion(ticket);
+    
+    return (
+        <div className="ticket-status">
+            <span className={`status ${ticket.status.toLowerCase()}`}>
+                {ticket.status}
+            </span>
+            {ticket.dateCompleted && (
+                <div className="completion-info">
+                    <strong>{getCompletionDateLabel(ticket)}:</strong> 
+                    {new Date(ticket.dateCompleted).toLocaleString()}
+                </div>
+            )}
+            {ticket.rejectReason && (
+                <div className="reject-reason">
+                    <strong>Reason:</strong> {ticket.rejectReason}
+                </div>
+            )}
+        </div>
+    );
+};
+```
+
+### Display Rules Summary
+
+| Ticket Status | dateCompleted Field Display | Additional Info |
+|---------------|----------------------------|------------------|
+| **Active** | Not shown (field is null) | Show as "Active" or "Pending" |
+| **Rejected** | **"Date Rejected: [timestamp]"** | Also show `rejectReason` |
+| **Completed** | **"Date Completed: [timestamp]"** | No additional reason needed |
+
 ---
 
 ## 📊 Status Workflow
 
 ```
-Active → Closed (via admin revocation)
-Active → Completed (via normal resolution)
-Closed → [Final state]
+Active → Rejected (via admin revocation)
+Active → Completed (via normal resolution or automatic expiration)
+Rejected → [Final state]
+Completed → [Final state]
 ```
 
-The admin revocation sets status to "Closed" and adds a reject reason, creating a clear audit trail for administrative actions. 
+The admin revocation sets status to "Rejected" and adds a reject reason, creating a clear audit trail for administrative actions while distinguishing from naturally completed tickets. 
