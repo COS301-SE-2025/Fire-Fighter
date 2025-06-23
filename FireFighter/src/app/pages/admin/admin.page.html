@@ -114,12 +114,20 @@
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-700">
             <tr>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <input 
+                  id="select-all-active-desktop" 
+                  type="checkbox" 
+                  [checked]="isAllActiveSelected()" 
+                  (change)="toggleSelectAllActive($event)"
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                >
+              </th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Requester</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Reason</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date & Action</th>
-              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Details</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -143,8 +151,8 @@
                 <td class="px-4 py-4">
                   <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-full w-16"></div>
                 </td>
-                <td class="px-4 py-4 text-right">
-                  <div class="flex justify-end space-x-2">
+                <td class="px-4 py-4 text-center">
+                  <div class="flex justify-center space-x-2">
                     <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
                     <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
                   </div>
@@ -166,10 +174,10 @@
                     >
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.id }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.requester }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.reason }}</td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.id }}</td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.requester }}</td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.reason }}</td>
+                <td class="px-4 py-4 whitespace-nowrap">
                   <span
                     class="inline-block align-middle rounded-full px-3 py-1 text-xs font-semibold uppercase"
                     [ngClass]="{
@@ -182,7 +190,7 @@
                     {{ req.status }}
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right">
+                <td class="px-4 py-4 whitespace-nowrap text-center">
                   <button (click)="revokeAccess(req.id)" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 focus:ring-4 focus:ring-red-300 dark:bg-red-900/50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/70 transition-colors duration-200 whitespace-nowrap">
                     Revoke Access
                   </button>
