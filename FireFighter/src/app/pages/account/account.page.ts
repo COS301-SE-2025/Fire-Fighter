@@ -18,6 +18,7 @@ import { User } from 'firebase/auth';
 })
 export class AccountPage implements OnInit, OnDestroy {
   user$: Observable<User | null>;
+  isAdmin$: Observable<boolean>;
   private subscription: Subscription = new Subscription();
 
   constructor(
@@ -25,6 +26,7 @@ export class AccountPage implements OnInit, OnDestroy {
     private router: Router
   ) {
     this.user$ = this.authService.user$;
+    this.isAdmin$ = this.authService.isAdmin$;
   }
 
   ngOnInit() {
@@ -34,19 +36,9 @@ export class AccountPage implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  // Get user role - in a real app this would come from your backend
-  getUserRole(user: User | null): string {
-    if (!user) return 'Guest';
-    
-    // Example logic: Check if user email contains admin domains
-    const adminDomains = ['admin.firefighter.com', 'management.firefighter.com'];
-    const userEmail = user.email?.toLowerCase() || '';
-    
-    if (adminDomains.some(domain => userEmail.includes(domain))) {
-      return 'Administrator';
-    }
-    
-    return 'User';
+  // Get user role - uses the actual admin status from the API
+  getUserRole(): string {
+    return this.authService.isCurrentUserAdmin() ? 'Administrator' : 'User';
   }
 
   // Get user display name safely
