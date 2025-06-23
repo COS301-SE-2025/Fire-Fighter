@@ -58,6 +58,9 @@ export class AdminPage implements OnInit {
   isAdmin$: Observable<boolean>;
   userProfile$: Observable<any>;
   
+  // User names mapping (userId -> username)
+  usernames: { [userId: string]: string } = {};
+  
   // Loading and error states
   loading = false;
   error: string | null = null;
@@ -87,7 +90,12 @@ export class AdminPage implements OnInit {
     }),
     map(tickets => {
       this.activeTicketsLoading = false;
-      return tickets.map(ticket => this.adminService.mapAdminTicketToEmergencyRequest(ticket));
+      const requests = tickets.map(ticket => this.adminService.mapAdminTicketToEmergencyRequest(ticket));
+      
+      // Populate usernames for active requests
+      this.populateUsernames(requests.map(r => r.requester));
+      
+      return requests;
     }),
     catchError(err => {
       this.activeTicketsLoading = false;
@@ -233,7 +241,17 @@ export class AdminPage implements OnInit {
     }),
     map(tickets => {
       this.historyLoading = false;
-      return tickets.map(ticket => this.mapAdminTicketToHistory(ticket));
+      const history = tickets.map(ticket => this.mapAdminTicketToHistory(ticket));
+      
+      // Populate usernames for history requests (requester and actionBy)
+      const allUserIds = new Set<string>();
+      history.forEach(h => {
+        allUserIds.add(h.requester);
+        if (h.actionBy) allUserIds.add(h.actionBy);
+      });
+      this.populateUsernames(Array.from(allUserIds));
+      
+      return history;
     }),
     catchError(err => {
       this.historyLoading = false;
@@ -580,6 +598,24 @@ export class AdminPage implements OnInit {
           }
         });
       }
+    });
+  }
+
+  /**
+   * Populate usernames for given user IDs
+   */
+  private populateUsernames(userIds: string[]) {
+    const uniqueUserIds = Array.from(new Set(userIds.filter(id => id && !this.usernames[id])));
+    
+    uniqueUserIds.forEach(userId => {
+      this.authService.getUserProfileById(userId).subscribe({
+        next: (profile) => {
+          this.usernames[userId] = profile.username || profile.email || userId;
+        },
+        error: () => {
+          this.usernames[userId] = userId; // fallback if error
+        }
+      });
     });
   }
 }

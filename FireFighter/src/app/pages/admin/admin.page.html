@@ -175,7 +175,7 @@
                   </div>
                 </td>
                 <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.id }}</td>
-                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.requester }}</td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ usernames[req.requester] || req.requester }}</td>
                 <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.reason }}</td>
                 <td class="px-4 py-4 whitespace-nowrap">
                   <span
@@ -358,7 +358,7 @@
                     class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                   >
                   <div>
-                    <div class="font-semibold text-gray-900 dark:text-white">{{ req.requester }}</div>
+                    <div class="font-semibold text-gray-900 dark:text-white">{{ usernames[req.requester] || req.requester }}</div>
                     <div class="text-sm text-gray-600 dark:text-gray-400">ID: {{ req.id }}</div>
                   </div>
                 </div>
