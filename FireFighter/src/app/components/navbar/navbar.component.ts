@@ -67,15 +67,16 @@ export class NavbarComponent implements OnInit {
     this.closeMobileMenu();
   }
 
-  navigateToActivityLog() {
-    // This will navigate to activity log when the route is implemented
-    // For now, we can keep it as a placeholder or navigate to dashboard
-    this.router.navigate(['/dashboard']);
-    this.closeMobileMenu();
-  }
+
 
   navigateToHelp() {
     this.router.navigate(['/help']);
+    this.closeMobileMenu();
+    this.profileMenuOpen = false; // Close profile menu after navigation
+  }
+
+  navigateToAdmin() {
+    this.router.navigate(['/admin']);
     this.closeMobileMenu();
     this.profileMenuOpen = false; // Close profile menu after navigation
   }
