@@ -15,6 +15,7 @@ export interface Ticket {
   userId: string;
   emergencyType?: string;
   emergencyContact?: string;
+  duration: number; // Duration in minutes
 }
 
 @Injectable({
@@ -56,7 +57,8 @@ export class TicketService {
       requestDate: typeof ticket.requestDate === 'string' ? ticket.requestDate : (ticket.requestDate ? ticket.requestDate.toString().split('T')[0] : new Date().toISOString().split('T')[0]),
       userId: ticket.userId,
       emergencyType: ticket.emergencyType,
-      emergencyContact: ticket.emergencyContact
+      emergencyContact: ticket.emergencyContact,
+      duration: ticket.duration || 60 // Default to 60 if not present
     };
   }
 
@@ -96,7 +98,8 @@ export class TicketService {
         requestDate: ticketData.requestDate || new Date().toISOString().split('T')[0],
         userId: currentUserId || currentUserEmail || currentUserName || 'unknown',
         emergencyType: ticketData.emergencyType || 'critical-system-failure',
-        emergencyContact: ticketData.emergencyContact || ''
+        emergencyContact: ticketData.emergencyContact || '',
+        duration: ticketData.duration || 60
       };
       return this.http.post<any>(this.apiUrl, backendTicketData).pipe(
         map(ticket => this.mapBackendTicketToFrontend(ticket)),

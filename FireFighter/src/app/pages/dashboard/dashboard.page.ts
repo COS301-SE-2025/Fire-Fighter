@@ -121,10 +121,10 @@ export class DashboardPage implements OnInit, OnDestroy {
       .subscribe(tickets => {
         // Sort tickets: non-expired Active with least time remaining first, then Completed/Rejected, then Expired
         const now = new Date();
-        const durationInHours = 2;
         const getRemainingMs = (ticket: Ticket) => {
           const createdTime = new Date(ticket.dateCreated);
-          const endTime = new Date(createdTime.getTime() + durationInHours * 60 * 60 * 1000);
+          const durationMs = (ticket.duration || 60) * 60 * 1000;
+          const endTime = new Date(createdTime.getTime() + durationMs);
           return endTime.getTime() - now.getTime();
         };
         this.tickets = [...tickets].sort((a, b) => {
@@ -278,12 +278,12 @@ export class DashboardPage implements OnInit, OnDestroy {
     return activities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 4);
   }
 
-  // Calculate remaining time based on creation time (assuming 2 hours duration)
+  // Calculate remaining time based on creation time (using ticket's duration)
   getRemainingTime(ticket: Ticket): string {
     const now = new Date();
     const createdTime = new Date(ticket.dateCreated);
-    const durationInHours = 2; // Assuming 2 hours duration for emergency access
-    const endTime = new Date(createdTime.getTime() + (durationInHours * 60 * 60 * 1000));
+    const durationMs = (ticket.duration || 60) * 60 * 1000;
+    const endTime = new Date(createdTime.getTime() + durationMs);
     
     const remainingMs = endTime.getTime() - now.getTime();
     
