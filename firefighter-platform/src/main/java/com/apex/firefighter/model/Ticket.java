@@ -1,5 +1,6 @@
 package com.apex.firefighter.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
@@ -10,37 +11,50 @@ public class Ticket {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty("id")
     private Long id;
 
     @Column(nullable = false, unique = true)
+    @JsonProperty("ticketId")
     private String ticketId;
 
+    @JsonProperty("description")
     private String description;
 
+    @JsonProperty("valid")
     private boolean valid;
 
+    @JsonProperty("createdBy")
     private String createdBy;
 
+    @JsonProperty("lastVerifiedAt")
     private LocalDateTime lastVerifiedAt;
 
+    @JsonProperty("verificationCount")
     private int verificationCount;
 
     @Column(nullable = false)
+    @JsonProperty("status")
     private String status;
 
     @Column(nullable = false, updatable = false)
+    @JsonProperty("dateCreated")
     private LocalDateTime dateCreated;
 
     @Column(nullable = false)
+    @JsonProperty("requestDate")
     private LocalDate requestDate;
 
     @Column(nullable = false)
+    @JsonProperty("userId")
     private String userId;
 
     @Column(nullable = false)
+    @JsonProperty("emergencyType")
     private String emergencyType;
 
     @Column(nullable = false)
+    @JsonProperty("emergencyContact")
     private String emergencyContact;
 
     // Default constructor. Initializes a new instance of the Ticket class with empty(null) values.

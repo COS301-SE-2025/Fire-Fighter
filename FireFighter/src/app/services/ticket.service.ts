@@ -21,7 +21,7 @@ export interface Ticket {
 })
 export class TicketService {
   private apiUrl = `${environment.apiUrl}/tickets`;
-  private useMockDatabase = true; // Set to false when using real API
+  private useMockDatabase = false; // Set to false when using real API
 
   constructor(
     private http: HttpClient,
