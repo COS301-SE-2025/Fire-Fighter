@@ -144,6 +144,18 @@ export class AuthService {
       console.error('Error details:', error);
       // Clear user data on verification failure
       this.clearUserData();
+      
+      // IMPORTANT: Sign out the user from Firebase if backend verification fails
+      // This ensures Firebase auth state stays consistent with our app state
+      try {
+        if (Capacitor.isNativePlatform()) {
+          await FirebaseAuthentication.signOut();
+        }
+        await signOut(this.auth);
+      } catch (signOutError) {
+        console.error('Error signing out after backend verification failure:', signOutError);
+      }
+      
       throw error;
     }
   }
@@ -153,8 +165,24 @@ export class AuthService {
    */
   private isSafari(): boolean {
     const userAgent = navigator.userAgent;
-    return /^((?!chrome|android).)*safari/i.test(userAgent) || 
-           /(iPad|iPhone|iPod).*Safari/i.test(userAgent);
+    const isSafari = /^((?!chrome|android).)*safari/i.test(userAgent) || 
+                     /(iPad|iPhone|iPod).*Safari/i.test(userAgent);
+    console.log('Safari detection - User Agent:', userAgent);
+    console.log('Safari detection result:', isSafari);
+    return isSafari;
+  }
+
+  /**
+   * Sign in with Google using popup method (fallback for when redirect fails)
+   */
+  private async signInWithPopupFallback(): Promise<User> {
+    console.log('Attempting popup fallback...');
+    const provider = new GoogleAuthProvider();
+    provider.addScope('email');
+    provider.addScope('profile');
+    
+    const credential = await signInWithPopup(this.auth, provider);
+    return credential.user;
   }
 
   /**
@@ -163,8 +191,11 @@ export class AuthService {
   async signInWithGoogle(): Promise<User> {
     let user: User;
     
+    console.log('Starting Google sign-in process...');
+    
     // For mobile (Android/iOS) use the native Google Sign In
     if (Capacitor.isNativePlatform()) {
+      console.log('Using native platform Google sign-in');
       // Sign in with Google on native platform
       const result = await FirebaseAuthentication.signInWithGoogle();
       
@@ -182,46 +213,114 @@ export class AuthService {
       }
     } else {
       // On web, check if Safari and use appropriate method
+      console.log('Using web platform Google sign-in');
       const provider = new GoogleAuthProvider();
       // Add extra scopes for better compatibility
       provider.addScope('email');
       provider.addScope('profile');
       
       if (this.isSafari()) {
+        console.log('Safari detected, using redirect method');
         // Safari: Use redirect-based authentication for better compatibility
         await signInWithRedirect(this.auth, provider);
         // Note: This will cause a page redirect, so we won't reach the return statement
         // The actual sign-in completion will be handled by checkForRedirectResult
         throw new Error('Redirect initiated - should not reach this point');
       } else {
+        console.log('Non-Safari browser, using popup method');
         // Other browsers: Use popup-based authentication
         const credential = await signInWithPopup(this.auth, provider);
         user = credential.user;
       }
     }
 
+    console.log('Firebase authentication successful, verifying with backend...');
     // Verify user with backend after successful Firebase authentication
     await this.verifyUserWithBackend(user);
     
+    console.log('Backend verification successful');
     return user;
   }
 
   /**
+   * Sign in with Google using popup method (force popup instead of redirect)
+   * This can be used as a manual fallback when redirect authentication fails
+   */
+  async signInWithGooglePopup(): Promise<User> {
+    console.log('Starting Google sign-in with forced popup...');
+    
+    if (Capacitor.isNativePlatform()) {
+      // On native platforms, use the same native method
+      return this.signInWithGoogle();
+    }
+    
+    // Force popup method regardless of browser
+    const user = await this.signInWithPopupFallback();
+    
+    console.log('Firebase popup authentication successful, verifying with backend...');
+    await this.verifyUserWithBackend(user);
+    
+    console.log('Backend verification successful');
+    return user;
+  }
+
+  /**
+   * Clear the redirect processing flag (useful for manual retry)
+   */
+  clearRedirectProcessingFlag(): void {
+    (window as any)._firebaseRedirectProcessed = false;
+    console.log('Redirect processing flag cleared');
+  }
+
+  /**
    * Check for redirect result when the page loads (for Safari redirect-based auth)
+   * This should only be called once per page load to avoid multiple processing attempts
    */
   async checkForRedirectResult(): Promise<User | null> {
+    // Use a static flag to ensure this only runs once per page load
+    if ((window as any)._firebaseRedirectProcessed) {
+      console.log('Redirect result already processed this page load');
+      return null;
+    }
+    
     try {
+      console.log('Checking for redirect result...');
       const result = await getRedirectResult(this.auth);
       
+      // Mark as processed regardless of result to prevent multiple attempts
+      (window as any)._firebaseRedirectProcessed = true;
+      
       if (result?.user) {
-        // Verify user with backend after successful Firebase authentication
-        await this.verifyUserWithBackend(result.user);
-        return result.user;
+        console.log('Redirect result found, user:', result.user.email);
+        console.log('Verifying user with backend after redirect...');
+        
+        try {
+          // Verify user with backend after successful Firebase authentication
+          await this.verifyUserWithBackend(result.user);
+          console.log('Backend verification successful for redirect user');
+          return result.user;
+        } catch (backendError) {
+          console.error('Backend verification failed for redirect user:', backendError);
+          // The verifyUserWithBackend method already handles sign-out on failure
+          // Re-throw the error so the calling code can handle it appropriately
+          throw backendError;
+        }
       }
       
+      console.log('No redirect result found');
       return null;
-    } catch (error) {
+    } catch (error: any) {
+      // Mark as processed even on error to prevent infinite retry loops
+      (window as any)._firebaseRedirectProcessed = true;
+      
       console.error('Error checking redirect result:', error);
+      
+      // If this is a Firebase auth error (not a backend verification error), 
+      // we should handle it differently
+      if (error.code && error.code.startsWith('auth/')) {
+        console.error('Firebase auth error during redirect:', error.code);
+      }
+      
       throw error;
     }
   }
