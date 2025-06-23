@@ -81,11 +81,57 @@ export class RequestsPage implements OnInit {
     reason: '',
     userId: '', // This should be set from the auth service
     emergencyType: '',
-    emergencyContact: ''
+    emergencyContact: '',
+    duration: 60 // Duration in minutes, default 1 hour
   };
 
   // Add calculateTimeAgo function
   calculateTimeAgo = calculateTimeAgo;
+
+  // Duration validation and utility methods
+  getTotalDurationMinutes(): number {
+    return this.newTicket.duration;
+  }
+
+  isDurationValid(): boolean {
+    const totalMinutes = this.getTotalDurationMinutes();
+    return totalMinutes >= 15 && totalMinutes <= 120;
+  }
+
+  getDurationErrorMessage(): string {
+    const totalMinutes = this.getTotalDurationMinutes();
+    if (totalMinutes < 15) {
+      return 'Duration must be at least 15 minutes';
+    }
+    if (totalMinutes > 120) {
+      return 'Duration cannot exceed 2 hours';
+    }
+    return '';
+  }
+
+  formatDuration(minutes: number): string {
+    if (minutes < 60) {
+      return `${minutes} minutes`;
+    }
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    if (remainingMinutes === 0) {
+      return `${hours} hour${hours > 1 ? 's' : ''}`;
+    }
+    return `${hours} hour${hours > 1 ? 's' : ''} ${remainingMinutes} minutes`;
+  }
+
+  incrementDuration(): void {
+    if (this.newTicket.duration < 120) {
+      this.newTicket.duration += 15;
+    }
+  }
+
+  decrementDuration(): void {
+    if (this.newTicket.duration > 15) {
+      this.newTicket.duration -= 15;
+    }
+  }
 
   constructor(
     private toastController: ToastController,
@@ -170,7 +216,8 @@ export class RequestsPage implements OnInit {
           reason: '',
           userId: '', // This should be set from the auth service
           emergencyType: '',
-          emergencyContact: ''
+          emergencyContact: '',
+          duration: 60 // Default 1 hour
         };
       }, 200);
     }
@@ -180,6 +227,17 @@ export class RequestsPage implements OnInit {
     if (!this.newTicket.reason.trim()) {
       const toast = await this.toastController.create({
         message: 'Please provide a reason for your request',
+        duration: 3000,
+        position: 'bottom',
+        color: 'warning',
+      });
+      await toast.present();
+      return;
+    }
+
+    if (!this.isDurationValid()) {
+      const toast = await this.toastController.create({
+        message: this.getDurationErrorMessage(),
         duration: 3000,
         position: 'bottom',
         color: 'warning',
