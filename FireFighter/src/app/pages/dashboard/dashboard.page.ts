@@ -207,15 +207,12 @@ export class DashboardPage implements OnInit, OnDestroy {
   // Generate recent activities from tickets
   get recentActivities(): Activity[] {
     const activities: Activity[] = [];
-    
     // Sort tickets by date (most recent first)
     const sortedTickets = [...this.tickets].sort((a, b) => 
       new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime()
     );
-
     sortedTickets.slice(0, 4).forEach(ticket => {
       const ticketId = ticket.id;
-      
       if (ticket.status === 'Active') {
         activities.push({
           type: 'granted',
@@ -248,12 +245,10 @@ export class DashboardPage implements OnInit, OnDestroy {
         });
       }
     });
-
     // Add some sample activities if we have tickets
     if (this.tickets.length > 0) {
       const latestTicket = sortedTickets[0];
       const ticketId = latestTicket.id.split('-').pop() || latestTicket.id;
-      
       activities.unshift({
         type: 'submitted',
         title: 'New emergency access request submitted',
@@ -264,8 +259,8 @@ export class DashboardPage implements OnInit, OnDestroy {
         timestamp: new Date(Date.now() - 23 * 60 * 1000) // 23 minutes ago
       });
     }
-
-    return activities.slice(0, 4); // Return max 4 activities
+    // Sort activities by timestamp (most recent first, i.e., lowest time passed at the top)
+    return activities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 4);
   }
 
   // Calculate remaining time based on creation time (assuming 2 hours duration)

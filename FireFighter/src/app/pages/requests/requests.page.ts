@@ -108,8 +108,13 @@ export class RequestsPage implements OnInit {
         finalize(() => this.isLoading = false)
       )
       .subscribe(tickets => {
-        // Sort tickets by most recently requested (dateCreated) at the top
-        this.tickets = [...tickets].sort((a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime());
+        // Sort: Active first, then Completed, then Rejected, each by most recent dateCreated
+        this.tickets = [...tickets].sort((a, b) => {
+          const statusOrder = (status: string) => status === 'Active' ? 0 : status === 'Completed' ? 1 : 2;
+          const statusDiff = statusOrder(a.status) - statusOrder(b.status);
+          if (statusDiff !== 0) return statusDiff;
+          return new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime();
+        });
       });
   }
 
