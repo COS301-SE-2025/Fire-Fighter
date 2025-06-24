@@ -2,7 +2,7 @@
 
 ## Overview
 
-This Postman collection provides comprehensive testing for the FireFighter TicketService API. It includes all CRUD operations, verification endpoints, and error handling scenarios.
+This Postman collection provides comprehensive testing for the FireFighter TicketService API. It includes all CRUD operations and error handling scenarios.
 
 ## 📁 Files
 
@@ -45,7 +45,6 @@ mvn spring-boot:run -Dspring.profiles.active=dev
 
 ### 1. CREATE Operations
 - **Create New Ticket** - Creates a valid ticket
-- **Create Invalid Ticket** - Creates a ticket marked as invalid
 - **Create Duplicate Ticket (Error Test)** - Tests duplicate ticket handling
 
 ### 2. READ Operations
@@ -63,12 +62,7 @@ mvn spring-boot:run -Dspring.profiles.active=dev
 - **Delete Ticket by Ticket ID** - Deletes by ticket ID
 - **Delete Non-existent Ticket (Error Test)** - Tests delete error handling
 
-### 5. VERIFICATION Operations
-- **Verify Valid Ticket** - Verifies a valid ticket
-- **Verify Invalid Ticket** - Verifies an invalid ticket
-- **Verify Non-existent Ticket (Error Test)** - Tests verification error handling
-
-### 6. Test Scenarios
+### 5. Test Scenarios
 - **Complete Ticket Lifecycle** - End-to-end testing guide
 - **Bulk Operations Test** - Multiple operations testing guide
 
@@ -84,8 +78,6 @@ mvn spring-boot:run -Dspring.profiles.active=dev
    {
        "ticketId": "JIRA-123",
        "description": "Test ticket for API testing",
-       "valid": true,
-       "createdBy": "test-user",
        "userId": "user1",
        "emergencyType": "critical-system-failure",
        "emergencyContact": "12345"
@@ -103,22 +95,17 @@ mvn spring-boot:run -Dspring.profiles.active=dev
    ```json
    {
        "description": "Updated ticket description",
-       "valid": false,
        "status": "Completed",
        "emergencyType": "security-incident",
        "emergencyContact": "09876"
    }
    ```
 
-4. **Verify Ticket**
-   - Method: `GET`
-   - URL: `{{baseUrl}}/api/tickets/JIRA-123/verify`
-
-5. **Delete Ticket**
+4. **Delete Ticket**
    - Method: `DELETE`
    - URL: `{{baseUrl}}/api/tickets/ticket-id/JIRA-123`
 
-6. **Get All Tickets** (verify deletion)
+5. **Get All Tickets** (verify deletion)
    - Method: `GET`
    - URL: `{{baseUrl}}/api/tickets`
 
@@ -136,9 +123,6 @@ mvn spring-boot:run -Dspring.profiles.active=dev
 4. **Delete Non-existent Ticket**
    - Should return 404 status
 
-5. **Verify Non-existent Ticket**
-   - Should return 404 status
-
 ## 📊 Expected Responses
 
 ### Successful Responses
@@ -149,10 +133,6 @@ mvn spring-boot:run -Dspring.profiles.active=dev
     "id": 1,
     "ticketId": "JIRA-123",
     "description": "Test ticket for API testing",
-    "valid": true,
-    "createdBy": "test-user",
-    "lastVerifiedAt": null,
-    "verificationCount": 0,
     "status": "Active",
     "dateCreated": "...",
     "requestDate": "...",
@@ -169,10 +149,6 @@ mvn spring-boot:run -Dspring.profiles.active=dev
         "id": 1,
         "ticketId": "JIRA-123",
         "description": "Test ticket",
-        "valid": true,
-        "createdBy": "test-user",
-        "lastVerifiedAt": null,
-        "verificationCount": 0,
         "status": "Active",
         "dateCreated": "...",
         "requestDate": "...",
@@ -181,16 +157,6 @@ mvn spring-boot:run -Dspring.profiles.active=dev
         "emergencyContact": "12345"
     }
 ]
-```
-
-#### Verify Ticket (200)
-```json
-{
-    "valid": true,
-    "ticketId": "JIRA-123",
-    "lastVerifiedAt": "2024-06-18T16:30:00",
-    "verificationCount": 1
-}
 ```
 
 ### Error Responses
@@ -209,7 +175,7 @@ mvn spring-boot:run -Dspring.profiles.active=dev
 }
 ```
 
-## 🔧 Customization
+## 🛠️ Customization
 
 ### Adding New Tests
 
@@ -233,7 +199,7 @@ The collection includes automatic test scripts that validate:
 - Response time (< 2000ms)
 - Required headers
 
-## 🐛 Troubleshooting
+## 🐞 Troubleshooting
 
 ### Common Issues
 
@@ -248,28 +214,7 @@ The collection includes automatic test scripts that validate:
    - Ensure the application context path is correct
 
 3. **500 Errors**
-   - Check application logs for detailed error messages
-   - Verify database connection
-   - Check if required dependencies are available
-
-4. **CORS Errors**
-   - The application includes CORS configuration for testing
-   - In production, configure CORS properly
-
-### Debug Tips
-
-1. **Check Application Logs**
-   ```bash
-   tail -f logs/application.log
-   ```
-
-2. **Use Postman Console**
-   - View → Show Postman Console
-   - Check for detailed request/response logs
-
-3. **Test Database Connection**
-   - Use the database connection test endpoint
-   - Verify database is accessible
+   - Check for duplicate ticketId or missing required fields
 
 ## 📈 Performance Testing
 

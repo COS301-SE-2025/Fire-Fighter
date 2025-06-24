@@ -11,13 +11,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = {
-    "http://localhost:8100", 
-    "http://127.0.0.1:8100", 
-    "https://localhost:8100",
-    "ionic://localhost",
-    "capacitor://localhost"
-}, allowCredentials = "true")
 public class UserController {
 
     private final UserService userService;
@@ -40,9 +33,21 @@ public class UserController {
             @RequestParam(required = false) String department) {
         
         try {
+            System.out.println("🔵 VERIFY USER REQUEST:");
+            System.out.println("  Firebase UID: " + firebaseUid);
+            System.out.println("  Username: " + username);
+            System.out.println("  Email: " + email);
+            System.out.println("  Department: " + department);
+            
             User user = userService.verifyOrCreateUser(firebaseUid, username, email, department);
+            
+            System.out.println("✅ USER VERIFICATION SUCCESS: " + user.getUsername());
             return ResponseEntity.ok(user);
         } catch (Exception e) {
+            System.err.println("❌ USER VERIFICATION FAILED:");
+            System.err.println("  Error Type: " + e.getClass().getSimpleName());
+            System.err.println("  Error Message: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(500).build();
         }
     }

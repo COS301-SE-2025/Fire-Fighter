@@ -12,13 +12,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tickets")
-@CrossOrigin(origins = {
-    "http://localhost:8100", 
-    "http://127.0.0.1:8100", 
-    "https://localhost:8100",
-    "ionic://localhost",
-    "capacitor://localhost"
-}, allowCredentials = "true")
 public class TicketController {
 
     private final TicketService ticketService;
@@ -33,14 +26,12 @@ public class TicketController {
     public ResponseEntity<Ticket> createTicket(@RequestBody Map<String, Object> payload) {
         String ticketId = (String) payload.get("ticketId");
         String description = (String) payload.get("description");
-        Boolean valid = (Boolean) payload.get("valid");
-        String createdBy = (String) payload.get("createdBy");
         String userId = (String) payload.get("userId");
         String emergencyType = (String) payload.get("emergencyType");
         String emergencyContact = (String) payload.get("emergencyContact");
+        Integer duration = payload.get("duration") != null ? ((Number) payload.get("duration")).intValue() : null;
 
-        Ticket ticket = ticketService.createTicket(ticketId, description, valid != null ? valid : false, userId, emergencyType, emergencyContact, createdBy);
-        
+        Ticket ticket = ticketService.createTicket(ticketId, description, userId, emergencyType, emergencyContact, duration);
         return ResponseEntity.ok(ticket);
     }
 
@@ -70,46 +61,13 @@ public class TicketController {
     @PutMapping("/{id}")
     public ResponseEntity<Ticket> updateTicket(@PathVariable Long id, @RequestBody Map<String, Object> payload) {
         String description = (String) payload.get("description");
-        Boolean valid = (Boolean) payload.get("valid");
         String status = (String) payload.get("status");
         String emergencyType = (String) payload.get("emergencyType");
         String emergencyContact = (String) payload.get("emergencyContact");
-
+        Integer duration = payload.get("duration") != null ? ((Number) payload.get("duration")).intValue() : null;
         try {
-            Ticket updatedTicket = ticketService.updateTicket(id, description, valid, status, emergencyType, emergencyContact);
+            Ticket updatedTicket = ticketService.updateTicket(id, description, status, emergencyType, emergencyContact, duration);
             return ResponseEntity.ok(updatedTicket);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    // Update ticket validity
-    @PatchMapping("/{ticketId}/validity")
-    public ResponseEntity<Ticket> updateTicketValidity(
-            @PathVariable String ticketId,
-            @RequestBody Map<String, Boolean> payload) {
-        try {
-            Boolean valid = payload.get("valid");
-            if (valid == null) {
-                return ResponseEntity.badRequest().build();
-            }
-            return ResponseEntity.ok(ticketService.updateTicketValidity(ticketId, valid));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    // Update ticket description
-    @PatchMapping("/{ticketId}/description")
-    public ResponseEntity<Ticket> updateTicketDescription(
-            @PathVariable String ticketId,
-            @RequestBody Map<String, String> payload) {
-        try {
-            String description = payload.get("description");
-            if (description == null) {
-                return ResponseEntity.badRequest().build();
-            }
-            return ResponseEntity.ok(ticketService.updateTicketDescription(ticketId, description));
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
@@ -129,19 +87,119 @@ public class TicketController {
         return deleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
     }
 
-    // Verify ticket
-    @GetMapping("/{ticketId}/verify")
-    public ResponseEntity<Map<String, Object>> verifyTicket(@PathVariable String ticketId) {
-        boolean isValid = ticketService.verifyTicket(ticketId);
-        return ticketService.getTicketByTicketId(ticketId)
-                .map(ticket -> {
-                    Map<String, Object> response = new HashMap<>();
-                    response.put("valid", isValid);
-                    response.put("ticketId", ticket.getTicketId());
-                    response.put("lastVerifiedAt", ticket.getLastVerifiedAt());
-                    response.put("verificationCount", ticket.getVerificationCount());
-                    return ResponseEntity.ok(response);
-                })
-                .orElse(ResponseEntity.notFound().build());
+    // ==================== ADMIN ENDPOINTS ====================
+
+    // Get all active tickets (Admin only)
+    @GetMapping("/admin/active")
+    public ResponseEntity<List<Ticket>> getActiveTickets() {
+        try {
+            List<Ticket> activeTickets = ticketService.getActiveTickets();
+            return ResponseEntity.ok(activeTickets);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    // Get ticket history sorted by creation date (Admin only)
+    @GetMapping("/admin/history")
+    public ResponseEntity<List<Ticket>> getTicketHistory() {
+        try {
+            List<Ticket> ticketHistory = ticketService.getTicketHistory();
+            return ResponseEntity.ok(ticketHistory);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    // Get tickets by status (Admin only)
+    @GetMapping("/admin/status/{status}")
+    public ResponseEntity<List<Ticket>> getTicketsByStatus(@PathVariable String status) {
+        try {
+            List<Ticket> tickets = ticketService.getTicketsByStatus(status);
+            return ResponseEntity.ok(tickets);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    // Revoke ticket by database ID (Admin only)
+    @PutMapping("/admin/revoke/{id}")
+    public ResponseEntity<Map<String, Object>> revokeTicket(
+            @PathVariable Long id, 
+            @RequestBody Map<String, String> payload) {
+        
+        String adminUserId = payload.get("adminUserId");
+        String rejectReason = payload.get("rejectReason");
+        
+        Map<String, Object> response = new HashMap<>();
+        
+        if (adminUserId == null || adminUserId.trim().isEmpty()) {
+            response.put("error", "Admin user ID is required");
+            return ResponseEntity.badRequest().body(response);
+        }
+        
+        if (rejectReason == null || rejectReason.trim().isEmpty()) {
+            response.put("error", "Reject reason is required");
+            return ResponseEntity.badRequest().body(response);
+        }
+        
+        try {
+            Ticket revokedTicket = ticketService.revokeTicket(id, adminUserId, rejectReason);
+            response.put("success", true);
+            response.put("message", "Ticket revoked successfully");
+            response.put("ticket", revokedTicket);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(400).body(response);
+        } catch (Exception e) {
+            response.put("error", "Internal server error");
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    // Revoke ticket by ticket ID (Admin only)
+    @PutMapping("/admin/revoke/ticket-id/{ticketId}")
+    public ResponseEntity<Map<String, Object>> revokeTicketByTicketId(
+            @PathVariable String ticketId, 
+            @RequestBody Map<String, String> payload) {
+        
+        String adminUserId = payload.get("adminUserId");
+        String rejectReason = payload.get("rejectReason");
+        
+        Map<String, Object> response = new HashMap<>();
+        
+        if (adminUserId == null || adminUserId.trim().isEmpty()) {
+            response.put("error", "Admin user ID is required");
+            return ResponseEntity.badRequest().body(response);
+        }
+        
+        if (rejectReason == null || rejectReason.trim().isEmpty()) {
+            response.put("error", "Reject reason is required");
+            return ResponseEntity.badRequest().body(response);
+        }
+        
+        try {
+            Ticket revokedTicket = ticketService.revokeTicketByTicketId(ticketId, adminUserId, rejectReason);
+            response.put("success", true);
+            response.put("message", "Ticket revoked successfully");
+            response.put("ticket", revokedTicket);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(400).body(response);
+        } catch (Exception e) {
+            response.put("error", "Internal server error");
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    // Check if user is admin (Helper endpoint)
+    @GetMapping("/admin/check/{userId}")
+    public ResponseEntity<Map<String, Boolean>> checkAdminStatus(@PathVariable String userId) {
+        Map<String, Boolean> response = new HashMap<>();
+        boolean isAdmin = ticketService.isUserAdmin(userId);
+        response.put("isAdmin", isAdmin);
+        return ResponseEntity.ok(response);
     }
 }

@@ -14,16 +14,13 @@ CREATE TABLE firefighter.tickets (
     id BIGSERIAL PRIMARY KEY,
     ticket_id VARCHAR(255) NOT NULL UNIQUE,
     description TEXT,
-    valid BOOLEAN DEFAULT false,
-    created_by VARCHAR(255),
-    last_verified_at TIMESTAMP,
-    verification_count INTEGER DEFAULT 0,
     status VARCHAR(255) NOT NULL DEFAULT 'Active',
     date_created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     request_date DATE NOT NULL DEFAULT CURRENT_DATE,
     user_id VARCHAR(255) NOT NULL,
     emergency_type VARCHAR(255) NOT NULL,
-    emergency_contact VARCHAR(255) NOT NULL
+    emergency_contact VARCHAR(255) NOT NULL,
+    duration INTEGER
 );
 ```
 
@@ -31,16 +28,13 @@ CREATE TABLE firefighter.tickets (
 - **`id`**: Auto-incrementing primary key
 - **`ticket_id`**: Unique identifier for the ticket (e.g., "JIRA-123")
 - **`description`**: Text description of the ticket
-- **`valid`**: Boolean flag indicating if the ticket is valid
-- **`created_by`**: User who created the ticket
-- **`last_verified_at`**: Timestamp of last verification
-- **`verification_count`**: Number of times the ticket has been verified
 - **`status`**: The current status of the ticket (e.g., 'Active', 'Completed').
 - **`date_created`**: The timestamp when the ticket was created.
 - **`request_date`**: The date the request was made.
 - **`user_id`**: The ID of the user associated with the ticket.
 - **`emergency_type`**: The type of emergency (e.g., 'critical-system-failure').
 - **`emergency_contact`**: The contact information for the emergency.
+- **`duration`**: Duration of the ticket in minutes (integer, optional).
 
 ## 🚀 Quick Setup
 
@@ -69,36 +63,31 @@ CREATE TABLE firefighter.tickets (
        id BIGSERIAL PRIMARY KEY,
        ticket_id VARCHAR(255) NOT NULL UNIQUE,
        description TEXT,
-       valid BOOLEAN DEFAULT false,
-       created_by VARCHAR(255),
-       last_verified_at TIMESTAMP,
-       verification_count INTEGER DEFAULT 0,
        status VARCHAR(255) NOT NULL DEFAULT 'Active',
        date_created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
        request_date DATE NOT NULL DEFAULT CURRENT_DATE,
        user_id VARCHAR(255) NOT NULL,
        emergency_type VARCHAR(255) NOT NULL,
-       emergency_contact VARCHAR(255) NOT NULL
+       emergency_contact VARCHAR(255) NOT NULL,
+       duration INTEGER
    );
    ```
 
 3. **Create indexes for performance**
    ```sql
    CREATE INDEX IF NOT EXISTS idx_tickets_ticket_id ON firefighter.tickets(ticket_id);
-   CREATE INDEX IF NOT EXISTS idx_tickets_valid ON firefighter.tickets(valid);
-   CREATE INDEX IF NOT EXISTS idx_tickets_created_by ON firefighter.tickets(created_by);
    ```
 
 4. **Insert sample data**
    ```sql
-   INSERT INTO firefighter.tickets (ticket_id, description, valid, created_by, verification_count, status, date_created, request_date, user_id, emergency_type, emergency_contact) VALUES 
-   ('SAMPLE-001', 'Sample ticket for testing', true, 'test-user', 0, 'Active', CURRENT_TIMESTAMP, CURRENT_DATE, 'user1', 'critical-system-failure', '12345'),
-   ('SAMPLE-002', 'Another sample ticket', false, 'test-user', 0, 'Completed', CURRENT_TIMESTAMP, CURRENT_DATE, 'user2', 'network-outage', '67890'),
-   ('SAMPLE-003', 'Valid ticket for verification', true, 'admin-user', 0, 'Active', CURRENT_TIMESTAMP, CURRENT_DATE, 'user3', 'security-incident', '11223')
+   INSERT INTO firefighter.tickets (ticket_id, description, status, date_created, request_date, user_id, emergency_type, emergency_contact) VALUES 
+   ('SAMPLE-001', 'Sample ticket for testing', 'Active', CURRENT_TIMESTAMP, CURRENT_DATE, 'user1', 'critical-system-failure', '12345'),
+   ('SAMPLE-002', 'Another sample ticket', 'Completed', CURRENT_TIMESTAMP, CURRENT_DATE, 'user2', 'network-outage', '67890'),
+   ('SAMPLE-003', 'Valid ticket for verification', 'Active', CURRENT_TIMESTAMP, CURRENT_DATE, 'user3', 'security-incident', '11223')
    ON CONFLICT (ticket_id) DO NOTHING;
    ```
 
-## 🔧 Verification
+## 🛠️ Verification
 
 ### Check if table exists
 ```sql
@@ -135,8 +124,6 @@ curl -X POST "http://localhost:8080/api/tickets" \
   -d '{
     "ticketId": "TEST-001",
     "description": "Test ticket from API",
-    "valid": true,
-    "createdBy": "test-user",
     "userId": "user-test",
     "emergencyType": "test-emergency",
     "emergencyContact": "555-1234"
@@ -149,10 +136,6 @@ curl -X POST "http://localhost:8080/api/tickets" \
     "id": 1,
     "ticketId": "TEST-001",
     "description": "Test ticket from API",
-    "valid": true,
-    "createdBy": "test-user",
-    "lastVerifiedAt": null,
-    "verificationCount": 0,
     "status": "Active",
     "dateCreated": "...",
     "requestDate": "...",
@@ -205,22 +188,17 @@ FROM information_schema.role_table_grants
 WHERE table_schema = 'firefighter' AND table_name = 'tickets';
 ```
 
-## 📊 Performance Optimization
+## 📈 Performance Optimization
 
 ### Indexes
-The setup script creates the following indexes for optimal performance:
+The setup script creates the following index for optimal performance:
 
 1. **`idx_tickets_ticket_id`**: For fast ticket lookups by ID
-2. **`idx_tickets_valid`**: For filtering valid/invalid tickets
-3. **`idx_tickets_created_by`**: For user-based queries
 
 ### Additional Indexes (Optional)
 ```sql
 -- For date-based queries
-CREATE INDEX IF NOT EXISTS idx_tickets_last_verified_at ON firefighter.tickets(last_verified_at);
-
--- For composite queries
-CREATE INDEX IF NOT EXISTS idx_tickets_valid_created_by ON firefighter.tickets(valid, created_by);
+-- CREATE INDEX IF NOT EXISTS idx_tickets_date_created ON firefighter.tickets(date_created);
 ```
 
 ## 🔄 Hibernate Auto-Creation
@@ -244,7 +222,6 @@ If you prefer to let Hibernate create the table automatically:
 ## 📝 Notes
 
 - The table uses the `firefighter` schema to match other entities
-- All columns except `id` and `ticket_id` are nullable for flexibility
 - The `ticket_id` column has a unique constraint to prevent duplicates
 - Sample data is included for testing purposes
 - Indexes are created for common query patterns
