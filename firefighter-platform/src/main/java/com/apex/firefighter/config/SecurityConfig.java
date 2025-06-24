@@ -34,8 +34,20 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Allow all origins for development (use specific origins in production)
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        // Allow specific origins for both HTTP and HTTPS in development
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+            "http://localhost",
+            "https://localhost",
+            "http://localhost:*",
+            "https://localhost:*", 
+            "http://127.0.0.1:*",
+            "https://127.0.0.1:*",
+            "ionic://localhost",
+            "capacitor://localhost",
+            "http://100.123.32.43:*",
+            "https://100.123.32.43:*",
+            "*"  // Allow all origins for development (remove in production)
+        ));
         
         // Allow all common HTTP methods
         configuration.setAllowedMethods(Arrays.asList(
