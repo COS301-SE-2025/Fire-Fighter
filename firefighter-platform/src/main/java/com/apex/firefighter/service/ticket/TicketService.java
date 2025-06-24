@@ -1,11 +1,14 @@
 package com.apex.firefighter.service.ticket;
 
 import com.apex.firefighter.model.Ticket;
+import com.apex.firefighter.model.User;
 import com.apex.firefighter.repository.TicketRepository;
+import com.apex.firefighter.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,16 +26,18 @@ import java.util.stream.Collectors;
 public class TicketService {
 
     private final TicketRepository ticketRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public TicketService(TicketRepository ticketRepository) {
+    public TicketService(TicketRepository ticketRepository, UserRepository userRepository) {
         this.ticketRepository = ticketRepository;
+        this.userRepository = userRepository;
     }
 
     /**
      * Create a new ticket
      */
-    public Ticket createTicket(String ticketId, String description, boolean valid, String userId, String emergencyType, String emergencyContact, String createdBy) {
+    public Ticket createTicket(String ticketId, String description, String userId, String emergencyType, String emergencyContact, Integer duration) {
         System.out.println("🔵 CREATE TICKET: Creating ticket - " + ticketId);
         
         // Check if ticket ID already exists
@@ -42,7 +47,7 @@ public class TicketService {
             throw new RuntimeException("Ticket with ID '" + ticketId + "' already exists");
         }
         
-        Ticket ticket = new Ticket(ticketId, description, valid, userId, emergencyType, emergencyContact, createdBy);
+        Ticket ticket = new Ticket(ticketId, description, userId, emergencyType, emergencyContact, duration);
         Ticket savedTicket = ticketRepository.save(ticket);
         System.out.println("✅ TICKET CREATED: " + savedTicket);
         return savedTicket;
@@ -51,7 +56,7 @@ public class TicketService {
     /**
      * Update ticket information
      */
-    public Ticket updateTicket(Long id, String description, Boolean valid, String status, String emergencyType, String emergencyContact) {
+    public Ticket updateTicket(Long id, String description, String status, String emergencyType, String emergencyContact, Integer duration) {
         System.out.println("🔵 UPDATE TICKET: Updating ticket ID - " + id);
         
         Optional<Ticket> ticketOpt = ticketRepository.findById(id);
@@ -60,9 +65,6 @@ public class TicketService {
             
             if (description != null) {
                 ticket.setDescription(description);
-            }
-            if (valid != null) {
-                ticket.setValid(valid);
             }
             if (status != null) {
                 ticket.setStatus(status);
@@ -73,6 +75,9 @@ public class TicketService {
             if (emergencyContact != null) {
                 ticket.setEmergencyContact(emergencyContact);
             }
+            if (duration != null) {
+                ticket.setDuration(duration);
+            }
             
             Ticket updatedTicket = ticketRepository.save(ticket);
             System.out.println("✅ TICKET UPDATED: " + updatedTicket);
@@ -81,55 +86,6 @@ public class TicketService {
             System.out.println("❌ UPDATE FAILED: Ticket not found with ID - " + id);
             throw new RuntimeException("Ticket not found with ID: " + id);
         }
-    }
-
-    /**
-     * Validate a ticket (mark as valid)
-     */
-    public Ticket validateTicket(String ticketId) {
-        System.out.println("🔵 VALIDATE TICKET: Validating ticket - " + ticketId);
-        
-        Optional<Ticket> ticketOpt = ticketRepository.findByTicketId(ticketId);
-        if (ticketOpt.isPresent()) {
-            Ticket ticket = ticketOpt.get();
-            ticket.setValid(true);
-            Ticket validatedTicket = ticketRepository.save(ticket);
-            System.out.println("✅ TICKET VALIDATED: " + validatedTicket);
-            return validatedTicket;
-        } else {
-            System.out.println("❌ VALIDATE FAILED: Ticket not found with ID - " + ticketId);
-            throw new RuntimeException("Ticket not found with ID: " + ticketId);
-        }
-    }
-
-    /**
-     * Invalidate a ticket (mark as invalid)
-     */
-    public Ticket invalidateTicket(String ticketId) {
-        System.out.println("🔵 INVALIDATE TICKET: Invalidating ticket - " + ticketId);
-        
-        Optional<Ticket> ticketOpt = ticketRepository.findByTicketId(ticketId);
-        if (ticketOpt.isPresent()) {
-            Ticket ticket = ticketOpt.get();
-            ticket.setValid(false);
-            Ticket invalidatedTicket = ticketRepository.save(ticket);
-            System.out.println("✅ TICKET INVALIDATED: " + invalidatedTicket);
-            return invalidatedTicket;
-        } else {
-            System.out.println("❌ INVALIDATE FAILED: Ticket not found with ID - " + ticketId);
-            throw new RuntimeException("Ticket not found with ID: " + ticketId);
-        }
-    }
-
-    /**
-     * Check if a ticket is valid
-     */
-    public boolean isTicketValid(String ticketId) {
-        Optional<Ticket> ticketOpt = ticketRepository.findByTicketId(ticketId);
-        if (ticketOpt.isPresent()) {
-            return ticketOpt.get().isValid();
-        }
-        return false;
     }
 
     /**
@@ -158,24 +114,6 @@ public class TicketService {
     }
 
     /**
-     * Get all valid tickets
-     */
-    public List<Ticket> getValidTickets() {
-        return ticketRepository.findAll().stream()
-                .filter(Ticket::isValid)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Get all invalid tickets
-     */
-    public List<Ticket> getInvalidTickets() {
-        return ticketRepository.findAll().stream()
-                .filter(ticket -> !ticket.isValid())
-                .collect(Collectors.toList());
-    }
-
-    /**
      * Search tickets by description (contains)
      */
     public List<Ticket> searchTicketsByDescription(String description) {
@@ -197,13 +135,6 @@ public class TicketService {
      */
     public long getTicketCount() {
         return ticketRepository.count();
-    }
-
-    /**
-     * Get valid ticket count
-     */
-    public long getValidTicketCount() {
-        return getValidTickets().size();
     }
 
     /**
@@ -234,45 +165,6 @@ public class TicketService {
     }
 
     /**
-     * Verify a ticket (increment verification count and update last verified time)
-     */
-    public boolean verifyTicket(String ticketId) {
-        System.out.println("🔵 VERIFY TICKET: Verifying ticket - " + ticketId);
-        
-        Optional<Ticket> ticketOpt = ticketRepository.findByTicketId(ticketId);
-        if (ticketOpt.isPresent()) {
-            Ticket ticket = ticketOpt.get();
-            ticket.setVerificationCount(ticket.getVerificationCount() + 1);
-            ticket.setLastVerifiedAt(java.time.LocalDateTime.now());
-            ticketRepository.save(ticket);
-            System.out.println("✅ TICKET VERIFIED: " + ticket);
-            return ticket.isValid();
-        } else {
-            System.out.println("❌ VERIFY FAILED: Ticket not found with ID - " + ticketId);
-            return false;
-        }
-    }
-
-    /**
-     * Update ticket validity
-     */
-    public Ticket updateTicketValidity(String ticketId, boolean valid) {
-        System.out.println("🔵 UPDATE VALIDITY: Updating ticket validity - " + ticketId + " to " + valid);
-        
-        Optional<Ticket> ticketOpt = ticketRepository.findByTicketId(ticketId);
-        if (ticketOpt.isPresent()) {
-            Ticket ticket = ticketOpt.get();
-            ticket.setValid(valid);
-            Ticket updatedTicket = ticketRepository.save(ticket);
-            System.out.println("✅ VALIDITY UPDATED: " + updatedTicket);
-            return updatedTicket;
-        } else {
-            System.out.println("❌ UPDATE FAILED: Ticket not found with ID - " + ticketId);
-            throw new RuntimeException("Ticket not found with ID: " + ticketId);
-        }
-    }
-
-    /**
      * Update ticket description
      */
     public Ticket updateTicketDescription(String ticketId, String description) {
@@ -289,5 +181,136 @@ public class TicketService {
             System.out.println("❌ UPDATE FAILED: Ticket not found with ID - " + ticketId);
             throw new RuntimeException("Ticket not found with ID: " + ticketId);
         }
+    }
+
+    /**
+     * ADMIN OPERATIONS
+     */
+
+    /**
+     * Get all active tickets (Admin function)
+     * Returns tickets with status = "Active" sorted by creation date descending
+     */
+    public List<Ticket> getActiveTickets() {
+        System.out.println("🔵 ADMIN: Getting all active tickets");
+        List<Ticket> activeTickets = ticketRepository.findActiveTickets();
+        System.out.println("✅ ADMIN: Found " + activeTickets.size() + " active tickets");
+        return activeTickets;
+    }
+
+    /**
+     * Get ticket history (Admin function)
+     * Returns all tickets sorted by creation date descending
+     */
+    public List<Ticket> getTicketHistory() {
+        System.out.println("🔵 ADMIN: Getting ticket history");
+        List<Ticket> ticketHistory = ticketRepository.findAllByOrderByDateCreatedDesc();
+        System.out.println("✅ ADMIN: Found " + ticketHistory.size() + " tickets in history");
+        return ticketHistory;
+    }
+
+    /**
+     * Revoke/Reject a ticket (Admin function)
+     * Only users with admin flag can revoke tickets
+     */
+    public Ticket revokeTicket(Long ticketId, String adminUserId, String rejectReason) {
+        System.out.println("🔵 ADMIN REVOKE: Attempting to revoke ticket ID - " + ticketId + " by admin - " + adminUserId);
+        
+        // Verify admin privileges
+        Optional<User> adminUser = userRepository.findById(adminUserId);
+        if (adminUser.isEmpty()) {
+            System.out.println("❌ REVOKE FAILED: Admin user not found - " + adminUserId);
+            throw new RuntimeException("Admin user not found: " + adminUserId);
+        }
+        
+        if (!adminUser.get().isAdmin()) {
+            System.out.println("❌ REVOKE FAILED: User does not have admin privileges - " + adminUserId);
+            throw new RuntimeException("User does not have admin privileges: " + adminUserId);
+        }
+        
+        // Find and update the ticket
+        Optional<Ticket> ticketOpt = ticketRepository.findById(ticketId);
+        if (ticketOpt.isEmpty()) {
+            System.out.println("❌ REVOKE FAILED: Ticket not found with ID - " + ticketId);
+            throw new RuntimeException("Ticket not found with ID: " + ticketId);
+        }
+        
+        Ticket ticket = ticketOpt.get();
+        
+        // Check if ticket is already completed or rejected
+        if ("Completed".equalsIgnoreCase(ticket.getStatus()) || "Rejected".equalsIgnoreCase(ticket.getStatus())) {
+            System.out.println("⚠️ REVOKE WARNING: Ticket is already " + ticket.getStatus().toLowerCase() + " - " + ticketId);
+            throw new RuntimeException("Ticket is already " + ticket.getStatus().toLowerCase() + ": " + ticketId);
+        }
+        
+        // Update ticket status, rejection reason, and completion date
+        ticket.setStatus("Rejected");
+        ticket.setRejectReason(rejectReason);
+        ticket.setDateCompleted(LocalDateTime.now());
+        
+        Ticket revokedTicket = ticketRepository.save(ticket);
+        System.out.println("✅ TICKET REVOKED: " + revokedTicket.getTicketId() + " by admin " + adminUserId);
+        return revokedTicket;
+    }
+
+    /**
+     * Revoke ticket by ticket ID (Admin function)
+     */
+    public Ticket revokeTicketByTicketId(String ticketId, String adminUserId, String rejectReason) {
+        System.out.println("🔵 ADMIN REVOKE: Attempting to revoke ticket - " + ticketId + " by admin - " + adminUserId);
+        
+        // Verify admin privileges
+        Optional<User> adminUser = userRepository.findById(adminUserId);
+        if (adminUser.isEmpty()) {
+            System.out.println("❌ REVOKE FAILED: Admin user not found - " + adminUserId);
+            throw new RuntimeException("Admin user not found: " + adminUserId);
+        }
+        
+        if (!adminUser.get().isAdmin()) {
+            System.out.println("❌ REVOKE FAILED: User does not have admin privileges - " + adminUserId);
+            throw new RuntimeException("User does not have admin privileges: " + adminUserId);
+        }
+        
+        // Find and update the ticket
+        Optional<Ticket> ticketOpt = ticketRepository.findByTicketId(ticketId);
+        if (ticketOpt.isEmpty()) {
+            System.out.println("❌ REVOKE FAILED: Ticket not found with ticket ID - " + ticketId);
+            throw new RuntimeException("Ticket not found with ticket ID: " + ticketId);
+        }
+        
+        Ticket ticket = ticketOpt.get();
+        
+        // Check if ticket is already completed or rejected
+        if ("Completed".equalsIgnoreCase(ticket.getStatus()) || "Rejected".equalsIgnoreCase(ticket.getStatus())) {
+            System.out.println("⚠️ REVOKE WARNING: Ticket is already " + ticket.getStatus().toLowerCase() + " - " + ticketId);
+            throw new RuntimeException("Ticket is already " + ticket.getStatus().toLowerCase() + ": " + ticketId);
+        }
+        
+        // Update ticket status, rejection reason, and completion date
+        ticket.setStatus("Rejected");
+        ticket.setRejectReason(rejectReason);
+        ticket.setDateCompleted(LocalDateTime.now());
+        
+        Ticket revokedTicket = ticketRepository.save(ticket);
+        System.out.println("✅ TICKET REVOKED: " + revokedTicket.getTicketId() + " by admin " + adminUserId);
+        return revokedTicket;
+    }
+
+    /**
+     * Check if user is admin
+     */
+    public boolean isUserAdmin(String userId) {
+        Optional<User> user = userRepository.findById(userId);
+        return user.isPresent() && user.get().isAdmin();
+    }
+
+    /**
+     * Get tickets by status
+     */
+    public List<Ticket> getTicketsByStatus(String status) {
+        System.out.println("🔵 QUERY: Getting tickets with status - " + status);
+        List<Ticket> tickets = ticketRepository.findByStatus(status);
+        System.out.println("✅ QUERY: Found " + tickets.size() + " tickets with status " + status);
+        return tickets;
     }
 } 

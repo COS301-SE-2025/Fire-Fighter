@@ -20,11 +20,12 @@ class TicketRepositoryTest {
         Ticket ticket = new Ticket();
         ticket.setTicketId("JIRA-456");
         ticket.setDescription("Test Ticket");
-        ticket.setValid(true);
+        ticket.setDuration(30);
         ticketRepository.save(ticket);
 
         Optional<Ticket> found = ticketRepository.findByTicketId("JIRA-456");
         assertThat(found).isPresent();
-        assertThat(found.get().isValid()).isTrue();
+        assertThat(found.get().getTicketId()).isEqualTo("JIRA-456");
+        assertThat(found.get().getDuration()).isEqualTo(30);
     }
 }

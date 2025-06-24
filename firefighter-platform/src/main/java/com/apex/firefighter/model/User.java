@@ -37,9 +37,9 @@ public class User {
     @Column(name = "is_admin", nullable = true, columnDefinition = "boolean default false")
     private Boolean isAdmin = false;
 
-    // One-to-Many relationship with UserRole (instead of Many-to-Many)
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Set<UserRole> userRoles = new HashSet<>();
+    // Simple role relationship - commented out complex role system for now
+    // @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    // private Set<UserRole> userRoles = new HashSet<>();
 
     // Default constructor
     public User() {
@@ -130,6 +130,8 @@ public class User {
         this.isAdmin = isAdmin;
     }
 
+    // Complex role methods commented out - using simple role column instead
+    /*
     public Set<UserRole> getUserRoles() {
         return userRoles;
     }
@@ -152,6 +154,12 @@ public class User {
     public boolean hasRole(String roleName) {
         return this.userRoles.stream()
                 .anyMatch(userRole -> userRole.getRole().getName().equals(roleName));
+    }
+    */
+
+    // Simple role checking using the role column
+    public boolean hasRole(String roleName) {
+        return this.role != null && this.role.equals(roleName);
     }
 
     public boolean isAuthorized() {
@@ -178,7 +186,7 @@ public class User {
                 ", isAdmin=" + isAdmin +
                 ", createdAt=" + createdAt +
                 ", lastLogin=" + lastLogin +
-                ", roles=" + userRoles.size() + " roles" +
+                ", role='" + role + '\'' +
                 '}';
     }
 }

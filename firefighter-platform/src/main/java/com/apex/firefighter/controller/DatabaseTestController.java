@@ -11,13 +11,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/test")
-@CrossOrigin(origins = {
-    "http://localhost:8100", 
-    "http://127.0.0.1:8100", 
-    "https://localhost:8100",
-    "ionic://localhost",
-    "capacitor://localhost"
-}, allowCredentials = "true")
 public class DatabaseTestController {
 
     private final DatabaseConnectionTestService testService;
@@ -25,6 +18,15 @@ public class DatabaseTestController {
     @Autowired
     public DatabaseTestController(DatabaseConnectionTestService testService) {
         this.testService = testService;
+    }
+
+    /**
+     * Simple CORS test endpoint
+     * GET /api/test/cors
+     */
+    @GetMapping("/cors")
+    public ResponseEntity<String> corsTest() {
+        return ResponseEntity.ok("🎉 CORS is working correctly! You can access this API from any device on the network.");
     }
 
     /**
