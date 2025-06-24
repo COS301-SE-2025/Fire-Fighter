@@ -308,12 +308,12 @@ export class AdminPage implements OnInit {
     ];
     const rows = this.filteredAndSortedHistory.map(req => [
       req.id,
-      req.requester,
+      this.usernames[req.requester] || req.requester,
       req.reason,
       req.status,
       req.completedAt,
       req.lastAction || '',
-      req.actionBy || '',
+      req.actionBy ? (this.usernames[req.actionBy] || req.actionBy) : '',
       req.actionAt || ''
     ]);
     const csvContent = [headers, ...rows].map(e => e.map(field => '"' + String(field).replace(/"/g, '""') + '"').join(',')).join('\r\n');
@@ -473,7 +473,19 @@ export class AdminPage implements OnInit {
     const selected = this.filteredAndSortedRequests.filter(req => this.selectedActiveIds.has(req.id));
     if (selected.length === 0) return;
     const headers = ['ID', 'Requester', 'Reason', 'Status', 'Access Start', 'Access End', 'System', 'Justification', 'Reject Reason', 'Email', 'Phone'];
-    const rows = selected.map(req => [req.id, req.requester, req.reason, req.status, req.accessStart, req.accessEnd, req.system, req.justification, req.rejectReason || '', req.email, req.phone]);
+    const rows = selected.map(req => [
+      req.id,
+      this.usernames[req.requester] || req.requester,
+      req.reason,
+      req.status,
+      req.accessStart,
+      req.accessEnd,
+      req.system,
+      req.justification,
+      req.rejectReason || '',
+      this.userEmails[req.requester] || req.email,
+      req.phone
+    ]);
     const csvContent = [headers, ...rows].map(e => e.map(field => '"' + String(field).replace(/"/g, '""') + '"').join(',')).join('\r\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -492,17 +504,17 @@ export class AdminPage implements OnInit {
     ];
     const rows = this.filteredAndSortedRequests.map(req => [
       req.id,
-      req.requester,
+      this.usernames[req.requester] || req.requester,
       req.reason,
       req.status,
       req.accessStart,
       req.accessEnd,
       req.system,
       req.justification,
-      req.revokedBy || '',
+      req.revokedBy ? (this.usernames[req.revokedBy] || req.revokedBy) : '',
       req.revokedAt || '',
       req.rejectReason || '',
-      req.email,
+      this.userEmails[req.requester] || req.email,
       req.phone
     ]);
     const csvContent = [headers, ...rows].map(e => e.map(field => '"' + String(field).replace(/"/g, '""') + '"').join(',')).join('\r\n');
@@ -525,9 +537,9 @@ export class AdminPage implements OnInit {
         req.auditLog.forEach(log => {
           rows.push([
             req.id,
-            req.requester,
+            this.usernames[req.requester] || req.requester,
             log.action,
-            log.by,
+            this.usernames[log.by] || log.by,
             log.at,
             log.reason || ''
           ]);
