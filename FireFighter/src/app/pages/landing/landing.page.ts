@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonContent } from '@ionic/angular/standalone';
+import { ThemeService } from '../../services/theme.service';
 
 @Component({
   selector: 'app-landing',
@@ -13,9 +14,14 @@ import { IonContent } from '@ionic/angular/standalone';
 })
 export class LandingPage implements OnInit {
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router,
+    private themeService: ThemeService
+  ) { }
 
   ngOnInit() {
+    // Always set status bar to dark for landing page
+    this.themeService.setStatusBarDark();
   }
 
   navigateToLogin() {

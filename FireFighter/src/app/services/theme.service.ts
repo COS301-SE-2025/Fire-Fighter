@@ -63,4 +63,16 @@ export class ThemeService {
       console.warn('Could not update status bar:', error);
     }
   }
+
+  async setStatusBarDark(): Promise<void> {
+    try {
+      if (Capacitor.isNativePlatform()) {
+        // Force dark status bar with light content (white text)
+        await StatusBar.setStyle({ style: Style.Dark });
+        await StatusBar.setBackgroundColor({ color: '#111827' }); // gray-900
+      }
+    } catch (error) {
+      console.warn('Could not set dark status bar:', error);
+    }
+  }
 } 

@@ -1,15 +1,29 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RequestsPage } from './requests.page';
-import { testProviders } from '../../../test-setup';
+import { testProviders, mockTicketService, mockAuthService } from '../../../test-setup';
+import { TicketService } from '../../services/ticket.service';
+import { AuthService } from '../../services/auth.service';
+import { ToastController } from '@ionic/angular';
 
 describe('RequestsPage', () => {
   let component: RequestsPage;
   let fixture: ComponentFixture<RequestsPage>;
 
+  const mockToastController = {
+    create: jasmine.createSpy('create').and.returnValue(Promise.resolve({
+      present: jasmine.createSpy('present')
+    }))
+  };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RequestsPage],
-      providers: [...testProviders]
+      providers: [
+        ...testProviders,
+        { provide: TicketService, useValue: mockTicketService },
+        { provide: AuthService, useValue: mockAuthService },
+        { provide: ToastController, useValue: mockToastController }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(RequestsPage);

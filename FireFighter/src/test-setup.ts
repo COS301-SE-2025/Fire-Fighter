@@ -1,5 +1,7 @@
 // src/test-setup.ts
 import { importProvidersFrom } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
 import { provideRouter } from '@angular/router';
@@ -37,6 +39,8 @@ export const testProviders = [
   { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
   provideIonicAngular(),
   provideRouter([]),
+  provideHttpClient(),
+  provideHttpClientTesting(),
   provideFirebaseApp(() => testApp),
   provideAuth(() => testAuth),
 ];
@@ -62,6 +66,8 @@ export const mockUser = {
 // Mock AuthService for tests that don't need real Firebase
 export const mockAuthService = {
   user$: of(null),
+  userProfile$: of(null),
+  isAdmin$: of(false),
   signInWithGoogle: jasmine.createSpy('signInWithGoogle'),
   signInWithEmail: jasmine.createSpy('signInWithEmail'),
   createUserWithEmail: jasmine.createSpy('createUserWithEmail'),
@@ -69,4 +75,27 @@ export const mockAuthService = {
   signOut: jasmine.createSpy('signOut'),
   logout: jasmine.createSpy('logout'),
   navigateToDashboard: jasmine.createSpy('navigateToDashboard'),
+  getUserProfileById: jasmine.createSpy('getUserProfileById').and.returnValue(of({ username: 'Test User', email: 'test@example.com' })),
+};
+
+// Mock TicketService for tests
+export const mockTicketService = {
+  getTickets: jasmine.createSpy('getTickets').and.returnValue(of([])),
+  createTicket: jasmine.createSpy('createTicket').and.returnValue(of({})),
+  updateTicket: jasmine.createSpy('updateTicket').and.returnValue(of({})),
+};
+
+// Mock NotificationService for tests
+export const mockNotificationService = {
+  getNotifications: jasmine.createSpy('getNotifications').and.returnValue(of([])),
+  markAsRead: jasmine.createSpy('markAsRead'),
+  markAllAsRead: jasmine.createSpy('markAllAsRead'),
+};
+
+// Mock ThemeService for tests
+export const mockThemeService = {
+  toggleTheme: jasmine.createSpy('toggleTheme'),
+  setTheme: jasmine.createSpy('setTheme'),
+  getCurrentTheme: jasmine.createSpy('getCurrentTheme').and.returnValue(false),
+  setStatusBarDark: jasmine.createSpy('setStatusBarDark'),
 }; 
