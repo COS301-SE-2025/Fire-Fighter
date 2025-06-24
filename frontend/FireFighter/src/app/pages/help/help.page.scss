@@ -1,0 +1,74 @@
+/* Help Page Styles - Optimized */
+.help-container {
+  .quick-actions-grid {
+    @apply gap-4 md:gap-6;
+    
+    .action-card {
+      @apply transition-all duration-300 ease-in-out;
+      
+      &:hover {
+        @apply shadow-lg;
+        transform: translateY(-2px);
+        
+        .action-icon {
+          @apply scale-110;
+        }
+      }
+    }
+  }
+  
+  .documentation-section .doc-card,
+  .faq-section .faq-item {
+    @apply transition-all duration-200 ease-in-out;
+    
+    &:hover {
+      @apply shadow-md;
+    }
+  }
+  
+  .documentation-section .doc-item:hover {
+    @apply transform scale-[1.02];
+  }
+  
+  .faq-item:hover {
+    @apply transform translate-y-[-1px];
+  }
+}
+
+/* Custom scrollbar */
+.help-content::-webkit-scrollbar {
+  width: 6px;
+  
+  &-track {
+    @apply bg-gray-100 dark:bg-gray-800;
+  }
+  
+  &-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+    
+    &:hover {
+      @apply bg-gray-400 dark:bg-gray-500;
+    }
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .help-container .quick-actions-grid {
+    @apply grid-cols-1 gap-3;
+  }
+}
+
+/* Focus states */
+.help-container button:focus-visible,
+.help-container [role="button"]:focus-visible {
+  @apply ring-2 ring-blue-500 ring-offset-2;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    @apply transition-none;
+    animation: none !important;
+  }
+}
