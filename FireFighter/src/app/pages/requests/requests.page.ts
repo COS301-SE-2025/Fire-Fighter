@@ -189,9 +189,16 @@ export class RequestsPage implements OnInit {
 
     // Apply status filter
     if (this.filter !== 'all') {
-      filtered = filtered.filter(ticket => 
-        ticket.status.toLowerCase() === this.filter.toLowerCase()
-      );
+      if (this.filter.toLowerCase() === 'completed') {
+        // Include both "Completed" and "Closed" tickets when "Completed" filter is selected
+        filtered = filtered.filter(ticket => 
+          ticket.status === 'Completed' || ticket.status === 'Closed'
+        );
+      } else {
+        filtered = filtered.filter(ticket => 
+          ticket.status.toLowerCase() === this.filter.toLowerCase()
+        );
+      }
     }
 
     return filtered;
@@ -202,7 +209,7 @@ export class RequestsPage implements OnInit {
   }
 
   get completedTicketsCount() {
-    return this.tickets.filter(t => t.status === 'Completed').length;
+    return this.tickets.filter(t => t.status === 'Completed' || t.status === 'Closed').length;
   }
 
   get rejectedTicketsCount() {

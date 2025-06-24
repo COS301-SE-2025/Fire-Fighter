@@ -8,7 +8,7 @@ import { AuthService } from './auth.service';
 
 export interface Ticket {
   id: string;
-  status: 'Active' | 'Completed' | 'Rejected';
+  status: 'Active' | 'Completed' | 'Rejected' | 'Closed';
   dateCreated: Date;
   reason: string;
   requestDate: string;
@@ -51,7 +51,7 @@ export class TicketService {
   private mapBackendTicketToFrontend(ticket: any): Ticket {
     return {
       id: ticket.ticketId, // Use ticketId from backend as id in frontend
-      status: ticket.status as 'Active' | 'Completed' | 'Rejected',
+      status: ticket.status as 'Active' | 'Completed' | 'Rejected' | 'Closed',
       dateCreated: ticket.dateCreated ? new Date(ticket.dateCreated) : new Date(),
       reason: ticket.description, // Map description to reason
       requestDate: typeof ticket.requestDate === 'string' ? ticket.requestDate : (ticket.requestDate ? ticket.requestDate.toString().split('T')[0] : new Date().toISOString().split('T')[0]),
