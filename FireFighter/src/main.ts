@@ -10,11 +10,15 @@ import {
   IonicRouteStrategy,
   provideIonicAngular
 } from '@ionic/angular/standalone';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors, HttpErrorResponse } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { inject } from '@angular/core';
+import { catchError, throwError } from 'rxjs';
 
 import { routes }       from './app/app.routes';
 import { AppComponent } from './app/app.component';
+import { ApiConfigService } from './app/services/api-config.service';
+import { environment } from './environments/environment';
 
 // ← THESE imports are from @angular/fire
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
@@ -44,7 +48,85 @@ bootstrapApplication(AppComponent, {
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideIonicAngular(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([
+      (req, next) => {
+        const apiConfigService = inject(ApiConfigService);
+        const currentApiUrl = apiConfigService.getCurrentApiUrlSync();
+        
+        // Update request URL to use current API URL
+        let modifiedRequest = req;
+        if (req.url.includes(environment.apiUrl) || req.url.includes(environment.fallbackApiUrl)) {
+          const updatedUrl = req.url
+            .replace(environment.apiUrl, currentApiUrl)
+            .replace(environment.fallbackApiUrl, currentApiUrl);
+          
+          modifiedRequest = req.clone({ url: updatedUrl });
+        }
+
+        return next(modifiedRequest).pipe(
+          catchError((error: HttpErrorResponse) => {
+            console.log('🔍 HTTP Error detected:', {
+              url: modifiedRequest.url,
+              status: error.status,
+              message: error.message,
+              error: error.error,
+              name: error.name,
+              isProgressEvent: error.error instanceof ProgressEvent,
+              isUsingFallback: apiConfigService.isUsingFallbackApi()
+            });
+
+            // Improved connection error detection
+            const isConnectionError = error.status === 0 || 
+                                    (error.status >= 500 && error.status < 600) ||
+                                    error.error instanceof ProgressEvent ||
+                                    error.message?.includes('CONNECTION_REFUSED') ||
+                                    error.message?.includes('NETWORK_ERROR') ||
+                                    error.message?.includes('net::') ||
+                                    !error.status; // Sometimes status is undefined for network errors
+
+            const isLocalhostRequest = modifiedRequest.url.includes('localhost') || 
+                                     modifiedRequest.url.includes('127.0.0.1') ||
+                                     modifiedRequest.url.includes(environment.apiUrl);
+
+            if (!apiConfigService.isUsingFallbackApi() && 
+                isConnectionError && 
+                isLocalhostRequest) {
+              
+              console.warn('🚨 API request failed, switching to fallback...', {
+                error: error.message,
+                url: modifiedRequest.url,
+                status: error.status,
+                fallbackUrl: environment.fallbackApiUrl
+              });
+
+              // Switch to fallback API
+              apiConfigService.switchToFallback();
+
+              // Retry the request with the fallback URL
+              const fallbackUrl = modifiedRequest.url.replace(environment.apiUrl, environment.fallbackApiUrl);
+              const fallbackRequest = modifiedRequest.clone({ url: fallbackUrl });
+              
+              console.log('🔄 Retrying with fallback URL:', fallbackUrl);
+              
+              return next(fallbackRequest).pipe(
+                catchError((fallbackError: HttpErrorResponse) => {
+                  console.error('❌ Fallback API also failed:', {
+                    error: fallbackError.message,
+                    url: fallbackRequest.url,
+                    status: fallbackError.status,
+                    fallbackError: fallbackError.error
+                  });
+                  return throwError(() => fallbackError);
+                })
+              );
+            }
+
+            console.log('⚠️ Error not qualifying for fallback - passing through');
+            return throwError(() => error);
+          })
+        );
+      }
+    ])),
     provideAnimations(),
 
     // ← wire AngularFire into Angular’s DI
