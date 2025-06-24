@@ -279,12 +279,12 @@ export class AdminPage implements OnInit {
     // Add completion/rejection entry if ticket is not active
     if (ticket.status === 'Rejected' && ticket.dateCompleted) {
       auditLog.push({ 
-        action: 'Rejected', 
+        action: 'Revoked', 
         by: 'Admin', 
         at: ticket.dateCompleted, 
         reason: ticket.rejectReason || 'No reason provided' 
       });
-    } else if (ticket.status === 'Completed' && ticket.dateCompleted) {
+    } else if (ticket.status === 'Closed' && ticket.dateCompleted) {
       auditLog.push({ 
         action: 'Completed', 
         by: 'System', 

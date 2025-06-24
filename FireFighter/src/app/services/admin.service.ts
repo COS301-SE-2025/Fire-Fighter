@@ -9,7 +9,7 @@ export interface AdminTicket {
   id: number;
   ticketId: string;
   description: string;
-  status: 'Active' | 'Rejected' | 'Completed';
+  status: 'Active' | 'Rejected' | 'Completed' | 'Closed';
   dateCreated: string;
   requestDate: string;
   userId: string;
