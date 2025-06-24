@@ -669,7 +669,7 @@
                           <div class="flex-1 min-w-0">
                             <div class="text-gray-900 dark:text-white">
                               <span class="font-semibold">{{ log.action }}</span>
-                              <span class="text-gray-600 dark:text-gray-400"> by {{ log.by }}</span>
+                              <span class="text-gray-600 dark:text-gray-400"> by {{ usernames[log.by] || log.by }}</span>
                             </div>
                             <div class="text-xs text-gray-500 dark:text-gray-500">{{ log.at }}</div>
                             <div *ngIf="log.reason" class="text-xs text-gray-600 dark:text-gray-400 italic mt-1 bg-gray-50 dark:bg-gray-800 p-2 rounded">
@@ -822,7 +822,7 @@
                 <span class="font-semibold text-gray-700 dark:text-gray-300">Complete Audit Log:</span>
                 <ul class="list-disc list-inside text-sm text-gray-700 dark:text-gray-300 mt-2 space-y-1">
                   <li *ngFor="let log of req.auditLog">
-                    <span class="font-bold">{{ log.action }}</span> by <span class="text-gray-900 dark:text-white">{{ log.by }}</span> at <span class="text-gray-900 dark:text-white">{{ log.at }}</span>
+                    <span class="font-bold">{{ log.action }}</span> by <span class="text-gray-900 dark:text-white">{{ usernames[log.by] || log.by }}</span> at <span class="text-gray-900 dark:text-white">{{ log.at }}</span>
                     <span *ngIf="log.reason" class="block text-gray-600 dark:text-gray-400 italic ml-4">{{ log.reason }}</span>
                   </li>
                 </ul>
