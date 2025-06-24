@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonContent } from '@ionic/angular/standalone';
+import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
@@ -50,7 +50,7 @@ interface AuditLogEntry {
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, IonContent, NavbarComponent, FormsModule],
+  imports: [CommonModule, IonContent, IonRefresher, IonRefresherContent, NavbarComponent, FormsModule],
   templateUrl: './admin.page.html',
   styleUrls: ['./admin.page.scss']
 })
@@ -642,5 +642,13 @@ export class AdminPage implements OnInit {
         });
       }
     });
+  }
+
+  doRefresh(event: any) {
+    this.refreshData();
+    // Complete the refresh after a short delay to ensure data is loaded
+    setTimeout(() => {
+      event.target.complete();
+    }, 1000);
   }
 }

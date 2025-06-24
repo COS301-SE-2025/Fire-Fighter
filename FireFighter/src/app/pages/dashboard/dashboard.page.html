@@ -1,7 +1,16 @@
 <app-navbar></app-navbar>
 
 <ion-content [fullscreen]="true" class="ion-padding">
-  <div class="min-h-full bg-gray-50 dark:bg-gray-900 pb-24 mb-8">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)" pullFactor="0.5" pullMin="60" pullMax="120">
+    <ion-refresher-content 
+      pullingIcon="chevron-down-circle-outline"
+      pullingText="Pull to refresh"
+      refreshingSpinner="circles"
+      refreshingText="Refreshing...">
+    </ion-refresher-content>
+  </ion-refresher>
+  
+  <div class="min-h-full bg-gray-50 dark:bg-gray-900 pb-24 mb-8 pt-2">
     <!-- Admin Access Denied Message -->
     <div *ngIf="adminAccessDeniedMessage" class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg dark:bg-red-900/50 dark:border-red-600 dark:text-red-300">
       <div class="flex items-center">

@@ -1,7 +1,16 @@
 <app-navbar></app-navbar>
 
 <ion-content [fullscreen]="true" class="ion-padding">
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)" pullFactor="0.5" pullMin="60" pullMax="120">
+    <ion-refresher-content 
+      pullingIcon="chevron-down-circle-outline"
+      pullingText="Pull to refresh"
+      refreshingSpinner="circles"
+      refreshingText="Refreshing...">
+    </ion-refresher-content>
+  </ion-refresher>
+  
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20 pt-2">
     
     <!-- Header Section -->
     <div class="mb-6">

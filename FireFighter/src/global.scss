@@ -114,3 +114,18 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Pull-to-refresh theming */
+ion-refresher-content {
+  color: #374151; /* gray-700 */
+}
+
+:root.dark ion-refresher-content {
+  color: #ffffff; /* white */
+}
+
+/* Ensure spinner inherits the color */
+:root.dark ion-refresher-content .refresher-refreshing-icon,
+:root.dark ion-refresher-content .refresher-pulling-icon {
+  color: #ffffff !important;
+}

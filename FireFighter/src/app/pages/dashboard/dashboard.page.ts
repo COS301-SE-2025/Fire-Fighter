@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
-import { IonContent } from '@ionic/angular/standalone';
+import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { TicketService, Ticket } from '../../services/ticket.service';
 import { NotificationService } from '../../services/notification.service';
@@ -29,6 +29,8 @@ export interface Activity {
     CommonModule,
     RouterModule,
     IonContent,
+    IonRefresher,
+    IonRefresherContent,
     NavbarComponent
   ]
 })
@@ -343,6 +345,14 @@ export class DashboardPage implements OnInit, OnDestroy {
 
   async logout() {
     await this.authService.logout();
+  }
+
+  doRefresh(event: any) {
+    this.loadTickets();
+    // Wait for the tickets to load then complete the refresh
+    this.ticketService.getTickets().pipe(
+      finalize(() => event.target.complete())
+    ).subscribe();
   }
 }
 

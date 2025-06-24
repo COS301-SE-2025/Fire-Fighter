@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent } from '@ionic/angular/standalone';
+import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 import { ToastController } from '@ionic/angular';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { TicketService, Ticket } from '../../services/ticket.service';
@@ -17,7 +17,9 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./requests.page.scss'],
   standalone: true,
   imports: [
-    IonContent, 
+    IonContent,
+    IonRefresher,
+    IonRefresherContent,
     CommonModule, FormsModule, NavbarComponent
   ],
   animations: [
@@ -315,7 +317,10 @@ export class RequestsPage implements OnInit {
     return ticket.id;
   }
 
-  
+  doRefresh(event: any) {
+    this.loadTickets();
+    event.target.complete();
+  }
 }
 
 

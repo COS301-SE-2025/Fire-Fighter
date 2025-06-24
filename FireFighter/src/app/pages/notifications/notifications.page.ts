@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { IonContent } from '@ionic/angular/standalone';
+import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService, Notification } from '../../services/notification.service';
 import { addIcons } from 'ionicons';
@@ -19,7 +19,9 @@ import { Observable } from 'rxjs';
     CommonModule, 
     FormsModule,
     RouterModule,
-    IonContent, 
+    IonContent,
+    IonRefresher,
+    IonRefresherContent,
     NavbarComponent
   ]
 })
@@ -109,5 +111,12 @@ export class NotificationsPage implements OnInit {
 
   getEmergencyCount(notifications: Notification[]): number {
     return notifications.filter(n => n.type === 'request_completed' || n.type === 'new_request').length;
+  }
+
+  doRefresh(event: any) {
+    // Refresh notifications data
+    this.notifications$ = this.notificationService.getNotifications();
+    // Complete the refresh
+    event.target.complete();
   }
 }
