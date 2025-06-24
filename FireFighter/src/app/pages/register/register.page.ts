@@ -3,6 +3,7 @@ import { CommonModule, NgClass } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IonContent } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
+import { ThemeService } from '../../services/theme.service';
 import { Router, RouterLink } from '@angular/router';
 
 @Component({
@@ -26,8 +27,12 @@ export class RegisterPage implements OnInit {
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
-    private router: Router
-  ) {}
+    private router: Router,
+    private themeService: ThemeService
+  ) {
+    // Ensure theme service is initialized for status bar color
+    this.themeService.getCurrentTheme();
+  }
 
   async ngOnInit() {
     this.registerForm = this.fb.group({

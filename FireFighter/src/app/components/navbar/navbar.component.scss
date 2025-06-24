@@ -5,19 +5,21 @@ ion-header {
   z-index: 1000;
 }
 
-/* Safe area handling for notification bar */
-.navbar-safe-area {
-  padding-top: env(safe-area-inset-top, 8px);
-  margin-top: 8px; /* Additional margin for devices without safe-area support */
-}
-
-/* Additional safe area spacing for mobile devices */
+/* Remove default spacing on mobile devices */
 @media screen and (max-width: 768px) {
-  .navbar-safe-area {
-    padding-top: env(safe-area-inset-top, 12px);
-    margin-top: 12px;
+  ion-header {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    top: 0 !important;
+  }
+  
+  ion-header .ion-no-border {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
   }
 }
+
+
 
 /* Professional shadow and border effects - Fixed for dark mode */
 .navbar {

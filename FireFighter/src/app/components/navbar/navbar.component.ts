@@ -4,6 +4,7 @@ import { IonHeader } from '@ionic/angular/standalone';
 import { Router, NavigationEnd} from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
+import { ThemeService } from '../../services/theme.service';
 import { Observable, map } from 'rxjs';
 
 @Component({
@@ -30,7 +31,8 @@ export class NavbarComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private themeService: ThemeService
   ) {
     this.hasUnreadNotifications$ = this.notificationService.getNotifications().pipe(
       map(notifications => notifications.some(notification => !notification.read))
@@ -98,13 +100,8 @@ export class NavbarComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)')
-                              .matches;
-    this.isDarkMode = savedTheme === 'dark'
-      || (!savedTheme && prefersDark);
-    this.updateHtmlClass();
+    // Get current theme from the theme service
+    this.isDarkMode = this.themeService.getCurrentTheme();
 
     this.currentURL = this.router.url;
     this.router.events.subscribe(evt => {
@@ -119,15 +116,11 @@ export class NavbarComponent implements OnInit {
   }
 
   toggleTheme(): void {
-    this.isDarkMode = !this.isDarkMode;
-    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
-    this.updateHtmlClass();
+    this.themeService.toggleTheme();
+    this.isDarkMode = this.themeService.getCurrentTheme();
   }
 
-  updateHtmlClass(): void {
-    const html = document.documentElement;
-    html.classList.toggle('dark', this.isDarkMode);
-  }
+
 
   async logout() {
     await this.authService.logout();
