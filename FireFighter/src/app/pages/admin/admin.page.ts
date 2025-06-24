@@ -60,6 +60,7 @@ export class AdminPage implements OnInit {
   
   // User names mapping (userId -> username)
   usernames: { [userId: string]: string } = {};
+  userEmails: { [userId: string]: string } = {};
   
   // Loading and error states
   loading = false;
@@ -93,7 +94,7 @@ export class AdminPage implements OnInit {
       const requests = tickets.map(ticket => this.adminService.mapAdminTicketToEmergencyRequest(ticket));
       
       // Populate usernames for active requests
-      this.populateUsernames(requests.map(r => r.requester));
+      this.populateUserDetails(requests.map(r => r.requester));
       
       return requests;
     }),
@@ -248,8 +249,11 @@ export class AdminPage implements OnInit {
       history.forEach(h => {
         allUserIds.add(h.requester);
         if (h.actionBy) allUserIds.add(h.actionBy);
+        if (h.auditLog) {
+          h.auditLog.forEach(log => allUserIds.add(log.by));
+        }
       });
-      this.populateUsernames(Array.from(allUserIds));
+      this.populateUserDetails(Array.from(allUserIds));
       
       return history;
     }),
@@ -363,7 +367,7 @@ export class AdminPage implements OnInit {
     if (this.sortOption === 'date') {
       filtered = filtered.slice().sort((a, b) => a.accessStart.localeCompare(b.accessStart));
     } else if (this.sortOption === 'requester') {
-      filtered = filtered.slice().sort((a, b) => a.requester.localeCompare(b.requester));
+      filtered = filtered.slice().sort((a, b) => a.requester.toLowerCase().localeCompare(b.requester.toLowerCase()));
     } else if (this.sortOption === 'urgency') {
       // For demo, sort by status: Open > Revoked > Resolved
       const order = { 'Open': 1, 'Revoked': 2, 'Resolved': 3 };
@@ -418,9 +422,9 @@ export class AdminPage implements OnInit {
     if (this.historySortOption === 'date') {
       filtered = filtered.slice().sort((a, b) => a.completedAt.localeCompare(b.completedAt));
     } else if (this.historySortOption === 'requester') {
-      filtered = filtered.slice().sort((a, b) => a.requester.localeCompare(b.requester));
+      filtered = filtered.slice().sort((a, b) => a.requester.toLowerCase().localeCompare(b.requester.toLowerCase()));
     } else if (this.historySortOption === 'reason') {
-      filtered = filtered.slice().sort((a, b) => a.reason.localeCompare(b.reason));
+      filtered = filtered.slice().sort((a, b) => a.reason.toLowerCase().localeCompare(b.reason.toLowerCase()));
     }
     return filtered;
   }
@@ -601,21 +605,30 @@ export class AdminPage implements OnInit {
     });
   }
 
-  /**
-   * Populate usernames for given user IDs
-   */
-  private populateUsernames(userIds: string[]) {
-    const uniqueUserIds = Array.from(new Set(userIds.filter(id => id && !this.usernames[id])));
-    
+  private populateUserDetails(userIds: string[]) {
+    // Deduplicate user IDs
+    const uniqueUserIds = [...new Set(userIds)].filter(id => id); // Filter out any undefined/null IDs
+
     uniqueUserIds.forEach(userId => {
-      this.authService.getUserProfileById(userId).subscribe({
-        next: (profile) => {
-          this.usernames[userId] = profile.username || profile.email || userId;
-        },
-        error: () => {
-          this.usernames[userId] = userId; // fallback if error
-        }
-      });
+      // Avoid re-fetching if details are already known
+      if (!this.usernames[userId] || !this.userEmails[userId]) {
+        this.authService.getUserProfileById(userId).subscribe({
+          next: (user) => {
+            if (user) {
+              this.usernames[userId] = user.username;
+              this.userEmails[userId] = user.email;
+            } else {
+              this.usernames[userId] = 'Unknown User';
+              this.userEmails[userId] = 'unknown@example.com';
+            }
+          },
+          error: (err) => {
+            console.error(`Error fetching user details for ID ${userId}:`, err);
+            this.usernames[userId] = 'Unknown User';
+            this.userEmails[userId] = 'unknown@example.com';
+          }
+        });
+      }
     });
   }
 }
