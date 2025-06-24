@@ -1,0 +1,110 @@
+/* Make sure the navbar is visible */
+ion-header {
+  display: block;
+  position: relative;
+  background-color: transparent;
+}
+
+/* Fix size utility class */
+.size-6 {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.size-8 {
+  width: 2rem;
+  height: 2rem;
+}
+
+/* Ensure proper stacking for mobile menu */
+#mobile-menu {
+  z-index: 100;
+}
+
+/* Fix focus styles */
+.focus\\:outline-none:focus {
+  outline: none;
+}
+
+/* Allow overflow for dropdown menu */
+ion-content {
+  position: relative;
+  z-index: 0;
+  --padding-top: calc(var(--ion-safe-area-top, env(safe-area-inset-top)) + 28px);
+}
+
+/* Ensure proper dropdown appearance */
+.ring-1 {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Add padding to prevent content from scrolling under the navbar */
+:host {
+  display: block;
+}
+
+/* Responsive table improvements */
+.overflow-x-auto {
+  /* Ensure smooth scrolling on mobile if needed */
+  -webkit-overflow-scrolling: touch;
+  
+  /* Add scrollbar styling for better UX */
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Dark mode scrollbar */
+.dark .overflow-x-auto {
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* Table responsiveness improvements */
+table {
+  /* Ensure table doesn't break layout */
+  table-layout: auto;
+  
+  th, td {
+    /* Prevent text from breaking awkwardly */
+    word-break: break-word;
+    
+    /* Better text overflow handling for smaller screens */
+    @media (max-width: 1023px) {
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
+  }
+}
+
+/* Improved truncation for better mobile experience */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Better responsive spacing for table content */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .overflow-x-auto table {
+    font-size: 0.875rem; /* Slightly smaller text on medium screens */
+  }
+}

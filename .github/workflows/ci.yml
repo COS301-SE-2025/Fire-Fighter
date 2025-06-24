@@ -1,0 +1,134 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    name: Backend Tests
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    
+    - name: Run backend tests
+      run: cd backend/firefighter-platform && ./mvnw clean test
+    
+    - name: Build backend
+      run: cd backend/firefighter-platform && ./mvnw clean package -DskipTests
+
+  frontend-tests:
+    runs-on: ubuntu-latest
+    name: Frontend Tests
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/FireFighter/package-lock.json
+    
+    - name: Install frontend dependencies
+      run: cd frontend/FireFighter && npm ci
+    
+    - name: Run frontend linting
+      run: cd frontend/FireFighter && npm run lint
+    
+    - name: Run frontend tests
+      run: cd frontend/FireFighter && npm test -- --watch=false --browsers=ChromeHeadless
+    
+    - name: Build frontend
+      run: cd frontend/FireFighter && npm run build
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    name: Integration Tests
+    needs: [backend-tests, frontend-tests]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install root dependencies
+      run: npm install
+    
+    - name: Install integration test dependencies
+      run: cd integration-tests && npm install
+    
+    - name: Start backend service
+      run: |
+        cd backend/firefighter-platform
+        ./mvnw spring-boot:run -Dspring-boot.run.profiles=test &
+        echo $! > backend.pid
+      env:
+        SPRING_PROFILES_ACTIVE: test
+    
+    - name: Wait for backend to be ready
+      run: |
+        timeout 60 sh -c 'until curl -f http://localhost:8080/api/health; do sleep 2; done'
+    
+    - name: Start frontend service
+      run: |
+        cd frontend/FireFighter
+        npm start &
+        echo $! > frontend.pid
+    
+    - name: Wait for frontend to be ready
+      run: |
+        timeout 60 sh -c 'until curl -f http://localhost:4200; do sleep 2; done'
+    
+    - name: Run API integration tests
+      run: cd integration-tests && npm test
+    
+    - name: Run E2E tests
+      run: cd integration-tests && npm run test:e2e
+    
+    - name: Stop services
+      if: always()
+      run: |
+        if [ -f backend/firefighter-platform/backend.pid ]; then
+          kill $(cat backend/firefighter-platform/backend.pid) || true
+        fi
+        if [ -f frontend/FireFighter/frontend.pid ]; then
+          kill $(cat frontend/FireFighter/frontend.pid) || true
+        fi
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results
+        path: |
+          integration-tests/cypress/screenshots/
+          integration-tests/cypress/videos/
+          integration-tests/coverage/ 
