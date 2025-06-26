@@ -8,7 +8,7 @@
 
 <h2>📃 Documentation</h2>
 
-- [Software Requirements Specification (PDF)](Documentation/FireFighter - Software Requirements Specification v2.pdf)
+- [Software Requirements Specification (PDF)](Documentation/FireFighter_Software_Requirements_Specification_v2.pdf)
   
 <h2>🧐 Features</h2>
 
