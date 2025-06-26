@@ -9,7 +9,8 @@
     "test:coverage": "jest --coverage",
     "test:e2e": "cypress run",
     "test:e2e:open": "cypress open",
-    "pretest": "wait-on http://localhost:8080/api/health && wait-on http://localhost:4200"
+    "integration:test": "npm test && cypress run",
+    "pretest": "npx wait-on http://localhost:8080/api/health && npx wait-on http://localhost:4200"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
