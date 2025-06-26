@@ -235,7 +235,7 @@ curl http://localhost:8080/api/health
 curl http://localhost:8100
 
 # View backend logs
-cd backend/firefighter-platform && ./mvnw spring-boot:run -Dspring-boot.run.profiles=test
+cd backend/firefighter-platform && mvn spring-boot:run -Dspring-boot.run.profiles=test
 
 # View frontend logs
 cd frontend/FireFighter && npm start
