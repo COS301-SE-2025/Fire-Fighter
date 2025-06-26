@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">FireFighter</string>
-    <string name="title_activity_main">FireFighter</string>
-    <string name="package_name">com.apex.firefighter</string>
-    <string name="custom_url_scheme">com.apex.firefighter</string>
-</resources>
