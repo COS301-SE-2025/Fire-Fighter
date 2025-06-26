@@ -2,13 +2,14 @@
 
 <p align="center"><img src="https://socialify.git.ci/COS301-SE-2025/Fire-Fighter/image?font=Inter&amp;issues=1&amp;name=1&amp;pattern=Circuit+Board&amp;pulls=1&amp;stargazers=1&amp;theme=Auto" alt="project-image"></p>
 
-<p id="description">FireFighter Access Management Platform is a secure auditable system designed to streamline emergency privilege escalations within BMW Group’s IT Hub. It enables authorised support engineers to request time-limited elevated access tied to incident tickets through a responsive front-end complete with real-time notifications and a tamper-evident audit trail for full compliance. This repository contains the initial front-end implementation—built with Angular Ionic and Firebase Authentication—with back-end services and data persistence to follow in future releases.</p>
+<p id="description">FireFighter Access Management Platform is a secure auditable system designed to streamline emergency privilege escalations within BMW Group’s IT Hub. It enables authorised support engineers to request time-limited elevated access tied to incident tickets through a responsive front-end complete with real-time notifications and a tamper-evident audit trail for full compliance. This repository contains the initial front-end implementation—built with Angular Ionic and Firebase Authentication—with back-end services and data persistence.</p>
 
 <p align="center"><img src="https://img.shields.io/badge/Angular-DD0031?logo=angular&amp;logoColor=white" alt="shields"><img src="https://img.shields.io/badge/Ionic-3880FF?logo=ionic&amp;logoColor=white" alt="shields"><img src="https://img.shields.io/badge/Capacitor-000000?logo=capacitor&amp;logoColor=white)" alt="shields"><img src="https://img.shields.io/badge/Maven-C71A36?logo=apache-maven&amp;logoColor=white" alt="shields"><img src="https://img.shields.io/badge/Spring_Boot-6DB33F?logo=springboot&amp;logoColor=white" alt="shields"><img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&amp;logoColor=white" alt="shields"><img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwind-css&amp;logoColor=white" alt="shields"></p>
 
 <h2>📃 Documentation</h2>
 
 - [Software Requirements Specification (PDF)](Documentation/FireFighter_Software_Requirements_Specification_v2.pdf)
+
   
 <h2>🧐 Features</h2>
 
