@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.time.ZonedDateTime;
 
 @Entity
-@Table(name = "access_requests")
+@Table(name = "access_requests", schema = "firefighter")
 public class AccessRequest {
 
     @Id
