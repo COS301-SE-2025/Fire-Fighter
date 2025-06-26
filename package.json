@@ -18,7 +18,7 @@
     "build:all": "npm run build:frontend && npm run build:backend",
     
     "test:frontend": "cd frontend/FireFighter && npm test",
-    "test:backend": "cd backend/firefighter-platform && ./mvnw test",
+    "test:backend": "cd backend/firefighter-platform && mvn test",
     "test:all": "npm run test:frontend && npm run test:backend",
     
     "lint:frontend": "cd frontend/FireFighter && npm run lint",
