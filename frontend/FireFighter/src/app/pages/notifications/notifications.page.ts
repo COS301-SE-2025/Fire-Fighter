@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -25,7 +25,7 @@ import { Observable } from 'rxjs';
     NavbarComponent
   ]
 })
-export class NotificationsPage implements OnInit {
+export class NotificationsPage {
   user$ = this.authService.user$;
   notifications$: Observable<Notification[]>;
   mobileMenuOpen = false;
@@ -38,9 +38,6 @@ export class NotificationsPage implements OnInit {
     // Register icons
     addIcons({ logOutOutline });
     this.notifications$ = this.notificationService.getNotifications();
-  }
-
-  ngOnInit() {
   }
 
   toggleMobileMenu() {
