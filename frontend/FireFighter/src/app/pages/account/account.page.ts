@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -16,7 +16,7 @@ import { User } from 'firebase/auth';
   standalone: true,
   imports: [IonContent, CommonModule, FormsModule, RouterModule, NavbarComponent]
 })
-export class AccountPage implements OnInit, OnDestroy {
+export class AccountPage implements OnDestroy {
   user$: Observable<User | null>;
   isAdmin$: Observable<boolean>;
   private subscription: Subscription = new Subscription();
@@ -27,9 +27,6 @@ export class AccountPage implements OnInit, OnDestroy {
   ) {
     this.user$ = this.authService.user$;
     this.isAdmin$ = this.authService.isAdmin$;
-  }
-
-  ngOnInit() {
   }
 
   ngOnDestroy() {
