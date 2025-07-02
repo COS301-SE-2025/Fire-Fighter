@@ -89,11 +89,10 @@ jobs:
     
     - name: Start backend service
       run: |
-        cd backend/firefighter-platform
-        mvn spring-boot:run -Dspring-boot.run.profiles=test &
+        npm run start:backend:dev &
         echo $! > backend.pid
       env:
-        SPRING_PROFILES_ACTIVE: test
+        SPRING_PROFILES_ACTIVE: dev
     
     - name: Wait for backend to be ready
       run: |
@@ -118,8 +117,8 @@ jobs:
     - name: Stop services
       if: always()
       run: |
-        if [ -f backend/firefighter-platform/backend.pid ]; then
-          kill $(cat backend/firefighter-platform/backend.pid) || true
+        if [ -f backend.pid ]; then
+          kill $(cat backend.pid) || true
         fi
         if [ -f frontend/FireFighter/frontend.pid ]; then
           kill $(cat frontend/FireFighter/frontend.pid) || true
