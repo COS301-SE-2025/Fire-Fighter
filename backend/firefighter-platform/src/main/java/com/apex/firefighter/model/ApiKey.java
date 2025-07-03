@@ -6,7 +6,7 @@ import java.time.ZonedDateTime;
 @Entity
 @Table(name = "api_keys", schema = "firefighter")
 public class ApiKey {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,6 +34,10 @@ public class ApiKey {
         this.apiKey = apiKey;
         this.user = user;
     }
+
+    public Long getId() { return id; }
+    public String getApiKey() { return apiKey; }
+    
 
     
 }
