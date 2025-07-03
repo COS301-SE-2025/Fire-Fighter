@@ -1,5 +1,8 @@
 package com.apex.firefighter.controller;
 
+import com.apex.firefighter.model.ApiKey;
+import com.apex.firefighter.service.ApiKeyService;
+
 import com.apex.firefighter.model.User;
 import com.apex.firefighter.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +17,8 @@ import java.util.Optional;
 public class UserController {
 
     private final UserService userService;
+    private final ApiKeyService apiKeyService;
+
 
     @Autowired
     public UserController(UserService userService) {
