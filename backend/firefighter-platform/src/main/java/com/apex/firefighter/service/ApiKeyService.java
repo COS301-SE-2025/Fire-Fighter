@@ -14,4 +14,12 @@ public class ApiKeyService {
         this.apiKeyRepository = apiKeyRepository;
         this.userRepository = userRepository;
     }
+
+    public ApiKey generateApiKeyForUser(String userId) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+        String apiKeyValue = ApiKeyGenerator.generateApiKey();
+        ApiKey apiKey = new ApiKey(apiKeyValue, user);
+        return apiKeyRepository.save(apiKey);
+    }
 }
