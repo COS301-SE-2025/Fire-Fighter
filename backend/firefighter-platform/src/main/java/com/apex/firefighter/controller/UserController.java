@@ -27,6 +27,24 @@ public class UserController {
     }
 
     /**
+     * REQUEST API KEY ENDPOINT
+     * POST /api/users/{firebaseUid}/apikey
+     * Request an API key for a user
+     */ 
+    @PostMapping("/{firebaseUid}/apikey")
+    public ResponseEntity<String> requestApiKey(@PathVariable String firebaseUid) {
+        try {
+            ApiKey apiKey = apiKeyService.generateApiKeyForUser(firebaseUid);
+            // Return the API key value directly (only show once)
+            return ResponseEntity.ok(apiKey.getApiKey());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error generating API key");
+        }
+    }
+
+    /**
      * FIREBASE USER VERIFICATION ENDPOINT
      * POST /api/users/verify
      * Called when a Firebase-authenticated user accesses the system
