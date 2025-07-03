@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.security.core.Authentication;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/api/users")
@@ -32,7 +34,13 @@ public class UserController {
      * Request an API key for a user
      */ 
     @PostMapping("/{firebaseUid}/apikey")
-    public ResponseEntity<String> requestApiKey(@PathVariable String firebaseUid) {
+    public ResponseEntity<String> requestApiKey(@PathVariable String firebaseUid, Authentication authentication) {
+
+        String authenticatedUid = authentication.getName(); // This should be the Firebase UID
+        if (!firebaseUid.equals(authenticatedUid)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can only request an API key for yourself.");
+        }
+
         try {
             ApiKey apiKey = apiKeyService.generateApiKeyForUser(firebaseUid);
             // Return the API key value directly (only show once)
