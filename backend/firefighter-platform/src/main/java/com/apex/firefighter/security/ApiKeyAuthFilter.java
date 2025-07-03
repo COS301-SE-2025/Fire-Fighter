@@ -15,4 +15,27 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
     public ApiKeyAuthFilter(ApiKeyRepository apiKeyRepository) {
         this.apiKeyRepository = apiKeyRepository;
     }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        String header = request.getHeader("Authorization");
+        if (StringUtils.hasText(header) && header.startsWith("ApiKey ")) {
+            String apiKeyValue = header.substring(7);
+            Optional<ApiKey> apiKeyOpt = apiKeyRepository.findByApiKey(apiKeyValue);
+            if (apiKeyOpt.isPresent() && Boolean.TRUE.equals(apiKeyOpt.get().getIsActive())) {
+                // Set authentication with the user's UID as principal
+                String userId = apiKeyOpt.get().getUser().getUserId();
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        userId, null, Collections.emptyList());
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Invalid or inactive API key");
+                return;
+            }
+        }
+        filterChain.doFilter(request, response);
+    }
 }
