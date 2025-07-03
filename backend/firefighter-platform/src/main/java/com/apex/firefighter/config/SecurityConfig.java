@@ -29,10 +29,16 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable()) // Disable CSRF for API endpoints
             .authorizeHttpRequests(authz -> authz
                 // Allow all API endpoints for development
+                // Require API key for protected endpoints
+                .requestMatchers("/api/protected/**").authenticated()
+                // Allow all other API endpoints for development
                 .requestMatchers("/api/**").permitAll()
                 // Allow all other requests
                 .anyRequest().permitAll()
             );
+
+            )
+            .addFilterBefore(new ApiKeyAuthFilter(apiKeyRepository), UsernamePasswordAuthenticationFilter.class);
             
         return http.build();
     }
