@@ -40,6 +40,10 @@ public class ApiKey {
 
     public void setApiKey(String apiKey) { this.apiKey = apiKey; }
     public User getUser() { return user; }
+
+    public void setUser(User user) { this.user = user; }
+    public ZonedDateTime getCreatedAt() { return createdAt; }
+    
     
     
 
