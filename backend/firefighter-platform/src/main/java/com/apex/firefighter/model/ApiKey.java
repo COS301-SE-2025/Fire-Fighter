@@ -43,9 +43,8 @@ public class ApiKey {
 
     public void setUser(User user) { this.user = user; }
     public ZonedDateTime getCreatedAt() { return createdAt; }
-    
-    
-    
 
+    public void setCreatedAt(ZonedDateTime createdAt) { this.createdAt = createdAt; }
+    public Boolean getIsActive() { return isActive; }
     
 }
