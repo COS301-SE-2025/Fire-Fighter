@@ -21,8 +21,9 @@ public class UserController {
 
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, ApiKeyService apiKeyService) {
         this.userService = userService;
+        this.apiKeyService = apiKeyService;
     }
 
     /**
