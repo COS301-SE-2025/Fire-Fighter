@@ -54,5 +54,41 @@ public class SecuredTicketController {
         }
     }
 
+    // Revoke ticket by database ID (Admin only)
+    @PutMapping("/admin/revoke/{id}")
+    public ResponseEntity<Map<String, Object>> revokeTicket(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> payload) {
+
+        String adminUserId = payload.get("adminUserId");
+        String rejectReason = payload.get("rejectReason");
+
+        Map<String, Object> response = new HashMap<>();
+
+        if (adminUserId == null || adminUserId.trim().isEmpty()) {
+            response.put("error", "Admin user ID is required");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        if (rejectReason == null || rejectReason.trim().isEmpty()) {
+            response.put("error", "Reject reason is required");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            Ticket revokedTicket = ticketService.revokeTicket(id, adminUserId, rejectReason);
+            response.put("success", true);
+            response.put("message", "Ticket revoked successfully");
+            response.put("ticket", revokedTicket);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(400).body(response);
+        } catch (Exception e) {
+            response.put("error", "Internal server error");
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
     
 } 
