@@ -21,5 +21,16 @@ public class SecuredTicketController {
         this.ticketService = ticketService;
     }
 
+    // Get all active tickets (Admin only)
+    @GetMapping("/admin/active")
+    public ResponseEntity<List<Ticket>> getActiveTickets() {
+        try {
+            List<Ticket> activeTickets = ticketService.getActiveTickets();
+            return ResponseEntity.ok(activeTickets);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
     
 } 
