@@ -16,4 +16,18 @@ public class SecuredUserController {
     public SecuredUserController(UserService userService) {
         this.userService = userService;
     }
+
+    @PutMapping("/{firebaseUid}/authorize")
+    public ResponseEntity<User> authorizeUser(
+            @PathVariable String firebaseUid,
+            @RequestParam String authorizedBy) {
+        try {
+            User authorizedUser = userService.authorizeUser(firebaseUid, authorizedBy);
+            return ResponseEntity.ok(authorizedUser);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    
 }
