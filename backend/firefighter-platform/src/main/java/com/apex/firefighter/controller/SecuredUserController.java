@@ -41,5 +41,16 @@ public class SecuredUserController {
         }
     }
 
-    
+    @PostMapping("/{firebaseUid}/roles")
+    public ResponseEntity<User> assignRole(
+            @PathVariable String firebaseUid,
+            @RequestParam String roleName,
+            @RequestParam String assignedBy) {
+        try {
+            User updatedUser = userService.assignRole(firebaseUid, roleName, assignedBy);
+            return ResponseEntity.ok(updatedUser);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }
