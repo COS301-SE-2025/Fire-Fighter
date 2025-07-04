@@ -126,5 +126,12 @@ public class SecuredTicketController {
         }
     }
 
-    
+    // Check if user is admin (Helper endpoint)
+    @GetMapping("/admin/check/{userId}")
+    public ResponseEntity<Map<String, Boolean>> checkAdminStatus(@PathVariable String userId) {
+        Map<String, Boolean> response = new HashMap<>();
+        boolean isAdmin = ticketService.isUserAdmin(userId);
+        response.put("isAdmin", isAdmin);
+        return ResponseEntity.ok(response);
+    }
 } 
