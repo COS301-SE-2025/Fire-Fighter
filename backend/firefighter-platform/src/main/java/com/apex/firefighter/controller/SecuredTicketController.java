@@ -32,5 +32,16 @@ public class SecuredTicketController {
         }
     }
 
+    // Get ticket history sorted by creation date (Admin only)
+    @GetMapping("/admin/history")
+    public ResponseEntity<List<Ticket>> getTicketHistory() {
+        try {
+            List<Ticket> ticketHistory = ticketService.getTicketHistory();
+            return ResponseEntity.ok(ticketHistory);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
     
 } 
