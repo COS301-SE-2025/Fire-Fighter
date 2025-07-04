@@ -29,5 +29,17 @@ public class SecuredUserController {
         }
     }
 
+    @PutMapping("/{firebaseUid}/revoke")
+    public ResponseEntity<User> revokeAuthorization(
+            @PathVariable String firebaseUid,
+            @RequestParam String revokedBy) {
+        try {
+            User revokedUser = userService.revokeUserAuthorization(firebaseUid, revokedBy);
+            return ResponseEntity.ok(revokedUser);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     
 }
