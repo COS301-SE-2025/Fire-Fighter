@@ -43,5 +43,16 @@ public class SecuredTicketController {
         }
     }
 
+    // Get tickets by status (Admin only)
+    @GetMapping("/admin/status/{status}")
+    public ResponseEntity<List<Ticket>> getTicketsByStatus(@PathVariable String status) {
+        try {
+            List<Ticket> tickets = ticketService.getTicketsByStatus(status);
+            return ResponseEntity.ok(tickets);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
     
 } 
