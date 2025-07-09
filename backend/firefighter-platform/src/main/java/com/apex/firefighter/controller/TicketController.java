@@ -2,13 +2,18 @@ package com.apex.firefighter.controller;
 
 import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.service.ticket.TicketService;
+import com.google.firebase.auth.FirebaseToken;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/tickets")
@@ -23,27 +28,41 @@ public class TicketController {
 
     // Create a new ticket
     @PostMapping
-    public ResponseEntity<Ticket> createTicket(@RequestBody Map<String, Object> payload) {
-        String ticketId = (String) payload.get("ticketId");
-        String description = (String) payload.get("description");
-        String userId = (String) payload.get("userId");
+    public ResponseEntity<Ticket> createTicket(@RequestBody Map<String, Object> payload, @AuthenticationPrincipal FirebaseToken token) {
+        //get User ID from Firebase token instead of request
+        String userId = token.getUid();
+
+        if (!payload.containsKey("description") || !payload.containsKey("emergencyType"))
+        {
+            return ResponseEntity.badRequest().build();
+        }
+
+        String description = (String) payload.get("description");       
         String emergencyType = (String) payload.get("emergencyType");
         String emergencyContact = (String) payload.get("emergencyContact");
         Integer duration = payload.get("duration") != null ? ((Number) payload.get("duration")).intValue() : null;
 
-        Ticket ticket = ticketService.createTicket(ticketId, description, userId, emergencyType, emergencyContact, duration);
+        Ticket ticket = ticketService.createTicket(
+            UUID.randomUUID().toString(),
+            description,
+            userId,
+            emergencyType,
+            emergencyContact,
+            duration
+        );
+
         return ResponseEntity.ok(ticket);
     }
 
     // Get all tickets
     @GetMapping
-    public ResponseEntity<List<Ticket>> getAllTickets() {
+    public ResponseEntity<List<Ticket>> getAllTickets(@AuthenticationPrincipal FirebaseToken token) {
         return ResponseEntity.ok(ticketService.getAllTickets());
     }
 
     // Get ticket by ID
     @GetMapping("/{id}")
-    public ResponseEntity<Ticket> getTicketById(@PathVariable Long id) {
+    public ResponseEntity<Ticket> getTicketById(@PathVariable Long id, @AuthenticationPrincipal FirebaseToken token) {
         return ticketService.getTicketById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -51,7 +70,7 @@ public class TicketController {
 
     // Get ticket by ticket ID
     @GetMapping("/ticket-id/{ticketId}")
-    public ResponseEntity<Ticket> getTicketByTicketId(@PathVariable String ticketId) {
+    public ResponseEntity<Ticket> getTicketByTicketId(@PathVariable String ticketId, @AuthenticationPrincipal FirebaseToken token) {
         return ticketService.getTicketByTicketId(ticketId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -59,7 +78,7 @@ public class TicketController {
 
     // Update a ticket
     @PutMapping("/{id}")
-    public ResponseEntity<Ticket> updateTicket(@PathVariable Long id, @RequestBody Map<String, Object> payload) {
+    public ResponseEntity<Ticket> updateTicket(@PathVariable Long id, @RequestBody Map<String, Object> payload, @AuthenticationPrincipal FirebaseToken token) {
         String description = (String) payload.get("description");
         String status = (String) payload.get("status");
         String emergencyType = (String) payload.get("emergencyType");
@@ -75,23 +94,31 @@ public class TicketController {
 
     // Delete ticket by ID
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTicket(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteTicket(@PathVariable Long id, @AuthenticationPrincipal FirebaseToken token) {
         boolean deleted = ticketService.deleteTicket(id);
         return deleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
     }
 
     // Delete ticket by ticket ID
     @DeleteMapping("/ticket-id/{ticketId}")
-    public ResponseEntity<Void> deleteTicketByTicketId(@PathVariable String ticketId) {
+    public ResponseEntity<Void> deleteTicketByTicketId(@PathVariable String ticketId, @AuthenticationPrincipal FirebaseToken token) {
         boolean deleted = ticketService.deleteTicketByTicketId(ticketId);
         return deleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
     }
 
     // ==================== ADMIN ENDPOINTS ====================
 
+    private boolean isAdmin(FirebaseToken token) {
+        Map<String, Object> claims = token.getClaims();
+        return claims != null && Boolean.TRUE.equals(claims.get("admin"));
+    }
     // Get all active tickets (Admin only)
     @GetMapping("/admin/active")
-    public ResponseEntity<List<Ticket>> getActiveTickets() {
+    public ResponseEntity<List<Ticket>> getActiveTickets(@AuthenticationPrincipal FirebaseToken token) {
+        if (!isAdmin(token)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         try {
             List<Ticket> activeTickets = ticketService.getActiveTickets();
             return ResponseEntity.ok(activeTickets);
@@ -102,7 +129,11 @@ public class TicketController {
 
     // Get ticket history sorted by creation date (Admin only)
     @GetMapping("/admin/history")
-    public ResponseEntity<List<Ticket>> getTicketHistory() {
+    public ResponseEntity<List<Ticket>> getTicketHistory(@AuthenticationPrincipal FirebaseToken token) {
+        if (!isAdmin(token)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         try {
             List<Ticket> ticketHistory = ticketService.getTicketHistory();
             return ResponseEntity.ok(ticketHistory);
@@ -113,7 +144,11 @@ public class TicketController {
 
     // Get tickets by status (Admin only)
     @GetMapping("/admin/status/{status}")
-    public ResponseEntity<List<Ticket>> getTicketsByStatus(@PathVariable String status) {
+    public ResponseEntity<List<Ticket>> getTicketsByStatus(@PathVariable String status, @AuthenticationPrincipal FirebaseToken token) {
+        if (!isAdmin(token)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        
         try {
             List<Ticket> tickets = ticketService.getTicketsByStatus(status);
             return ResponseEntity.ok(tickets);
@@ -126,7 +161,12 @@ public class TicketController {
     @PutMapping("/admin/revoke/{id}")
     public ResponseEntity<Map<String, Object>> revokeTicket(
             @PathVariable Long id, 
-            @RequestBody Map<String, String> payload) {
+            @RequestBody Map<String, String> payload,
+            @AuthenticationPrincipal FirebaseToken token) {
+        
+        if (!isAdmin(token)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         
         String adminUserId = payload.get("adminUserId");
         String rejectReason = payload.get("rejectReason");
@@ -162,7 +202,12 @@ public class TicketController {
     @PutMapping("/admin/revoke/ticket-id/{ticketId}")
     public ResponseEntity<Map<String, Object>> revokeTicketByTicketId(
             @PathVariable String ticketId, 
-            @RequestBody Map<String, String> payload) {
+            @RequestBody Map<String, String> payload,
+            @AuthenticationPrincipal FirebaseToken token) {
+
+        if (!isAdmin(token)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         
         String adminUserId = payload.get("adminUserId");
         String rejectReason = payload.get("rejectReason");
@@ -196,7 +241,13 @@ public class TicketController {
 
     // Check if user is admin (Helper endpoint)
     @GetMapping("/admin/check/{userId}")
-    public ResponseEntity<Map<String, Boolean>> checkAdminStatus(@PathVariable String userId) {
+    public ResponseEntity<Map<String, Boolean>> checkAdminStatus(@PathVariable String userId,@AuthenticationPrincipal FirebaseToken token) {
+        
+        if (!isAdmin(token))
+        {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         Map<String, Boolean> response = new HashMap<>();
         boolean isAdmin = ticketService.isUserAdmin(userId);
         response.put("isAdmin", isAdmin);
