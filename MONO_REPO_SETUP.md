@@ -34,11 +34,12 @@ Fire-Fighter/
 
 ```bash
 # Install all dependencies (frontend, backend, and integration tests)
-npm install
+npm run install:all
 
 # Or install individually:
 npm run install:frontend
 npm run install:backend
+npm run install:integration
 ```
 
 ### 2. Environment Configuration
@@ -88,9 +89,6 @@ npm run test:all
 # Run unit tests only
 npm run test:frontend
 npm run test:backend
-
-# Install integration test dependencies
-npm run install:integration
 
 # Run integration tests (run "npm run dev" first)
 npm run integration:test

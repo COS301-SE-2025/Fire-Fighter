@@ -7,7 +7,7 @@
     "install:frontend": "cd frontend/FireFighter && npm install",
     "install:backend": "cd backend/firefighter-platform && mvn clean install",
     "install:integration": "cd integration-tests && npm install",
-    "install:all": "npm run install:frontend && npm run install:integration",
+    "install:all": "npm run install:frontend && npm run install:backend && npm run install:integration",
     
     "start:frontend": "cd frontend/FireFighter && ng serve",
     "start:backend": "cd backend/firefighter-platform && mvn spring-boot:run",
