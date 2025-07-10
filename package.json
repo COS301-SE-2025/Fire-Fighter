@@ -10,7 +10,7 @@
     "install:all": "npm run install:frontend && npm run install:integration",
     
     "start:frontend": "cd frontend/FireFighter && ng serve",
-    "start:backend": "cd backend/firefighter-platform && ./mvnw spring-boot:run",
+    "start:backend": "cd backend/firefighter-platform && mvn spring-boot:run",
     "start:backend:dev": "cd backend/firefighter-platform && mvn spring-boot:run -Dspring-boot.run.profiles=dev",
     
     "build:frontend": "cd frontend/FireFighter && npm run build",
