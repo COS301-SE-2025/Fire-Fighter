@@ -82,12 +82,15 @@ npm run lint:frontend
 ### Running Tests
 
 ```bash
-# Run all tests (unit + integration)
+# Run all tests (unit)
 npm run test:all
 
 # Run unit tests only
 npm run test:frontend
 npm run test:backend
+
+# Install integration test dependencies
+npm run install:integration
 
 # Run integration tests
 npm run integration:test
