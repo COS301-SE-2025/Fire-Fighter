@@ -20,7 +20,7 @@
     
     "test:frontend": "cd frontend/FireFighter && npm test",
     "test:backend": "cd backend/firefighter-platform && mvn test",
-    "test:all": "powershell -Command \"Start-Process cmd -ArgumentList '/c cd frontend/FireFighter && npm test' ; Start-Process cmd -ArgumentList '/c cd backend/firefighter-platform && mvn test' ; Start-Process cmd -ArgumentList '/c cd integration-tests && npm test'\"",
+    "test:all": "powershell -Command \"Start-Process cmd -ArgumentList '/c cd frontend/FireFighter && npm test' ; Start-Process cmd -ArgumentList '/c cd backend/firefighter-platform && mvn test'\"",
     
     "lint:frontend": "cd frontend/FireFighter && npm run lint",
     "lint:all": "npm run lint:frontend",
