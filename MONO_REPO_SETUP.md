@@ -72,6 +72,13 @@ npm run build:frontend
 npm run build:backend
 ```
 
+### Running Linting Tests
+
+```bash
+# Run all frontend linting 
+npm run lint:frontend
+```
+
 ### Running Tests
 
 ```bash
