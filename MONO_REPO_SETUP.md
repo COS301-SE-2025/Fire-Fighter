@@ -92,7 +92,7 @@ npm run test:backend
 # Install integration test dependencies
 npm run install:integration
 
-# Run integration tests
+# Run integration tests (run "npm run dev" first)
 npm run integration:test
 ```
 
