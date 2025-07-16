@@ -17,6 +17,7 @@ export interface AdminTicket {
   emergencyContact: string;
   rejectReason?: string;
   dateCompleted?: string;
+  revokedBy?: string;
 }
 
 export interface RevokeTicketRequest {
