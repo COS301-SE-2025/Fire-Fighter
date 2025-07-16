@@ -289,7 +289,7 @@ export class AdminPage implements OnInit {
     } else if (ticket.status === 'Closed' && ticket.dateCompleted) {
       auditLog.push({ 
         action: 'Completed', 
-        by: 'System', 
+        by: ticket.userId, 
         at: ticket.dateCompleted 
       });
     }
