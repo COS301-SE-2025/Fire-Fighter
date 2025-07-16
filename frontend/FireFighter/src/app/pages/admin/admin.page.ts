@@ -37,6 +37,7 @@ interface EmergencyRequestHistory {
   lastAction?: string;
   actionBy?: string;
   actionAt?: string;
+  revokedBy?: string; // Added for username lookup
 }
 
 // Add to the interface for history records (if not already present)
@@ -244,11 +245,12 @@ export class AdminPage implements OnInit {
       this.historyLoading = false;
       const history = tickets.map(ticket => this.mapAdminTicketToHistory(ticket));
       
-      // Populate usernames for history requests (requester and actionBy)
+      // Populate usernames for history requests (requester, actionBy, revokedBy)
       const allUserIds = new Set<string>();
       history.forEach(h => {
         allUserIds.add(h.requester);
         if (h.actionBy) allUserIds.add(h.actionBy);
+        if ((h as any).revokedBy) allUserIds.add((h as any).revokedBy);
         if (h.auditLog) {
           h.auditLog.forEach(log => allUserIds.add(log.by));
         }
@@ -280,7 +282,7 @@ export class AdminPage implements OnInit {
     if (ticket.status === 'Rejected' && ticket.dateCompleted) {
       auditLog.push({ 
         action: 'Revoked', 
-        by: 'Admin', 
+        by: ticket.revokedBy || 'Unknown', // Always use the actual admin user ID if present
         at: ticket.dateCompleted, 
         reason: ticket.rejectReason || 'No reason provided' 
       });
@@ -298,7 +300,9 @@ export class AdminPage implements OnInit {
       reason: ticket.description,
       status: this.adminService.mapTicketStatus(ticket.status),
       completedAt: completedTimestamp,
-      auditLog: auditLog
+      auditLog: auditLog,
+      // Pass revokedBy for username lookup
+      ...(ticket.revokedBy ? { revokedBy: ticket.revokedBy } : {})
     };
   }
 
