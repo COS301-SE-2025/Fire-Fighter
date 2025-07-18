@@ -2,6 +2,9 @@ package com.apex.firefighter.controller;
 
 import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.service.ticket.TicketService;
+import com.apex.firefighter.service.MailtrapEmailService;
+import com.apex.firefighter.service.UserService;
+import com.apex.firefighter.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/api/tickets")
@@ -20,6 +24,11 @@ public class TicketController {
     public TicketController(TicketService ticketService) {
         this.ticketService = ticketService;
     }
+
+    @Autowired
+    private MailtrapEmailService mailtrapEmailService;
+    @Autowired
+    private UserService userService;
 
     // Create a new ticket
     @PostMapping
@@ -201,5 +210,26 @@ public class TicketController {
         boolean isAdmin = ticketService.isUserAdmin(userId);
         response.put("isAdmin", isAdmin);
         return ResponseEntity.ok(response);
+    }
+
+    // Export all tickets as CSV and email to the given address (Admin only)
+    @PostMapping("/admin/export")
+    public ResponseEntity<?> exportTicketsAndEmail(@RequestParam String email) {
+        // 1. Check if user with this email is admin
+        User user = userService.getUserByEmail(email)
+                .orElse(null);
+        if (user == null || !user.isAdmin()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not authorized: Only admins can export tickets.");
+        }
+        // 2. Export tickets to CSV
+        List<Ticket> tickets = ticketService.getAllTickets();
+        String csv = mailtrapEmailService.exportTicketsToCsv(tickets);
+        // 3. Send email
+        try {
+            mailtrapEmailService.sendTicketsCsv(email, csv);
+            return ResponseEntity.ok("Tickets exported and emailed successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send email: " + e.getMessage());
+        }
     }
 }
