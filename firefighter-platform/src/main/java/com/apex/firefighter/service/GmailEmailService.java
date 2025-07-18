@@ -42,21 +42,9 @@ public class GmailEmailService {
     }
 
     public void sendTicketsCsv(String recipientEmail, String csvContent, User user) throws MessagingException {
-        System.out.println("=== EMAIL DEBUG INFO ===");
-        System.out.println("Recipient: " + recipientEmail);
-        System.out.println("CSV Content Length: " + csvContent.length());
-
-        // Debug Gmail configuration
-        System.out.println("Gmail Username: " + System.getenv("GMAIL_USERNAME"));
-        System.out.println("Gmail App Password Set: " + (System.getenv("GMAIL_APP_PASSWORD") != null ? "YES" : "NO"));
-        System.out.println("Gmail App Password Length: " + (System.getenv("GMAIL_APP_PASSWORD") != null ? System.getenv("GMAIL_APP_PASSWORD").length() : "NULL"));
-
         try {
             MimeMessage message = mailSender.createMimeMessage();
-            System.out.println("MimeMessage created successfully");
-
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            System.out.println("MimeMessageHelper created successfully");
 
             helper.setTo(recipientEmail);
             helper.setSubject("FireFighter Platform - Tickets Export Report");
@@ -64,24 +52,16 @@ public class GmailEmailService {
             // Create professional HTML email content
             String htmlContent = createProfessionalEmailContent(csvContent, user);
             helper.setText(htmlContent, true); // true indicates HTML content
-            System.out.println("Email headers and HTML content set successfully");
 
             // Add CSV attachment with proper content type and encoding
             ByteArrayResource csvResource = new ByteArrayResource(csvContent.getBytes(StandardCharsets.UTF_8));
             helper.addAttachment("firefighter_tickets_export.csv", csvResource, "text/csv");
-            System.out.println("Attachment added successfully");
 
-            System.out.println("Attempting to send email...");
             mailSender.send(message);
-            System.out.println("Email sent successfully!");
+            System.out.println("Email sent successfully to " + recipientEmail + " (" + csvContent.length() + " bytes CSV)");
 
         } catch (Exception e) {
-            System.err.println("Email sending failed with error: " + e.getClass().getSimpleName());
-            System.err.println("Error message: " + e.getMessage());
-            if (e.getCause() != null) {
-                System.err.println("Root cause: " + e.getCause().getMessage());
-            }
-            e.printStackTrace();
+            System.err.println("Email failed: " + e.getMessage());
             throw e;
         }
     }
