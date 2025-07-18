@@ -17,8 +17,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
 @RestController
 @RequestMapping("/api/tickets")
+@Tag(name = "Tickets", description = "Emergency ticket management operations")
 public class TicketController {
 
     private final TicketService ticketService;
@@ -33,7 +41,13 @@ public class TicketController {
     @Autowired
     private UserService userService;
 
-    // Create a new ticket
+    @Operation(summary = "Create a new emergency ticket",
+               description = "Creates a new emergency ticket with the provided details")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Ticket created successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid input data"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     @PostMapping
     public ResponseEntity<Ticket> createTicket(@RequestBody Map<String, Object> payload) {
         String ticketId = (String) payload.get("ticketId");
@@ -47,15 +61,27 @@ public class TicketController {
         return ResponseEntity.ok(ticket);
     }
 
-    // Get all tickets
+    @Operation(summary = "Get all tickets",
+               description = "Retrieves a list of all emergency tickets in the system")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved tickets"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     @GetMapping
     public ResponseEntity<List<Ticket>> getAllTickets() {
         return ResponseEntity.ok(ticketService.getAllTickets());
     }
 
-    // Get ticket by ID
+    @Operation(summary = "Get ticket by database ID",
+               description = "Retrieves a specific ticket using its database ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Ticket found"),
+        @ApiResponse(responseCode = "404", description = "Ticket not found"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<Ticket> getTicketById(@PathVariable Long id) {
+    public ResponseEntity<Ticket> getTicketById(
+            @Parameter(description = "Database ID of the ticket") @PathVariable Long id) {
         return ticketService.getTicketById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -215,8 +241,15 @@ public class TicketController {
         return ResponseEntity.ok(response);
     }
 
-    // Export tickets as CSV and email to the given address (Admin only)
-    // Supports optional date range filtering with startDate and endDate parameters
+    @Operation(summary = "Export tickets to CSV and email",
+               description = "Exports all tickets to CSV format and emails to admin. Supports optional date range filtering.",
+               security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Tickets exported and emailed successfully"),
+        @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required"),
+        @ApiResponse(responseCode = "500", description = "Internal server error during export/email"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     @PostMapping("/admin/export")
     public ResponseEntity<?> exportTicketsAndEmail(@RequestBody Map<String, Object> payload) {
         System.out.println("=== EXPORT ENDPOINT DEBUG ===");
