@@ -9,8 +9,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
 @RestController
 @RequestMapping("/api/users")
+@Tag(name = "Users", description = "User management and authentication operations")
 public class UserController {
 
     private final UserService userService;
@@ -20,17 +28,19 @@ public class UserController {
         this.userService = userService;
     }
 
-    /**
-     * FIREBASE USER VERIFICATION ENDPOINT
-     * POST /api/users/verify
-     * Called when a Firebase-authenticated user accesses the system
-     */
+    @Operation(summary = "Verify Firebase user",
+               description = "Verifies and registers a Firebase-authenticated user in the system")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "User verified successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid user data"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PostMapping("/verify")
     public ResponseEntity<User> verifyUser(
-            @RequestParam String firebaseUid,
-            @RequestParam String username,
-            @RequestParam String email,
-            @RequestParam(required = false) String department) {
+            @Parameter(description = "Firebase UID") @RequestParam String firebaseUid,
+            @Parameter(description = "Username") @RequestParam String username,
+            @Parameter(description = "Email address") @RequestParam String email,
+            @Parameter(description = "Department (optional)") @RequestParam(required = false) String department) {
         
         try {
             System.out.println("🔵 VERIFY USER REQUEST:");
