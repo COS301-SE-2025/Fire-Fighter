@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FireFighter Platform - Tickets Export</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .email-container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #06437d 0%, #04365a 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 12px 12px 0 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .header .subtitle {
+            margin: 8px 0 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 25px 30px 40px 30px;
+        }
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #06437d;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .info-item:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .info-value {
+            color: #06437d;
+            font-weight: 500;
+        }
+
+        .footer {
+            background-color: #f8f9fa;
+            padding: 25px 30px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+        .footer p {
+            margin: 5px 0;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .security-notice {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #856404;
+        }
+        .preview-note {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-note">
+        <strong>Email Preview</strong><br>
+        This is how the ticket export email will appear to recipients
+    </div>
+    
+    <div class="email-container">
+        <div class="header">
+            <h1>FireFighter Platform</h1>
+            <p class="subtitle">Emergency Response Management System</p>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">
+                Hello, John Smith,
+            </div>
+            
+            <p>Your requested tickets export has been successfully generated and is ready for download.</p>
+            
+            <div class="info-box">
+                <div class="info-item">
+                    <span class="info-label">Export Generated: </span>
+                    <span class="info-value">July 18, 2025 at 16:45</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Total Tickets: </span>
+                    <span class="info-value">127 records</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">File Format: </span>
+                    <span class="info-value">CSV (Comma Separated Values)</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">File Size: </span>
+                    <span class="info-value">15.42 KB</span>
+                </div>
+            </div>
+            
+            <div class="security-notice">
+                <strong>Security Notice:</strong> This export contains sensitive emergency response data.
+                Please handle this information according to your organization's data protection policies
+                and applicable privacy regulations.
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>FireFighter Emergency Response Platform</strong></p>
+            <p>Automated Export System | Generated on July 18, 2025 at 16:45</p>
+            <p style="font-size: 12px; margin-top: 15px;">
+                This is an automated message. Please do not reply to this email.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
