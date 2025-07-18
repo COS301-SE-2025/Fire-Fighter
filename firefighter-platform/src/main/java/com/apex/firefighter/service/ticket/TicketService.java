@@ -313,4 +313,15 @@ public class TicketService {
         System.out.println("✅ QUERY: Found " + tickets.size() + " tickets with status " + status);
         return tickets;
     }
+
+    /**
+     * Get tickets within a date range (Admin function)
+     * Returns tickets created between startDate and endDate (inclusive)
+     */
+    public List<Ticket> getTicketsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+        System.out.println("🔵 ADMIN: Getting tickets between " + startDate + " and " + endDate);
+        List<Ticket> tickets = ticketRepository.findByDateCreatedBetween(startDate, endDate);
+        System.out.println("✅ ADMIN: Found " + tickets.size() + " tickets in date range");
+        return tickets;
+    }
 } 

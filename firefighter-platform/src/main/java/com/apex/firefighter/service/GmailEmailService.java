@@ -1,0 +1,230 @@
+package com.apex.firefighter.service;
+
+import com.apex.firefighter.model.Ticket;
+import com.apex.firefighter.model.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+@Service
+public class GmailEmailService {
+
+    @Autowired
+    private JavaMailSender mailSender;
+
+    public String exportTicketsToCsv(List<Ticket> tickets) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("TicketId,Description,Status,DateCreated,UserId,EmergencyType,EmergencyContact,Duration\n");
+        for (Ticket ticket : tickets) {
+            sb.append(safe(ticket.getTicketId())).append(",")
+              .append(safe(ticket.getDescription())).append(",")
+              .append(safe(ticket.getStatus())).append(",")
+              .append(safe(ticket.getDateCreated())).append(",")
+              .append(safe(ticket.getUserId())).append(",")
+              .append(safe(ticket.getEmergencyType())).append(",")
+              .append(safe(ticket.getEmergencyContact())).append(",")
+              .append(safe(ticket.getDuration())).append("\n");
+        }
+        return sb.toString();
+    }
+
+    private String safe(Object value) {
+        return value == null ? "" : value.toString().replaceAll(",", " ");
+    }
+
+    public void sendTicketsCsv(String recipientEmail, String csvContent, User user) throws MessagingException {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(recipientEmail);
+            helper.setSubject("FireFighter Platform - Tickets Export Report");
+
+            // Create professional HTML email content
+            String htmlContent = createProfessionalEmailContent(csvContent, user);
+            helper.setText(htmlContent, true); // true indicates HTML content
+
+            // Add CSV attachment with proper content type and encoding
+            ByteArrayResource csvResource = new ByteArrayResource(csvContent.getBytes(StandardCharsets.UTF_8));
+            helper.addAttachment("firefighter_tickets_export.csv", csvResource, "text/csv");
+
+            mailSender.send(message);
+            System.out.println("Email sent successfully to " + recipientEmail + " (" + csvContent.length() + " bytes CSV)");
+
+        } catch (Exception e) {
+            System.err.println("Email failed: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * Creates professional HTML email content for ticket export
+     */
+    private String createProfessionalEmailContent(String csvContent, User user) {
+        // Count tickets in CSV (subtract 1 for header row)
+        int ticketCount = csvContent.split("\n").length - 1;
+        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm"));
+        double fileSizeKB = csvContent.length() / 1024.0;
+
+        StringBuilder html = new StringBuilder();
+        html.append("<!DOCTYPE html>");
+        html.append("<html lang=\"en\">");
+        html.append("<head>");
+        html.append("<meta charset=\"UTF-8\">");
+        html.append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
+        html.append("<title>FireFighter Platform - Tickets Export</title>");
+        html.append("<style>");
+        html.append("body {");
+        html.append("    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;");
+        html.append("    line-height: 1.6;");
+        html.append("    color: #333;");
+        html.append("    max-width: 600px;");
+        html.append("    margin: 0 auto;");
+        html.append("    padding: 20px;");
+        html.append("    background-color: #f8f9fa;");
+        html.append("}");
+        html.append(".email-container {");
+        html.append("    background-color: #ffffff;");
+        html.append("    border-radius: 12px;");
+        html.append("    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);");
+        html.append("    overflow: hidden;");
+        html.append("}");
+        html.append(".header {");
+        html.append("    background: linear-gradient(135deg, #06437d 0%, #04365a 100%);");
+        html.append("    color: white;");
+        html.append("    padding: 30px;");
+        html.append("    text-align: center;");
+        html.append("    border-radius: 12px 12px 0 0;");
+        html.append("}");
+        html.append(".header h1 {");
+        html.append("    margin: 0;");
+        html.append("    font-size: 28px;");
+        html.append("    font-weight: 600;");
+        html.append("}");
+        html.append(".header .subtitle {");
+        html.append("    margin: 8px 0 0 0;");
+        html.append("    font-size: 16px;");
+        html.append("    opacity: 0.9;");
+        html.append("}");
+        html.append(".content {");
+        html.append("    padding: 25px 30px 40px 30px;");
+        html.append("}");
+        html.append(".greeting {");
+        html.append("    font-size: 18px;");
+        html.append("    margin-bottom: 20px;");
+        html.append("    color: #2c3e50;");
+        html.append("}");
+        html.append(".info-box {");
+        html.append("    background-color: #f8f9fa;");
+        html.append("    border-left: 4px solid #06437d;");
+        html.append("    padding: 20px;");
+        html.append("    margin: 25px 0;");
+        html.append("    border-radius: 0 8px 8px 0;");
+        html.append("}");
+        html.append(".info-item {");
+        html.append("    display: flex;");
+        html.append("    justify-content: space-between;");
+        html.append("    margin-bottom: 12px;");
+        html.append("    padding-bottom: 8px;");
+        html.append("    border-bottom: 1px solid #e9ecef;");
+        html.append("}");
+        html.append(".info-item:last-child {");
+        html.append("    margin-bottom: 0;");
+        html.append("    border-bottom: none;");
+        html.append("}");
+        html.append(".info-label {");
+        html.append("    font-weight: 600;");
+        html.append("    color: #495057;");
+        html.append("}");
+        html.append(".info-value {");
+        html.append("    color: #06437d;");
+        html.append("    font-weight: 500;");
+        html.append("}");
+
+        html.append(".footer {");
+        html.append("    background-color: #f8f9fa;");
+        html.append("    padding: 25px 30px;");
+        html.append("    text-align: center;");
+        html.append("    border-top: 1px solid #e9ecef;");
+        html.append("}");
+        html.append(".footer p {");
+        html.append("    margin: 5px 0;");
+        html.append("    color: #6c757d;");
+        html.append("    font-size: 14px;");
+        html.append("}");
+        html.append(".security-notice {");
+        html.append("    background-color: #fff3cd;");
+        html.append("    border: 1px solid #ffeaa7;");
+        html.append("    border-radius: 8px;");
+        html.append("    padding: 15px;");
+        html.append("    margin: 20px 0;");
+        html.append("    font-size: 14px;");
+        html.append("    color: #856404;");
+        html.append("}");
+        html.append("</style>");
+        html.append("</head>");
+        html.append("<body>");
+        html.append("<div class=\"email-container\">");
+        html.append("<div class=\"header\">");
+        html.append("<h1>FireFighter Platform</h1>");
+        html.append("<p class=\"subtitle\">Emergency Response Management System</p>");
+        html.append("</div>");
+        html.append("<div class=\"content\">");
+
+        // Create personalized greeting
+        String greeting = "Hello";
+        if (user != null && user.getUsername() != null && !user.getUsername().trim().isEmpty()) {
+            greeting = "Hello, " + user.getUsername();
+        }
+
+        html.append("<div class=\"greeting\">").append(greeting).append(",</div>");
+        html.append("<p>Your requested tickets export has been successfully generated and is ready for download.</p>");
+        html.append("<div class=\"info-box\">");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Export Generated: </span>");
+        html.append("<span class=\"info-value\">").append(currentDateTime).append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Total Tickets: </span>");
+        html.append("<span class=\"info-value\">").append(ticketCount).append(" records</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">File Format: </span>");
+        html.append("<span class=\"info-value\">CSV (Comma Separated Values)</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">File Size: </span>");
+        html.append("<span class=\"info-value\">").append(String.format("%.2f KB", fileSizeKB)).append("</span>");
+        html.append("</div>");
+        html.append("</div>");
+        html.append("<div class=\"security-notice\">");
+        html.append("<strong>Security Notice:</strong> This export contains sensitive emergency response data. ");
+        html.append("Please handle this information according to your organization's data protection policies ");
+        html.append("and applicable privacy regulations.");
+        html.append("</div>");
+        html.append("</div>");
+        html.append("<div class=\"footer\">");
+        html.append("<p><strong>FireFighter Emergency Response Platform</strong></p>");
+        html.append("<p>Automated Export System | Generated on ").append(currentDateTime).append("</p>");
+        html.append("<p style=\"font-size: 12px; margin-top: 15px;\">");
+        html.append("This is an automated message. Please do not reply to this email.");
+        html.append("</p>");
+        html.append("</div>");
+        html.append("</div>");
+        html.append("</body>");
+        html.append("</html>");
+
+        return html.toString();
+    }
+
+
+}
