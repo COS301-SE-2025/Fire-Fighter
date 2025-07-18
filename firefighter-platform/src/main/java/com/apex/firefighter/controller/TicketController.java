@@ -2,6 +2,9 @@ package com.apex.firefighter.controller;
 
 import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.service.ticket.TicketService;
+import com.apex.firefighter.service.GmailEmailService;
+import com.apex.firefighter.service.UserService;
+import com.apex.firefighter.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,9 +12,21 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.RequestBody;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 @RestController
 @RequestMapping("/api/tickets")
+@Tag(name = "Tickets", description = "Emergency ticket management operations")
 public class TicketController {
 
     private final TicketService ticketService;
@@ -21,7 +36,18 @@ public class TicketController {
         this.ticketService = ticketService;
     }
 
-    // Create a new ticket
+    @Autowired
+    private GmailEmailService gmailEmailService;
+    @Autowired
+    private UserService userService;
+
+    @Operation(summary = "Create a new emergency ticket",
+               description = "Creates a new emergency ticket with the provided details")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Ticket created successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid input data"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     @PostMapping
     public ResponseEntity<Ticket> createTicket(@RequestBody Map<String, Object> payload) {
         String ticketId = (String) payload.get("ticketId");
@@ -35,15 +61,27 @@ public class TicketController {
         return ResponseEntity.ok(ticket);
     }
 
-    // Get all tickets
+    @Operation(summary = "Get all tickets",
+               description = "Retrieves a list of all emergency tickets in the system")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved tickets"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     @GetMapping
     public ResponseEntity<List<Ticket>> getAllTickets() {
         return ResponseEntity.ok(ticketService.getAllTickets());
     }
 
-    // Get ticket by ID
+    @Operation(summary = "Get ticket by database ID",
+               description = "Retrieves a specific ticket using its database ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Ticket found"),
+        @ApiResponse(responseCode = "404", description = "Ticket not found"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<Ticket> getTicketById(@PathVariable Long id) {
+    public ResponseEntity<Ticket> getTicketById(
+            @Parameter(description = "Database ID of the ticket") @PathVariable Long id) {
         return ticketService.getTicketById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -201,5 +239,113 @@ public class TicketController {
         boolean isAdmin = ticketService.isUserAdmin(userId);
         response.put("isAdmin", isAdmin);
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Export tickets to CSV and email",
+               description = "Exports all tickets to CSV format and emails to admin. Supports optional date range filtering.",
+               security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Tickets exported and emailed successfully"),
+        @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required"),
+        @ApiResponse(responseCode = "500", description = "Internal server error during export/email"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    @PostMapping("/admin/export")
+    public ResponseEntity<?> exportTicketsAndEmail(@RequestBody Map<String, Object> payload) {
+        System.out.println("=== EXPORT ENDPOINT DEBUG ===");
+        System.out.println("Payload received: " + payload);
+
+        String userId = (String) payload.get("userId");
+        String email = (String) payload.get("email");
+        String startDateStr = (String) payload.get("startDate");
+        String endDateStr = (String) payload.get("endDate");
+
+        System.out.println("UserId: " + userId);
+        System.out.println("Email: " + email);
+        System.out.println("Start Date: " + startDateStr);
+        System.out.println("End Date: " + endDateStr);
+
+        if (userId == null && email == null) {
+            return ResponseEntity.badRequest().body("Either userId or email is required.");
+        }
+
+        // Parse optional date range parameters
+        LocalDateTime startDate = null;
+        LocalDateTime endDate = null;
+
+        try {
+            if (startDateStr != null && !startDateStr.trim().isEmpty()) {
+                startDate = LocalDateTime.parse(startDateStr);
+                System.out.println("Parsed start date: " + startDate);
+            }
+            if (endDateStr != null && !endDateStr.trim().isEmpty()) {
+                endDate = LocalDateTime.parse(endDateStr);
+                System.out.println("Parsed end date: " + endDate);
+            }
+
+            // Validate date range if both dates are provided
+            if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+                return ResponseEntity.badRequest().body("Start date cannot be after end date.");
+            }
+
+        } catch (DateTimeParseException e) {
+            return ResponseEntity.badRequest().body("Invalid date format. Use ISO format: yyyy-MM-ddTHH:mm:ss");
+        }
+
+        User user;
+        if (userId != null) {
+            System.out.println("Looking up user by userId: " + userId);
+            user = userService.getUserWithRoles(userId).orElse(null);
+        } else {
+            System.out.println("Looking up user by email: " + email);
+            user = userService.getUserByEmail(email).orElse(null);
+        }
+
+        System.out.println("User found: " + (user != null ? "YES" : "NO"));
+        if (user != null) {
+            System.out.println("User email: " + user.getEmail());
+            System.out.println("User is admin: " + user.isAdmin());
+        }
+
+        if (user == null || !user.isAdmin()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not authorized: Only admins can export tickets.");
+        }
+
+        String targetEmail = user.getEmail();
+        System.out.println("Target email for sending: " + targetEmail);
+
+        // Get tickets based on date range filtering
+        List<Ticket> tickets;
+        if (startDate != null && endDate != null) {
+            System.out.println("Filtering tickets by date range: " + startDate + " to " + endDate);
+            tickets = ticketService.getTicketsByDateRange(startDate, endDate);
+        } else if (startDate != null) {
+            System.out.println("Filtering tickets from start date: " + startDate);
+            // If only start date is provided, get tickets from start date to now
+            tickets = ticketService.getTicketsByDateRange(startDate, LocalDateTime.now());
+        } else if (endDate != null) {
+            System.out.println("Filtering tickets up to end date: " + endDate);
+            // If only end date is provided, get tickets from beginning of time to end date
+            tickets = ticketService.getTicketsByDateRange(LocalDateTime.of(2000, 1, 1, 0, 0), endDate);
+        } else {
+            System.out.println("No date filtering - getting all tickets");
+            tickets = ticketService.getAllTickets();
+        }
+
+        System.out.println("Number of tickets retrieved: " + tickets.size());
+
+        String csv = gmailEmailService.exportTicketsToCsv(tickets);
+        System.out.println("CSV generated, length: " + csv.length());
+
+        try {
+            gmailEmailService.sendTicketsCsv(targetEmail, csv, user);
+            String dateRangeInfo = (startDate != null || endDate != null) ?
+                " (filtered by date range)" : "";
+            return ResponseEntity.ok("Tickets exported and emailed successfully to " + targetEmail + dateRangeInfo);
+        } catch (Exception e) {
+            System.err.println("Controller caught exception: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Failed to send email: " + e.getMessage());
+        }
     }
 }
