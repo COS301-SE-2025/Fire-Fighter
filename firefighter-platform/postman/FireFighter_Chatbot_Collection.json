@@ -1,0 +1,312 @@
+{
+  "info": {
+    "name": "FireFighter AI Chatbot API",
+    "description": "Comprehensive testing collection for FireFighter Platform AI Chatbot features",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://localhost:8443",
+      "type": "string"
+    },
+    {
+      "key": "test_user_id",
+      "value": "your-firebase-user-id-here",
+      "type": "string"
+    },
+    {
+      "key": "admin_user_id",
+      "value": "admin-firebase-user-id-here",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/chatbot/health",
+          "host": ["{{base_url}}"],
+          "path": ["api", "chatbot", "health"]
+        },
+        "description": "Verify chatbot service is running and healthy"
+      },
+      "response": []
+    },
+    {
+      "name": "Basic User Query - Show My Tickets",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"Show my tickets\",\n  \"userId\": \"{{test_user_id}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/chatbot/query",
+          "host": ["{{base_url}}"],
+          "path": ["api", "chatbot", "query"]
+        },
+        "description": "Test basic user ticket query functionality"
+      },
+      "response": []
+    },
+    {
+      "name": "Active Tickets Query",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"What active tickets am I assigned to?\",\n  \"userId\": \"{{test_user_id}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/chatbot/query",
+          "host": ["{{base_url}}"],
+          "path": ["api", "chatbot", "query"]
+        },
+        "description": "Test filtering for active tickets only"
+      },
+      "response": []
+    },
+    {
+      "name": "Emergency Type Query - Fire",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"Do I have any fire emergencies?\",\n  \"userId\": \"{{test_user_id}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/chatbot/query",
+          "host": ["{{base_url}}"],
+          "path": ["api", "chatbot", "query"]
+        },
+        "description": "Test filtering by emergency type (fire)"
+      },
+      "response": []
+    },
+    {
+      "name": "Recent Tickets Query",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"Show my recent activity\",\n  \"userId\": \"{{test_user_id}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/chatbot/query",
+          "host": ["{{base_url}}"],
+          "path": ["api", "chatbot", "query"]
+        },
+        "description": "Test recent ticket filtering"
+      },
+      "response": []
+    },
+    {
+      "name": "Closed Tickets Query",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"What tickets have I completed recently?\",\n  \"userId\": \"{{test_user_id}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/chatbot/query",
+          "host": ["{{base_url}}"],
+          "path": ["api", "chatbot", "query"]
+        },
+        "description": "Test closed ticket filtering"
+      },
+      "response": []
+    },
+    {
+      "name": "Get User Capabilities",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/chatbot/capabilities/{{test_user_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "chatbot", "capabilities", "{{test_user_id}}"]
+        },
+        "description": "Test capability discovery for regular user"
+      },
+      "response": []
+    },
+    {
+      "name": "Get User Suggestions",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/chatbot/suggestions/{{test_user_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "chatbot", "suggestions", "{{test_user_id}}"]
+        },
+        "description": "Test personalized query suggestions"
+      },
+      "response": []
+    },
+    {
+      "name": "Admin Query (Future Feature)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"Show system overview\",\n  \"userId\": \"{{admin_user_id}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/chatbot/admin/query",
+          "host": ["{{base_url}}"],
+          "path": ["api", "chatbot", "admin", "query"]
+        },
+        "description": "Test admin-level query (currently shows user context for security)"
+      },
+      "response": []
+    },
+    {
+      "name": "Admin Capabilities",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/chatbot/capabilities/{{admin_user_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "chatbot", "capabilities", "{{admin_user_id}}"]
+        },
+        "description": "Test capability discovery for admin user"
+      },
+      "response": []
+    },
+    {
+      "name": "Error Test - Empty Query",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"\",\n  \"userId\": \"{{test_user_id}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/chatbot/query",
+          "host": ["{{base_url}}"],
+          "path": ["api", "chatbot", "query"]
+        },
+        "description": "Test validation for empty queries - should return 400"
+      },
+      "response": []
+    },
+    {
+      "name": "Error Test - Missing User ID",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"Show my tickets\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/chatbot/query",
+          "host": ["{{base_url}}"],
+          "path": ["api", "chatbot", "query"]
+        },
+        "description": "Test validation for missing user ID - should return 400"
+      },
+      "response": []
+    },
+    {
+      "name": "Error Test - Invalid User ID",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"Show my tickets\",\n  \"userId\": \"invalid-user-id-123\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/chatbot/query",
+          "host": ["{{base_url}}"],
+          "path": ["api", "chatbot", "query"]
+        },
+        "description": "Test authentication with non-existent user"
+      },
+      "response": []
+    },
+    {
+      "name": "Error Test - Non-Admin Accessing Admin Endpoint",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"Show system statistics\",\n  \"userId\": \"{{test_user_id}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/chatbot/admin/query",
+          "host": ["{{base_url}}"],
+          "path": ["api", "chatbot", "admin", "query"]
+        },
+        "description": "Test security for admin endpoints - should return 403"
+      },
+      "response": []
+    }
+  ]
+}

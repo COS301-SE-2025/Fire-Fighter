@@ -315,6 +315,16 @@ public class TicketService {
     }
 
     /**
+     * Get tickets by user ID
+     */
+    public List<Ticket> getTicketsByUserId(String userId) {
+        System.out.println("🔵 QUERY: Getting tickets for user - " + userId);
+        List<Ticket> userTickets = ticketRepository.findByUserId(userId);
+        System.out.println("✅ QUERY: Found " + userTickets.size() + " tickets for user " + userId);
+        return userTickets;
+    }
+
+    /**
      * Get tickets within a date range (Admin function)
      * Returns tickets created between startDate and endDate (inclusive)
      */

@@ -25,7 +25,10 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     
     // Find tickets by status
     List<Ticket> findByStatus(String status);
-    
+
+    // Find tickets by user ID
+    List<Ticket> findByUserId(String userId);
+
     // Find all active tickets that have a duration set (not null)
     @Query("SELECT t FROM Ticket t WHERE t.status = 'Active' AND t.duration IS NOT NULL")
     List<Ticket> findActiveTicketsWithDuration();
