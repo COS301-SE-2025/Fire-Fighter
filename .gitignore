@@ -8,3 +8,7 @@
 /FireFighter/www
 /FireFighter/www
 /FireFighter/android
+# Environment variables
+.env
+.env.local
+.env.*.local
