@@ -214,4 +214,16 @@ public class ChatbotController {
             };
         }
     }
+
+    @GetMapping("/debug/context/{userId}")
+    public ResponseEntity<String> getDebugContext(@PathVariable String userId, @RequestParam String query) {
+        try {
+            // This is a debug endpoint to see what context is being generated
+            String context = chatbotService.getDebugContext(query, userId);
+            return ResponseEntity.ok(context);
+        } catch (Exception e) {
+            System.err.println("Error getting debug context: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
+    }
 }

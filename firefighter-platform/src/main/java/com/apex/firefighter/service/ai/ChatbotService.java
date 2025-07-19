@@ -50,14 +50,26 @@ public class ChatbotService {
             boolean isAdmin = user.isAdmin();
             String userRole = isAdmin ? "Administrator" : "User";
 
-            // For basic users, focus on their own tickets only
-            String ticketContext;
-            if (isAdmin) {
-                // Admin can see system-wide information (to be implemented later)
-                ticketContext = "Admin access available. Currently showing user-specific context for security.";
-            } else {
-                // Regular users see only their own tickets
+            // Focus ONLY on ticket data - no navigation guidance
+            String ticketContext = "";
+
+            // Add request creation context if query is about creating requests
+            if (containsRequestCreationKeywords(query)) {
+                String requestContext = ticketQueryService.getRequestCreationContext(query);
+                if (!requestContext.isEmpty()) {
+                    ticketContext = requestContext;
+                }
+            }
+            // For ALL other queries, show user's ticket data
+            else {
+                // BOTH admin and regular users see their own ticket data
                 ticketContext = ticketQueryService.getUserTicketContext(query, userId);
+                System.out.println("🔍 DEBUG: Generated ticket context for query '" + query + "': " + ticketContext.substring(0, Math.min(100, ticketContext.length())) + "...");
+
+                // Add admin note if user is admin
+                if (isAdmin) {
+                    ticketContext = "Note: You have admin privileges for system-wide access.\n\n" + ticketContext;
+                }
             }
 
             // Generate AI response with context
@@ -125,8 +137,10 @@ public class ChatbotService {
     private String buildAdminContext(String query, String userId) {
         StringBuilder context = new StringBuilder();
         
-        // Include user ticket context (for now, admin sees their own tickets too)
-        context.append(ticketQueryService.getUserTicketContext(query, userId));
+        // Include user ticket context - admin sees their own tickets
+        String userTicketContext = ticketQueryService.getUserTicketContext(query, userId);
+        context.append("Admin Query - Your Personal Tickets:\n");
+        context.append(userTicketContext);
         
         // Add admin-specific context
         context.append("\nAdmin Functions Available:\n");
@@ -139,26 +153,87 @@ public class ChatbotService {
     }
 
     /**
+     * Check if query contains request creation keywords (token-efficient detection)
+     */
+    private boolean containsRequestCreationKeywords(String query) {
+        String lowerQuery = query.toLowerCase();
+        return (lowerQuery.contains("create") || lowerQuery.contains("new") ||
+                lowerQuery.contains("submit") || lowerQuery.contains("form")) &&
+               (lowerQuery.contains("request") || lowerQuery.contains("emergency") ||
+                lowerQuery.contains("access"));
+    }
+
+
+
+    /**
      * Get suggested queries based on user role
      */
     private String[] getSuggestedQueries(boolean isAdmin) {
         if (isAdmin) {
             return new String[]{
-                "Show me active tickets",
-                "What's the current ticket summary?",
-                "How many fire emergencies are active?",
-                "Show recent ticket activity",
-                "What tickets need attention?",
-                "Export ticket statistics"
+                "Show system-wide access logs",
+                "Show recent access activity",
+                "What's the current access summary?",
+                "Show active access tickets",
+                "Show my access tickets",
+                "What access tickets need review?",
+                "Show latest system activity",
+                "How do I create a new emergency request?"
             };
         } else {
             return new String[]{
-                "Show my tickets",
-                "What tickets am I assigned to?",
-                "Do I have any active emergencies?",
-                "Help with ticket status",
-                "How do I update a ticket?"
+                "Show my access tickets",
+                "How much time is remaining on my tickets?",
+                "Show my recent access activity",
+                "What elevated access do I currently have?",
+                "When do my active tickets expire?",
+                "Show my active tickets",
+                "Do I have any security incident access?",
+                "How do I create a new emergency request?"
             };
+        }
+    }
+
+    /**
+     * Debug method to see what context is being generated
+     */
+    public String getDebugContext(String query, String userId) {
+        try {
+            Optional<User> userOpt = userService.getUserByFirebaseUid(userId);
+            if (userOpt.isEmpty()) {
+                return "DEBUG: User not found for ID: " + userId;
+            }
+
+            User user = userOpt.get();
+            boolean isAdmin = user.isAdmin();
+
+            // Generate the same context as the main query method
+            String ticketContext = "";
+            if (containsRequestCreationKeywords(query)) {
+                String requestContext = ticketQueryService.getRequestCreationContext(query);
+                if (!requestContext.isEmpty()) {
+                    ticketContext = requestContext;
+                }
+            } else {
+                ticketContext = ticketQueryService.getUserTicketContext(query, userId);
+                if (isAdmin) {
+                    ticketContext = "Note: You have admin privileges for system-wide access.\n\n" + ticketContext;
+                }
+            }
+
+            StringBuilder debug = new StringBuilder();
+            debug.append("DEBUG CONTEXT GENERATION:\n");
+            debug.append("Query: ").append(query).append("\n");
+            debug.append("User ID: ").append(userId).append("\n");
+            debug.append("Is Admin: ").append(isAdmin).append("\n");
+            debug.append("Request Creation Keywords: ").append(containsRequestCreationKeywords(query)).append("\n");
+            debug.append("Generated Context Length: ").append(ticketContext.length()).append("\n");
+            debug.append("Generated Context:\n").append(ticketContext).append("\n");
+
+            return debug.toString();
+
+        } catch (Exception e) {
+            return "DEBUG ERROR: " + e.getMessage();
         }
     }
 

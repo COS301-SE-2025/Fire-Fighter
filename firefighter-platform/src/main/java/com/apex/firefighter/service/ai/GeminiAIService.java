@@ -1,4 +1,4 @@
-package com.apex.firefighter.service.ai;
+ package com.apex.firefighter.service.ai;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -119,23 +119,49 @@ public class GeminiAIService {
      */
     private String buildContextualPrompt(String userPrompt, String userRole, String context) {
         StringBuilder prompt = new StringBuilder();
-        
-        prompt.append("You are an AI assistant for the FireFighter Emergency Response Platform. ");
-        prompt.append("You help emergency responders and administrators manage tickets and operations.\n\n");
-        
+
+        prompt.append("You are an AI assistant for the FireFighter Emergency Access Management Platform. ");
+        prompt.append("FireFighter is a system that allows users to request temporary elevated access to critical systems ");
+        prompt.append("(like ERP systems, databases, production environments) during system emergencies without waiting for administrator approval. ");
+        prompt.append("This enables rapid incident response and system fixes.\n\n");
+
+        prompt.append("Key FireFighter Concepts:\n");
+        prompt.append("- Tickets = Access requests for elevated permissions in integrated systems\n");
+        prompt.append("- Emergency Types: Critical System Failure, Security Incident, Data Recovery, Network Outage, User Lockout, Other Emergency\n");
+        prompt.append("- Users can create tickets that immediately grant temporary elevated access\n");
+        prompt.append("- Administrators review access logs and can revoke access if needed\n");
+        prompt.append("- This is for SYSTEM emergencies, not physical emergencies\n\n");
+
+        prompt.append("FireFighter Application Structure:\n");
+        prompt.append("- Dashboard: Main overview page with key metrics and recent activity\n");
+        prompt.append("- My Requests: User's personal access tickets and request history\n");
+        prompt.append("- Gemini: AI chatbot interface (this current conversation)\n");
+        prompt.append("- Admin Console: System-wide access logs and management (Administrators Only)\n");
+        prompt.append("- Notifications: Alerts about access approvals, revocations, and system updates\n");
+        prompt.append("- Help and Support: Documentation, guides, and support resources\n");
+        prompt.append("- Account: User profile and authentication settings\n");
+        prompt.append("- Settings: Application preferences and configuration\n\n");
+
         prompt.append("User Role: ").append(userRole).append("\n");
-        
+
         if (context != null && !context.trim().isEmpty()) {
-            prompt.append("Context: ").append(context).append("\n");
+            prompt.append("TICKET DATA CONTEXT (USE THIS EXACT DATA): ").append(context).append("\n");
+        } else {
+            prompt.append("TICKET DATA CONTEXT: No ticket data provided - user may have no tickets.\n");
         }
-        
+
         prompt.append("\nUser Question: ").append(userPrompt).append("\n\n");
-        
-        prompt.append("Please provide a helpful, accurate, and professional response. ");
-        prompt.append("If the question is about specific ticket data, use the provided context. ");
-        prompt.append("If you need more information, ask clarifying questions. ");
-        prompt.append("Keep responses concise but informative.");
-        
+
+        prompt.append("CRITICAL: USE THE TICKET DATA CONTEXT ABOVE. ");
+        prompt.append("When users ask about tickets, access, or activity, COPY THE EXACT TEXT from the 'TICKET DATA CONTEXT' section. ");
+        prompt.append("If the context says 'You have no active tickets. Here are your past X tickets:', COPY THAT EXACTLY. ");
+        prompt.append("If the context shows ticket lists, COPY THOSE EXACTLY. ");
+        prompt.append("DO NOT create your own response - USE THE PROVIDED CONTEXT. ");
+        prompt.append("DO NOT mention navigation, pages, or UI elements. ");
+        prompt.append("DO NOT say 'I need to access' or 'navigate to'. ");
+        prompt.append("ONLY use the ticket data from the context section above. ");
+        prompt.append("If context is empty or says no tickets, respond with exactly what the context says.");
+
         return prompt.toString();
     }
 

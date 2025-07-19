@@ -1,5 +1,16 @@
 # 🤖 Postman Testing Guide - AI Chatbot Features
 
+## 📋 About FireFighter Platform
+
+FireFighter is an **Emergency Access Management Platform** that allows users to request temporary elevated access to critical systems (ERP, databases, production environments) during system emergencies without waiting for administrator approval. This enables rapid incident response and system fixes.
+
+**Key Concepts:**
+- **Tickets** = Access requests for elevated permissions in integrated systems
+- **Emergency Types**: Critical System Failure, Security Incident, Data Recovery, Network Outage, User Lockout, Other Emergency
+- **Users** can create tickets that immediately grant temporary elevated access
+- **Administrators** review access logs and can revoke access if needed
+- This is for **SYSTEM emergencies**, not physical emergencies
+
 ## 📋 Prerequisites
 
 1. **Application Running**: Start with `mvn spring-boot:run`
@@ -39,14 +50,14 @@ GET {{base_url}}/api/chatbot/health
 ---
 
 ### 2. Basic User Query - Show My Tickets
-**Purpose**: Test basic user ticket query functionality
+**Purpose**: Test basic user ticket query functionality (MUST show actual data, not navigation)
 
 ```http
 POST {{base_url}}/api/chatbot/query
 Content-Type: application/json
 
 {
-  "query": "Show my tickets",
+  "query": "Show me my tickets",
   "userId": "{{test_user_id}}"
 }
 ```
@@ -54,7 +65,7 @@ Content-Type: application/json
 **Expected Response** (200 OK):
 ```json
 {
-  "message": "Here are your current tickets: You have 2 active tickets...",
+  "message": "Your latest access tickets (3 most recent): - SYS-2025-001: Critical System Failure...",
   "success": true,
   "userRole": "User",
   "timestamp": "2025-01-18T18:30:00",
@@ -64,15 +75,15 @@ Content-Type: application/json
 
 ---
 
-### 3. Active Tickets Query
-**Purpose**: Test filtering for active tickets only
+### 3. Active Access Query
+**Purpose**: Test filtering for active access permissions only
 
 ```http
 POST {{base_url}}/api/chatbot/query
 Content-Type: application/json
 
 {
-  "query": "What active tickets am I assigned to?",
+  "query": "What elevated access do I currently have?",
   "userId": "{{test_user_id}}"
 }
 ```
@@ -80,7 +91,7 @@ Content-Type: application/json
 **Expected Response** (200 OK):
 ```json
 {
-  "message": "Your active tickets (2 total): - FIRE-2025-001: FIRE - House fire...",
+  "message": "Your active access tickets (2 total): - SYS-2025-001: SYSTEM_OUTAGE - Production database access...",
   "success": true,
   "userRole": "User",
   "timestamp": "2025-01-18T18:30:00"
@@ -97,7 +108,7 @@ POST {{base_url}}/api/chatbot/query
 Content-Type: application/json
 
 {
-  "query": "Do I have any fire emergencies?",
+  "query": "Do I have any security incident access?",
   "userId": "{{test_user_id}}"
 }
 ```
@@ -105,7 +116,7 @@ Content-Type: application/json
 **Expected Response** (200 OK):
 ```json
 {
-  "message": "Your fire tickets (1 total): - FIRE-2025-001: House fire on Main Street...",
+  "message": "Your security incident tickets (1 total): - SEC-2025-001: Security breach response access...",
   "success": true,
   "userRole": "User",
   "timestamp": "2025-01-18T18:30:00"
@@ -114,7 +125,57 @@ Content-Type: application/json
 
 ---
 
-### 5. Recent Tickets Query
+### 5. Latest Tickets Query
+**Purpose**: Test showing user's latest tickets (not admin guidance)
+
+```http
+POST {{base_url}}/api/chatbot/query
+Content-Type: application/json
+
+{
+  "query": "Can you show me the latest tickets in the system",
+  "userId": "{{test_user_id}}"
+}
+```
+
+**Expected Response** (200 OK):
+```json
+{
+  "message": "Your latest access tickets (3 most recent): - SYS-2025-001: Critical System Failure...",
+  "success": true,
+  "userRole": "User",
+  "timestamp": "2025-01-18T18:30:00"
+}
+```
+
+---
+
+### 6. Access Activity Query
+**Purpose**: Test showing user's recent access activity (not navigation)
+
+```http
+POST {{base_url}}/api/chatbot/query
+Content-Type: application/json
+
+{
+  "query": "Show recent access activity",
+  "userId": "{{test_user_id}}"
+}
+```
+
+**Expected Response** (200 OK):
+```json
+{
+  "message": "Your recent access activity (3 latest tickets): - SYS-2025-001: Critical System Failure...",
+  "success": true,
+  "userRole": "User",
+  "timestamp": "2025-01-18T18:30:00"
+}
+```
+
+---
+
+### 7. Recent Tickets Query
 **Purpose**: Test recent ticket filtering
 
 ```http
@@ -139,7 +200,182 @@ Content-Type: application/json
 
 ---
 
-### 6. Closed Tickets Query
+### 6. Navigation Query
+**Purpose**: Test application navigation guidance
+
+```http
+POST {{base_url}}/api/chatbot/query
+Content-Type: application/json
+
+{
+  "query": "How do I navigate to My Requests page?",
+  "userId": "{{test_user_id}}"
+}
+```
+
+**Expected Response** (200 OK):
+```json
+{
+  "message": "📋 My Requests: Your personal access management page showing: - All your access tickets...",
+  "success": true,
+  "userRole": "User",
+  "timestamp": "2025-01-18T18:30:00"
+}
+```
+
+---
+
+### 7. Application Structure Query
+**Purpose**: Test understanding of app structure
+
+```http
+POST {{base_url}}/api/chatbot/query
+Content-Type: application/json
+
+{
+  "query": "Help me understand the Dashboard",
+  "userId": "{{test_user_id}}"
+}
+```
+
+**Expected Response** (200 OK):
+```json
+{
+  "message": "📊 Dashboard: Your main overview page showing: - Key metrics and system status...",
+  "success": true,
+  "userRole": "User",
+  "timestamp": "2025-01-18T18:30:00"
+}
+```
+
+---
+
+### 8. Request Creation Query
+**Purpose**: Test emergency request creation guidance
+
+```http
+POST {{base_url}}/api/chatbot/query
+Content-Type: application/json
+
+{
+  "query": "How do I create a new emergency request?",
+  "userId": "{{test_user_id}}"
+}
+```
+
+**Expected Response** (200 OK):
+```json
+{
+  "message": "🚨 Creating Emergency Access Requests: Step 1: Access the Request Form...",
+  "success": true,
+  "userRole": "User",
+  "timestamp": "2025-01-18T18:30:00"
+}
+```
+
+---
+
+### 9. Request Details Query
+**Purpose**: Test specific request information guidance
+
+```http
+POST {{base_url}}/api/chatbot/query
+Content-Type: application/json
+
+{
+  "query": "What information do I need for a request?",
+  "userId": "{{test_user_id}}"
+}
+```
+
+**Expected Response** (200 OK):
+```json
+{
+  "message": "📝 Step 2: Fill Out Request Details: Request Date, Emergency Type, Reason for Access...",
+  "success": true,
+  "userRole": "User",
+  "timestamp": "2025-01-18T18:30:00"
+}
+```
+
+---
+
+### 10. No Active Tickets Query
+**Purpose**: Test showing past tickets when no active tickets exist
+
+```http
+POST {{base_url}}/api/chatbot/query
+Content-Type: application/json
+
+{
+  "query": "Show me my tickets",
+  "userId": "{{test_user_id_no_active}}"
+}
+```
+
+**Expected Response** (200 OK):
+```json
+{
+  "message": "You have no active tickets. Here are your past 3 tickets: - SYS-2025-001: Critical System Failure...",
+  "success": true,
+  "userRole": "User",
+  "timestamp": "2025-01-18T18:30:00"
+}
+```
+
+---
+
+### 11. Time Remaining Query
+**Purpose**: Test showing time remaining on active tickets
+
+```http
+POST {{base_url}}/api/chatbot/query
+Content-Type: application/json
+
+{
+  "query": "How much time is remaining on my active tickets?",
+  "userId": "{{test_user_id}}"
+}
+```
+
+**Expected Response** (200 OK):
+```json
+{
+  "message": "Time remaining on your active tickets: - SYS-2025-001: Critical System Failure - 2h 15m remaining...",
+  "success": true,
+  "userRole": "User",
+  "timestamp": "2025-01-18T18:30:00"
+}
+```
+
+---
+
+### 12. Ticket Expiration Query
+**Purpose**: Test asking about ticket expiration
+
+```http
+POST {{base_url}}/api/chatbot/query
+Content-Type: application/json
+
+{
+  "query": "When do my tickets expire?",
+  "userId": "{{test_user_id}}"
+}
+```
+
+**Expected Response** (200 OK):
+```json
+{
+  "message": "Time remaining on your active tickets: - SYS-2025-001: Critical System Failure - 45 minutes remaining...",
+  "success": true,
+  "userRole": "User",
+  "timestamp": "2025-01-18T18:30:00"
+}
+```
+
+---
+
+### 13. Closed Tickets Query
 **Purpose**: Test closed ticket filtering
 
 ```http

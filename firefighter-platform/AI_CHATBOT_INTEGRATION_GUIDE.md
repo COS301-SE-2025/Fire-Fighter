@@ -246,7 +246,36 @@ const adminResponse = await fetch('/api/chatbot/admin/query', {
 - **Integration Expansion**: Weather data, traffic information, resource availability
 - **Advanced Analytics**: Predictive insights and recommendations
 
+## 🌐 Auto-Open Swagger Feature
+
+The platform now automatically opens Swagger UI in your browser when starting! You'll see:
+
+```
+======================================================================
+🚒 FIREFIGHTER PLATFORM STARTED SUCCESSFULLY!
+======================================================================
+📚 Swagger UI: https://localhost:8443/swagger-ui.html
+🤖 AI Chatbot: https://localhost:8443/api/chatbot/health
+📧 Email Service: Configured and ready
+======================================================================
+🌐 Opening Swagger UI in your default browser...
+✅ Browser opened successfully!
+```
+
+### Quick Start
+1. **Run**: `mvn spring-boot:run`
+2. **Wait**: For startup completion
+3. **Browser Opens**: Swagger UI automatically opens
+4. **Test**: Try the AI Chatbot endpoints
+
+### Disable Auto-Open
+To disable automatic browser opening:
+```properties
+# In application.properties
+firefighter.swagger.auto-open=false
+```
+
 ---
 
-**FireFighter Platform Development Team**  
+**FireFighter Platform Development Team**
 *Emergency Response Management System*
