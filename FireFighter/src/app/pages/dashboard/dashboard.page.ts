@@ -4,6 +4,7 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
 import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { TicketService, Ticket } from '../../services/ticket.service';
+import { AdminService, AdminTicket } from '../../services/admin.service';
 import { NotificationService } from '../../services/notification.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { calculateTimeAgo } from '../../services/mock-ticket-database';
@@ -51,20 +52,29 @@ export class DashboardPage implements OnInit, OnDestroy {
   // Add calculateTimeAgo function
   calculateTimeAgo = calculateTimeAgo;
 
-  // Helper method to extract display name from email
-  private extractUserName(email: string): string {
-    if (!email || !email.includes('@')) return 'BMW User';
-    
-    const localPart = email.split('@')[0];
-    const nameParts = localPart.split('.');
-    
-    if (nameParts.length >= 2) {
-      const firstName = nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1);
-      const lastName = nameParts[1].charAt(0).toUpperCase() + nameParts[1].slice(1);
-      return `${firstName} ${lastName}`;
+  // Helper method to extract display name from userId
+  private extractUserName(userId: string): string {
+    // First check if we have the username in our usernames map
+    if (this.usernames[userId]) {
+      return this.usernames[userId];
     }
-    
-    return localPart.charAt(0).toUpperCase() + localPart.slice(1);
+
+    // Fallback: extract name from email if userId is an email
+    if (userId && userId.includes('@')) {
+      const localPart = userId.split('@')[0];
+      const nameParts = localPart.split('.');
+
+      if (nameParts.length >= 2) {
+        const firstName = nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1);
+        const lastName = nameParts[1].charAt(0).toUpperCase() + nameParts[1].slice(1);
+        return `${firstName} ${lastName}`;
+      }
+
+      return localPart.charAt(0).toUpperCase() + localPart.slice(1);
+    }
+
+    // Final fallback
+    return userId || 'Unknown User';
   }
 
   // Helper method to truncate long descriptions
@@ -76,6 +86,7 @@ export class DashboardPage implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private ticketService: TicketService,
+    private adminService: AdminService,
     private notificationService: NotificationService,
     private route: ActivatedRoute
   ) {
@@ -115,57 +126,82 @@ export class DashboardPage implements OnInit, OnDestroy {
   loadTickets() {
     this.isLoading = true;
     this.error = null;
-    this.ticketService.getTickets()
-      .pipe(
-        catchError(err => {
-          this.error = 'Failed to load tickets. Please try again later.';
-          return of([]);
-        }),
-        finalize(() => this.isLoading = false)
-      )
-      .subscribe(tickets => {
-        // Sort tickets: non-expired Active with least time remaining first, then Completed/Rejected, then Expired
-        const now = new Date();
-        const getRemainingMs = (ticket: Ticket) => {
-          const createdTime = new Date(ticket.dateCreated);
-          const durationMs = (ticket.duration || 60) * 60 * 1000;
-          const endTime = new Date(createdTime.getTime() + durationMs);
-          return endTime.getTime() - now.getTime();
-        };
-        this.tickets = [...tickets].sort((a, b) => {
-          // Expired = Active but remaining time <= 0
-          const aRem = getRemainingMs(a);
-          const bRem = getRemainingMs(b);
-          const aExpired = a.status === 'Active' && aRem <= 0;
-          const bExpired = b.status === 'Active' && bRem <= 0;
-          // 1. Non-expired Active first, sorted by least time remaining
-          if (a.status === 'Active' && !aExpired && (b.status !== 'Active' || bExpired)) return -1;
-          if (b.status === 'Active' && !bExpired && (a.status !== 'Active' || aExpired)) return 1;
-          if (a.status === 'Active' && !aExpired && b.status === 'Active' && !bExpired) {
-            return aRem - bRem; // Least time remaining first
-          }
-          // 2. Completed/Rejected next (keep their order)
-          if ((a.status === 'Completed' || a.status === 'Rejected') && (b.status !== 'Completed' && b.status !== 'Rejected')) return 1;
-          if ((b.status === 'Completed' || b.status === 'Rejected') && (a.status !== 'Completed' && a.status !== 'Rejected')) return -1;
-          // 3. Expired Active last
-          if (aExpired && !bExpired) return 1;
-          if (bExpired && !aExpired) return -1;
-          // Otherwise, keep original order
-          return 0;
-        });
 
-        // Fetch usernames for unique userIds
-        const uniqueUserIds = Array.from(new Set(this.tickets.map(t => t.userId)));
-        uniqueUserIds.forEach(userId => {
-          if (!this.usernames[userId]) {
-            this.authService.getUserProfileById(userId).subscribe(profile => {
-              this.usernames[userId] = profile.username || profile.email || userId;
-            }, () => {
-              this.usernames[userId] = userId; // fallback if error
-            });
-          }
+    // Check if user is admin to determine which tickets to load
+    const isAdmin = this.authService.isCurrentUserAdmin();
+
+    if (isAdmin) {
+      // Admin: Load all tickets from the system (last 6)
+      this.adminService.getTicketHistory()
+        .pipe(
+          catchError(err => {
+            this.error = 'Failed to load tickets. Please try again later.';
+            return of([]);
+          }),
+          finalize(() => this.isLoading = false)
+        )
+        .subscribe(adminTickets => {
+          // Convert AdminTicket to Ticket format and get last 6
+          const convertedTickets = this.convertAdminTicketsToTickets(adminTickets);
+          this.processTickets(convertedTickets.slice(0, 6));
         });
-      });
+    } else {
+      // Regular user: Load only their tickets (last 6)
+      this.ticketService.getTickets()
+        .pipe(
+          catchError(err => {
+            this.error = 'Failed to load tickets. Please try again later.';
+            return of([]);
+          }),
+          finalize(() => this.isLoading = false)
+        )
+        .subscribe(tickets => {
+          // Get last 6 tickets for the user, sorted by date created (newest first)
+          const sortedTickets = tickets
+            .sort((a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime())
+            .slice(0, 6);
+          this.processTickets(sortedTickets);
+        });
+    }
+  }
+
+  /**
+   * Convert AdminTicket array to Ticket array format
+   */
+  private convertAdminTicketsToTickets(adminTickets: AdminTicket[]): Ticket[] {
+    return adminTickets.map(adminTicket => ({
+      id: adminTicket.ticketId,
+      status: adminTicket.status,
+      dateCreated: new Date(adminTicket.dateCreated),
+      reason: adminTicket.description,
+      requestDate: adminTicket.requestDate,
+      userId: adminTicket.userId,
+      emergencyType: adminTicket.emergencyType,
+      emergencyContact: adminTicket.emergencyContact,
+      duration: 60 // Default duration, could be extracted from description if available
+    }));
+  }
+
+  /**
+   * Process tickets with sorting and username fetching
+   */
+  private processTickets(tickets: Ticket[]): void {
+    // Sort tickets: newest first for recent activity display
+    this.tickets = tickets.sort((a, b) =>
+      new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime()
+    );
+
+    // Fetch usernames for unique userIds
+    const uniqueUserIds = Array.from(new Set(this.tickets.map(t => t.userId)));
+    uniqueUserIds.forEach(userId => {
+      if (!this.usernames[userId]) {
+        this.authService.getUserProfileById(userId).subscribe(profile => {
+          this.usernames[userId] = profile.username || profile.email || userId;
+        }, () => {
+          this.usernames[userId] = userId; // fallback if error
+        });
+      }
+    });
   }
 
   get activeTicketsCount() {
@@ -239,11 +275,26 @@ export class DashboardPage implements OnInit, OnDestroy {
   // Generate recent activities from tickets
   get recentActivities(): Activity[] {
     const activities: Activity[] = [];
-    // Sort tickets by date (most recent first)
-    const sortedTickets = [...this.tickets].sort((a, b) => 
-      new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime()
-    );
-    sortedTickets.slice(0, 4).forEach(ticket => {
+    const isAdmin = this.authService.isCurrentUserAdmin();
+    const currentUser = this.authService.getCurrentUserProfile();
+
+    // Filter tickets based on user role
+    let ticketsToShow: Ticket[] = [];
+
+    if (isAdmin) {
+      // Admin: Show all tickets (already loaded from admin service)
+      ticketsToShow = this.tickets.slice(0, 6);
+    } else {
+      // Regular user: Only show their own tickets
+      if (currentUser) {
+        ticketsToShow = this.tickets
+          .filter(ticket => ticket.userId === currentUser.userId || ticket.userId === currentUser.email)
+          .slice(0, 6);
+      }
+    }
+
+    // Generate activities from filtered tickets
+    ticketsToShow.forEach(ticket => {
       const ticketId = ticket.id;
       if (ticket.status === 'Active') {
         activities.push({
@@ -269,30 +320,27 @@ export class DashboardPage implements OnInit, OnDestroy {
         activities.push({
           type: 'denied',
           title: `Emergency access request ${ticketId} denied`,
-          description: 'Request did not meet emergency access criteria',
-          user: 'BMW Security Team',
+          description: this.truncateDescription(ticket.reason, 80),
+          user: this.extractUserName(ticket.userId),
           timeAgo: this.calculateTimeAgo(ticket.dateCreated),
           status: 'denied',
           timestamp: ticket.dateCreated
         });
+      } else if (ticket.status === 'Closed') {
+        activities.push({
+          type: 'revoked',
+          title: `Emergency access closed for ${ticketId}`,
+          description: this.truncateDescription(ticket.reason, 80),
+          user: this.extractUserName(ticket.userId),
+          timeAgo: this.calculateTimeAgo(ticket.dateCreated),
+          status: 'completed',
+          timestamp: ticket.dateCreated
+        });
       }
     });
-    // Add some sample activities if we have tickets
-    if (this.tickets.length > 0) {
-      const latestTicket = sortedTickets[0];
-      const ticketId = latestTicket.id.split('-').pop() || latestTicket.id;
-      activities.unshift({
-        type: 'submitted',
-        title: 'New emergency access request submitted',
-        description: 'Network infrastructure failure',
-        user: 'Anna Schmidt',
-        timeAgo: '23 minutes ago',
-        status: 'pending',
-        timestamp: new Date(Date.now() - 23 * 60 * 1000) // 23 minutes ago
-      });
-    }
-    // Sort activities by timestamp (most recent first, i.e., lowest time passed at the top)
-    return activities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 4);
+
+    // Return activities sorted by timestamp (most recent first)
+    return activities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
 
   // Calculate remaining time based on creation time (using ticket's duration)

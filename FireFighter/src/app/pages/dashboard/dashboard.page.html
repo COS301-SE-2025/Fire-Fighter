@@ -38,7 +38,10 @@
     
           <h1 class="text-4xl font-sans font-bold text-gray-900 dark:text-white">{{ activeTicketsCount }}</h1>
     
-          <p class="mb-3 font-sans text-gray-600 dark:text-gray-400">You have active FireFighter privileges</p>
+          <p class="mb-3 font-sans text-gray-600 dark:text-gray-400">
+            <span *ngIf="activeTicketsCount > 0">You have active FireFighter privileges</span>
+            <span *ngIf="activeTicketsCount === 0">No active FireFighter sessions</span>
+          </p>
         </div>
     
         <div class="w-full p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50 space-y-4">
