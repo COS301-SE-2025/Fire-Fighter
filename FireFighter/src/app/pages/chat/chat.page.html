@@ -1,21 +1,138 @@
 <app-navbar></app-navbar>
 
-<ion-content [fullscreen]="true" class="ion-padding">
+<ion-content [fullscreen]="true" class="bg-gray-50 dark:bg-gray-900">
   <ion-header collapse="condense">
     <ion-toolbar>
       <ion-title size="large">Gemini AI Assistant</ion-title>
     </ion-toolbar>
   </ion-header>
 
-  <!-- Chat interface content will go here -->
-  <div class="flex flex-col h-full">
-    <div class="flex-1 p-4">
-      <div class="text-center text-gray-500 dark:text-gray-400">
-        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="currentColor" fill-rule="evenodd" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M20.616 10.835a14.147 14.147 0 01-4.45-3.001 14.111 14.111 0 01-3.678-6.452.503.503 0 00-.975 0 14.134 14.134 0 01-3.679 6.452 14.155 14.155 0 01-4.45 3.001c-.65.28-1.318.505-2.002.678a.502.502 0 000 .975c.684.172 1.35.397 2.002.677a14.147 14.147 0 014.45 3.001 14.112 14.112 0 013.679 6.453.502.502 0 00.975 0c.172-.685.397-1.351.677-2.003a14.145 14.145 0 013.001-4.45 14.113 14.113 0 016.453-3.678.503.503 0 000-.975 13.245 13.245 0 01-2.003-.678z"></path>
-        </svg>
-        <h3 class="text-lg font-medium mb-2">Welcome to Gemini AI Assistant</h3>
-        <p class="text-sm">Ask me anything about your tickets, requests, or emergency access management.</p>
+  <!-- Chat Container -->
+  <div class="flex flex-col h-full max-w-4xl mx-auto">
+
+    <!-- Chat Messages Area -->
+    <div class="flex-1 overflow-y-auto px-4 py-6 space-y-4" #chatContainer>
+
+      <!-- Welcome Message (shown when no messages) -->
+      <div *ngIf="messages.length === 0" class="text-center py-12">
+        <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 via-purple-500 to-red-500 rounded-full mb-6 shadow-lg">
+          <svg class="w-10 h-10 text-white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+
+            <path d="M20.616 10.835a14.147 14.147 0 01-4.45-3.001 14.111 14.111 0 01-3.678-6.452.503.503 0 00-.975 0 14.134 14.134 0 01-3.679 6.452 14.155 14.155 0 01-4.45 3.001c-.65.28-1.318.505-2.002.678a.502.502 0 000 .975c.684.172 1.35.397 2.002.677a14.147 14.147 0 014.45 3.001 14.112 14.112 0 013.679 6.453.502.502 0 00.975 0c.172-.685.397-1.351.677-2.003a14.145 14.145 0 013.001-4.45 14.113 14.113 0 016.453-3.678.503.503 0 000-.975 13.245 13.245 0 01-2.003-.678z" fill="currentColor"></path>
+            <path d="M20.616 10.835a14.147 14.147 0 01-4.45-3.001 14.111 14.111 0 01-3.678-6.452.503.503 0 00-.975 0 14.134 14.134 0 01-3.679 6.452 14.155 14.155 0 01-4.45 3.001c-.65.28-1.318.505-2.002.678a.502.502 0 000 .975c.684.172 1.35.397 2.002.677a14.147 14.147 0 014.45 3.001 14.112 14.112 0 013.679 6.453.502.502 0 00.975 0c.172-.685.397-1.351.677-2.003a14.145 14.145 0 013.001-4.45 14.113 14.113 0 016.453-3.678.503.503 0 000-.975 13.245 13.245 0 01-2.003-.678z" fill="currentColor"></path>
+            <path d="M20.616 10.835a14.147 14.147 0 01-4.45-3.001 14.111 14.111 0 01-3.678-6.452.503.503 0 00-.975 0 14.134 14.134 0 01-3.679 6.452 14.155 14.155 0 01-4.45 3.001c-.65.28-1.318.505-2.002.678a.502.502 0 000 .975c.684.172 1.35.397 2.002.677a14.147 14.147 0 014.45 3.001 14.112 14.112 0 013.679 6.453.502.502 0 00.975 0c.172-.685.397-1.351.677-2.003a14.145 14.145 0 013.001-4.45 14.113 14.113 0 016.453-3.678.503.503 0 000-.975 13.245 13.245 0 01-2.003-.678z" fill="currentColor"></path>
+            <path d="M20.616 10.835a14.147 14.147 0 01-4.45-3.001 14.111 14.111 0 01-3.678-6.452.503.503 0 00-.975 0 14.134 14.134 0 01-3.679 6.452 14.155 14.155 0 01-4.45 3.001c-.65.28-1.318.505-2.002.678a.502.502 0 000 .975c.684.172 1.35.397 2.002.677a14.147 14.147 0 014.45 3.001 14.112 14.112 0 013.679 6.453.502.502 0 00.975 0c.172-.685.397-1.351.677-2.003a14.145 14.145 0 013.001-4.45 14.113 14.113 0 016.453-3.678.503.503 0 000-.975 13.245 13.245 0 01-2.003-.678z" fill="currentColor"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Welcome to Gemini AI Assistant</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">Ask me anything about your tickets, requests, or emergency access management. I'm here to help!</p>
+
+        <!-- Suggested Questions -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
+          <button
+            *ngFor="let suggestion of suggestedQuestions"
+            (click)="sendSuggestedMessage(suggestion)"
+            class="p-4 text-left bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 shadow-sm"
+          >
+            <div class="flex items-center">
+              <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span class="text-sm font-medium text-gray-900 dark:text-white">{{ suggestion }}</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Chat Messages -->
+      <div *ngFor="let message of messages; trackBy: trackByMessageId" class="flex message-container" [ngClass]="{'justify-end': message.isUser, 'justify-start': !message.isUser}">
+
+        <!-- User Message -->
+        <div *ngIf="message.isUser" class="flex items-start gap-2.5 max-w-[85%] sm:max-w-[70%] message-bubble">
+          <div class="flex flex-col w-full leading-1.5 p-4 border-gray-200 bg-red-600 rounded-s-xl rounded-ee-xl">
+            <p class="text-sm font-normal text-white">{{ message.content }}</p>
+            <span class="text-xs font-normal text-red-100 mt-1">{{ formatTime(message.timestamp) }}</span>
+          </div>
+          <!-- User Avatar -->
+          <div class="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0">
+            <span class="text-white text-sm font-semibold">{{ getUserInitials() }}</span>
+          </div>
+        </div>
+
+        <!-- Gemini Message -->
+        <div *ngIf="!message.isUser" class="flex items-start gap-2.5 max-w-[85%] sm:max-w-[70%] message-bubble">
+          <!-- Gemini Avatar -->
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-red-500 flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20.616 10.835a14.147 14.147 0 01-4.45-3.001 14.111 14.111 0 01-3.678-6.452.503.503 0 00-.975 0 14.134 14.134 0 01-3.679 6.452 14.155 14.155 0 01-4.45 3.001c-.65.28-1.318.505-2.002.678a.502.502 0 000 .975c.684.172 1.35.397 2.002.677a14.147 14.147 0 014.45 3.001 14.112 14.112 0 013.679 6.453.502.502 0 00.975 0c.172-.685.397-1.351.677-2.003a14.145 14.145 0 013.001-4.45 14.113 14.113 0 016.453-3.678.503.503 0 000-.975 13.245 13.245 0 01-2.003-.678z" fill="currentColor"></path>
+            </svg>
+          </div>
+          <div class="flex flex-col w-full leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700 dark:border-gray-600">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse mb-2">
+              <span class="text-sm font-semibold text-gray-900 dark:text-white">Gemini</span>
+              <span class="text-sm font-normal text-gray-500 dark:text-gray-400">{{ formatTime(message.timestamp) }}</span>
+            </div>
+            <div class="text-sm font-normal text-gray-900 dark:text-white" [innerHTML]="formatMessageContent(message.content)"></div>
+            <div *ngIf="message.isTyping" class="flex items-center mt-2">
+              <div class="flex space-x-1">
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+              </div>
+              <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">Gemini is typing...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Input Area -->
+    <div class="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-4 sm:mx-4 sm:mb-4 sm:rounded-lg sm:border sm:shadow-sm">
+      <div class="flex items-stretch space-x-3">
+        <!-- Message Input -->
+        <div class="flex-1 relative">
+          <textarea
+            [(ngModel)]="currentMessage"
+            (keydown)="onKeyDown($event)"
+            [disabled]="isLoading"
+            placeholder="Ask me about your tickets, requests, or emergency access..."
+            rows="1"
+            class="w-full resize-none rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-red-500 dark:focus:border-red-400 focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:ring-opacity-20 transition-colors duration-200"
+            style="min-height: 48px; max-height: 120px; line-height: 1.5;"
+            #messageInput
+          ></textarea>
+
+          <!-- Character count (optional) -->
+          <div *ngIf="currentMessage.length > 0" class="absolute bottom-2 right-3 text-xs text-gray-400 dark:text-gray-500">
+            {{ currentMessage.length }}/2000
+          </div>
+        </div>
+
+        <!-- Send Button -->
+        <button
+          (click)="sendMessage()"
+          [disabled]="!currentMessage.trim() || isLoading"
+          class="flex items-center justify-center w-12 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 flex-shrink-0 self-stretch"
+        >
+          <svg *ngIf="!isLoading" class="w-5 h-5 text-white transform rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+          </svg>
+          <svg *ngIf="isLoading" class="w-5 h-5 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Quick Actions (optional) -->
+      <div *ngIf="!isLoading && messages.length > 0" class="flex flex-wrap gap-2 mt-3">
+        <button
+          *ngFor="let action of quickActions"
+          (click)="sendSuggestedMessage(action)"
+          class="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full transition-colors duration-200"
+        >
+          {{ action }}
+        </button>
       </div>
     </div>
   </div>
