@@ -4,7 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { AuthService } from '../../services/auth.service';
+import { ChatbotService, ChatbotResponse } from '../../services/chatbot.service';
 import { User } from '@angular/fire/auth';
+import { firstValueFrom } from 'rxjs';
 
 export interface ChatMessage {
   id: string;
@@ -29,29 +31,146 @@ export class ChatPage implements OnInit, AfterViewChecked {
   currentMessage: string = '';
   isLoading: boolean = false;
   user: User | null = null;
+  apiHealthy: boolean | null = null; // null = checking, true = healthy, false = unhealthy
+  apiHealthStatus: string = 'Checking...';
+  showQuickActions: boolean = true;
 
   suggestedQuestions: string[] = [
-    'Show me my recent tickets',
-    'How do I request emergency access?',
-    'What are my pending requests?',
-    'Help me understand the approval process'
+    'Show me my tickets',
+    'What elevated access do I currently have?',
+    'Show my active tickets',
+    'How do I create a new emergency request?'
   ];
 
   quickActions: string[] = [
-    'Show tickets',
-    'New request',
-    'Check status',
+    'Show my active tickets',
+    'Show recent activity',
+    'What emergency types are available?',
+    'How do I request emergency access?',
+    'What elevated access do I currently have?',
     'Help'
   ];
 
   private shouldScrollToBottom = false;
 
-  constructor(private authService: AuthService) { }
+  constructor(
+    private authService: AuthService,
+    private chatbotService: ChatbotService
+  ) { }
 
   ngOnInit() {
-    // Get current user
+    // Check API health immediately when component loads
+    this.checkAPIHealth();
+
+    // Get current user and load suggestions
     this.authService.user$.subscribe(user => {
       this.user = user;
+      if (user?.uid) {
+        this.loadSuggestions(user.uid);
+      }
+    });
+  }
+
+  /**
+   * Load personalized suggestions from the API
+   */
+  private loadSuggestions(userId: string): void {
+    this.chatbotService.getSuggestions(userId).subscribe({
+      next: (response) => {
+        if (response.suggestions && response.suggestions.length > 0) {
+          this.suggestedQuestions = response.suggestions;
+        } else {
+          // Use enhanced default suggestions if API doesn't return any
+          this.setDefaultSuggestions();
+        }
+      },
+      error: (error) => {
+        console.warn('Failed to load suggestions, using enhanced defaults:', error);
+        // Use enhanced default suggestions if API fails
+        this.setDefaultSuggestions();
+      }
+    });
+  }
+
+  /**
+   * Set enhanced default suggestions based on FireFighter capabilities
+   */
+  private setDefaultSuggestions(): void {
+    const allSuggestions = [
+      // Ticket Data Queries
+      'Show me my tickets',
+      'Show my access tickets',
+      'Show my active tickets',
+      'What elevated access do I currently have?',
+      'Do I have any active access permissions?',
+      'Show my current access',
+      'Show recent access activity',
+      'Show my recent activity',
+      'Show my closed tickets',
+      'What tickets have I completed?',
+
+      // Emergency Type Specific
+      'Do I have any security incident access?',
+      'Show my critical system failure tickets',
+      'What data recovery access do I have?',
+      'Do I have any network outage permissions?',
+      'Show my user lockout tickets',
+      'What other emergency access do I have?',
+
+      // Request Creation Guidance
+      'How do I create a new emergency request?',
+      'How do I request emergency access?',
+      'What information do I need for a request?',
+      'What emergency types are available?',
+      'How long can I request access for?',
+
+      // System Information
+      'What is FireFighter?',
+      'How does emergency access work?',
+      'How does temporary access work?',
+      'When does my access expire?'
+    ];
+
+    // Randomly select 4 suggestions to display
+    const shuffled = allSuggestions.sort(() => 0.5 - Math.random());
+    this.suggestedQuestions = shuffled.slice(0, 4);
+  }
+
+  /**
+   * Check if the chatbot API is healthy
+   */
+  checkAPIHealth(): void {
+    // Set initial checking state
+    this.apiHealthy = null;
+    this.apiHealthStatus = 'Checking...';
+
+    this.chatbotService.getHealth().subscribe({
+      next: (health) => {
+        console.log('API Health Response:', health);
+
+        if (health.status === 'healthy') {
+          this.apiHealthy = true;
+          this.apiHealthStatus = `Service Online (v${health.version || '1.0.0'})`;
+        } else {
+          this.apiHealthy = false;
+          this.apiHealthStatus = 'Service Degraded';
+        }
+      },
+      error: (error) => {
+        console.warn('API health check failed:', error);
+        this.apiHealthy = false;
+
+        // Provide more specific error messages based on error type
+        if (error.status === 0) {
+          this.apiHealthStatus = 'Service Offline (Connection Failed)';
+        } else if (error.status === 404) {
+          this.apiHealthStatus = 'Service Not Found';
+        } else if (error.status >= 500) {
+          this.apiHealthStatus = 'Service Error';
+        } else {
+          this.apiHealthStatus = 'Service Unavailable';
+        }
+      }
     });
   }
 
@@ -79,13 +198,17 @@ export class ChatPage implements OnInit, AfterViewChecked {
     this.currentMessage = '';
     this.shouldScrollToBottom = true;
 
-    // Simulate Gemini response
-    this.simulateGeminiResponse(messageContent);
+    // Send to real API
+    this.sendToGeminiAPI(messageContent);
   }
 
   sendSuggestedMessage(suggestion: string) {
     this.currentMessage = suggestion;
     this.sendMessage();
+  }
+
+  toggleQuickActions() {
+    this.showQuickActions = !this.showQuickActions;
   }
 
   onKeyDown(event: KeyboardEvent) {
@@ -95,7 +218,12 @@ export class ChatPage implements OnInit, AfterViewChecked {
     }
   }
 
-  private simulateGeminiResponse(userMessage: string) {
+  private sendToGeminiAPI(userMessage: string) {
+    if (!this.user?.uid) {
+      this.addErrorMessage('Please log in to use the AI assistant.');
+      return;
+    }
+
     this.isLoading = true;
 
     // Add typing indicator
@@ -110,107 +238,59 @@ export class ChatPage implements OnInit, AfterViewChecked {
     this.messages.push(typingMessage);
     this.shouldScrollToBottom = true;
 
-    // Simulate API delay
-    setTimeout(() => {
-      // Remove typing indicator
-      this.messages = this.messages.filter(msg => !msg.isTyping);
+    // Determine if this should be an admin query
+    const isAdmin = this.authService.isCurrentUserAdmin();
+    const shouldUseAdminEndpoint = isAdmin && this.chatbotService.isAdminQuery(userMessage);
 
-      // Add actual response
-      const response = this.generateGeminiResponse(userMessage);
-      const geminiMessage: ChatMessage = {
-        id: this.generateMessageId(),
-        content: response,
-        isUser: false,
-        timestamp: new Date()
-      };
+    // Choose the appropriate API endpoint
+    const apiCall = shouldUseAdminEndpoint
+      ? this.chatbotService.sendAdminQuery(userMessage, this.user.uid)
+      : this.chatbotService.sendQuery(userMessage, this.user.uid);
 
-      this.messages.push(geminiMessage);
-      this.isLoading = false;
-      this.shouldScrollToBottom = true;
-    }, 1500 + Math.random() * 1000); // Random delay between 1.5-2.5 seconds
+    apiCall.subscribe({
+      next: (response: ChatbotResponse) => {
+        // Remove typing indicator
+        this.messages = this.messages.filter(msg => !msg.isTyping);
+
+        // Add API response
+        const geminiMessage: ChatMessage = {
+          id: this.generateMessageId(),
+          content: response.message,
+          isUser: false,
+          timestamp: new Date(response.timestamp)
+        };
+
+        this.messages.push(geminiMessage);
+        this.isLoading = false;
+        this.shouldScrollToBottom = true;
+      },
+      error: (errorResponse: ChatbotResponse) => {
+        // Remove typing indicator
+        this.messages = this.messages.filter(msg => !msg.isTyping);
+
+        // Add error message
+        this.addErrorMessage(errorResponse.message);
+        this.isLoading = false;
+      }
+    });
   }
 
-  private generateGeminiResponse(userMessage: string): string {
-    const lowerMessage = userMessage.toLowerCase();
+  /**
+   * Add an error message to the chat
+   */
+  private addErrorMessage(message: string): void {
+    const errorMessage: ChatMessage = {
+      id: this.generateMessageId(),
+      content: message,
+      isUser: false,
+      timestamp: new Date()
+    };
 
-    if (lowerMessage.includes('ticket') || lowerMessage.includes('show me')) {
-      return `I can help you with your tickets! Here are some things I can do:
-
-• **View Recent Tickets**: I can show you your most recent emergency access tickets
-• **Search Tickets**: Find specific tickets by ID, date, or status
-• **Ticket Details**: Get detailed information about any ticket
-
-Would you like me to show you your recent tickets or help you search for something specific?`;
-    }
-
-    if (lowerMessage.includes('request') || lowerMessage.includes('emergency access')) {
-      return `To request emergency access, I can guide you through the process:
-
-**Emergency Access Request Steps:**
-1. **Specify the system** you need access to
-2. **Provide justification** for the emergency access
-3. **Set duration** for how long you need access
-4. **Submit for approval** to your manager or admin
-
-Would you like me to help you start a new emergency access request?`;
-    }
-
-    if (lowerMessage.includes('pending') || lowerMessage.includes('status')) {
-      return `I can help you check the status of your requests! Here's what I can show you:
-
-• **Pending Approvals**: Requests waiting for manager approval
-• **Active Access**: Currently granted emergency access
-• **Recent Activity**: Latest updates on your requests
-
-Would you like me to check your pending requests or show you active access permissions?`;
-    }
-
-    if (lowerMessage.includes('approval') || lowerMessage.includes('process')) {
-      return `The **Emergency Access Approval Process** works like this:
-
-1. **Request Submission** → You submit an emergency access request
-2. **Manager Review** → Your direct manager reviews the request
-3. **Admin Approval** → System admin grants the access
-4. **Access Granted** → You receive temporary access
-5. **Auto Revocation** → Access is automatically removed after the specified duration
-
-**Typical Timeline**: Most requests are processed within 15-30 minutes during business hours.
-
-Need help with a specific step in this process?`;
-    }
-
-    if (lowerMessage.includes('help') || lowerMessage.includes('how')) {
-      return `I'm here to help you with the **FireFighter Emergency Access Management System**!
-
-**What I can help you with:**
-• 🎫 View and manage your tickets
-• 🚨 Request emergency access
-• ✅ Check approval status
-• 📊 Review access history
-• ❓ Answer questions about the system
-
-**Quick Commands:**
-• "Show my tickets" - View recent tickets
-• "New request" - Start emergency access request
-• "Check status" - See pending approvals
-• "Help with [topic]" - Get specific help
-
-What would you like to do today?`;
-    }
-
-    // Default response
-    return `I'm Gemini, your AI assistant for the FireFighter Emergency Access Management System.
-
-I can help you with:
-• **Managing tickets** and emergency access requests
-• **Checking status** of your pending requests
-• **Understanding processes** and procedures
-• **Finding information** quickly
-
-Try asking me something like "Show me my recent tickets" or "How do I request emergency access?"
-
-What can I help you with today?`;
+    this.messages.push(errorMessage);
+    this.shouldScrollToBottom = true;
   }
+
+
 
   formatTime(timestamp: Date): string {
     const now = new Date();
@@ -258,12 +338,12 @@ What can I help you with today?`;
     return 'U';
   }
 
-  trackByMessageId(index: number, message: ChatMessage): string {
+  trackByMessageId(_index: number, message: ChatMessage): string {
     return message.id;
   }
 
   private generateMessageId(): string {
-    return Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    return Date.now().toString() + Math.random().toString(36).substring(2, 11);
   }
 
   private scrollToBottom(): void {

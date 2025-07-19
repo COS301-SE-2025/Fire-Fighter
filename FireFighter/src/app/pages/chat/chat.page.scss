@@ -48,7 +48,6 @@ textarea {
 .message-bubble {
   animation: messageBubbleIn 0.5s ease-out;
   animation-fill-mode: both;
-  transition: all 0.2s ease;
 }
 
 @keyframes messageSlideIn {
@@ -132,19 +131,48 @@ textarea {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-/* Message bubble hover effects */
-.message-bubble:hover {
-  transform: translateY(-2px) scale(1.01);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+/* Message bubble - no hover effects */
+.message-bubble {
+  /* Removed all hover effects and transitions */
 }
 
-.dark .message-bubble:hover {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+/* Quick Actions Smooth Animation */
+.quick-actions-container {
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: top;
 }
 
-/* Smooth transition for hover states */
-.message-bubble:not(:hover) {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+.quick-actions-container.expanded {
+  max-height: 200px;
+  opacity: 1;
+  transform: scaleY(1);
+  margin-top: 0;
+}
+
+.quick-actions-container.collapsed {
+  max-height: 0;
+  opacity: 0;
+  transform: scaleY(0);
+  margin-top: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* Smooth button animations within quick actions */
+.quick-actions-container.expanded .flex {
+  animation: fadeInUp 0.3s ease-out 0.1s both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Focus styles for better accessibility */
