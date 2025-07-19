@@ -24,6 +24,12 @@ export interface RevokeTicketRequest {
   rejectReason: string;
 }
 
+export interface ExportTicketsRequest {
+  userId: string;
+  startDate?: string;
+  endDate?: string;
+}
+
 export interface RevokeTicketResponse {
   success: boolean;
   message: string;
@@ -137,6 +143,23 @@ export class AdminService {
    */
   checkAdminStatus(userId: string): Observable<AdminStatusResponse> {
     return this.http.get<AdminStatusResponse>(`${this.apiUrl}/check/${userId}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Export tickets to CSV and email to administrator
+   * Endpoint: POST /api/tickets/admin/export
+   */
+  exportTicketsToEmail(request: ExportTicketsRequest): Observable<string> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+
+    return this.http.post(`${this.apiUrl}/export`, request, {
+      headers,
+      responseType: 'text'
+    }).pipe(
       catchError(this.handleError)
     );
   }

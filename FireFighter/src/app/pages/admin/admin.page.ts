@@ -116,6 +116,19 @@ export class AdminPage implements OnInit {
   revocationReason = '';
   revocationTarget: string | 'bulk' | null = null;
 
+  // Modal state for export options
+  showExportModal = false;
+  exportType: 'active' | 'history' | 'audit' | null = null;
+  exportStartDate = '';
+  exportEndDate = '';
+  isExporting = false;
+
+  // Notification state
+  showNotification = false;
+  notificationMessage = '';
+  notificationType: 'success' | 'error' = 'success';
+  notificationAnimatingOut = false;
+
   // Open modal for single revoke
   openRevokeModal(id: string) {
     this.revocationTarget = id;
@@ -128,6 +141,48 @@ export class AdminPage implements OnInit {
     this.revocationTarget = 'bulk';
     this.revocationReason = '';
     this.showRevocationModal = true;
+  }
+
+  // Open export modal
+  openExportModal(type: 'active' | 'history' | 'audit') {
+    this.exportType = type;
+    this.exportStartDate = '';
+    this.exportEndDate = '';
+    this.showExportModal = true;
+  }
+
+  // Close export modal
+  closeExportModal() {
+    this.showExportModal = false;
+    this.exportType = null;
+    this.exportStartDate = '';
+    this.exportEndDate = '';
+    this.isExporting = false;
+  }
+
+  // Show notification
+  showNotificationBanner(message: string, type: 'success' | 'error' = 'success') {
+    this.notificationMessage = message;
+    this.notificationType = type;
+    this.showNotification = true;
+    this.notificationAnimatingOut = false;
+
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+      this.hideNotification();
+    }, 5000);
+  }
+
+  // Hide notification with animation
+  hideNotification() {
+    this.notificationAnimatingOut = true;
+
+    // Wait for animation to complete before hiding
+    setTimeout(() => {
+      this.showNotification = false;
+      this.notificationMessage = '';
+      this.notificationAnimatingOut = false;
+    }, 300); // Match animation duration
   }
 
   // Confirm revocation (single or bulk)
@@ -302,31 +357,7 @@ export class AdminPage implements OnInit {
     };
   }
 
-  exportHistoryToCSV() {
-    const headers = [
-      'ID', 'Requester', 'Reason', 'Status', 'Completed At', 'Last Action', 'Action By', 'Action At'
-    ];
-    const rows = this.filteredAndSortedHistory.map(req => [
-      req.id,
-      this.usernames[req.requester] || req.requester,
-      req.reason,
-      req.status,
-      req.completedAt,
-      req.lastAction || '',
-      req.actionBy ? (this.usernames[req.actionBy] || req.actionBy) : '',
-      req.actionAt || ''
-    ]);
-    const csvContent = [headers, ...rows].map(e => e.map(field => '"' + String(field).replace(/"/g, '""') + '"').join(',')).join('\r\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'requests-history.csv');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
+
 
   // Search, filter, and sort state
   searchQuery: string = '';
@@ -498,7 +529,72 @@ export class AdminPage implements OnInit {
     document.body.removeChild(link);
   }
 
+
+
+  // Full export uses modal (top button)
+  exportFullAuditLogs() {
+    this.openExportModal('audit');
+  }
+
+  // Direct export methods (section buttons)
   exportActiveToCSV() {
+    this.downloadActiveTicketsCSV();
+  }
+
+  exportHistoryToCSV() {
+    this.downloadHistoryCSV();
+  }
+
+  // Handle direct download export
+  handleDirectDownload() {
+    if (this.exportType === 'active') {
+      this.downloadActiveTicketsCSV();
+    } else if (this.exportType === 'history') {
+      this.downloadHistoryCSV();
+    } else if (this.exportType === 'audit') {
+      this.downloadAuditLogsCSV();
+    }
+    this.closeExportModal();
+  }
+
+  // Handle email export
+  handleEmailExport() {
+    const currentUser = this.authService.getCurrentUserProfile();
+    if (!currentUser) {
+      alert('User not authenticated');
+      return;
+    }
+
+    this.isExporting = true;
+
+    const request = {
+      userId: currentUser.userId,
+      startDate: this.exportStartDate || undefined,
+      endDate: this.exportEndDate || undefined
+    };
+
+    this.adminService.exportTicketsToEmail(request).subscribe({
+      next: (response) => {
+        // Display the actual API response message
+        this.showNotificationBanner(
+          response || 'Export request sent! You will receive the CSV file via email shortly.',
+          'success'
+        );
+        this.closeExportModal();
+      },
+      error: (error) => {
+        console.error('Export failed:', error);
+        this.showNotificationBanner(
+          'Export failed: ' + (error.error || error.message || 'Unknown error'),
+          'error'
+        );
+        this.isExporting = false;
+      }
+    });
+  }
+
+  // Direct download methods (existing functionality)
+  private downloadActiveTicketsCSV() {
     const headers = [
       'ID', 'Requester', 'Reason', 'Status', 'Access Start', 'Access End', 'System/Resource', 'Justification/Notes', 'Revoked By', 'Revoked At', 'Reject Reason', 'Email', 'Phone'
     ];
@@ -517,19 +613,27 @@ export class AdminPage implements OnInit {
       this.userEmails[req.requester] || req.email,
       req.phone
     ]);
-    const csvContent = [headers, ...rows].map(e => e.map(field => '"' + String(field).replace(/"/g, '""') + '"').join(',')).join('\r\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'active-emergency-requests.csv');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    this.downloadCSV(headers, rows, 'active-emergency-requests.csv');
   }
 
-  exportFullAuditLogs() {
+  private downloadHistoryCSV() {
+    const headers = [
+      'ID', 'Requester', 'Reason', 'Status', 'Completed At', 'Last Action', 'Action By', 'Action At'
+    ];
+    const rows = this.filteredAndSortedHistory.map(req => [
+      req.id,
+      this.usernames[req.requester] || req.requester,
+      req.reason,
+      req.status,
+      req.completedAt,
+      req.lastAction || '',
+      req.actionBy ? (this.usernames[req.actionBy] || req.actionBy) : '',
+      req.actionAt || ''
+    ]);
+    this.downloadCSV(headers, rows, 'requests-history.csv');
+  }
+
+  private downloadAuditLogsCSV() {
     const headers = ['Request ID', 'Requester', 'Action', 'By', 'At', 'Reason'];
     const rows: string[][] = [];
     this.requestHistory.forEach(req => {
@@ -546,12 +650,16 @@ export class AdminPage implements OnInit {
         });
       }
     });
+    this.downloadCSV(headers, rows, 'full-audit-logs.csv');
+  }
+
+  private downloadCSV(headers: string[], rows: string[][], filename: string) {
     const csvContent = [headers, ...rows].map(e => e.map(field => '"' + String(field).replace(/"/g, '""') + '"').join(',')).join('\r\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', 'full-audit-logs.csv');
+    link.setAttribute('download', filename);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
