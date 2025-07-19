@@ -260,15 +260,13 @@
                  </div>
                </button>
 
-               <!-- Security Button -->
-               <button class="flex items-center p-4 bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 text-white rounded-lg transition-colors duration-200 dark:bg-green-700 dark:hover:bg-green-800 dark:focus:ring-green-800">
+               <!-- Gemini Button -->
+               <button [routerLink]="['/chat']" class="flex items-center p-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:ring-4 focus:ring-blue-300 text-white rounded-lg transition-all duration-200 dark:from-blue-700 dark:to-purple-700 dark:hover:from-blue-800 dark:hover:to-purple-800 dark:focus:ring-blue-800">
                  <div class="flex items-center space-x-3">
-                   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                   </svg>
+                   <svg fill="currentColor" fill-rule="evenodd" height="24px" style="flex:none;line-height:1" viewBox="0 0 24 24" width="24px" xmlns="http://www.w3.org/2000/svg"><title>Gemini</title><path d="M20.616 10.835a14.147 14.147 0 01-4.45-3.001 14.111 14.111 0 01-3.678-6.452.503.503 0 00-.975 0 14.134 14.134 0 01-3.679 6.452 14.155 14.155 0 01-4.45 3.001c-.65.28-1.318.505-2.002.678a.502.502 0 000 .975c.684.172 1.35.397 2.002.677a14.147 14.147 0 014.45 3.001 14.112 14.112 0 013.679 6.453.502.502 0 00.975 0c.172-.685.397-1.351.677-2.003a14.145 14.145 0 013.001-4.45 14.113 14.113 0 016.453-3.678.503.503 0 000-.975 13.245 13.245 0 01-2.003-.678z"></path></svg>
                    <div class="text-left">
-                     <div class="font-semibold">Security</div>
-                     <div class="text-sm opacity-90">Security dashboard</div>
+                     <div class="font-semibold">Gemini</div>
+                     <div class="text-sm opacity-90">Ask AI assistant</div>
                    </div>
                  </div>
                </button>
