@@ -83,6 +83,11 @@ export class NavbarComponent implements OnInit {
     this.profileMenuOpen = false; // Close profile menu after navigation
   }
 
+  navigateToChat() {
+    this.router.navigate(['/chat']);
+    this.closeMobileMenu();
+  }
+
   navigateToAccount() {
     this.router.navigate(['/account']);
     this.closeMobileMenu();
