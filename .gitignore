@@ -13,3 +13,4 @@
 .env.local
 .env.*.local
 firefighter-platform/src/main/resources/keystore.p12
+firefighter-platform/env
