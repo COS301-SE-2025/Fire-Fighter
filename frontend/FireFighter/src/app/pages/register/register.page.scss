@@ -1,8 +1,0 @@
-// Since we're using Tailwind classes, we're removing most of the custom CSS
-// Any additional styles not covered by Tailwind can go here
-
-// Make the content fill the whole screen with an extremely dark blue background
-ion-content {
-  --background: #080a1c; // Very dark blue, almost black
-  height: 100vh;
-}

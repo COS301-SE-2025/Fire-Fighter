@@ -1,7 +1,0 @@
-{
-  "name": "FireFighter",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "angular-standalone"
-}
