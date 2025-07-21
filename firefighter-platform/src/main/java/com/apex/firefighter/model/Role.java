@@ -3,7 +3,7 @@ package com.apex.firefighter.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "roles")
+@Table(name = "roles", schema = "firefighter")
 public class Role {
 
     @Id

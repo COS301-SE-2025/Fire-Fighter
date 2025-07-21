@@ -247,6 +247,7 @@ public class TicketService {
         ticket.setStatus("Rejected");
         ticket.setRejectReason(rejectReason);
         ticket.setDateCompleted(LocalDateTime.now());
+        ticket.setRevokedBy(adminUserId);
         
         Ticket revokedTicket = ticketRepository.save(ticket);
         System.out.println("✅ TICKET REVOKED: " + revokedTicket.getTicketId() + " by admin " + adminUserId);
@@ -290,6 +291,7 @@ public class TicketService {
         ticket.setStatus("Rejected");
         ticket.setRejectReason(rejectReason);
         ticket.setDateCompleted(LocalDateTime.now());
+        ticket.setRevokedBy(adminUserId);
         
         Ticket revokedTicket = ticketRepository.save(ticket);
         System.out.println("✅ TICKET REVOKED: " + revokedTicket.getTicketId() + " by admin " + adminUserId);

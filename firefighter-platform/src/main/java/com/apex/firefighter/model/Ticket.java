@@ -45,6 +45,10 @@ public class Ticket {
     @JsonProperty("emergencyContact")
     private String emergencyContact;
 
+    @Column(name = "revoked_by")
+    @JsonProperty("revokedBy")
+    private String revokedBy;
+
     @Column(name = "reject_reason")
     @JsonProperty("rejectReason")
     private String rejectReason;
@@ -92,6 +96,7 @@ public class Ticket {
     public void setUserId(String userId) { this.userId = userId; }
     public void setEmergencyType(String emergencyType) { this.emergencyType = emergencyType; }
     public void setEmergencyContact(String emergencyContact) { this.emergencyContact = emergencyContact; }
+    public void setRevokedBy(String revokedBy) { this.revokedBy = revokedBy; }
     public void setRejectReason(String rejectReason) { this.rejectReason = rejectReason; }
     public void setDateCompleted(LocalDateTime dateCompleted) { this.dateCompleted = dateCompleted; }
     public void setDuration(Integer duration) { this.duration = duration; }
@@ -106,6 +111,7 @@ public class Ticket {
     public String getUserId() { return userId; }
     public String getEmergencyType() { return emergencyType; }
     public String getEmergencyContact() { return emergencyContact; }
+    public String getRevokedBy() { return revokedBy; }
     public String getRejectReason() { return rejectReason; }
     public LocalDateTime getDateCompleted() { return dateCompleted; }
     public Integer getDuration() { return duration; }
