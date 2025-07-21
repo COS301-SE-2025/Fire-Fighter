@@ -13,8 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(properties = {
     "spring.datasource.url=jdbc:h2:mem:testdb",
-    "spring.jpa.hibernate.ddl-auto=create-drop",
-    "server.ssl.enabled=false"
+    "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 public class SwaggerIntegrationTest {
 
