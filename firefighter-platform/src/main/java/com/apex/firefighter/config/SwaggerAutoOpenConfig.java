@@ -14,8 +14,7 @@ public class SwaggerAutoOpenConfig {
     @Value("${server.port:8080}")
     private String serverPort;
 
-    @Value("${server.ssl.enabled:false}")
-    private boolean sslEnabled;
+
 
     @Value("${firefighter.swagger.auto-open:true}")
     private boolean autoOpenEnabled;
@@ -28,14 +27,14 @@ public class SwaggerAutoOpenConfig {
         }
 
         try {
-            String protocol = sslEnabled ? "https" : "http";
+            String protocol = "http";
             String swaggerUrl = protocol + "://localhost:" + serverPort + "/swagger-ui.html";
             
             System.out.println("=".repeat(60));
             System.out.println("🚀 FireFighter Platform Started Successfully!");
             System.out.println("=".repeat(60));
             System.out.println("📚 Swagger UI: " + swaggerUrl);
-            System.out.println("🤖 AI Chatbot: " + protocol + "://localhost:" + serverPort + "/api/chatbot/health");
+            System.out.println("🤖 AI Chatbot: http://localhost:" + serverPort + "/api/chatbot/health");
             System.out.println("📧 Email Service: Configured and ready");
             System.out.println("=".repeat(60));
 
@@ -51,7 +50,7 @@ public class SwaggerAutoOpenConfig {
 
         } catch (Exception e) {
             System.err.println("❌ Failed to auto-open Swagger UI: " + e.getMessage());
-            String fallbackUrl = (sslEnabled ? "https" : "http") + "://localhost:" + serverPort + "/swagger-ui.html";
+            String fallbackUrl = "http://localhost:" + serverPort + "/swagger-ui.html";
             System.out.println("📋 Please manually open: " + fallbackUrl);
         }
     }
