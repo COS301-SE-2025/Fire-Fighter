@@ -1,33 +1,23 @@
-# Multi-stage build for Angular application
-# Stage 1: Build the Angular app
-FROM node:18-alpine AS build
+# Development Dockerfile for Angular/Ionic application
+FROM node:18-alpine
 
 # Set working directory
 WORKDIR /app
 
+# Install Ionic CLI globally
+RUN npm install -g @ionic/cli
+
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies (including dev dependencies for build)
+# Install dependencies (including dev dependencies)
 RUN npm ci
 
 # Copy source code
 COPY . .
 
-# Build the application for production
-RUN npm run build
+# Expose port 8100 (default Ionic serve port)
+EXPOSE 8100
 
-# Stage 2: Serve the app with nginx
-FROM nginx:alpine
-
-# Copy the built app from the previous stage
-COPY --from=build /app/www /usr/share/nginx/html
-
-# Copy custom nginx configuration (optional)
-COPY nginx.conf /etc/nginx/nginx.conf
-
-# Expose port 80
-EXPOSE 80
-
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Start the development server
+CMD ["ionic", "serve", "--host", "0.0.0.0", "--port", "8100", "--no-open"]
