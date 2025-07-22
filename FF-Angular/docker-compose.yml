@@ -2,18 +2,7 @@ version: '3.8'
 
 services:
   firefighter-frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: firefighter-angular
+    build: .
     ports:
       - "8080:80"
     restart: unless-stopped
-    environment:
-      - NODE_ENV=production
-    networks:
-      - firefighter-network
-
-networks:
-  firefighter-network:
-    driver: bridge
