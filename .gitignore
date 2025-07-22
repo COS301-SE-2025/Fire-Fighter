@@ -1,211 +1,233 @@
 # ===================================
-# FireFighter Mono-Repo .gitignore
+# MONOREPO .gitignore for Fire-Fighter
 # ===================================
+# This file covers both FF-Angular (Angular/Ionic/Capacitor) and FF-API (Spring Boot Maven)
 
 # ===================================
-# Node.js & npm
+# ENVIRONMENT VARIABLES (ALL PROJECTS)
 # ===================================
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-.pnpm-debug.log*
-*.tgz
-*.tar.gz
-.npm
-.eslintcache
-.yarn-integrity
-.yarn-offline-mirror
-.yarn-offline-mirror-pruning
+.env
+.env.local
+.env.*.local
+.env.test
+.env.production
+FF-Angular/.env*
+FF-API/.env*
+
+# ===================================
+# FF-ANGULAR (Angular/Ionic/Capacitor)
+# ===================================
+
+# Node.js dependencies
+FF-Angular/node_modules/
+FF-Angular/jspm_packages/
+
+# Build outputs
+FF-Angular/dist/
+FF-Angular/www/
+FF-Angular/build/
+FF-Angular/.angular/
+FF-Angular/coverage/
+FF-Angular/.nyc_output/
+FF-Angular/tmp/
+FF-Angular/temp/
+
+# Logs
+FF-Angular/logs/
+FF-Angular/*.log
+FF-Angular/npm-debug.log*
+FF-Angular/yarn-debug.log*
+FF-Angular/yarn-error.log*
+FF-Angular/lerna-debug.log*
 
 # Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
+FF-Angular/pids/
+FF-Angular/*.pid
+FF-Angular/*.seed
+FF-Angular/*.pid.lock
+
+# Optional npm cache directory
+FF-Angular/.npm
+
+# Optional eslint cache
+FF-Angular/.eslintcache
+
+# Optional REPL history
+FF-Angular/.node_repl_history
+
+# Output of 'npm pack'
+FF-Angular/*.tgz
+
+# Yarn Integrity file
+FF-Angular/.yarn-integrity
+
+# Firebase
+FF-Angular/.firebase/
+FF-Angular/firebase-debug.log
+FF-Angular/firestore-debug.log
+
+# Capacitor
+FF-Angular/ios/
+FF-Angular/android/local.properties
+FF-Angular/android/app/google-services.json
+FF-Angular/ios/App/App/GoogleService-Info.plist
+
+# Android specific (for Capacitor)
+FF-Angular/android/*.apk
+FF-Angular/android/*.aar
+FF-Angular/android/*.ap_
+FF-Angular/android/*.aab
+FF-Angular/android/*.dex
+FF-Angular/android/*.class
+FF-Angular/android/bin/
+FF-Angular/android/gen/
+FF-Angular/android/out/
+FF-Angular/android/.gradle/
+FF-Angular/android/build/
+FF-Angular/android/captures/
+FF-Angular/android/.externalNativeBuild
+FF-Angular/android/.cxx/
+FF-Angular/android/freeline.py
+FF-Angular/android/freeline/
+FF-Angular/android/freeline_project_description.json
+FF-Angular/android/fastlane/report.xml
+FF-Angular/android/fastlane/Preview.html
+FF-Angular/android/fastlane/screenshots
+FF-Angular/android/fastlane/test_output
+FF-Angular/android/fastlane/readme.md
+FF-Angular/android/lint/intermediates/
+FF-Angular/android/lint/generated/
+FF-Angular/android/lint/outputs/
+FF-Angular/android/lint/tmp/
+FF-Angular/android/*.hprof
+FF-Angular/android/capacitor-cordova-android-plugins
+FF-Angular/android/app/src/main/assets/public
+FF-Angular/android/app/src/main/assets/capacitor.config.json
+FF-Angular/android/app/src/main/assets/capacitor.plugins.json
+FF-Angular/android/app/src/main/res/xml/config.xml
 
 # ===================================
-# Angular & Ionic
+# FF-API (Spring Boot Maven)
 # ===================================
-# Build outputs
-frontend/FireFighter/dist/
-frontend/FireFighter/www/
-frontend/FireFighter/build/
-
-# Angular specific
-frontend/FireFighter/.angular/
-frontend/FireFighter/.ng_build_cache/
-frontend/FireFighter/.ng_compilation_cache/
-
-# Ionic/Capacitor
-frontend/FireFighter/android/
-frontend/FireFighter/ios/
-frontend/FireFighter/.capacitor/
-frontend/FireFighter/capacitor.config.json
-
-# ===================================
-# Spring Boot & Maven
-# ===================================
-backend/firefighter-platform/target/
-backend/firefighter-platform/.mvn/
-backend/firefighter-platform/mvnw
-backend/firefighter-platform/mvnw.cmd
 
 # Maven
-.m2/
-*.class
-*.jar
-*.war
-*.ear
-*.nar
-hs_err_pid*
+FF-API/target/
+FF-API/!.mvn/wrapper/maven-wrapper.jar
+FF-API/!**/src/main/**/target/
+FF-API/!**/src/test/**/target/
 
-# Spring Boot specific
-backend/firefighter-platform/HELP.md
-backend/firefighter-platform/.gradle/
-backend/firefighter-platform/build/
-backend/firefighter-platform/!gradle/wrapper/gradle-wrapper.jar
-backend/firefighter-platform/!**/src/main/**/build/
-backend/firefighter-platform/!**/src/test/**/build/
+# Spring Boot
+FF-API/HELP.md
+
+# STS (Spring Tool Suite)
+FF-API/.apt_generated
+FF-API/.classpath
+FF-API/.factorypath
+FF-API/.project
+FF-API/.settings
+FF-API/.springBeans
+FF-API/.sts4-cache
+
+# NetBeans
+FF-API/nbproject/private/
+FF-API/nbbuild/
+FF-API/dist/
+FF-API/nbdist/
+FF-API/.nb-gradle/
+FF-API/build/
+FF-API/!**/src/main/**/build/
+FF-API/!**/src/test/**/build/
 
 # ===================================
-# Integration Tests
+# IDE/EDITOR FILES (ALL PROJECTS)
 # ===================================
-integration-tests/node_modules/
-integration-tests/coverage/
-integration-tests/cypress/screenshots/
-integration-tests/cypress/videos/
-integration-tests/cypress/downloads/
-integration-tests/.nyc_output/
-integration-tests/test-results/
-integration-tests/playwright-report/
 
-# ===================================
-# IDEs & Editors
-# ===================================
 # IntelliJ IDEA
 .idea/
 *.iws
 *.iml
 *.ipr
-out/
+FF-Angular/.idea/
+FF-API/.idea/
 
-# Visual Studio Code
+# VS Code
 .vscode/
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-*.code-workspace
+FF-Angular/.vscode/
+FF-API/.vscode/
 
 # Eclipse
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
+.metadata
+.recommenders
+FF-Angular/.metadata
+FF-Angular/.recommenders
+FF-API/.metadata
+FF-API/.recommenders
 
-# NetBeans
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-
-# ===================================
-# Operating System
-# ===================================
-# Windows
-Thumbs.db
-Thumbs.db:encryptable
-ehthumbs.db
-ehthumbs_vista.db
-*.tmp
-*.temp
+# Vim
 *.swp
 *.swo
 *~
 
+# ===================================
+# OS GENERATED FILES
+# ===================================
+
 # macOS
 .DS_Store
-.AppleDouble
-.LSOverride
-Icon
+.DS_Store?
 ._*
-.DocumentRevisions-V100
-.fseventsd
 .Spotlight-V100
-.TemporaryItems
 .Trashes
-.VolumeIcon.icns
-.com.apple.timemachine.donotpresent
+
+# Windows
+ehthumbs.db
+Thumbs.db
+Desktop.ini
 
 # Linux
 *~
-.nfs*
 
 # ===================================
-# Environment & Configuration
+# LOGS AND TEMPORARY FILES
 # ===================================
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Firebase
-firebase-debug.log*
-firestore-debug.log*
-ui-debug.log*
+*.log
+*.tmp
+*.temp
 
 # ===================================
-# Database
+# SECURITY AND SENSITIVE FILES
 # ===================================
+
+# SSH keys
+*.pem
+*.key
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+
+# SSL certificates
+*.crt
+*.cert
+*.p12
+*.pfx
+
+# Database files
 *.db
 *.sqlite
 *.sqlite3
 
-# ===================================
-# Logs
-# ===================================
-logs/
-*.log
-log/
-
-# ===================================
-# Temporary files
-# ===================================
-tmp/
-temp/
-.tmp/
-.temp/
-
-# ===================================
 # Backup files
-# ===================================
-*.backup
 *.bak
-*.orig
+*.backup
+*.old
 
 # ===================================
-# Package managers lockfiles (keep package-lock.json for consistency)
+# CUSTOM PROJECT IGNORES
 # ===================================
-# Uncomment the next line if you want to ignore lockfiles
-# package-lock.json
-# yarn.lock
 
-# ===================================
-# SSL certificates (for development)
-# ===================================
-*.pem
-*.key
-*.crt
-*.p12
-keystore.*
-!backend/firefighter-platform/src/main/resources/keystore.p12
+# Add any project-specific files here
+# Example:
+# config/secrets.yml
+# uploads/
+# storage/
