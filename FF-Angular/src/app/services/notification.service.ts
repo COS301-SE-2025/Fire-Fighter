@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, of, catchError, tap, map, take } from 'rxjs';
+import { BehaviorSubject, Observable, of, catchError, tap, map, take, interval, switchMap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
@@ -21,6 +21,8 @@ export interface Notification {
 export class NotificationService {
   private notifications = new BehaviorSubject<Notification[]>([]);
   private apiUrl = `${environment.apiUrl}/notifications`;
+  private pollingInterval = 30000; // Poll every 30 seconds
+  private isPolling = false;
 
   constructor(
     private http: HttpClient,
@@ -28,6 +30,59 @@ export class NotificationService {
   ) {
     // Load notifications from backend on service initialization
     this.loadNotifications();
+    // Start automatic polling for new notifications
+    this.startPolling();
+    // Listen for page visibility changes to refresh when user returns
+    this.setupVisibilityListener();
+  }
+
+  /**
+   * Start automatic polling for notifications
+   */
+  private startPolling(): void {
+    if (this.isPolling) {
+      return;
+    }
+
+    this.isPolling = true;
+
+    // Poll every 30 seconds
+    interval(this.pollingInterval).pipe(
+      switchMap(() => this.authService.user$.pipe(take(1))),
+      switchMap(currentUser => {
+        if (!currentUser?.uid) {
+          return of([]);
+        }
+
+        return this.http.get<Notification[]>(`${this.apiUrl}?userId=${currentUser.uid}`)
+          .pipe(
+            map(notifications => notifications.map(n => ({
+              ...n,
+              timestamp: new Date(n.timestamp)
+            }))),
+            catchError(error => {
+              console.error('Error polling notifications:', error);
+              return of([]);
+            })
+          );
+      })
+    ).subscribe(notifications => {
+      const currentNotifications = this.notifications.value;
+
+      // Check if there are new notifications
+      if (notifications.length > currentNotifications.length) {
+        console.log('🔔 New notifications detected:', notifications.length - currentNotifications.length);
+      }
+
+      this.notifications.next(notifications);
+    });
+  }
+
+  /**
+   * Stop automatic polling
+   */
+  public stopPolling(): void {
+    this.isPolling = false;
   }
 
   /**
@@ -71,6 +126,29 @@ export class NotificationService {
    */
   refreshNotifications(): void {
     this.loadNotifications();
+  }
+
+  /**
+   * Force an immediate refresh of notifications (useful after actions that should trigger notifications)
+   */
+  forceRefresh(): void {
+    console.log('🔄 Force refreshing notifications...');
+    this.loadNotifications();
+  }
+
+  /**
+   * Setup listener for page visibility changes
+   */
+  private setupVisibilityListener(): void {
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          // Page became visible, refresh notifications
+          console.log('📱 Page became visible, refreshing notifications...');
+          this.forceRefresh();
+        }
+      });
+    }
   }
 
   /**
