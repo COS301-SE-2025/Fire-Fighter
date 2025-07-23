@@ -52,6 +52,7 @@ export class ChatPage implements OnInit, AfterViewChecked {
   ];
 
   private shouldScrollToBottom = false;
+  copiedMessageId: string | null = null;
 
   constructor(
     private authService: AuthService,
@@ -354,6 +355,45 @@ export class ChatPage implements OnInit, AfterViewChecked {
       }
     } catch (err) {
       console.error('Error scrolling to bottom:', err);
+    }
+  }
+
+  /**
+   * Copy message content to clipboard
+   */
+  async copyToClipboard(messageId: string, content: string): Promise<void> {
+    try {
+      // Remove HTML tags from content for clean copying
+      const cleanContent = content.replace(/<[^>]*>/g, '');
+
+      if (navigator.clipboard && window.isSecureContext) {
+        // Use modern clipboard API
+        await navigator.clipboard.writeText(cleanContent);
+      } else {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = cleanContent;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand('copy');
+        textArea.remove();
+      }
+
+      // Show visual feedback
+      this.copiedMessageId = messageId;
+
+      // Reset feedback after 2 seconds
+      setTimeout(() => {
+        this.copiedMessageId = null;
+      }, 2000);
+
+      console.log('Message copied to clipboard');
+    } catch (error) {
+      console.error('Failed to copy message:', error);
     }
   }
 }
