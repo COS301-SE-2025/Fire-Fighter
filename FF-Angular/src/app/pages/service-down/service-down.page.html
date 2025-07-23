@@ -1,8 +1,5 @@
 <ion-content [fullscreen]="true" class="service-down-content">
   <div class="service-down-container">
-    <!-- Background Pattern -->
-    <div class="background-pattern"></div>
-    
     <!-- Main Content -->
     <div class="content-wrapper">
       <!-- Status Icon with Animation -->
@@ -17,10 +14,10 @@
 
       <!-- Title and Message -->
       <div class="text-center space-y-4 mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+        <h1 class="text-3xl font-bold text-gray-900 tracking-tight">
           Service Temporarily Unavailable
         </h1>
-        <p class="text-lg text-gray-600 dark:text-gray-300 max-w-md mx-auto leading-relaxed">
+        <p class="text-lg text-gray-600 max-w-md mx-auto leading-relaxed">
           We're experiencing technical difficulties. Our team is working to restore service as quickly as possible.
         </p>
       </div>
@@ -30,7 +27,7 @@
         <div class="status-card-header">
           <div class="flex items-center space-x-3">
             <div class="status-indicator" [ngClass]="serviceStatusClass"></div>
-            <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">System Status</span>
+            <span class="text-sm font-semibold text-gray-700">System Status</span>
           </div>
           <span class="status-badge" [ngClass]="serviceStatusClass">{{ serviceStatusText }}</span>
         </div>
@@ -54,7 +51,7 @@
           </div>
           <div class="status-item" *ngIf="serviceHealth?.lastChecked">
             <span class="status-label">Last Health Check</span>
-            <span class="status-value">{{ serviceHealth?.lastChecked | date:'short' }}</span>
+            <span class="status-value">{{ serviceHealth?.lastChecked | date:'yyyy/MM/dd, HH:mm:ss' }}</span>
           </div>
           <div class="status-item" *ngIf="!serviceHealth?.isHealthy">
             <span class="status-label">Estimated Recovery</span>
@@ -96,8 +93,8 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
             <div>
-              <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-1">What's happening?</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+              <h3 class="text-sm font-semibold text-gray-900 mb-1">What's happening?</h3>
+              <p class="text-sm text-gray-600 leading-relaxed">
                 The FireFighter emergency access system is temporarily unavailable. This may be due to scheduled maintenance or unexpected technical issues.
               </p>
             </div>
@@ -110,8 +107,8 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
             <div>
-              <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-1">What can I do?</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+              <h3 class="text-sm font-semibold text-gray-900 mb-1">What can I do?</h3>
+              <p class="text-sm text-gray-600 leading-relaxed">
                 You can retry the connection or continue in offline mode to view cached data. For urgent emergency access, contact your system administrator.
               </p>
             </div>
@@ -121,14 +118,14 @@
 
       <!-- Footer -->
       <div class="footer-section">
-        <div class="flex items-center justify-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+        <div class="flex items-center justify-center space-x-4 text-sm text-gray-500">
           <span>FireFighter Platform</span>
           <span>•</span>
           <span>Emergency Access Management</span>
         </div>
         <div class="mt-2 text-center">
-          <span class="text-xs text-gray-400 dark:text-gray-500">
-            Last updated: {{ currentTime | date:'medium' }}
+          <span class="text-xs text-gray-400">
+            Last updated: {{ currentTime | date:'yyyy/MM/dd, HH:mm:ss' }}
           </span>
         </div>
       </div>
