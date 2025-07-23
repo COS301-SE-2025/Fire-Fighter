@@ -4,6 +4,7 @@ import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.model.User;
 import com.apex.firefighter.repository.TicketRepository;
 import com.apex.firefighter.repository.UserRepository;
+import com.apex.firefighter.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,11 +28,13 @@ public class TicketService {
 
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Autowired
-    public TicketService(TicketRepository ticketRepository, UserRepository userRepository) {
+    public TicketService(TicketRepository ticketRepository, UserRepository userRepository, NotificationService notificationService) {
         this.ticketRepository = ticketRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     /**
@@ -39,17 +42,32 @@ public class TicketService {
      */
     public Ticket createTicket(String ticketId, String description, String userId, String emergencyType, String emergencyContact, Integer duration) {
         System.out.println("🔵 CREATE TICKET: Creating ticket - " + ticketId);
-        
+
         // Check if ticket ID already exists
         Optional<Ticket> existingTicket = ticketRepository.findByTicketId(ticketId);
         if (existingTicket.isPresent()) {
             System.out.println("⚠️ TICKET EXISTS: Ticket with ID '" + ticketId + "' already exists");
             throw new RuntimeException("Ticket with ID '" + ticketId + "' already exists");
         }
-        
+
         Ticket ticket = new Ticket(ticketId, description, userId, emergencyType, emergencyContact, duration);
         Ticket savedTicket = ticketRepository.save(ticket);
         System.out.println("✅ TICKET CREATED: " + savedTicket);
+
+        // Create notification for ticket creation
+        try {
+            notificationService.createNotification(
+                userId,
+                "ticket_created",
+                "New Ticket Created",
+                "A new ticket " + ticketId + " has been created",
+                ticketId
+            );
+            System.out.println("🔔 NOTIFICATION CREATED: Ticket creation notification sent to user " + userId);
+        } catch (Exception e) {
+            System.err.println("⚠️ NOTIFICATION FAILED: Could not create ticket creation notification: " + e.getMessage());
+        }
+
         return savedTicket;
     }
 
@@ -248,9 +266,24 @@ public class TicketService {
         ticket.setRejectReason(rejectReason);
         ticket.setDateCompleted(LocalDateTime.now());
         ticket.setRevokedBy(adminUserId);
-        
+
         Ticket revokedTicket = ticketRepository.save(ticket);
         System.out.println("✅ TICKET REVOKED: " + revokedTicket.getTicketId() + " by admin " + adminUserId);
+
+        // Create notification for ticket revocation
+        try {
+            notificationService.createNotification(
+                ticket.getUserId(),
+                "ticket_revoked",
+                "Ticket Revoked",
+                "Your ticket " + ticket.getTicketId() + " has been revoked by an administrator. Reason: " + rejectReason,
+                ticket.getTicketId()
+            );
+            System.out.println("🔔 NOTIFICATION CREATED: Ticket revocation notification sent to user " + ticket.getUserId());
+        } catch (Exception e) {
+            System.err.println("⚠️ NOTIFICATION FAILED: Could not create ticket revocation notification: " + e.getMessage());
+        }
+
         return revokedTicket;
     }
 
@@ -292,9 +325,24 @@ public class TicketService {
         ticket.setRejectReason(rejectReason);
         ticket.setDateCompleted(LocalDateTime.now());
         ticket.setRevokedBy(adminUserId);
-        
+
         Ticket revokedTicket = ticketRepository.save(ticket);
         System.out.println("✅ TICKET REVOKED: " + revokedTicket.getTicketId() + " by admin " + adminUserId);
+
+        // Create notification for ticket revocation
+        try {
+            notificationService.createNotification(
+                ticket.getUserId(),
+                "ticket_revoked",
+                "Ticket Revoked",
+                "Your ticket " + ticket.getTicketId() + " has been revoked by an administrator. Reason: " + rejectReason,
+                ticket.getTicketId()
+            );
+            System.out.println("🔔 NOTIFICATION CREATED: Ticket revocation notification sent to user " + ticket.getUserId());
+        } catch (Exception e) {
+            System.err.println("⚠️ NOTIFICATION FAILED: Could not create ticket revocation notification: " + e.getMessage());
+        }
+
         return revokedTicket;
     }
 
