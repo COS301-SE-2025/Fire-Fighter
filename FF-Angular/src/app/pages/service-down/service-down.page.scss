@@ -1,7 +1,7 @@
-// Service Down Page - BMW-inspired Professional Design
+// Service Down Page - Clean Professional Design
 .service-down-content {
-  --background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  --ion-background-color: transparent;
+  --background: #ffffff;
+  --ion-background-color: #ffffff;
 }
 
 
@@ -13,32 +13,15 @@
   align-items: center;
   justify-content: center;
   padding: 2rem 1rem;
-  background: var(--background);
+  background: #ffffff;
   overflow: hidden;
 }
 
-// Subtle background pattern
-.background-pattern {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  opacity: 0.03;
-  background-image: 
-    radial-gradient(circle at 25% 25%, #3b82f6 0%, transparent 50%),
-    radial-gradient(circle at 75% 75%, #ef4444 0%, transparent 50%);
-  background-size: 100px 100px;
-  animation: patternFloat 20s ease-in-out infinite;
-}
+// Removed background pattern for clean white design
 
 
 
-@keyframes patternFloat {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  33% { transform: translate(10px, -10px) rotate(1deg); }
-  66% { transform: translate(-5px, 5px) rotate(-1deg); }
-}
+// Removed pattern animation
 
 .content-wrapper {
   position: relative;
@@ -106,15 +89,14 @@
   50% { opacity: 0.7; }
 }
 
-// Status Card - BMW-inspired design
+// Status Card - Clean design
 .status-card {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 16px;
   margin-bottom: 2rem;
   overflow: hidden;
-  box-shadow: 
+  box-shadow:
     0 20px 25px -5px rgba(0, 0, 0, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
@@ -136,17 +118,33 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  
+
   &.offline {
     background: #ef4444;
     box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
     animation: statusBlink 2s ease-in-out infinite;
+  }
+
+  &.online {
+    background: #10b981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+  }
+
+  &.checking {
+    background: #f59e0b;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+    animation: statusPulse 1.5s ease-in-out infinite;
   }
 }
 
 @keyframes statusBlink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
+}
+
+@keyframes statusPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
 }
 
 .status-badge {
@@ -156,11 +154,23 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  
+
   &.offline {
     background: rgba(239, 68, 68, 0.1);
     color: #dc2626;
     border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+
+  &.online {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+  }
+
+  &.checking {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+    border: 1px solid rgba(245, 158, 11, 0.2);
   }
 }
 
@@ -195,9 +205,17 @@
   font-size: 0.875rem;
   font-weight: 600;
   color: #374151;
-  
+
   &.offline {
     color: #dc2626;
+  }
+
+  &.online {
+    color: #059669;
+  }
+
+  &.checking {
+    color: #d97706;
   }
 }
 
