@@ -63,12 +63,51 @@ export class NotificationsPage implements OnInit {
     await this.authService.logout();
   }
 
-  markAsRead(notificationId: string) {
+  markAsRead(notificationId: number) {
     this.notificationService.markAsRead(notificationId);
   }
 
   markAllAsRead() {
     this.notificationService.markAllAsRead();
+  }
+
+  deleteReadNotifications() {
+    if (confirm('Are you sure you want to delete all read notifications? This action cannot be undone.')) {
+      this.notificationService.deleteReadNotifications().subscribe({
+        next: (response) => {
+          if (response) {
+            console.log('Read notifications deleted successfully');
+            // Refresh notifications to reflect changes
+            this.notificationService.refreshNotifications();
+          }
+        },
+        error: (error) => {
+          console.error('Error deleting read notifications:', error);
+          alert('Failed to delete read notifications. Please try again.');
+        }
+      });
+    }
+  }
+
+  deleteNotification(notificationId: number, event: Event) {
+    // Prevent event bubbling to avoid triggering markAsRead
+    event.stopPropagation();
+
+    if (confirm('Are you sure you want to delete this notification? This action cannot be undone.')) {
+      this.notificationService.deleteNotification(notificationId).subscribe({
+        next: (response) => {
+          if (response) {
+            console.log('Notification deleted successfully');
+            // Refresh notifications to reflect changes
+            this.notificationService.refreshNotifications();
+          }
+        },
+        error: (error) => {
+          console.error('Error deleting notification:', error);
+          alert('Failed to delete notification. Please try again.');
+        }
+      });
+    }
   }
 
   getTimeAgo(timestamp: Date): string {
@@ -97,7 +136,7 @@ export class NotificationsPage implements OnInit {
     return timestamp.toLocaleDateString();
   }
 
-  trackByNotificationId(index: number, notification: Notification): string {
+  trackByNotificationId(index: number, notification: Notification): number {
     return notification.id;
   }
 
@@ -114,9 +153,13 @@ export class NotificationsPage implements OnInit {
   }
 
   doRefresh(event: any) {
-    // Refresh notifications data
-    this.notifications$ = this.notificationService.getNotifications();
+    // Refresh notifications data from backend
+    this.notificationService.refreshNotifications();
     // Complete the refresh
     event.target.complete();
+  }
+
+  hasReadNotifications(notifications: Notification[]): boolean {
+    return notifications.some(n => n.read);
   }
 }
