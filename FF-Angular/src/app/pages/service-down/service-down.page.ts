@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IonContent } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 import { interval, Subscription } from 'rxjs';
+import { HealthService, ServiceHealth } from '../../services/health.service';
 
 @Component({
   selector: 'app-service-down',
@@ -16,22 +17,31 @@ export class ServiceDownPage implements OnInit, OnDestroy {
   lastConnectionTime: string | null = null;
   estimatedRecovery: string | null = null;
   currentTime = new Date();
-  
+  serviceHealth: ServiceHealth | null = null;
+
   private timeUpdateSubscription?: Subscription;
+  private healthSubscription?: Subscription;
   private retryAttempts = 0;
   private maxRetryAttempts = 3;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private healthService: HealthService
+  ) {}
 
   ngOnInit() {
     this.initializeServiceDownPage();
     this.startTimeUpdates();
     this.setEstimatedRecovery();
+    this.subscribeToHealthUpdates();
   }
 
   ngOnDestroy() {
     if (this.timeUpdateSubscription) {
       this.timeUpdateSubscription.unsubscribe();
+    }
+    if (this.healthSubscription) {
+      this.healthSubscription.unsubscribe();
     }
   }
 
@@ -44,6 +54,26 @@ export class ServiceDownPage implements OnInit, OnDestroy {
 
     // Set current time
     this.currentTime = new Date();
+
+    // Get current health status
+    this.serviceHealth = this.healthService.getCurrentHealth();
+  }
+
+  private subscribeToHealthUpdates() {
+    // Subscribe to health updates
+    this.healthSubscription = this.healthService.health$.subscribe(health => {
+      this.serviceHealth = health;
+
+      // If service becomes healthy, automatically redirect to dashboard
+      if (health.isHealthy) {
+        console.log('🎉 Service is back online! Redirecting to dashboard...');
+        localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
+        this.router.navigate(['/dashboard']);
+      }
+    });
+
+    // Perform an immediate health check when page loads
+    this.healthService.checkHealth().subscribe();
   }
 
   private startTimeUpdates() {
@@ -73,15 +103,21 @@ export class ServiceDownPage implements OnInit, OnDestroy {
     this.retryAttempts++;
 
     try {
-      // Simulate connection attempt
-      await this.simulateConnectionAttempt();
-      
-      // If successful, navigate back to dashboard
-      this.router.navigate(['/dashboard']);
-      
+      // Perform actual health check
+      const health = await this.healthService.checkHealth().toPromise();
+
+      if (health?.isHealthy) {
+        // If successful, navigate back to dashboard
+        console.log('🎉 Connection restored! Redirecting to dashboard...');
+        localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
+        this.router.navigate(['/dashboard']);
+      } else {
+        throw new Error(health?.error || 'Service still unavailable');
+      }
+
     } catch (error) {
       console.error('Connection retry failed:', error);
-      
+
       if (this.retryAttempts >= this.maxRetryAttempts) {
         // Show message that max retries reached
         this.showMaxRetriesMessage();
@@ -91,23 +127,26 @@ export class ServiceDownPage implements OnInit, OnDestroy {
     }
   }
 
-  private async simulateConnectionAttempt(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      // Simulate network delay
-      setTimeout(() => {
-        // For demo purposes, randomly succeed or fail
-        // In real implementation, this would be an actual API call
-        const success = Math.random() > 0.7; // 30% success rate for demo
-        
-        if (success) {
-          // Store successful connection time
-          localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
-          resolve();
-        } else {
-          reject(new Error('Connection failed'));
-        }
-      }, 2000);
-    });
+  // Get service status display text
+  get serviceStatusText(): string {
+    if (!this.serviceHealth) {
+      return 'Checking...';
+    }
+
+    if (this.serviceHealth.isHealthy) {
+      return 'Online';
+    }
+
+    return this.serviceHealth.error || 'Offline';
+  }
+
+  // Get service status CSS class
+  get serviceStatusClass(): string {
+    if (!this.serviceHealth) {
+      return 'checking';
+    }
+
+    return this.serviceHealth.isHealthy ? 'online' : 'offline';
   }
 
   private showMaxRetriesMessage() {

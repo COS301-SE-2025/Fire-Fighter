@@ -29,22 +29,34 @@
       <div class="status-card">
         <div class="status-card-header">
           <div class="flex items-center space-x-3">
-            <div class="status-indicator offline"></div>
+            <div class="status-indicator" [ngClass]="serviceStatusClass"></div>
             <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">System Status</span>
           </div>
-          <span class="status-badge offline">Offline</span>
+          <span class="status-badge" [ngClass]="serviceStatusClass">{{ serviceStatusText }}</span>
         </div>
         
         <div class="status-card-body">
           <div class="status-item">
             <span class="status-label">FireFighter Platform</span>
-            <span class="status-value offline">Disconnected</span>
+            <span class="status-value" [ngClass]="serviceStatusClass">{{ serviceStatusText }}</span>
           </div>
           <div class="status-item">
             <span class="status-label">Last Successful Connection</span>
             <span class="status-value">{{ lastConnectionTime || 'Unknown' }}</span>
           </div>
-          <div class="status-item">
+          <div class="status-item" *ngIf="serviceHealth?.status?.service">
+            <span class="status-label">Service</span>
+            <span class="status-value">{{ serviceHealth?.status?.service }}</span>
+          </div>
+          <div class="status-item" *ngIf="serviceHealth?.status?.version">
+            <span class="status-label">Version</span>
+            <span class="status-value">{{ serviceHealth?.status?.version }}</span>
+          </div>
+          <div class="status-item" *ngIf="serviceHealth?.lastChecked">
+            <span class="status-label">Last Health Check</span>
+            <span class="status-value">{{ serviceHealth?.lastChecked | date:'short' }}</span>
+          </div>
+          <div class="status-item" *ngIf="!serviceHealth?.isHealthy">
             <span class="status-label">Estimated Recovery</span>
             <span class="status-value">{{ estimatedRecovery || 'Monitoring' }}</span>
           </div>
