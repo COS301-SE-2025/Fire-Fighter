@@ -61,12 +61,17 @@ public class Ticket {
     @JsonProperty("duration")
     private Integer duration; // duration in minutes
 
+    @Column(name = "five_minute_warning_sent")
+    @JsonProperty("fiveMinuteWarningSent")
+    private Boolean fiveMinuteWarningSent; // tracks if 5-minute warning notification was sent
+
     // Default constructor
     public Ticket() {
         this.dateCreated = LocalDateTime.now();
         this.requestDate = LocalDate.now();
         this.status = "Active";
         this.duration = null;
+        this.fiveMinuteWarningSent = false;
     }
 
     // Parameterized constructor
@@ -80,6 +85,7 @@ public class Ticket {
         this.requestDate = LocalDate.now();
         this.status = "Active";
         this.duration = duration;
+        this.fiveMinuteWarningSent = false;
     }
 
     // Legacy constructor for backward compatibility
@@ -100,6 +106,7 @@ public class Ticket {
     public void setRejectReason(String rejectReason) { this.rejectReason = rejectReason; }
     public void setDateCompleted(LocalDateTime dateCompleted) { this.dateCompleted = dateCompleted; }
     public void setDuration(Integer duration) { this.duration = duration; }
+    public void setFiveMinuteWarningSent(Boolean fiveMinuteWarningSent) { this.fiveMinuteWarningSent = fiveMinuteWarningSent; }
 
     // getters
     public Long getId() { return id; }
@@ -115,4 +122,5 @@ public class Ticket {
     public String getRejectReason() { return rejectReason; }
     public LocalDateTime getDateCompleted() { return dateCompleted; }
     public Integer getDuration() { return duration; }
+    public Boolean getFiveMinuteWarningSent() { return fiveMinuteWarningSent; }
 }
