@@ -7,7 +7,7 @@ import { AuthService } from './auth.service';
 export interface Notification {
   id: number;
   userId: string;
-  type: 'ticket_created' | 'request_completed' | 'request_approved' | 'action_taken' | 'new_request' | 'ticket_revoked';
+  type: 'ticket_created' | 'request_completed' | 'request_approved' | 'action_taken' | 'new_request' | 'ticket_revoked' | 'time_warning';
   title: string;
   message: string;
   timestamp: Date;
