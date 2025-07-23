@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { IonContent } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 import { interval, Subscription } from 'rxjs';
@@ -10,7 +10,8 @@ import { HealthService, ServiceHealth } from '../../services/health.service';
   templateUrl: './service-down.page.html',
   styleUrls: ['./service-down.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonContent]
+  imports: [CommonModule, IonContent],
+  providers: [DatePipe]
 })
 export class ServiceDownPage implements OnInit, OnDestroy {
   isRetrying = false;
@@ -26,7 +27,8 @@ export class ServiceDownPage implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private healthService: HealthService
+    private healthService: HealthService,
+    private datePipe: DatePipe
   ) {}
 
   ngOnInit() {
@@ -49,7 +51,7 @@ export class ServiceDownPage implements OnInit, OnDestroy {
     // Get last connection time from localStorage if available
     const lastConnection = localStorage.getItem('lastSuccessfulConnection');
     if (lastConnection) {
-      this.lastConnectionTime = new Date(lastConnection).toLocaleString();
+      this.lastConnectionTime = this.formatDate(new Date(lastConnection));
     }
 
     // Set current time
@@ -57,6 +59,10 @@ export class ServiceDownPage implements OnInit, OnDestroy {
 
     // Get current health status
     this.serviceHealth = this.healthService.getCurrentHealth();
+  }
+
+  private formatDate(date: Date): string {
+    return this.datePipe.transform(date, 'yyyy/MM/dd, HH:mm:ss') || '';
   }
 
   private subscribeToHealthUpdates() {
