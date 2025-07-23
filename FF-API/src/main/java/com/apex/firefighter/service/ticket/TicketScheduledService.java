@@ -28,10 +28,67 @@ public class TicketScheduledService {
     @PostConstruct
     public void runStartupCheck() {
         System.out.println("🚀 STARTUP CHECK: Running expired ticket check at application startup...");
+        sendFiveMinuteWarnings();
         closeExpiredTickets();
     }
 
     @Scheduled(cron = "0 */2 * * * *")
+    public void scheduledTicketCheck() {
+        sendFiveMinuteWarnings();
+        closeExpiredTickets();
+    }
+
+    public void sendFiveMinuteWarnings() {
+        System.out.println("Checking for tickets needing 5-minute warnings at " + LocalDateTime.now());
+
+        try {
+            List<Ticket> activeTicketsWithDuration = ticketRepository.findActiveTicketsWithDuration();
+
+            int warningsSent = 0;
+            LocalDateTime currentTime = LocalDateTime.now();
+
+            for (Ticket ticket : activeTicketsWithDuration) {
+                // Skip if warning already sent
+                if (ticket.getFiveMinuteWarningSent() != null && ticket.getFiveMinuteWarningSent()) {
+                    continue;
+                }
+
+                LocalDateTime expirationTime = ticket.getDateCreated().plusMinutes(ticket.getDuration());
+                LocalDateTime warningTime = expirationTime.minusMinutes(5);
+
+                // Check if current time is at or past the warning time but before expiration
+                if (currentTime.isAfter(warningTime) && currentTime.isBefore(expirationTime)) {
+                    // Send 5-minute warning notification
+                    try {
+                        notificationService.createNotification(
+                            ticket.getUserId(),
+                            "time_warning",
+                            "Ticket Expiring Soon",
+                            "Your request " + ticket.getTicketId() + " will expire in 5 minutes",
+                            ticket.getTicketId()
+                        );
+
+                        // Mark warning as sent
+                        ticket.setFiveMinuteWarningSent(true);
+                        ticketRepository.save(ticket);
+
+                        warningsSent++;
+                        System.out.println("🔔 5-MINUTE WARNING SENT: Notification sent to user " + ticket.getUserId() + " for ticket " + ticket.getTicketId());
+                    } catch (Exception e) {
+                        System.err.println("⚠️ WARNING NOTIFICATION FAILED: Could not send 5-minute warning for ticket " + ticket.getTicketId() + ": " + e.getMessage());
+                    }
+                }
+            }
+
+            if (warningsSent > 0) {
+                System.out.println("Sent " + warningsSent + " five-minute warning notifications");
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error sending five-minute warnings: " + e.getMessage());
+        }
+    }
+
     public void closeExpiredTickets() {
         System.out.println("Checking for expired tickets at " + LocalDateTime.now());
         
