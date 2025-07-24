@@ -3,6 +3,7 @@ import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { AuthService } from './services/auth.service';
 import { HealthService } from './services/health.service';
 import { HealthMonitorService } from './services/health-monitor.service';
+import { LanguageService } from './services/language.service';
 import { Capacitor } from '@capacitor/core';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { initFlowbite } from 'flowbite';
@@ -19,7 +20,8 @@ export class AppComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private healthService: HealthService,
-    private healthMonitorService: HealthMonitorService
+    private healthMonitorService: HealthMonitorService,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit() {
@@ -49,8 +51,12 @@ export class AppComponent implements OnInit {
 
     initFlowbite();
 
+    // Initialize language service
+    console.log('6. Initializing language service...');
+    console.log('Current language:', this.languageService.getCurrentLanguage());
+
     // Start health monitoring
-    console.log('6. Starting health monitoring...');
+    console.log('7. Starting health monitoring...');
     this.healthService.startMonitoring();
     this.healthMonitorService.startMonitoring();
 

@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { IonContent } from '@ionic/angular/standalone';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { VersionService } from '../../services/version.service';
+import { LanguageService, Language } from '../../services/language.service';
+import { TranslateModule } from '@ngx-translate/core';
 
 interface NotificationSettings {
   criticalAlerts: boolean;
@@ -16,17 +18,14 @@ interface NotificationSettings {
   emailEnabled: boolean;
 }
 
-interface Language {
-  code: string;
-  name: string;
-}
+
 
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.page.html',
   styleUrls: ['./settings.page.scss'],
   standalone: true,
-  imports: [IonContent, CommonModule, FormsModule, NavbarComponent]
+  imports: [IonContent, CommonModule, FormsModule, NavbarComponent, TranslateModule]
 })
 export class SettingsPage implements OnInit {
 
@@ -45,25 +44,23 @@ export class SettingsPage implements OnInit {
     emailEnabled: true
   };
 
-  availableLanguages: Language[] = [
-    {
-      code: 'en-GB',
-      name: 'English (UK)'
-    },
-    {
-      code: 'de-DE',
-      name: 'Deutsch (German)'
-    }
-  ];
+  availableLanguages: Language[] = [];
+  selectedLanguage: Language = { code: 'en', name: 'English (UK)' };
 
-  selectedLanguage: Language = this.availableLanguages[0]; // Default to English (UK)
-
-  constructor(private versionService: VersionService) { }
+  constructor(
+    private versionService: VersionService,
+    private languageService: LanguageService
+  ) { }
 
   ngOnInit() {
     this.loadNotificationSettings();
     this.loadLanguageSettings();
     this.appVersion = this.versionService.getVersion();
+
+    // Debug: Test translation service
+    console.log('Settings page initialized');
+    console.log('Current language:', this.languageService.getCurrentLanguage());
+    console.log('Available languages:', this.languageService.availableLanguages);
   }
 
   private loadNotificationSettings() {
@@ -79,19 +76,16 @@ export class SettingsPage implements OnInit {
   }
 
   private loadLanguageSettings() {
-    // Load language settings from localStorage
-    const savedLanguage = localStorage.getItem('selectedLanguage');
-    if (savedLanguage) {
-      try {
-        const languageCode = JSON.parse(savedLanguage);
-        const foundLanguage = this.availableLanguages.find(lang => lang.code === languageCode);
-        if (foundLanguage) {
-          this.selectedLanguage = foundLanguage;
-        }
-      } catch (error) {
-        console.error('Error loading language settings:', error);
-      }
-    }
+    // Get available languages from the language service
+    this.availableLanguages = this.languageService.availableLanguages;
+
+    // Get current language from the language service
+    this.selectedLanguage = this.languageService.getCurrentLanguageObject();
+
+    // Subscribe to language changes
+    this.languageService.currentLanguage$.subscribe(languageCode => {
+      this.selectedLanguage = this.languageService.getCurrentLanguageObject();
+    });
   }
 
   async saveNotificationSettings() {
@@ -159,17 +153,10 @@ export class SettingsPage implements OnInit {
     this.selectedLanguage = language;
     this.languageDropdownOpen = false;
 
-    // Save language preference to localStorage
-    localStorage.setItem('selectedLanguage', JSON.stringify(language.code));
+    // Use the language service to switch languages
+    this.languageService.setLanguage(language.code);
 
-    // Log the selection for now (in a real implementation, this would trigger language change)
-    console.log('Language selected:', language.name, language.code);
-
-    // TODO: Implement actual language switching functionality
-    // This could involve:
-    // - Loading different translation files
-    // - Updating Angular i18n locale
-    // - Refreshing the application with new language
+    console.log('Language switched to:', language.name, language.code);
   }
 
   @HostListener('document:click', ['$event'])
