@@ -1,3 +1,5 @@
+/// <reference types="@angular/localize" />
+
 // src/main.ts
 import { bootstrapApplication } from '@angular/platform-browser';
 import {
@@ -10,10 +12,20 @@ import {
   IonicRouteStrategy,
   provideIonicAngular
 } from '@ionic/angular/standalone';
-import { provideHttpClient, withInterceptors, HttpErrorResponse } from '@angular/common/http';
+import { provideHttpClient, withInterceptors, HttpErrorResponse, HttpClient } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
+
+// Translation imports
+import { importProvidersFrom } from '@angular/core';
+import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+
+// Translation loader factory
+export function HttpLoaderFactory(http: HttpClient) {
+  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
+}
 
 import { routes }       from './app/app.routes';
 import { AppComponent } from './app/app.component';
@@ -128,6 +140,18 @@ bootstrapApplication(AppComponent, {
       }
     ])),
     provideAnimations(),
+
+    // Translation configuration
+    importProvidersFrom(
+      TranslateModule.forRoot({
+        loader: {
+          provide: TranslateLoader,
+          useFactory: HttpLoaderFactory,
+          deps: [HttpClient]
+        },
+        defaultLanguage: 'en'
+      })
+    ),
 
     // ← wire AngularFire into Angular’s DI
     provideFirebaseApp(() => firebaseApp),
