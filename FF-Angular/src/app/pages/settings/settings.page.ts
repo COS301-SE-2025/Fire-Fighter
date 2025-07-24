@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent } from '@ionic/angular/standalone';
@@ -16,6 +16,11 @@ interface NotificationSettings {
   emailEnabled: boolean;
 }
 
+interface Language {
+  code: string;
+  name: string;
+}
+
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.page.html',
@@ -27,6 +32,7 @@ export class SettingsPage implements OnInit {
 
   isSaving = false;
   appVersion: string = '';
+  languageDropdownOpen = false;
 
   notificationSettings: NotificationSettings = {
     criticalAlerts: true,
@@ -39,10 +45,24 @@ export class SettingsPage implements OnInit {
     emailEnabled: true
   };
 
+  availableLanguages: Language[] = [
+    {
+      code: 'en-GB',
+      name: 'English (UK)'
+    },
+    {
+      code: 'de-DE',
+      name: 'Deutsch (German)'
+    }
+  ];
+
+  selectedLanguage: Language = this.availableLanguages[0]; // Default to English (UK)
+
   constructor(private versionService: VersionService) { }
 
   ngOnInit() {
     this.loadNotificationSettings();
+    this.loadLanguageSettings();
     this.appVersion = this.versionService.getVersion();
   }
 
@@ -54,6 +74,22 @@ export class SettingsPage implements OnInit {
         this.notificationSettings = { ...this.notificationSettings, ...JSON.parse(savedSettings) };
       } catch (error) {
         console.error('Error loading notification settings:', error);
+      }
+    }
+  }
+
+  private loadLanguageSettings() {
+    // Load language settings from localStorage
+    const savedLanguage = localStorage.getItem('selectedLanguage');
+    if (savedLanguage) {
+      try {
+        const languageCode = JSON.parse(savedLanguage);
+        const foundLanguage = this.availableLanguages.find(lang => lang.code === languageCode);
+        if (foundLanguage) {
+          this.selectedLanguage = foundLanguage;
+        }
+      } catch (error) {
+        console.error('Error loading language settings:', error);
       }
     }
   }
@@ -112,6 +148,43 @@ export class SettingsPage implements OnInit {
         icon: '/assets/icon/favicon.png',
         badge: '/assets/icon/favicon.png'
       });
+    }
+  }
+
+  toggleLanguageDropdown() {
+    this.languageDropdownOpen = !this.languageDropdownOpen;
+  }
+
+  selectLanguage(language: Language) {
+    this.selectedLanguage = language;
+    this.languageDropdownOpen = false;
+
+    // Save language preference to localStorage
+    localStorage.setItem('selectedLanguage', JSON.stringify(language.code));
+
+    // Log the selection for now (in a real implementation, this would trigger language change)
+    console.log('Language selected:', language.name, language.code);
+
+    // TODO: Implement actual language switching functionality
+    // This could involve:
+    // - Loading different translation files
+    // - Updating Angular i18n locale
+    // - Refreshing the application with new language
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    const target = event.target as HTMLElement;
+    const dropdownButton = document.getElementById('language-dropdown-button');
+    const dropdown = document.getElementById('language-dropdown');
+
+    // Close dropdown if clicking outside of it
+    if (this.languageDropdownOpen &&
+        dropdownButton &&
+        dropdown &&
+        !dropdownButton.contains(target) &&
+        !dropdown.contains(target)) {
+      this.languageDropdownOpen = false;
     }
   }
 }
