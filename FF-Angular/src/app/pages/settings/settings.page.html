@@ -19,6 +19,70 @@
       </div>
     </div>
 
+    <!-- Language Selection Section -->
+    <div class="mb-8">
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center space-x-3">
+            <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
+            </svg>
+            <div>
+              <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Language</h2>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Choose your preferred language for the application</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-6">
+          <div class="relative">
+            <label for="language-select" class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+              Application Language
+            </label>
+            <button
+              id="language-dropdown-button"
+              (click)="toggleLanguageDropdown()"
+              data-dropdown-toggle="language-dropdown"
+              class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-between w-full dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+              type="button"
+            >
+              <span class="font-medium">{{ selectedLanguage.name }}</span>
+              <svg class="w-2.5 h-2.5 ms-3 transition-transform duration-200"
+                   [class.rotate-180]="languageDropdownOpen"
+                   aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+              </svg>
+            </button>
+
+            <!-- Dropdown menu -->
+            <div
+              id="language-dropdown"
+              [class.hidden]="!languageDropdownOpen"
+              class="language-dropdown absolute z-10 mt-1 w-full bg-white divide-y divide-gray-100 rounded-lg shadow-lg dark:bg-gray-700 dark:divide-gray-600 border border-gray-200 dark:border-gray-600"
+            >
+              <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="language-dropdown-button">
+                <li *ngFor="let language of availableLanguages">
+                  <button
+                    (click)="selectLanguage(language)"
+                    class="language-option w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white flex items-center justify-between transition-colors duration-200"
+                    [class.bg-gray-50]="selectedLanguage.code === language.code"
+                    [class.dark:bg-gray-600]="selectedLanguage.code === language.code"
+                  >
+                    <span class="font-medium">{{ language.name }}</span>
+                    <svg *ngIf="selectedLanguage.code === language.code"
+                         class="w-4 h-4 text-indigo-600 dark:text-indigo-400"
+                         fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Push Notifications Section -->
     <div class="mb-8">
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50">
