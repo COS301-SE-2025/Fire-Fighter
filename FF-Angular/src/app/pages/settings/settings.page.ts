@@ -1,20 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent } from '@ionic/angular/standalone';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { VersionService } from '../../services/version.service';
-
-interface NotificationSettings {
-  criticalAlerts: boolean;
-  accessRequests: boolean;
-  sessionExpiry: boolean;
-  requestUpdates: boolean;
-  auditAlerts: boolean;
-  maintenance: boolean;
-  pushEnabled: boolean;
-  emailEnabled: boolean;
-}
+import { UserPreferencesService, NotificationSettings, UserPreferences } from '../../services/user-preferences.service';
+import { AuthService } from '../../services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-settings',
@@ -23,10 +15,12 @@ interface NotificationSettings {
   standalone: true,
   imports: [IonContent, CommonModule, FormsModule, NavbarComponent]
 })
-export class SettingsPage implements OnInit {
+export class SettingsPage implements OnInit, OnDestroy {
 
   isSaving = false;
   appVersion: string = '';
+  currentUserId: string | null = null;
+  private subscriptions: Subscription[] = [];
 
   notificationSettings: NotificationSettings = {
     criticalAlerts: true,
@@ -36,49 +30,168 @@ export class SettingsPage implements OnInit {
     auditAlerts: false,
     maintenance: false,
     pushEnabled: true,
-    emailEnabled: true
+    emailEnabled: false // Default to false as per requirements
   };
 
-  constructor(private versionService: VersionService) { }
+  constructor(
+    private versionService: VersionService,
+    private userPreferencesService: UserPreferencesService,
+    private authService: AuthService
+  ) { }
 
   ngOnInit() {
-    this.loadNotificationSettings();
     this.appVersion = this.versionService.getVersion();
+    this.loadNotificationSettings();
+  }
+
+  ngOnDestroy() {
+    // Clean up subscriptions
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
   private loadNotificationSettings() {
-    // Load settings from localStorage or service
+    // Subscribe to auth state changes
+    const authSub = this.authService.user$.subscribe(user => {
+      if (user?.uid) {
+        this.currentUserId = user.uid;
+        this.loadUserPreferences();
+      } else {
+        this.currentUserId = null;
+        // Load from localStorage as fallback
+        this.loadFromLocalStorage();
+      }
+    });
+    this.subscriptions.push(authSub);
+
+    // Subscribe to user preferences changes
+    const prefSub = this.userPreferencesService.userPreferences$.subscribe(preferences => {
+      if (preferences) {
+        this.notificationSettings = this.userPreferencesService.convertToNotificationSettings(preferences);
+        console.log('✅ Notification settings updated from preferences:', this.notificationSettings);
+      }
+    });
+    this.subscriptions.push(prefSub);
+  }
+
+  private loadUserPreferences() {
+    if (!this.currentUserId) return;
+
+    // The service will automatically load preferences when user changes
+    // We just need to make sure we have the current preferences
+    const currentPreferences = this.userPreferencesService.getCurrentPreferences();
+    if (currentPreferences) {
+      this.notificationSettings = this.userPreferencesService.convertToNotificationSettings(currentPreferences);
+    }
+  }
+
+  private loadFromLocalStorage() {
+    // Fallback to localStorage if user is not authenticated
     const savedSettings = localStorage.getItem('notificationSettings');
     if (savedSettings) {
       try {
         this.notificationSettings = { ...this.notificationSettings, ...JSON.parse(savedSettings) };
       } catch (error) {
-        console.error('Error loading notification settings:', error);
+        console.error('Error loading notification settings from localStorage:', error);
       }
     }
   }
 
   async saveNotificationSettings() {
     this.isSaving = true;
-    
+
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Save to localStorage (in a real app, this would be an API call)
-      localStorage.setItem('notificationSettings', JSON.stringify(this.notificationSettings));
-      
-      // Show success message (you could add a toast notification here)
-      console.log('Notification settings saved successfully');
-      
+      if (this.currentUserId) {
+        // Save to backend via API
+        const userPreferences = this.userPreferencesService.convertFromNotificationSettings(
+          this.notificationSettings,
+          this.currentUserId
+        );
+
+        await this.userPreferencesService.updateUserPreferences(this.currentUserId, userPreferences).toPromise();
+        console.log('✅ Notification settings saved to backend successfully');
+      } else {
+        // Fallback to localStorage if user is not authenticated
+        localStorage.setItem('notificationSettings', JSON.stringify(this.notificationSettings));
+        console.log('✅ Notification settings saved to localStorage');
+      }
+
       // Request push permission if push notifications are enabled
       if (this.notificationSettings.pushEnabled && 'Notification' in window) {
         await this.requestNotificationPermission();
       }
-      
+
     } catch (error) {
-      console.error('Error saving notification settings:', error);
-      // Handle error (show error message to user)
+      console.error('❌ Error saving notification settings:', error);
+
+      // Fallback to localStorage on API error
+      try {
+        localStorage.setItem('notificationSettings', JSON.stringify(this.notificationSettings));
+        console.log('⚠️ Saved to localStorage as fallback');
+      } catch (localError) {
+        console.error('❌ Failed to save to localStorage as well:', localError);
+      }
+    } finally {
+      this.isSaving = false;
+    }
+  }
+
+  /**
+   * Handle email notifications toggle change
+   */
+  onEmailNotificationsChange() {
+    if (this.currentUserId) {
+      // If email notifications are disabled, disable all email-related settings
+      if (!this.notificationSettings.emailEnabled) {
+        this.notificationSettings.requestUpdates = false;
+      } else {
+        // If email notifications are enabled, enable request updates by default
+        this.notificationSettings.requestUpdates = true;
+      }
+
+      // Auto-save the change
+      this.saveNotificationSettings();
+    }
+  }
+
+  /**
+   * Handle request updates toggle change
+   */
+  onRequestUpdatesChange() {
+    if (this.currentUserId) {
+      // Auto-save the change
+      this.saveNotificationSettings();
+    }
+  }
+
+  /**
+   * Quick toggle for enabling all email notifications
+   */
+  async enableAllEmailNotifications() {
+    if (!this.currentUserId) return;
+
+    this.isSaving = true;
+    try {
+      await this.userPreferencesService.enableAllEmailNotifications(this.currentUserId).toPromise();
+      console.log('✅ All email notifications enabled');
+    } catch (error) {
+      console.error('❌ Failed to enable all email notifications:', error);
+    } finally {
+      this.isSaving = false;
+    }
+  }
+
+  /**
+   * Quick toggle for disabling all email notifications
+   */
+  async disableAllEmailNotifications() {
+    if (!this.currentUserId) return;
+
+    this.isSaving = true;
+    try {
+      await this.userPreferencesService.disableAllEmailNotifications(this.currentUserId).toPromise();
+      console.log('✅ All email notifications disabled');
+    } catch (error) {
+      console.error('❌ Failed to disable all email notifications:', error);
     } finally {
       this.isSaving = false;
     }
