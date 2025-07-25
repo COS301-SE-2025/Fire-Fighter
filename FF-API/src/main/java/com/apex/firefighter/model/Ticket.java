@@ -70,7 +70,7 @@ public class Ticket {
         this.dateCreated = LocalDateTime.now();
         this.requestDate = LocalDate.now();
         this.status = "Active";
-        this.duration = null;
+        this.duration = 60; // Default to 60 minutes
         this.fiveMinuteWarningSent = false;
     }
 
