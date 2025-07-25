@@ -58,14 +58,12 @@ public class TicketScheduledService {
 
                 // Check if current time is at or past the warning time but before expiration
                 if (currentTime.isAfter(warningTime) && currentTime.isBefore(expirationTime)) {
-                    // Send 5-minute warning notification
+                    // Send 5-minute warning notification (with email support)
                     try {
-                        notificationService.createNotification(
+                        notificationService.createFiveMinuteWarningNotification(
                             ticket.getUserId(),
-                            "time_warning",
-                            "Ticket Expiring Soon",
-                            "Your request " + ticket.getTicketId() + " will expire in 5 minutes",
-                            ticket.getTicketId()
+                            ticket.getTicketId(),
+                            ticket
                         );
 
                         // Mark warning as sent
@@ -106,14 +104,12 @@ public class TicketScheduledService {
                     ticket.setDateCompleted(currentTime);
                     ticketRepository.save(ticket);
 
-                    // Create notification for ticket completion
+                    // Create notification for ticket completion (with email support)
                     try {
-                        notificationService.createNotification(
+                        notificationService.createTicketCompletionNotification(
                             ticket.getUserId(),
-                            "request_completed",
-                            "Request Completed",
-                            "Your request " + ticket.getTicketId() + " has been completed automatically",
-                            ticket.getTicketId()
+                            ticket.getTicketId(),
+                            ticket
                         );
                         System.out.println("🔔 NOTIFICATION CREATED: Ticket completion notification sent to user " + ticket.getUserId());
                     } catch (Exception e) {
