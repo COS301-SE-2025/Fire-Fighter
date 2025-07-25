@@ -21,11 +21,11 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9a6 6 0 10-12 0v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
             </svg>
           </div>
-          <div class="flex-1 min-w-0">
-            <h1 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
+          <div class="flex-1 min-w-0 pr-4 sm:pr-0">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white tracking-wider">
               Notifications
             </h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400">
+            <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
               Stay updated on FireFighter emergency system activity
             </p>
           </div>
@@ -33,29 +33,29 @@
         
         <!-- Action Buttons -->
         <ng-container *ngIf="notifications$ | async as notifications">
-          <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto items-end sm:items-center">
             <!-- Mark All Read Button -->
             <button
               (click)="markAllAsRead()"
               *ngIf="hasUnreadNotifications(notifications)"
-              class="inline-flex items-center justify-center px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-colors duration-200 w-full sm:w-auto"
+              class="inline-flex items-center justify-center px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-colors duration-200 w-auto sm:w-auto max-w-32 sm:max-w-none"
             >
               <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
               </svg>
-              <span class="truncate">Mark All Read</span>
+              <span class="truncate">Mark Read</span>
             </button>
 
             <!-- Delete Read Notifications Button -->
             <button
               (click)="deleteReadNotifications()"
               *ngIf="hasReadNotifications(notifications)"
-              class="inline-flex items-center justify-center px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800 transition-colors duration-200 w-auto sm:w-auto max-w-32 sm:max-w-none"
+              class="inline-flex items-center justify-center px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800 transition-colors duration-200 w-auto sm:w-auto max-w-32 sm:max-w-none self-end sm:self-auto"
             >
               <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
               </svg>
-              <span class="truncate">Delete Read</span>
+              <span class="truncate">Clear Read</span>
             </button>
           </div>
         </ng-container>
