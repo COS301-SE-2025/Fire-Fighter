@@ -226,5 +226,464 @@ public class GmailEmailService {
         return html.toString();
     }
 
+    /**
+     * Send ticket creation notification email
+     */
+    public void sendTicketCreationEmail(String recipientEmail, Ticket ticket, User user) throws MessagingException {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(recipientEmail);
+            helper.setSubject("FireFighter Platform - New Ticket Created: " + ticket.getTicketId());
+
+            String htmlContent = createTicketCreationEmailContent(ticket, user);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+            System.out.println("Ticket creation email sent successfully to " + recipientEmail + " for ticket " + ticket.getTicketId());
+
+        } catch (Exception e) {
+            System.err.println("Ticket creation email failed: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * Send ticket completion notification email
+     */
+    public void sendTicketCompletionEmail(String recipientEmail, Ticket ticket, User user) throws MessagingException {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(recipientEmail);
+            helper.setSubject("FireFighter Platform - Ticket Completed: " + ticket.getTicketId());
+
+            String htmlContent = createTicketCompletionEmailContent(ticket, user);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+            System.out.println("Ticket completion email sent successfully to " + recipientEmail + " for ticket " + ticket.getTicketId());
+
+        } catch (Exception e) {
+            System.err.println("Ticket completion email failed: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * Send ticket revocation notification email
+     */
+    public void sendTicketRevocationEmail(String recipientEmail, Ticket ticket, User user, String reason) throws MessagingException {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(recipientEmail);
+            helper.setSubject("FireFighter Platform - Ticket Revoked: " + ticket.getTicketId());
+
+            String htmlContent = createTicketRevocationEmailContent(ticket, user, reason);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+            System.out.println("Ticket revocation email sent successfully to " + recipientEmail + " for ticket " + ticket.getTicketId());
+
+        } catch (Exception e) {
+            System.err.println("Ticket revocation email failed: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * Send five-minute warning notification email
+     */
+    public void sendFiveMinuteWarningEmail(String recipientEmail, Ticket ticket, User user) throws MessagingException {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(recipientEmail);
+            helper.setSubject("FireFighter Platform - Ticket Expiring Soon: " + ticket.getTicketId());
+
+            String htmlContent = createFiveMinuteWarningEmailContent(ticket, user);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+            System.out.println("Five-minute warning email sent successfully to " + recipientEmail + " for ticket " + ticket.getTicketId());
+
+        } catch (Exception e) {
+            System.err.println("Five-minute warning email failed: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * Creates professional HTML email content for ticket creation notification
+     */
+    private String createTicketCreationEmailContent(Ticket ticket, User user) {
+        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm"));
+        String ticketDateTime = ticket.getDateCreated().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm"));
+
+        StringBuilder html = new StringBuilder();
+        html.append(getEmailHeader("Ticket Created"));
+        html.append("<div class=\"email-container\">");
+        html.append("<div class=\"header\">");
+        html.append("<h1>FireFighter Platform</h1>");
+        html.append("<p class=\"subtitle\">Emergency Response Management System</p>");
+        html.append("</div>");
+        html.append("<div class=\"content\">");
+
+        String greeting = "Hello";
+        if (user != null && user.getUsername() != null && !user.getUsername().trim().isEmpty()) {
+            greeting = "Hello, " + user.getUsername();
+        }
+
+        html.append("<div class=\"greeting\">").append(greeting).append(",</div>");
+        html.append("<p>A new emergency ticket has been created and is now active in the system.</p>");
+        html.append("<div class=\"info-box\">");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Ticket ID: </span>");
+        html.append("<span class=\"info-value\">").append(ticket.getTicketId()).append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Emergency Type: </span>");
+        html.append("<span class=\"info-value\">").append(ticket.getEmergencyType()).append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Created: </span>");
+        html.append("<span class=\"info-value\">").append(ticketDateTime).append("</span>");
+        html.append("</div>");
+        if (ticket.getDuration() != null) {
+            html.append("<div class=\"info-item\">");
+            html.append("<span class=\"info-label\">Duration: </span>");
+            html.append("<span class=\"info-value\">").append(ticket.getDuration()).append(" minutes</span>");
+            html.append("</div>");
+        }
+        if (ticket.getDescription() != null && !ticket.getDescription().trim().isEmpty()) {
+            html.append("<div class=\"info-item\">");
+            html.append("<span class=\"info-label\">Description: </span>");
+            html.append("<span class=\"info-value\">").append(ticket.getDescription()).append("</span>");
+            html.append("</div>");
+        }
+        html.append("</div>");
+        html.append("<div class=\"security-notice\">");
+        html.append("<strong>Important:</strong> This ticket is now active and emergency response procedures are in effect. ");
+        html.append("Please ensure you have the necessary access and follow all safety protocols.");
+        html.append("</div>");
+        html.append("</div>");
+        html.append(getEmailFooter(currentDateTime));
+        html.append("</div>");
+        html.append("</body>");
+        html.append("</html>");
+
+        return html.toString();
+    }
+
+    /**
+     * Creates professional HTML email content for ticket completion notification
+     */
+    private String createTicketCompletionEmailContent(Ticket ticket, User user) {
+        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm"));
+        String ticketDateTime = ticket.getDateCreated().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm"));
+        String completionDateTime = ticket.getDateCompleted() != null ?
+            ticket.getDateCompleted().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm")) : currentDateTime;
+
+        StringBuilder html = new StringBuilder();
+        html.append(getEmailHeader("Ticket Completed"));
+        html.append("<div class=\"email-container\">");
+        html.append("<div class=\"header\">");
+        html.append("<h1>FireFighter Platform</h1>");
+        html.append("<p class=\"subtitle\">Emergency Response Management System</p>");
+        html.append("</div>");
+        html.append("<div class=\"content\">");
+
+        String greeting = "Hello";
+        if (user != null && user.getUsername() != null && !user.getUsername().trim().isEmpty()) {
+            greeting = "Hello, " + user.getUsername();
+        }
+
+        html.append("<div class=\"greeting\">").append(greeting).append(",</div>");
+        html.append("<p>Your emergency ticket has been completed and is now closed.</p>");
+        html.append("<div class=\"info-box\">");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Ticket ID: </span>");
+        html.append("<span class=\"info-value\">").append(ticket.getTicketId()).append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Emergency Type: </span>");
+        html.append("<span class=\"info-value\">").append(ticket.getEmergencyType()).append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Created: </span>");
+        html.append("<span class=\"info-value\">").append(ticketDateTime).append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Completed: </span>");
+        html.append("<span class=\"info-value\">").append(completionDateTime).append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Status: </span>");
+        html.append("<span class=\"info-value\">").append(ticket.getStatus()).append("</span>");
+        html.append("</div>");
+        html.append("</div>");
+        html.append("<div class=\"security-notice\">");
+        html.append("<strong>Notice:</strong> This emergency response has been completed. ");
+        html.append("If you have any questions or concerns about this ticket, please contact your system administrator.");
+        html.append("</div>");
+        html.append("</div>");
+        html.append(getEmailFooter(currentDateTime));
+        html.append("</div>");
+        html.append("</body>");
+        html.append("</html>");
+
+        return html.toString();
+    }
+
+    /**
+     * Creates professional HTML email content for ticket revocation notification
+     */
+    private String createTicketRevocationEmailContent(Ticket ticket, User user, String reason) {
+        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm"));
+        String ticketDateTime = ticket.getDateCreated().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm"));
+        String revocationDateTime = ticket.getDateCompleted() != null ?
+            ticket.getDateCompleted().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm")) : currentDateTime;
+
+        StringBuilder html = new StringBuilder();
+        html.append(getEmailHeader("Ticket Revoked"));
+        html.append("<div class=\"email-container\">");
+        html.append("<div class=\"header\">");
+        html.append("<h1>FireFighter Platform</h1>");
+        html.append("<p class=\"subtitle\">Emergency Response Management System</p>");
+        html.append("</div>");
+        html.append("<div class=\"content\">");
+
+        String greeting = "Hello";
+        if (user != null && user.getUsername() != null && !user.getUsername().trim().isEmpty()) {
+            greeting = "Hello, " + user.getUsername();
+        }
+
+        html.append("<div class=\"greeting\">").append(greeting).append(",</div>");
+        html.append("<p>Your emergency ticket has been revoked by an administrator.</p>");
+        html.append("<div class=\"info-box\">");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Ticket ID: </span>");
+        html.append("<span class=\"info-value\">").append(ticket.getTicketId()).append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Emergency Type: </span>");
+        html.append("<span class=\"info-value\">").append(ticket.getEmergencyType()).append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Created: </span>");
+        html.append("<span class=\"info-value\">").append(ticketDateTime).append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Revoked: </span>");
+        html.append("<span class=\"info-value\">").append(revocationDateTime).append("</span>");
+        html.append("</div>");
+        if (reason != null && !reason.trim().isEmpty()) {
+            html.append("<div class=\"info-item\">");
+            html.append("<span class=\"info-label\">Reason: </span>");
+            html.append("<span class=\"info-value\">").append(reason).append("</span>");
+            html.append("</div>");
+        }
+        html.append("</div>");
+        html.append("<div class=\"security-notice\">");
+        html.append("<strong>Important:</strong> This ticket has been revoked and is no longer active. ");
+        html.append("If you believe this was done in error or have questions, please contact your system administrator immediately.");
+        html.append("</div>");
+        html.append("</div>");
+        html.append(getEmailFooter(currentDateTime));
+        html.append("</div>");
+        html.append("</body>");
+        html.append("</html>");
+
+        return html.toString();
+    }
+
+    /**
+     * Creates professional HTML email content for five-minute warning notification
+     */
+    private String createFiveMinuteWarningEmailContent(Ticket ticket, User user) {
+        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm"));
+        String ticketDateTime = ticket.getDateCreated().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm"));
+
+        LocalDateTime expirationTime = ticket.getDateCreated().plusMinutes(ticket.getDuration());
+        String expirationDateTime = expirationTime.format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm"));
+
+        StringBuilder html = new StringBuilder();
+        html.append(getEmailHeader("Ticket Expiring Soon"));
+        html.append("<div class=\"email-container\">");
+        html.append("<div class=\"header\">");
+        html.append("<h1>FireFighter Platform</h1>");
+        html.append("<p class=\"subtitle\">Emergency Response Management System</p>");
+        html.append("</div>");
+        html.append("<div class=\"content\">");
+
+        String greeting = "Hello";
+        if (user != null && user.getUsername() != null && !user.getUsername().trim().isEmpty()) {
+            greeting = "Hello, " + user.getUsername();
+        }
+
+        html.append("<div class=\"greeting\">").append(greeting).append(",</div>");
+        html.append("<p><strong>URGENT:</strong> Your emergency ticket will expire in approximately 5 minutes.</p>");
+        html.append("<div class=\"info-box\">");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Ticket ID: </span>");
+        html.append("<span class=\"info-value\">").append(ticket.getTicketId()).append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Emergency Type: </span>");
+        html.append("<span class=\"info-value\">").append(ticket.getEmergencyType()).append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Created: </span>");
+        html.append("<span class=\"info-value\">").append(ticketDateTime).append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Expires: </span>");
+        html.append("<span class=\"info-value\">").append(expirationDateTime).append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Duration: </span>");
+        html.append("<span class=\"info-value\">").append(ticket.getDuration()).append(" minutes</span>");
+        html.append("</div>");
+        html.append("</div>");
+        html.append("<div class=\"security-notice\">");
+        html.append("<strong>Action Required:</strong> This ticket will automatically close when it expires. ");
+        html.append("Please ensure all emergency response activities are completed before expiration. ");
+        html.append("Contact your system administrator if you need assistance.");
+        html.append("</div>");
+        html.append("</div>");
+        html.append(getEmailFooter(currentDateTime));
+        html.append("</div>");
+        html.append("</body>");
+        html.append("</html>");
+
+        return html.toString();
+    }
+
+    /**
+     * Creates the common email header with CSS styles
+     */
+    private String getEmailHeader(String title) {
+        StringBuilder html = new StringBuilder();
+        html.append("<!DOCTYPE html>");
+        html.append("<html lang=\"en\">");
+        html.append("<head>");
+        html.append("<meta charset=\"UTF-8\">");
+        html.append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
+        html.append("<title>FireFighter Platform - ").append(title).append("</title>");
+        html.append("<style>");
+        html.append("body {");
+        html.append("    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;");
+        html.append("    line-height: 1.6;");
+        html.append("    color: #333;");
+        html.append("    max-width: 600px;");
+        html.append("    margin: 0 auto;");
+        html.append("    padding: 20px;");
+        html.append("    background-color: #f8f9fa;");
+        html.append("}");
+        html.append(".email-container {");
+        html.append("    background-color: #ffffff;");
+        html.append("    border-radius: 12px;");
+        html.append("    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);");
+        html.append("    overflow: hidden;");
+        html.append("    border: 1px solid #e9ecef;");
+        html.append("}");
+        html.append(".header {");
+        html.append("    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);");
+        html.append("    color: white;");
+        html.append("    padding: 30px 25px;");
+        html.append("    text-align: center;");
+        html.append("}");
+        html.append(".header h1 {");
+        html.append("    margin: 0 0 8px 0;");
+        html.append("    font-size: 28px;");
+        html.append("    font-weight: 700;");
+        html.append("    letter-spacing: -0.5px;");
+        html.append("}");
+        html.append(".subtitle {");
+        html.append("    margin: 0;");
+        html.append("    font-size: 14px;");
+        html.append("    opacity: 0.9;");
+        html.append("    font-weight: 400;");
+        html.append("}");
+        html.append(".content {");
+        html.append("    padding: 30px 25px;");
+        html.append("}");
+        html.append(".greeting {");
+        html.append("    font-size: 18px;");
+        html.append("    font-weight: 600;");
+        html.append("    color: #2c3e50;");
+        html.append("    margin-bottom: 20px;");
+        html.append("}");
+        html.append(".info-box {");
+        html.append("    background-color: #f8f9fa;");
+        html.append("    border: 1px solid #e9ecef;");
+        html.append("    border-radius: 8px;");
+        html.append("    padding: 20px;");
+        html.append("    margin: 20px 0;");
+        html.append("}");
+        html.append(".info-item {");
+        html.append("    display: flex;");
+        html.append("    justify-content: space-between;");
+        html.append("    align-items: center;");
+        html.append("    padding: 8px 0;");
+        html.append("    border-bottom: 1px solid #e9ecef;");
+        html.append("}");
+        html.append(".info-item:last-child {");
+        html.append("    border-bottom: none;");
+        html.append("}");
+        html.append(".info-label {");
+        html.append("    font-weight: 600;");
+        html.append("    color: #495057;");
+        html.append("    flex: 0 0 auto;");
+        html.append("}");
+        html.append(".info-value {");
+        html.append("    color: #212529;");
+        html.append("    font-weight: 500;");
+        html.append("    text-align: right;");
+        html.append("    flex: 1 1 auto;");
+        html.append("    margin-left: 15px;");
+        html.append("}");
+        html.append(".security-notice {");
+        html.append("    background-color: #fff3cd;");
+        html.append("    border: 1px solid #ffeaa7;");
+        html.append("    border-radius: 6px;");
+        html.append("    padding: 15px;");
+        html.append("    margin: 20px 0;");
+        html.append("    font-size: 14px;");
+        html.append("    color: #856404;");
+        html.append("}");
+        html.append(".footer {");
+        html.append("    background-color: #f8f9fa;");
+        html.append("    padding: 20px 25px;");
+        html.append("    text-align: center;");
+        html.append("    border-top: 1px solid #e9ecef;");
+        html.append("    font-size: 12px;");
+        html.append("    color: #6c757d;");
+        html.append("}");
+        html.append("</style>");
+        html.append("</head>");
+        html.append("<body>");
+        return html.toString();
+    }
+
+    /**
+     * Creates the common email footer
+     */
+    private String getEmailFooter(String currentDateTime) {
+        StringBuilder html = new StringBuilder();
+        html.append("<div class=\"footer\">");
+        html.append("<p><strong>FireFighter Emergency Response Platform</strong></p>");
+        html.append("<p>Automated Notification System | Generated on ").append(currentDateTime).append("</p>");
+        html.append("<p style=\"font-size: 12px; margin-top: 15px;\">");
+        html.append("This is an automated message. Please do not reply to this email.");
+        html.append("</p>");
+        html.append("</div>");
+        return html.toString();
+    }
 
 }
