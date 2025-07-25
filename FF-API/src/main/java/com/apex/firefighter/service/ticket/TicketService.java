@@ -54,15 +54,9 @@ public class TicketService {
         Ticket savedTicket = ticketRepository.save(ticket);
         System.out.println("✅ TICKET CREATED: " + savedTicket);
 
-        // Create notification for ticket creation
+        // Create notification for ticket creation (with email support)
         try {
-            notificationService.createNotification(
-                userId,
-                "ticket_created",
-                "New Ticket Created",
-                "A new ticket " + ticketId + " has been created",
-                ticketId
-            );
+            notificationService.createTicketCreationNotification(userId, ticketId, savedTicket);
             System.out.println("🔔 NOTIFICATION CREATED: Ticket creation notification sent to user " + userId);
         } catch (Exception e) {
             System.err.println("⚠️ NOTIFICATION FAILED: Could not create ticket creation notification: " + e.getMessage());
@@ -270,15 +264,9 @@ public class TicketService {
         Ticket revokedTicket = ticketRepository.save(ticket);
         System.out.println("✅ TICKET REVOKED: " + revokedTicket.getTicketId() + " by admin " + adminUserId);
 
-        // Create notification for ticket revocation
+        // Create notification for ticket revocation (with email support)
         try {
-            notificationService.createNotification(
-                ticket.getUserId(),
-                "ticket_revoked",
-                "Ticket Revoked",
-                "Your ticket " + ticket.getTicketId() + " has been revoked by an administrator. Reason: " + rejectReason,
-                ticket.getTicketId()
-            );
+            notificationService.createTicketRevocationNotification(ticket.getUserId(), ticket.getTicketId(), ticket, rejectReason);
             System.out.println("🔔 NOTIFICATION CREATED: Ticket revocation notification sent to user " + ticket.getUserId());
         } catch (Exception e) {
             System.err.println("⚠️ NOTIFICATION FAILED: Could not create ticket revocation notification: " + e.getMessage());
@@ -329,15 +317,9 @@ public class TicketService {
         Ticket revokedTicket = ticketRepository.save(ticket);
         System.out.println("✅ TICKET REVOKED: " + revokedTicket.getTicketId() + " by admin " + adminUserId);
 
-        // Create notification for ticket revocation
+        // Create notification for ticket revocation (with email support)
         try {
-            notificationService.createNotification(
-                ticket.getUserId(),
-                "ticket_revoked",
-                "Ticket Revoked",
-                "Your ticket " + ticket.getTicketId() + " has been revoked by an administrator. Reason: " + rejectReason,
-                ticket.getTicketId()
-            );
+            notificationService.createTicketRevocationNotification(ticket.getUserId(), ticket.getTicketId(), ticket, rejectReason);
             System.out.println("🔔 NOTIFICATION CREATED: Ticket revocation notification sent to user " + ticket.getUserId());
         } catch (Exception e) {
             System.err.println("⚠️ NOTIFICATION FAILED: Could not create ticket revocation notification: " + e.getMessage());
