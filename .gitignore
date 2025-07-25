@@ -44,6 +44,86 @@ frontend/FireFighter/ios/
 frontend/FireFighter/.capacitor/
 frontend/FireFighter/capacitor.config.json
 
+# Coverage and test outputs
+frontend/FireFighter/coverage/
+frontend/FireFighter/.nyc_output/
+frontend/FireFighter/tmp/
+frontend/FireFighter/temp/
+
+# Logs
+frontend/FireFighter/logs/
+frontend/FireFighter/*.log
+frontend/FireFighter/npm-debug.log*
+frontend/FireFighter/yarn-debug.log*
+frontend/FireFighter/yarn-error.log*
+frontend/FireFighter/lerna-debug.log*
+
+# Runtime data
+frontend/FireFighter/pids/
+frontend/FireFighter/*.pid
+frontend/FireFighter/*.seed
+frontend/FireFighter/*.pid.lock
+
+# Optional npm cache directory
+frontend/FireFighter/.npm
+
+# Optional eslint cache
+frontend/FireFighter/.eslintcache
+
+# Optional REPL history
+frontend/FireFighter/.node_repl_history
+
+# Output of 'npm pack'
+frontend/FireFighter/*.tgz
+
+# Yarn Integrity file
+frontend/FireFighter/.yarn-integrity
+
+# Firebase
+frontend/FireFighter/.firebase/
+frontend/FireFighter/firebase-debug.log
+frontend/FireFighter/firestore-debug.log
+
+# Capacitor
+frontend/FireFighter/ios/
+frontend/FireFighter/android/local.properties
+frontend/FireFighter/android/app/google-services.json
+frontend/FireFighter/ios/App/App/GoogleService-Info.plist
+
+# Android specific (for Capacitor)
+frontend/FireFighter/android/*.apk
+frontend/FireFighter/android/*.aar
+frontend/FireFighter/android/*.ap_
+frontend/FireFighter/android/*.aab
+frontend/FireFighter/android/*.dex
+frontend/FireFighter/android/*.class
+frontend/FireFighter/android/bin/
+frontend/FireFighter/android/gen/
+frontend/FireFighter/android/out/
+frontend/FireFighter/android/.gradle/
+frontend/FireFighter/android/build/
+frontend/FireFighter/android/captures/
+frontend/FireFighter/android/.externalNativeBuild
+frontend/FireFighter/android/.cxx/
+frontend/FireFighter/android/freeline.py
+frontend/FireFighter/android/freeline/
+frontend/FireFighter/android/freeline_project_description.json
+frontend/FireFighter/android/fastlane/report.xml
+frontend/FireFighter/android/fastlane/Preview.html
+frontend/FireFighter/android/fastlane/screenshots
+frontend/FireFighter/android/fastlane/test_output
+frontend/FireFighter/android/fastlane/readme.md
+frontend/FireFighter/android/lint/intermediates/
+frontend/FireFighter/android/lint/generated/
+frontend/FireFighter/android/lint/outputs/
+frontend/FireFighter/android/lint/tmp/
+frontend/FireFighter/android/*.hprof
+frontend/FireFighter/android/capacitor-cordova-android-plugins
+frontend/FireFighter/android/app/src/main/assets/public
+frontend/FireFighter/android/app/src/main/assets/capacitor.config.json
+frontend/FireFighter/android/app/src/main/assets/capacitor.plugins.json
+frontend/FireFighter/android/app/src/main/res/xml/config.xml
+
 # ===================================
 # Spring Boot & Maven
 # ===================================
@@ -69,6 +149,25 @@ backend/firefighter-platform/!gradle/wrapper/gradle-wrapper.jar
 backend/firefighter-platform/!**/src/main/**/build/
 backend/firefighter-platform/!**/src/test/**/build/
 
+# STS (Spring Tool Suite)
+backend/firefighter-platform/.apt_generated
+backend/firefighter-platform/.classpath
+backend/firefighter-platform/.factorypath
+backend/firefighter-platform/.project
+backend/firefighter-platform/.settings
+backend/firefighter-platform/.springBeans
+backend/firefighter-platform/.sts4-cache
+
+# NetBeans
+backend/firefighter-platform/nbproject/private/
+backend/firefighter-platform/nbbuild/
+backend/firefighter-platform/dist/
+backend/firefighter-platform/nbdist/
+backend/firefighter-platform/.nb-gradle/
+backend/firefighter-platform/build/
+backend/firefighter-platform/!**/src/main/**/build/
+backend/firefighter-platform/!**/src/test/**/build/
+
 # ===================================
 # Integration Tests
 # ===================================
@@ -90,6 +189,8 @@ integration-tests/playwright-report/
 *.iml
 *.ipr
 out/
+frontend/FireFighter/.idea/
+backend/firefighter-platform/.idea/
 
 # Visual Studio Code
 .vscode/
@@ -98,6 +199,8 @@ out/
 !.vscode/launch.json
 !.vscode/extensions.json
 *.code-workspace
+frontend/FireFighter/.vscode/
+backend/firefighter-platform/.vscode/
 
 # Eclipse
 .apt_generated
@@ -110,6 +213,10 @@ out/
 bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
+frontend/FireFighter/.metadata
+frontend/FireFighter/.recommenders
+backend/firefighter-platform/.metadata
+backend/firefighter-platform/.recommenders
 
 # NetBeans
 /nbproject/private/
@@ -117,6 +224,11 @@ bin/
 /dist/
 /nbdist/
 /.nb-gradle/
+
+# Vim
+*.swp
+*.swo
+*~
 
 # ===================================
 # Operating System
@@ -131,6 +243,7 @@ ehthumbs_vista.db
 *.swp
 *.swo
 *~
+Desktop.ini
 
 # macOS
 .DS_Store
@@ -145,6 +258,7 @@ Icon
 .Trashes
 .VolumeIcon.icns
 .com.apple.timemachine.donotpresent
+.DS_Store?
 
 # Linux
 *~
@@ -192,6 +306,7 @@ temp/
 *.backup
 *.bak
 *.orig
+*.old
 
 # ===================================
 # Package managers lockfiles (keep package-lock.json for consistency)
@@ -209,3 +324,22 @@ temp/
 *.p12
 keystore.*
 !backend/firefighter-platform/src/main/resources/keystore.p12
+
+# ===================================
+# Security and sensitive files
+# ===================================
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+*.cert
+*.pfx
+
+# ===================================
+# Custom project ignores
+# ===================================
+# Add any project-specific files here
+# Example:
+# config/secrets.yml
+# uploads/
+# storage/

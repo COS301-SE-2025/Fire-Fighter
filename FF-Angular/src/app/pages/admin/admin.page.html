@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <app-navbar></app-navbar>
 <ion-content [fullscreen]="true" class="ion-padding">
   <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)" pullFactor="0.5" pullMin="60" pullMax="120">
@@ -887,3 +888,1038 @@
     </div>
   </div>
 </ion-content>
+=======
+<app-navbar></app-navbar>
+
+<!-- Notification Banner -->
+<div *ngIf="showNotification" class="fixed top-20 right-4 z-50" [ngClass]="notificationAnimatingOut ? 'animate-slideOutRight' : 'animate-slideInRight'">
+  <div class="flex items-center w-full max-w-xs p-4 space-x-4 rtl:space-x-reverse text-gray-500 bg-white divide-x rtl:divide-x-reverse divide-gray-200 rounded-lg shadow-lg dark:text-gray-400 dark:divide-gray-700 dark:bg-gray-800" role="alert">
+    <!-- Success Icon -->
+    <svg *ngIf="notificationType === 'success'" class="w-6 h-6 text-green-600 dark:text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+    </svg>
+    <!-- Error Icon -->
+    <svg *ngIf="notificationType === 'error'" class="w-6 h-6 text-red-600 dark:text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+    </svg>
+    <div class="ps-4 text-sm font-normal">{{ notificationMessage }}</div>
+    <!-- Close Button -->
+    <button
+      type="button"
+      (click)="hideNotification()"
+      class="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700"
+      aria-label="Close"
+    >
+      <span class="sr-only">Close</span>
+      <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)" pullFactor="0.6" pullMin="80" pullMax="140">
+    <ion-refresher-content
+      pullingIcon="arrow-down-outline"
+      pullingText="Pull to refresh admin console"
+      refreshingSpinner="crescent"
+      refreshingText="Updating admin data...">
+    </ion-refresher-content>
+  </ion-refresher>
+  
+  <div class="min-h-full bg-gray-50 dark:bg-gray-900 mb-8 pt-2">
+    
+    <!-- Header Section -->
+    <div class="mb-8">
+      <div class="flex flex-col space-y-4 lg:flex-row lg:items-center lg:space-y-0 lg:space-x-3 mb-2">
+        <div class="flex items-center space-x-3 flex-1">
+          <div class="flex-shrink-0 w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+            <svg class="w-7 h-7 text-white" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"></path>
+            </svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h1 class="text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900 dark:text-white">Admin Console</h1>
+            <p class="text-sm lg:text-base text-gray-600 dark:text-gray-400">Manage emergency access requests and system oversight</p>
+          </div>
+        </div>
+        <button (click)="exportFullAuditLogs()" class="w-full lg:w-auto inline-flex items-center justify-center px-4 lg:px-5 py-2 text-sm font-medium text-white bg-green-600 rounded-lg shadow hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-700 dark:hover:bg-green-800 dark:focus:ring-green-900">
+          <svg class="w-4 lg:w-5 h-4 lg:h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18v-1.5M7.5 12l4.5 4.5m0 0l4.5-4.5m-4.5 4.5V3"/>
+          </svg>
+          <span class="hidden sm:inline">Download Full Audit Logs</span>
+          <span class="sm:hidden">Download Logs</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Error Display -->
+    <div *ngIf="error" class="mb-6 p-4 bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-800 rounded-lg">
+      <div class="flex items-center">
+        <svg class="w-5 h-5 text-red-600 dark:text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span class="text-red-700 dark:text-red-300 font-medium">Error:</span>
+        <span class="text-red-600 dark:text-red-400 ml-1">{{ error }}</span>
+      </div>
+      <button (click)="error = null" class="mt-2 text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200 underline">
+        Dismiss
+      </button>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div *ngIf="loading" class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/50 border border-blue-200 dark:border-blue-800 rounded-lg">
+      <div class="flex items-center">
+        <svg class="animate-spin w-5 h-5 text-blue-600 dark:text-blue-400 mr-2" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span class="text-blue-700 dark:text-blue-300">Processing request...</span>
+      </div>
+    </div>
+
+    <!-- Active Emergency Requests Card -->
+    <div class="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50 mt-6">
+      <div class="flex flex-col space-y-3 lg:flex-row lg:items-center lg:justify-between lg:space-y-0 p-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center space-x-2">
+          <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+          <h2 class="text-lg lg:text-xl font-semibold text-gray-900 dark:text-white">Active Emergency Requests</h2>
+        </div>
+        <div class="flex flex-col space-y-2 lg:flex-row lg:items-center lg:space-y-0 lg:space-x-2">
+          <button (click)="exportActiveToCSV()" class="w-full lg:w-auto inline-flex items-center justify-center px-3 lg:px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-700 dark:hover:bg-green-800 dark:focus:ring-green-900">
+            <span class="hidden sm:inline">Export to CSV File</span>
+            <span class="sm:hidden">Export CSV</span>
+            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18v-1.5M7.5 12l4.5 4.5m0 0l4.5-4.5m-4.5 4.5V3"/>
+            </svg>
+          </button>
+          <button (click)="refreshData()" class="w-full lg:w-auto inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Refresh Data
+          </button>
+        </div>
+      </div>
+      <!-- Controls above the table headers -->
+      <div class="px-4 pt-4 pb-2 mb-4">
+        <div class="flex flex-col lg:flex-row lg:items-end gap-4">
+          <div class="flex-1 flex flex-col gap-3">
+            <div class="flex flex-col sm:flex-row gap-2">
+              <button (click)="bulkRevokeSelected()" [disabled]="selectedActiveIds.size === 0" class="flex-1 sm:flex-none inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                Bulk Revoke
+              </button>
+              <button (click)="bulkExportSelected()" [disabled]="selectedActiveIds.size === 0" class="flex-1 sm:flex-none inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                Bulk Export
+              </button>
+            </div>
+            <div>
+              <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
+              <input id="search" type="text" [(ngModel)]="searchQuery" placeholder="Search by name, ID, reason, or status..." class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" />
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 w-full lg:w-auto">
+            <div>
+              <label for="statusFilter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+              <select id="statusFilter" [(ngModel)]="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</option>
+              </select>
+            </div>
+            <div>
+              <label for="sortOption" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sort By</label>
+              <select id="sortOption" [(ngModel)]="sortOption" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <option *ngFor="let opt of sortOptions" [value]="opt.value">{{ opt.label }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Desktop Table View (hidden on mobile) -->
+      <div class="hidden lg:block overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead class="bg-gray-50 dark:bg-gray-700">
+            <tr>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <input 
+                  id="select-all-active-desktop" 
+                  type="checkbox" 
+                  [checked]="isAllActiveSelected()" 
+                  (change)="toggleSelectAllActive($event)"
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                >
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Requester</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Reason</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <!-- Loading skeleton rows for active requests -->
+            <ng-container *ngIf="activeTicketsLoading">
+              <tr *ngFor="let i of [1,2,3,4,5]" class="animate-pulse">
+                <td class="px-4 py-4 text-center">
+                  <div class="flex items-center justify-center">
+                    <div class="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  </div>
+                </td>
+                <td class="px-4 py-4">
+                  <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                </td>
+                <td class="px-4 py-4">
+                  <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                </td>
+                <td class="px-4 py-4">
+                  <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
+                </td>
+                <td class="px-4 py-4">
+                  <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-full w-16"></div>
+                </td>
+                <td class="px-4 py-4 text-center">
+                  <div class="flex justify-center space-x-2">
+                    <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+                    <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+            
+            <!-- Actual data rows -->
+            <ng-container *ngFor="let req of filteredAndSortedRequests">
+              <tr>
+                <td class="px-4 py-4 text-center">
+                  <div class="flex items-center justify-center">
+                    <input 
+                      id="select-active-desktop-{{req.id}}"
+                      type="checkbox" 
+                      [checked]="selectedActiveIds.has(req.id)" 
+                      (change)="toggleSelectActive(req.id, $event)"
+                      class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                    >
+                  </div>
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.id }}</td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ usernames[req.requester] || req.requester }}</td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ req.reason }}</td>
+                <td class="px-4 py-4 whitespace-nowrap">
+                  <span
+                    class="inline-block align-middle rounded-full px-3 py-1 text-xs font-semibold uppercase"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300': req.status === 'Open',
+                      'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300': req.status === 'Revoked',
+                      'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300': req.status === 'Resolved',
+                      'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200': req.status !== 'Open' && req.status !== 'Revoked' && req.status !== 'Resolved'
+                    }"
+                  >
+                    {{ req.status }}
+                  </span>
+                </td>
+                <td class="px-4 py-4 whitespace-nowrap text-center">
+                  <button (click)="revokeAccess(req.id)" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 focus:ring-4 focus:ring-red-300 dark:bg-red-900/50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/70 transition-colors duration-200 whitespace-nowrap">
+                    Revoke Access
+                  </button>
+                  <button (click)="toggleExpandRequest(req.id)" class="details-button inline-flex items-center px-3 py-1.5 ml-2 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors duration-200 whitespace-nowrap" [ngClass]="{'expanded': expandedRequestId === req.id}">
+                    <svg class="chevron-icon w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                    Details
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="expandedRequestId === req.id">
+                <td colspan="6" class="bg-gray-50 dark:bg-gray-800 px-4 py-4 border-t border-gray-200 dark:border-gray-700">
+                  <div class="ticket-details" [ngClass]="getTicketAnimationClass(req.id)">
+                  <div class="bg-white dark:bg-gray-900 rounded-lg p-4 shadow-sm">
+                    <!-- Contact Information -->
+                    <div class="mb-4">
+                      <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                        </svg>
+                        Contact Information
+                      </h4>
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                        <div class="flex items-center">
+                          <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                          </svg>
+                          <a href="mailto:{{ userEmails[req.requester] }}" class="text-blue-600 hover:text-blue-800 underline">{{ userEmails[req.requester] || req.requester }}</a>
+                        </div>
+                        <div class="flex items-center">
+                          <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                          </svg>
+                          <a href="tel:{{ req.phone }}" class="text-blue-600 hover:text-blue-800 underline">{{ req.phone }}</a>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Access Details -->
+                    <div class="mb-4">
+                      <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                        </svg>
+                        Access Information
+                      </h4>
+                      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                        <div>
+                          <span class="font-medium text-gray-700 dark:text-gray-300">System:</span>
+                          <div class="text-gray-900 dark:text-white">{{ req.system }}</div>
+                        </div>
+                        <div>
+                          <span class="font-medium text-gray-700 dark:text-gray-300">Start Time:</span>
+                          <div class="text-gray-900 dark:text-white">{{ req.accessStart }}</div>
+                        </div>
+                        <div>
+                          <span class="font-medium text-gray-700 dark:text-gray-300">End Time:</span>
+                          <div class="text-gray-900 dark:text-white">{{ req.accessEnd }}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Justification -->
+                    <div class="mb-4">
+                      <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-orange-500" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"></path>
+                        </svg>
+                        Justification
+                      </h4>
+                      <p class="text-sm text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 p-3 rounded-md">{{ req.justification }}</p>
+                    </div>
+
+                    <!-- Revocation Reason (if revoked) -->
+                    <div *ngIf="req.status === 'Revoked' && req.rejectReason" class="mb-4">
+                      <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                        Revocation Reason
+                      </h4>
+                      <p class="text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 p-3 rounded-md border border-red-200 dark:border-red-800">{{ req.rejectReason }}</p>
+                    </div>
+
+                    <!-- Activity Logs -->
+                    <div *ngIf="req.logs && req.logs.length > 0">
+                      <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-purple-500" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"></path>
+                        </svg>
+                        Activity Log
+                      </h4>
+                      <div class="space-y-2">
+                        <div *ngFor="let log of req.logs" class="text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-2 rounded border-l-2 border-blue-200 dark:border-blue-800">
+                          {{ log }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Card View (visible only on mobile and tablet) -->
+      <div class="lg:hidden space-y-4">
+        <!-- Select All for Mobile -->
+        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <div class="flex items-center space-x-3">
+            <input 
+              id="select-all-active-mobile" 
+              type="checkbox" 
+              [checked]="isAllActiveSelected()" 
+              (change)="toggleSelectAllActive($event)"
+              class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+            >
+            <label for="select-all-active-mobile" class="text-sm font-medium text-gray-700 dark:text-gray-300">Select All</label>
+          </div>
+          <div class="text-sm text-gray-600 dark:text-gray-400">
+            {{ filteredAndSortedRequests.length }} requests
+          </div>
+        </div>
+
+        <!-- Loading skeleton cards for active requests -->
+        <ng-container *ngIf="activeTicketsLoading">
+          <div *ngFor="let i of [1,2,3,4,5]" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50 overflow-hidden animate-pulse">
+            <!-- Card Header -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <div class="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  <div>
+                    <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-1"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                  </div>
+                </div>
+                <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-full w-16"></div>
+              </div>
+            </div>
+            <!-- Card Body -->
+            <div class="p-4">
+              <div class="mb-3">
+                <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-12 mb-1"></div>
+                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
+              </div>
+              <div class="flex flex-col space-y-2">
+                <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- Request Cards -->
+        <ng-container *ngFor="let req of filteredAndSortedRequests">
+          <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50 overflow-hidden">
+            <!-- Card Header -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <input 
+                    id="select-active-mobile-{{req.id}}"
+                    type="checkbox" 
+                    [checked]="selectedActiveIds.has(req.id)" 
+                    (change)="toggleSelectActive(req.id, $event)"
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  >
+                  <div>
+                    <div class="font-semibold text-gray-900 dark:text-white">{{ usernames[req.requester] || req.requester }}</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">ID: {{ req.id }}</div>
+                  </div>
+                </div>
+                <span
+                  class="inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase"
+                  [ngClass]="{
+                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300': req.status === 'Open',
+                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300': req.status === 'Revoked',
+                    'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300': req.status === 'Resolved',
+                    'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200': req.status !== 'Open' && req.status !== 'Revoked' && req.status !== 'Resolved'
+                  }"
+                >
+                  {{ req.status }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="p-4">
+              <div class="mb-3">
+                <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Reason</div>
+                <div class="text-gray-900 dark:text-white">{{ req.reason }}</div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex flex-col space-y-2">
+                <button (click)="revokeAccess(req.id)" class="w-full inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 focus:ring-4 focus:ring-red-300 dark:bg-red-900/50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/70 transition-colors duration-200">
+                  <svg class="w-4 h-4 mr-2" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"></path>
+                  </svg>
+                  Revoke Access
+                </button>
+                <button (click)="toggleExpandRequest(req.id)" class="details-button w-full inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors duration-200" [ngClass]="{'expanded': expandedRequestId === req.id}">
+                  <svg class="chevron-icon w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                  Details
+                </button>
+              </div>
+            </div>
+
+            <!-- Expanded Details (Mobile) -->
+            <div *ngIf="expandedRequestId === req.id" class="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4 ticket-details" [ngClass]="getTicketAnimationClass(req.id)">
+              <!-- Contact Information -->
+              <div class="mb-4">
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                  <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                  </svg>
+                  Contact
+                </h4>
+                <div class="space-y-2 text-sm">
+                  <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                    <a href="mailto:{{ userEmails[req.requester] }}" class="text-blue-600 hover:text-blue-800 underline">{{ userEmails[req.requester] || req.requester }}</a>
+                  </div>
+                  <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                    </svg>
+                    <a href="tel:{{ req.phone }}" class="text-blue-600 hover:text-blue-800 underline">{{ req.phone }}</a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Access Details -->
+              <div class="mb-4">
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                  <svg class="w-4 h-4 mr-2 text-green-500" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121.75 8.25Z"></path>
+                  </svg>
+                  Access Information
+                </h4>
+                <div class="space-y-2 text-sm">
+                  <div>
+                    <span class="font-medium text-gray-700 dark:text-gray-300">System:</span>
+                    <span class="text-gray-900 dark:text-white ml-2">{{ req.system }}</span>
+                  </div>
+                  <div>
+                    <span class="font-medium text-gray-700 dark:text-gray-300">Duration:</span>
+                    <span class="text-gray-900 dark:text-white ml-2">{{ req.accessStart }} - {{ req.accessEnd }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Justification -->
+              <div class="mb-4">
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
+                  <svg class="w-4 h-4 mr-2 text-orange-500" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"></path>
+                  </svg>
+                  Justification
+                </h4>
+                <p class="text-sm text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 p-3 rounded-md border border-gray-200 dark:border-gray-700">{{ req.justification }}</p>
+              </div>
+
+              <!-- Revocation Reason (if revoked) -->
+              <div *ngIf="req.status === 'Revoked' && req.rejectReason" class="mb-4">
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
+                  <svg class="w-4 h-4 mr-2 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                  </svg>
+                  Revocation Reason
+                </h4>
+                <p class="text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 p-3 rounded-md border border-red-200 dark:border-red-800">{{ req.rejectReason }}</p>
+              </div>
+
+              <!-- Activity Logs -->
+              <div *ngIf="req.logs && req.logs.length > 0">
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
+                  <svg class="w-4 h-4 mr-2 text-purple-500" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"></path>
+                  </svg>
+                  Activity Log
+                </h4>
+                <div class="space-y-1">
+                  <div *ngFor="let log of req.logs" class="text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-2 rounded border border-gray-200 dark:border-gray-700">
+                    {{ log }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+      <!-- End Table -->
+    </div>
+    <!-- End Card -->
+
+    <!-- Requests History Table -->
+    <div class="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50 mt-10">
+      <div class="flex flex-col space-y-3 lg:flex-row lg:items-center lg:justify-between lg:space-y-0 p-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center space-x-2">
+          <svg class="w-6 h-6 text-yellow-500 dark:text-yellow-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"/>
+          </svg>
+          <h2 class="text-lg lg:text-xl font-semibold text-gray-900 dark:text-white">Requests History</h2>
+        </div>
+        <div class="flex flex-col space-y-2 lg:flex-row lg:items-center lg:space-y-0 lg:space-x-2">
+          <button (click)="exportHistoryToCSV()" class="w-full lg:w-auto inline-flex items-center justify-center px-3 lg:px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 dark:bg-green-700 dark:hover:bg-green-800 dark:focus:ring-green-900">
+            <span class="hidden sm:inline">Export to CSV File</span>
+            <span class="sm:hidden">Export CSV</span>
+            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18v-1.5M7.5 12l4.5 4.5m0 0l4.5-4.5m-4.5 4.5V3"/>
+            </svg>
+          </button>
+          <button class="w-full lg:w-auto inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            View All
+            <svg class="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <!-- Controls above the table headers -->
+      <div class="px-4 pt-4 pb-2 mb-4">
+        <div class="flex flex-col lg:flex-row lg:items-end gap-4">
+          <div class="flex-1">
+            <label for="historySearch" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
+            <input id="historySearch" type="text" [(ngModel)]="historySearchQuery" placeholder="Search by name, ID, reason, or status..." class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" />
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 w-full lg:w-auto">
+            <div>
+              <label for="historyStatusFilter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+              <select id="historyStatusFilter" [(ngModel)]="historyStatusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <option *ngFor="let opt of historyStatusOptions" [value]="opt.value">{{ opt.label }}</option>
+              </select>
+            </div>
+            <div>
+              <label for="historySortOption" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sort By</label>
+              <select id="historySortOption" [(ngModel)]="historySortOption" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <option *ngFor="let opt of historySortOptions" [value]="opt.value">{{ opt.label }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Desktop Table View (hidden on mobile) -->
+      <div class="hidden lg:block overflow-x-auto">
+        <table class="min-w-full w-full divide-y divide-gray-200 dark:divide-gray-700 table-fixed">
+          <thead class="bg-gray-50 dark:bg-gray-700">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Requester</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Reason</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date & Action</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Details</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <!-- Loading skeleton rows for history -->
+            <ng-container *ngIf="historyLoading">
+              <tr *ngFor="let i of [1,2,3,4,5,6]" class="animate-pulse">
+                <td class="px-4 py-4">
+                  <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-12"></div>
+                </td>
+                <td class="px-4 py-4">
+                  <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                </td>
+                <td class="px-4 py-4">
+                  <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-36"></div>
+                </td>
+                <td class="px-4 py-4">
+                  <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-full w-16"></div>
+                </td>
+                <td class="px-4 py-4">
+                  <div class="space-y-1">
+                    <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-18"></div>
+                  </div>
+                </td>
+                <td class="px-4 py-4 text-center">
+                  <div class="flex justify-center">
+                    <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+            
+            <!-- Actual data rows -->
+            <ng-container *ngFor="let req of filteredAndSortedHistory">
+              <tr>
+                <td class="px-4 py-4 text-sm text-gray-900 dark:text-white font-mono">{{ req.id }}</td>
+                <td class="px-4 py-4 text-sm text-gray-900 dark:text-white">
+                  <div class="truncate" [title]="req.requester">{{ usernames[req.requester] || req.requester }}</div>
+                </td>
+                <td class="px-4 py-4 text-sm text-gray-900 dark:text-white">
+                  <div class="line-clamp-2" [title]="req.reason">{{ req.reason }}</div>
+                </td>
+                <td class="px-4 py-4">
+                  <span
+                    class="inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300': req.status === 'Open',
+                      'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300': req.status === 'Revoked',
+                      'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300': req.status === 'Resolved',
+                      'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200': req.status !== 'Open' && req.status !== 'Revoked' && req.status !== 'Resolved'
+                    }"
+                  >
+                    {{ req.status }}
+                  </span>
+                </td>
+                <td class="px-4 py-4 text-sm text-gray-900 dark:text-white">
+                  <div class="space-y-1">
+                    <div class="font-medium">{{ req.completedAt }}</div>
+                    <div class="text-gray-500 dark:text-gray-400 truncate" [title]="req.lastAction + ' by ' + req.actionBy">
+                      {{ req.lastAction }}
+                    </div>
+                    <div class="text-gray-500 dark:text-gray-400 truncate" [title]="'by ' + (req.actionBy ? usernames[req.actionBy] : undefined) || req.actionBy + ' at ' + req.actionAt">
+                      by {{ (req.actionBy ? usernames[req.actionBy] : undefined) || req.actionBy }}
+                    </div>
+                  </div>
+                </td>
+                <td class="px-4 py-4 text-center">
+                  <button (click)="toggleExpandHistory(req.id)" class="details-button inline-flex items-center justify-center px-3 py-2 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors duration-200" [ngClass]="{'expanded': expandedHistoryId === req.id}" [title]="'View details for ' + req.requester">
+                    <svg class="chevron-icon w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                    <span class="hidden xl:inline">Details</span>
+                    <span class="sr-only">View Details</span>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="expandedHistoryId === req.id">
+                <td colspan="6" class="bg-gray-50 dark:bg-gray-800 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+                  <div class="ticket-details" [ngClass]="getTicketAnimationClass(req.id)">
+                    <div class="bg-white dark:bg-gray-900 rounded-lg p-6 shadow-sm">
+                    <!-- Request Summary -->
+                    <div class="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div>
+                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Request Details</h4>
+                        <div class="space-y-2 text-sm">
+                          <div><span class="font-medium text-gray-700 dark:text-gray-300">ID:</span> <span class="text-gray-900 dark:text-white">{{ req.id }}</span></div>
+                          <div><span class="font-medium text-gray-700 dark:text-gray-300">Requester:</span> <span class="text-gray-900 dark:text-white">{{ usernames[req.requester] || req.requester }}</span></div>
+                          <div><span class="font-medium text-gray-700 dark:text-gray-300">Status:</span> <span class="text-gray-900 dark:text-white">{{ req.status }}</span></div>
+                        </div>
+                      </div>
+                      <div>
+                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Timeline</h4>
+                        <div class="space-y-2 text-sm">
+                          <div><span class="font-medium text-gray-700 dark:text-gray-300">Final Date:</span> <span class="text-gray-900 dark:text-white">{{ req.completedAt }}</span></div>
+                          <div><span class="font-medium text-gray-700 dark:text-gray-300">Last Action:</span> <span class="text-gray-900 dark:text-white">{{ req.lastAction }}</span></div>
+                          <div><span class="font-medium text-gray-700 dark:text-gray-300">Action At:</span> <span class="text-gray-900 dark:text-white">{{ req.actionAt }}</span></div>
+                        </div>
+                      </div>
+                      <div>
+                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Reason</h4>
+                        <div class="text-sm text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 p-4 rounded-md">
+                          {{ req.reason }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Audit Log -->
+                    <div *ngIf="req.auditLog && req.auditLog.length > 0">
+                      <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-purple-500" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"></path>
+                        </svg>
+                        Audit Trail
+                      </h4>
+                      <div class="space-y-3">
+                        <div *ngFor="let log of req.auditLog; let i = index" class="flex items-start space-x-3 text-sm">
+                          <div class="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                          <div class="flex-1 min-w-0">
+                            <div class="text-gray-900 dark:text-white">
+                              <span class="font-semibold">{{ log.action }}</span>
+                              <span class="text-gray-600 dark:text-gray-400"> by {{ usernames[log.by] || log.by }}</span>
+                            </div>
+                            <div class="text-xs text-gray-500 dark:text-gray-500">{{ log.at }}</div>
+                            <div *ngIf="log.reason" class="text-xs text-gray-600 dark:text-gray-400 italic mt-1 bg-gray-50 dark:bg-gray-800 p-2 rounded">
+                              Reason: {{ log.reason }}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Card View (visible only on mobile and tablet) -->
+      <div class="lg:hidden space-y-4">
+        <!-- History Info -->
+        <div class="flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <div class="text-sm text-gray-600 dark:text-gray-400">
+            {{ filteredAndSortedHistory.length }} historical requests
+          </div>
+        </div>
+
+        <!-- Loading skeleton cards for history -->
+        <ng-container *ngIf="historyLoading">
+          <div *ngFor="let i of [1,2,3,4,5,6]" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50 overflow-hidden animate-pulse">
+            <!-- Card Header -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-1"></div>
+                  <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                </div>
+                <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-full w-16"></div>
+              </div>
+            </div>
+            <!-- Card Body -->
+            <div class="p-4">
+              <div class="space-y-3">
+                <div>
+                  <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-12 mb-1"></div>
+                  <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-1"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+                  </div>
+                  <div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-1"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-18"></div>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-1"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+                  </div>
+                  <div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-1"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-18"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-4">
+                <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- History Cards -->
+        <ng-container *ngFor="let req of filteredAndSortedHistory">
+          <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50 overflow-hidden">
+            <!-- Card Header -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="font-semibold text-gray-900 dark:text-white">{{ usernames[req.requester] || req.requester }}</div>
+                  <div class="text-sm text-gray-600 dark:text-gray-400">ID: {{ req.id }}</div>
+                </div>
+                <span
+                  class="inline-block rounded-full px-3 py-1 text-xs font-semibold uppercase"
+                  [ngClass]="{
+                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300': req.status === 'Open',
+                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300': req.status === 'Revoked',
+                    'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300': req.status === 'Resolved',
+                    'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200': req.status !== 'Open' && req.status !== 'Revoked' && req.status !== 'Resolved'
+                  }"
+                >
+                  {{ req.status }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="p-4">
+              <div class="space-y-3">
+                <div>
+                  <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Reason</div>
+                  <div class="text-gray-900 dark:text-white">{{ req.reason }}</div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                      {{ req.status === 'Revoked' ? 'Date Rejected' : req.status === 'Resolved' ? 'Date Completed' : 'Created' }}
+                    </div>
+                    <div class="text-sm text-gray-900 dark:text-white">{{ req.completedAt }}</div>
+                  </div>
+                  <div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Last Action</div>
+                    <div class="text-sm text-gray-900 dark:text-white">{{ req.lastAction }}</div>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Action By</div>
+                    <div class="text-sm text-gray-900 dark:text-white">{{ (req.actionBy ? usernames[req.actionBy] : undefined) || req.actionBy }}</div>
+                  </div>
+                  <div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Action At</div>
+                    <div class="text-sm text-gray-900 dark:text-white">{{ req.actionAt }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Button -->
+              <div class="mt-4">
+                <button (click)="toggleExpandHistory(req.id)" class="details-button w-full inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors duration-200" [ngClass]="{'expanded': expandedHistoryId === req.id}">
+                  <svg class="chevron-icon w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                  View Audit Details
+                </button>
+              </div>
+            </div>
+
+            <!-- Expanded Details (Mobile) -->
+            <div *ngIf="expandedHistoryId === req.id" class="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4 ticket-details" [ngClass]="getTicketAnimationClass(req.id)">
+              <h3 class="text-lg font-bold mb-3 text-gray-900 dark:text-white flex items-center">
+                <svg class="w-4 h-4 mr-2 text-purple-500" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"></path>
+                </svg>
+                Audit Trail
+              </h3>
+              <div>
+                <span class="font-semibold text-gray-700 dark:text-gray-300">Complete Audit Log:</span>
+                <ul class="list-disc list-inside text-sm text-gray-700 dark:text-gray-300 mt-2 space-y-1">
+                  <li *ngFor="let log of req.auditLog">
+                    <span class="font-bold">{{ log.action }}</span> by <span class="text-gray-900 dark:text-white">{{ usernames[log.by] || log.by }}</span> at <span class="text-gray-900 dark:text-white">{{ log.at }}</span>
+                    <span *ngIf="log.reason" class="block text-gray-600 dark:text-gray-400 italic ml-4">{{ log.reason }}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+    <!-- End Requests History Table -->
+  </div>
+  <!-- Revocation Reason Modal -->
+  <div *ngIf="showRevocationModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md">
+      <h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Reason for Revocation</h3>
+      
+      <!-- Error display in modal -->
+      <div *ngIf="error" class="mb-4 p-3 bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-800 rounded-lg">
+        <div class="flex items-center">
+          <svg class="w-4 h-4 text-red-600 dark:text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span class="text-red-700 dark:text-red-300 text-sm">{{ error }}</span>
+        </div>
+      </div>
+      
+      <textarea 
+        [(ngModel)]="revocationReason" 
+        rows="3" 
+        [disabled]="loading"
+        class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed" 
+        placeholder="Enter reason for revocation (required)">
+      </textarea>
+      
+      <div class="flex justify-end gap-2 mt-4">
+        <button 
+          (click)="cancelRevocation()" 
+          [disabled]="loading"
+          class="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
+          Cancel
+        </button>
+        <button 
+          (click)="confirmRevocation()" 
+          [disabled]="!revocationReason.trim() || loading" 
+          class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center">
+          <svg *ngIf="loading" class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {{ loading ? 'Processing...' : 'Confirm Revocation' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Options Modal -->
+  <div *ngIf="showExportModal" class="fixed inset-0 z-50 overflow-y-auto" (click)="closeExportModal()">
+    <!-- Background overlay -->
+    <div [@modalBackdrop]="exportModalAnimationState" class="fixed inset-0 bg-black bg-opacity-50"></div>
+
+    <!-- Modal panel -->
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div [@modalPanel]="exportModalAnimationState" (click)="$event.stopPropagation()" class="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+        <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4 rounded-t-xl">
+          <div class="sm:flex sm:items-start">
+            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900 sm:mx-0 sm:h-10 sm:w-10">
+              <svg class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
+            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+              <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white" id="modal-title">
+                Export Options
+              </h3>
+              <div class="mt-2">
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  Choose how you'd like to receive your
+                  <span *ngIf="exportType === 'active'">active tickets</span>
+                  <span *ngIf="exportType === 'history'">ticket history</span>
+                  <span *ngIf="exportType === 'audit'">audit logs</span>
+                  export.
+                </p>
+              </div>
+
+              <!-- Date Range Filters (for email export) -->
+              <div class="mt-4 space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Date Range (Optional - for email export only)
+                  </label>
+                  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div>
+                      <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Start Date</label>
+                      <input
+                        type="datetime-local"
+                        [(ngModel)]="exportStartDate"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white text-sm transition-all duration-200"
+                      >
+                    </div>
+                    <div>
+                      <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">End Date</label>
+                      <input
+                        type="datetime-local"
+                        [(ngModel)]="exportEndDate"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white text-sm transition-all duration-200"
+                      >
+                    </div>
+                  </div>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Leave empty to export all records. Date filtering only applies to email export.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Actions -->
+        <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse space-y-2 sm:space-y-0 sm:space-x-reverse sm:space-x-3 rounded-b-xl">
+          <!-- Email Export Button -->
+          <button
+            type="button"
+            (click)="handleEmailExport()"
+            [disabled]="isExporting"
+            class="modal-button w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg *ngIf="isExporting" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <svg *ngIf="!isExporting" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+            {{ isExporting ? 'Sending...' : 'Email to Me' }}
+          </button>
+
+          <!-- Direct Download Button -->
+          <button
+            type="button"
+            (click)="handleDirectDownload()"
+            [disabled]="isExporting"
+            class="modal-button w-full inline-flex justify-center rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            Direct Download
+          </button>
+
+          <!-- Cancel Button -->
+          <button
+            type="button"
+            (click)="closeExportModal()"
+            [disabled]="isExporting"
+            class="modal-button w-full inline-flex justify-center rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</ion-content>
+>>>>>>> origin/develop
