@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { AuthService } from './services/auth.service';
+import { HealthService } from './services/health.service';
+import { HealthMonitorService } from './services/health-monitor.service';
 import { Capacitor } from '@capacitor/core';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { initFlowbite } from 'flowbite';
@@ -14,7 +16,11 @@ import { App } from '@capacitor/app';
   standalone: true,
 })
 export class AppComponent implements OnInit {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private healthService: HealthService,
+    private healthMonitorService: HealthMonitorService
+  ) {}
 
   ngOnInit() {
     console.log('=== APP INITIALIZATION DEBUG ===');
@@ -42,6 +48,12 @@ export class AppComponent implements OnInit {
     }
 
     initFlowbite();
+
+    // Start health monitoring
+    console.log('6. Starting health monitoring...');
+    this.healthService.startMonitoring();
+    this.healthMonitorService.startMonitoring();
+
     console.log('=== END APP INITIALIZATION DEBUG ===');
   }
 
