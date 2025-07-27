@@ -31,6 +31,12 @@ export class NotificationsPage implements OnInit {
   mobileMenuOpen = false;
   profileMenuOpen = false;
 
+  // Confirmation modal properties
+  showDeleteConfirmModal = false;
+  deleteConfirmationType: 'single' | 'multiple' = 'single';
+  notificationToDelete: number | null = null;
+  loading = false;
+
   constructor(
     private authService: AuthService,
     private notificationService: NotificationService
@@ -72,42 +78,18 @@ export class NotificationsPage implements OnInit {
   }
 
   deleteReadNotifications() {
-    if (confirm('Are you sure you want to delete all read notifications? This action cannot be undone.')) {
-      this.notificationService.deleteReadNotifications().subscribe({
-        next: (response) => {
-          if (response) {
-            console.log('Read notifications deleted successfully');
-            // Refresh notifications to reflect changes
-            this.notificationService.refreshNotifications();
-          }
-        },
-        error: (error) => {
-          console.error('Error deleting read notifications:', error);
-          alert('Failed to delete read notifications. Please try again.');
-        }
-      });
-    }
+    this.deleteConfirmationType = 'multiple';
+    this.notificationToDelete = null;
+    this.showDeleteConfirmModal = true;
   }
 
   deleteNotification(notificationId: number, event: Event) {
     // Prevent event bubbling to avoid triggering markAsRead
     event.stopPropagation();
 
-    if (confirm('Are you sure you want to delete this notification? This action cannot be undone.')) {
-      this.notificationService.deleteNotification(notificationId).subscribe({
-        next: (response) => {
-          if (response) {
-            console.log('Notification deleted successfully');
-            // Refresh notifications to reflect changes
-            this.notificationService.refreshNotifications();
-          }
-        },
-        error: (error) => {
-          console.error('Error deleting notification:', error);
-          alert('Failed to delete notification. Please try again.');
-        }
-      });
-    }
+    this.deleteConfirmationType = 'single';
+    this.notificationToDelete = notificationId;
+    this.showDeleteConfirmModal = true;
   }
 
   getTimeAgo(timestamp: Date): string {
@@ -161,5 +143,51 @@ export class NotificationsPage implements OnInit {
 
   hasReadNotifications(notifications: Notification[]): boolean {
     return notifications.some(n => n.read);
+  }
+
+  // Modal control methods
+  cancelDeletion() {
+    this.showDeleteConfirmModal = false;
+    this.notificationToDelete = null;
+    this.deleteConfirmationType = 'single';
+    this.loading = false;
+  }
+
+  confirmDeletion() {
+    this.loading = true;
+
+    if (this.deleteConfirmationType === 'single' && this.notificationToDelete) {
+      // Delete single notification
+      this.notificationService.deleteNotification(this.notificationToDelete).subscribe({
+        next: (response) => {
+          if (response) {
+            console.log('Notification deleted successfully');
+            this.notificationService.refreshNotifications();
+          }
+          this.cancelDeletion();
+        },
+        error: (error) => {
+          console.error('Error deleting notification:', error);
+          alert('Failed to delete notification. Please try again.');
+          this.loading = false;
+        }
+      });
+    } else if (this.deleteConfirmationType === 'multiple') {
+      // Delete all read notifications
+      this.notificationService.deleteReadNotifications().subscribe({
+        next: (response) => {
+          if (response) {
+            console.log('Read notifications deleted successfully');
+            this.notificationService.refreshNotifications();
+          }
+          this.cancelDeletion();
+        },
+        error: (error) => {
+          console.error('Error deleting read notifications:', error);
+          alert('Failed to delete read notifications. Please try again.');
+          this.loading = false;
+        }
+      });
+    }
   }
 }
