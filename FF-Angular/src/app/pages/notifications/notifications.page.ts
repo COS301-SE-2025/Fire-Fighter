@@ -31,6 +31,12 @@ export class NotificationsPage implements OnInit {
   mobileMenuOpen = false;
   profileMenuOpen = false;
 
+  // Confirmation modal properties
+  showDeleteConfirmModal = false;
+  deleteConfirmationType: 'single' | 'multiple' = 'single';
+  notificationToDelete: number | null = null;
+  loading = false;
+
   constructor(
     private authService: AuthService,
     private notificationService: NotificationService
@@ -63,12 +69,27 @@ export class NotificationsPage implements OnInit {
     await this.authService.logout();
   }
 
-  markAsRead(notificationId: string) {
+  markAsRead(notificationId: number) {
     this.notificationService.markAsRead(notificationId);
   }
 
   markAllAsRead() {
     this.notificationService.markAllAsRead();
+  }
+
+  deleteReadNotifications() {
+    this.deleteConfirmationType = 'multiple';
+    this.notificationToDelete = null;
+    this.showDeleteConfirmModal = true;
+  }
+
+  deleteNotification(notificationId: number, event: Event) {
+    // Prevent event bubbling to avoid triggering markAsRead
+    event.stopPropagation();
+
+    this.deleteConfirmationType = 'single';
+    this.notificationToDelete = notificationId;
+    this.showDeleteConfirmModal = true;
   }
 
   getTimeAgo(timestamp: Date): string {
@@ -97,7 +118,7 @@ export class NotificationsPage implements OnInit {
     return timestamp.toLocaleDateString();
   }
 
-  trackByNotificationId(index: number, notification: Notification): string {
+  trackByNotificationId(index: number, notification: Notification): number {
     return notification.id;
   }
 
@@ -114,9 +135,59 @@ export class NotificationsPage implements OnInit {
   }
 
   doRefresh(event: any) {
-    // Refresh notifications data
-    this.notifications$ = this.notificationService.getNotifications();
+    // Refresh notifications data from backend
+    this.notificationService.refreshNotifications();
     // Complete the refresh
     event.target.complete();
+  }
+
+  hasReadNotifications(notifications: Notification[]): boolean {
+    return notifications.some(n => n.read);
+  }
+
+  // Modal control methods
+  cancelDeletion() {
+    this.showDeleteConfirmModal = false;
+    this.notificationToDelete = null;
+    this.deleteConfirmationType = 'single';
+    this.loading = false;
+  }
+
+  confirmDeletion() {
+    this.loading = true;
+
+    if (this.deleteConfirmationType === 'single' && this.notificationToDelete) {
+      // Delete single notification
+      this.notificationService.deleteNotification(this.notificationToDelete).subscribe({
+        next: (response) => {
+          if (response) {
+            console.log('Notification deleted successfully');
+            this.notificationService.refreshNotifications();
+          }
+          this.cancelDeletion();
+        },
+        error: (error) => {
+          console.error('Error deleting notification:', error);
+          alert('Failed to delete notification. Please try again.');
+          this.loading = false;
+        }
+      });
+    } else if (this.deleteConfirmationType === 'multiple') {
+      // Delete all read notifications
+      this.notificationService.deleteReadNotifications().subscribe({
+        next: (response) => {
+          if (response) {
+            console.log('Read notifications deleted successfully');
+            this.notificationService.refreshNotifications();
+          }
+          this.cancelDeletion();
+        },
+        error: (error) => {
+          console.error('Error deleting read notifications:', error);
+          alert('Failed to delete read notifications. Please try again.');
+          this.loading = false;
+        }
+      });
+    }
   }
 }

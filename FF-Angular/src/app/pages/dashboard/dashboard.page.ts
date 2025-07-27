@@ -178,7 +178,7 @@ export class DashboardPage implements OnInit, OnDestroy {
       userId: adminTicket.userId,
       emergencyType: adminTicket.emergencyType,
       emergencyContact: adminTicket.emergencyContact,
-      duration: 60 // Default duration, could be extracted from description if available
+      duration: adminTicket.duration || 60 // Default to 60 minutes if duration is undefined
     }));
   }
 

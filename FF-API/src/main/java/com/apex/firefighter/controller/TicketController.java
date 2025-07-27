@@ -55,7 +55,7 @@ public class TicketController {
         String userId = (String) payload.get("userId");
         String emergencyType = (String) payload.get("emergencyType");
         String emergencyContact = (String) payload.get("emergencyContact");
-        Integer duration = payload.get("duration") != null ? ((Number) payload.get("duration")).intValue() : null;
+        Integer duration = payload.get("duration") != null ? ((Number) payload.get("duration")).intValue() : 60;
 
         Ticket ticket = ticketService.createTicket(ticketId, description, userId, emergencyType, emergencyContact, duration);
         return ResponseEntity.ok(ticket);
