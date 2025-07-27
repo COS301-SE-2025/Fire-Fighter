@@ -362,16 +362,94 @@
         <!-- Modal body -->
         <div class="p-6 max-h-96 overflow-y-auto">
           
-          <!-- Version 2.1.0 -->
+          <!-- Version 2.2.0 -->
           <div class="mb-8">
             <div class="flex items-center justify-between mb-4">
               <div class="flex items-center space-x-3">
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
-                  v2.1.0
+                  v2.2.0
                 </span>
                 <span class="text-sm text-gray-500 dark:text-gray-400">Current Version</span>
               </div>
               <span class="text-sm text-gray-500 dark:text-gray-400">Latest Release</span>
+            </div>
+            <div class="space-y-4">
+              <div>
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">New Features</h4>
+                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                  <li class="flex items-start space-x-2">
+                    <span class="text-blue-500 mt-1">•</span>
+                    <span><strong>Comprehensive Notification System</strong> - Real-time in-app notifications for ticket lifecycle events with read/unread status tracking</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-blue-500 mt-1">•</span>
+                    <span><strong>Email Notification Service</strong> - Automated email notifications sent to users for ticket updates, approvals, and status changes</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-blue-500 mt-1">•</span>
+                    <span><strong>Notification Management API</strong> - RESTful endpoints for creating, reading, updating, and deleting notifications with user-specific filtering</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-blue-500 mt-1">•</span>
+                    <span><strong>Professional Email Templates</strong> - BMW-styled HTML email templates for ticket exports and notifications with responsive design</span>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Improvements</h4>
+                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                  <li class="flex items-start space-x-2">
+                    <span class="text-green-500 mt-1">•</span>
+                    <span>Enhanced database schema with dedicated notifications table and optimized queries</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-green-500 mt-1">•</span>
+                    <span>Improved Gmail integration service with better error handling and delivery confirmation</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-green-500 mt-1">•</span>
+                    <span>Comprehensive test coverage for notification services with unit and integration tests</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-green-500 mt-1">•</span>
+                    <span>Enhanced Swagger documentation for all notification endpoints with detailed examples</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-green-500 mt-1">•</span>
+                    <span>Modified settings page for notifications with auto-saving and enhanced preference management</span>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Bug Fixes</h4>
+                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                  <li class="flex items-start space-x-2">
+                    <span class="text-red-500 mt-1">•</span>
+                    <span>Fixed time remaining for tickets on dashboard displaying incorrect duration calculations</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-red-500 mt-1">•</span>
+                    <span>Resolved page refreshing issues in ticket service and request page for better data consistency</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-red-500 mt-1">•</span>
+                    <span>Fixed notification page mobile responsiveness issues with improved layout and spacing</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Version 2.1.0 -->
+          <div class="mb-8 pb-8 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center space-x-3">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                  v2.1.0
+                </span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">Previous Version</span>
+              </div>
+              <span class="text-sm text-gray-500 dark:text-gray-400">Previous Release</span>
             </div>
             <div class="space-y-4">
               <div>
@@ -555,23 +633,29 @@
           <div class="mb-4">
             <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Development Roadmap</h4>
             <div class="space-y-3">
+              <div class="flex items-center space-x-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
+                  ✓ Completed
+                </span>
+                <span class="text-sm text-gray-700 dark:text-gray-300">Comprehensive notification system with email integration</span>
+              </div>
               <div class="flex items-center space-x-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300">
                   Upcoming
                 </span>
-                <span class="text-sm text-gray-700 dark:text-gray-300">Enhanced notification system with real-time alerts</span>
+                <span class="text-sm text-gray-700 dark:text-gray-300">Real-time WebSocket notifications and push notifications for mobile</span>
               </div>
               <div class="flex items-center space-x-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
                   Planned
                 </span>
-                <span class="text-sm text-gray-700 dark:text-gray-300">Advanced reporting and analytics dashboard</span>
+                <span class="text-sm text-gray-700 dark:text-gray-300">Advanced reporting and analytics dashboard with notification metrics</span>
               </div>
               <div class="flex items-center space-x-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
                   Future
                 </span>
-                <span class="text-sm text-gray-700 dark:text-gray-300">Integration with external monitoring systems</span>
+                <span class="text-sm text-gray-700 dark:text-gray-300">Integration with external monitoring systems and SMS notifications</span>
               </div>
             </div>
           </div>
