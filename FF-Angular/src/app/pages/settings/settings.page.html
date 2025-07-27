@@ -124,7 +124,7 @@
                 </div>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" [(ngModel)]="notificationSettings.requestUpdates" class="sr-only peer">
+                <input type="checkbox" [(ngModel)]="notificationSettings.requestUpdates" (change)="onRequestUpdatesChange()" class="sr-only peer">
                 <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </div>
@@ -199,10 +199,11 @@
 
               <!-- Email Notifications -->
               <div class="flex items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                <input 
-                  id="email-notifications" 
-                  type="checkbox" 
+                <input
+                  id="email-notifications"
+                  type="checkbox"
                   [(ngModel)]="notificationSettings.emailEnabled"
+                  (change)="onEmailNotificationsChange()"
                   class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                 >
                 <label for="email-notifications" class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">
@@ -212,8 +213,39 @@
                     </svg>
                     <span>Email Notifications</span>
                   </div>
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Email alerts for critical events</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Email alerts for ticket events (creation, completion, revocation, warnings)</p>
                 </label>
+              </div>
+            </div>
+
+            <!-- Email Notification Details (shown when email notifications are enabled) -->
+            <div *ngIf="notificationSettings.emailEnabled" class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <h4 class="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">Email Notification Types</h4>
+              <div class="text-xs text-blue-700 dark:text-blue-300 space-y-1">
+                <div class="flex items-center">
+                  <svg class="w-3 h-3 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                  </svg>
+                  <span>Ticket creation notifications</span>
+                </div>
+                <div class="flex items-center">
+                  <svg class="w-3 h-3 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                  </svg>
+                  <span>Ticket completion notifications</span>
+                </div>
+                <div class="flex items-center">
+                  <svg class="w-3 h-3 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                  </svg>
+                  <span>Ticket revocation notifications</span>
+                </div>
+                <div class="flex items-center">
+                  <svg class="w-3 h-3 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                  </svg>
+                  <span>Five-minute expiration warnings</span>
+                </div>
               </div>
             </div>
           </div>

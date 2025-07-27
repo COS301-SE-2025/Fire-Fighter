@@ -62,7 +62,8 @@ const initialMockTickets: Ticket[] = [
     userId: 'max.mueller@bmw.de',
     emergencyType: 'critical-system-failure',
     emergencyContact: '+49 89 382 12345',
-    duration: 60
+    duration: 60,
+    fiveMinuteWarningSent: false
   },
   {
     id: 'BMW-FF-739456',
@@ -73,7 +74,8 @@ const initialMockTickets: Ticket[] = [
     userId: 'sarah.weber@bmw.de',
     emergencyType: 'critical-system-failure',
     emergencyContact: '+49 89 382 67890',
-    duration: 60
+    duration: 60,
+    fiveMinuteWarningSent: false
   },
   {
     id: 'BMW-FF-682157',
@@ -84,7 +86,8 @@ const initialMockTickets: Ticket[] = [
     userId: 'thomas.schmidt@bmw.de',
     emergencyType: 'network-outage',
     emergencyContact: '+49 89 382 54321',
-    duration: 60
+    duration: 60,
+    fiveMinuteWarningSent: false
   },
   {
     id: 'BMW-FF-591834',
@@ -95,7 +98,8 @@ const initialMockTickets: Ticket[] = [
     userId: 'anna.fischer@bmw.de',
     emergencyType: 'security-incident',
     emergencyContact: '+49 89 382 98765',
-    duration: 60
+    duration: 60,
+    fiveMinuteWarningSent: false
   },
   {
     id: 'BMW-FF-463729',
@@ -106,7 +110,8 @@ const initialMockTickets: Ticket[] = [
     userId: 'michael.hoffman@bmw.de',
     emergencyType: 'critical-system-failure',
     emergencyContact: '+49 89 382 13579',
-    duration: 60
+    duration: 60,
+    fiveMinuteWarningSent: false
   },
   {
     id: 'BMW-FF-357291',
@@ -117,7 +122,8 @@ const initialMockTickets: Ticket[] = [
     userId: 'petra.lang@bmw.de',
     emergencyType: 'user-lockout',
     emergencyContact: '+49 89 382 24680',
-    duration: 60
+    duration: 60,
+    fiveMinuteWarningSent: false
   }
 ];
 
@@ -162,7 +168,8 @@ const loadFromStorage = (): Ticket[] => {
   return parsedTickets.map((ticket: any) => ({
     ...ticket,
     dateCreated: new Date(ticket.dateCreated),
-    duration: ticket.duration || 60
+    duration: ticket.duration || 60,
+    fiveMinuteWarningSent: ticket.fiveMinuteWarningSent || false
   }));
 };
 
@@ -202,7 +209,8 @@ export class MockTicketDatabase {
       status: 'Active',
       dateCreated: new Date(),
       ...ticketData,
-      duration: ticketData.duration || 60
+      duration: ticketData.duration || 60,
+      fiveMinuteWarningSent: false
     };
     
     this.tickets.unshift(newTicket);
