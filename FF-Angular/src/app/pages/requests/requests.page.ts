@@ -10,6 +10,7 @@ import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { AuthService } from '../../services/auth.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-requests',
@@ -140,7 +141,8 @@ export class RequestsPage implements OnInit {
   constructor(
     private toastController: ToastController,
     private ticketService: TicketService,
-    private authService: AuthService
+    private authService: AuthService,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
@@ -149,6 +151,8 @@ export class RequestsPage implements OnInit {
       if (user) {
         this.currentUid = user.uid;
         this.loadTickets();
+        // Also refresh notifications when user changes
+        this.notificationService.forceRefresh();
       }
     });
   }
@@ -175,6 +179,22 @@ export class RequestsPage implements OnInit {
           return new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime();
         });
       });
+  }
+
+  /**
+   * Refresh both tickets and notifications
+   */
+  refreshData(event?: any) {
+    console.log('🔄 Refreshing tickets and notifications...');
+    this.loadTickets();
+    this.notificationService.forceRefresh();
+
+    // Complete the refresh event if it exists (for pull-to-refresh)
+    if (event) {
+      setTimeout(() => {
+        event.target.complete();
+      }, 1000);
+    }
   }
 
   get filteredTickets() {
@@ -297,6 +317,10 @@ export class RequestsPage implements OnInit {
         if (ticket && 'id' in ticket) {
           this.tickets.unshift(ticket);
           this.presentToast('Ticket created successfully');
+          // Refresh data to ensure we have the latest notifications
+          setTimeout(() => {
+            this.refreshData();
+          }, 1500);
         }
       });
   }
@@ -318,8 +342,7 @@ export class RequestsPage implements OnInit {
   }
 
   doRefresh(event: any) {
-    this.loadTickets();
-    event.target.complete();
+    this.refreshData(event);
   }
 }
 
