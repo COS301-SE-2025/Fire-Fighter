@@ -10,17 +10,6 @@ import { UserPreferencesService, NotificationSettings, UserPreferences } from '.
 import { AuthService } from '../../services/auth.service';
 import { Subscription } from 'rxjs';
 
-interface NotificationSettings {
-  criticalAlerts: boolean;
-  accessRequests: boolean;
-  sessionExpiry: boolean;
-  requestUpdates: boolean;
-  auditAlerts: boolean;
-  maintenance: boolean;
-  pushEnabled: boolean;
-  emailEnabled: boolean;
-}
-
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.page.html',
