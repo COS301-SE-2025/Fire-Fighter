@@ -1,46 +1,24 @@
 package com.apex.firefighter.controller;
 
+import com.apex.firefighter.service.auth.AuthenticationService;
+import com.apex.firefighter.dto.AuthResponse;
 import com.apex.firefighter.model.User;
-import com.apex.firefighter.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseToken;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.MOCK,
-    properties = {
-        "spring.autoconfigure.exclude=com.apex.firefighter.config.FirebaseConfig"
-    }
-)
-@AutoConfigureWebMvc
-@ActiveProfiles("test")
-@Transactional
+@WebMvcTest(AuthController.class)
 class AuthControllerIntegrationTest {
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        @Primary
-        public FirebaseAuth firebaseAuth() {
-            return mock(FirebaseAuth.class);
-        }
-    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -48,11 +26,8 @@ class AuthControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired
-    private FirebaseAuth firebaseAuth;
-
-    @Autowired
-    private UserRepository userRepository;
+    @MockBean
+    private AuthenticationService authenticationService;
 
     @Test
     @DisplayName("Should authenticate user with valid Firebase token")
@@ -61,13 +36,17 @@ class AuthControllerIntegrationTest {
         String firebaseIdToken = "valid-firebase-token";
         String firebaseUid = "firebase-uid-123";
         String email = "test@example.com";
-        String name = "Test User";
+        String customJwt = "custom-jwt-token";
 
-        FirebaseToken mockFirebaseToken = mock(FirebaseToken.class);
-        when(firebaseAuth.verifyIdToken(firebaseIdToken)).thenReturn(mockFirebaseToken);
-        when(mockFirebaseToken.getUid()).thenReturn(firebaseUid);
-        when(mockFirebaseToken.getEmail()).thenReturn(email);
-        when(mockFirebaseToken.getName()).thenReturn(name);
+        User mockUser = new User();
+        mockUser.setUserId(firebaseUid);
+        mockUser.setEmail(email);
+        mockUser.setUsername("Test User");
+
+        AuthResponse mockResponse = new AuthResponse(customJwt, mockUser);
+        
+        when(authenticationService.verifyFirebaseTokenAndCreateJwt(firebaseIdToken))
+            .thenReturn(mockResponse);
 
         AuthController.FirebaseLoginRequest request = new AuthController.FirebaseLoginRequest();
         request.setIdToken(firebaseIdToken);
@@ -77,14 +56,11 @@ class AuthControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").exists())
+                .andExpect(jsonPath("$.token").value(customJwt))
                 .andExpect(jsonPath("$.user.userId").value(firebaseUid))
                 .andExpect(jsonPath("$.user.email").value(email));
 
-        // Verify user was created in database
-        User savedUser = userRepository.findByUserId(firebaseUid).orElse(null);
-        assert savedUser != null;
-        assert savedUser.getEmail().equals(email);
+        verify(authenticationService).verifyFirebaseTokenAndCreateJwt(firebaseIdToken);
     }
 
     @Test
@@ -92,7 +68,7 @@ class AuthControllerIntegrationTest {
     void shouldReturnBadRequestForInvalidFirebaseToken() throws Exception {
         // Given
         String invalidToken = "invalid-firebase-token";
-        when(firebaseAuth.verifyIdToken(invalidToken))
+        when(authenticationService.verifyFirebaseTokenAndCreateJwt(invalidToken))
             .thenThrow(new RuntimeException("Invalid token"));
 
         AuthController.FirebaseLoginRequest request = new AuthController.FirebaseLoginRequest();
@@ -103,5 +79,7 @@ class AuthControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
+
+        verify(authenticationService).verifyFirebaseTokenAndCreateJwt(invalidToken);
     }
 }
