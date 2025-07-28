@@ -1,7 +1,9 @@
 package com.apex.firefighter.service.auth;
 
+import com.apex.firefighter.dto.AuthResponse;
 import com.apex.firefighter.model.User;
 import com.apex.firefighter.repository.UserRepository;
+import com.google.firebase.auth.FirebaseToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
