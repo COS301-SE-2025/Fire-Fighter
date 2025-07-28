@@ -70,16 +70,19 @@ class JwtServiceTest {
 
     @Test
     @DisplayName("Should detect expired token")
-    void shouldDetectExpiredToken() {
-        // Given - Create a token that's already expired (negative expiration)
-        JwtService expiredTokenService = new JwtService(firebaseAuth);
-        ReflectionTestUtils.setField(expiredTokenService, "jwtSecret", TEST_JWT_SECRET);
-        ReflectionTestUtils.setField(expiredTokenService, "jwtExpiration", -1000L); // Already expired
+    void shouldDetectExpiredToken() throws InterruptedException {
+        // Given - Create a token with very short expiration
+        JwtService shortExpirationService = new JwtService(firebaseAuth);
+        ReflectionTestUtils.setField(shortExpirationService, "jwtSecret", TEST_JWT_SECRET);
+        ReflectionTestUtils.setField(shortExpirationService, "jwtExpiration", 100L); // 100ms
 
-        String expiredToken = expiredTokenService.generateToken("uid", "test@example.com", false);
+        String token = shortExpirationService.generateToken("uid", "test@example.com", false);
+        
+        // Wait for token to expire
+        Thread.sleep(200);
 
         // When & Then
-        assertThat(jwtService.isTokenExpired(expiredToken)).isTrue();
+        assertThat(jwtService.isTokenExpired(token)).isTrue();
     }
 
     @Test
