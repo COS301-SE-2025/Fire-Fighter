@@ -22,7 +22,12 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.MOCK,
+    properties = {
+        "spring.autoconfigure.exclude=com.apex.firefighter.config.FirebaseConfig"
+    }
+)
 @AutoConfigureWebMvc
 @ActiveProfiles("test")
 @Transactional
