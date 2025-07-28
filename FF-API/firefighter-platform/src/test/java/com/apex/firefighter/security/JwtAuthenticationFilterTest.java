@@ -133,8 +133,8 @@ class JwtAuthenticationFilterTest {
         // Given
         String invalidToken = "invalid.token";
         when(request.getHeader("Authorization")).thenReturn("Bearer " + invalidToken);
-        when(jwtService.verifyFirebaseToken(invalidToken))
-            .thenThrow(new RuntimeException("Invalid Firebase token"));
+        
+        // Only stub what will actually be called
         when(jwtService.extractFirebaseUid(invalidToken))
             .thenThrow(new RuntimeException("Invalid JWT token"));
 
