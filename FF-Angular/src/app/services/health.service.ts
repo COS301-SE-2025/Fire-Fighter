@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, interval, of } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap, timeout } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface HealthStatus {
@@ -85,7 +85,7 @@ export class HealthService {
           lastChecked: new Date(),
           error: null
         };
-        
+
         console.log('🏥 Health check successful:', health);
         this.healthSubject.next(health);
         return health;
@@ -97,8 +97,44 @@ export class HealthService {
           lastChecked: new Date(),
           error: this.getErrorMessage(error)
         };
-        
+
         console.warn('🏥 Health check failed:', health);
+        this.healthSubject.next(health);
+        return of(health);
+      })
+    );
+  }
+
+  /**
+   * Perform initial connectivity check with timeout and retry logic
+   * Used during app startup for better UX
+   */
+  checkInitialConnectivity(timeoutMs: number = 8000): Observable<ServiceHealth> {
+    console.log(`🏥 Performing initial connectivity check (timeout: ${timeoutMs}ms)...`);
+
+    return this.http.get<HealthStatus>(this.apiUrl).pipe(
+      timeout(timeoutMs),
+      map((status: HealthStatus) => {
+        const health: ServiceHealth = {
+          isHealthy: status.status === 'UP',
+          status: status,
+          lastChecked: new Date(),
+          error: null
+        };
+
+        console.log('🏥 Initial connectivity check successful:', health);
+        this.healthSubject.next(health);
+        return health;
+      }),
+      catchError((error) => {
+        const health: ServiceHealth = {
+          isHealthy: false,
+          status: null,
+          lastChecked: new Date(),
+          error: this.getErrorMessage(error)
+        };
+
+        console.warn('🏥 Initial connectivity check failed:', health);
         this.healthSubject.next(health);
         return of(health);
       })

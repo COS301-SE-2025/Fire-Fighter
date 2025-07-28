@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { IonContent } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
-import { interval, Subscription } from 'rxjs';
+import { interval, Subscription, firstValueFrom } from 'rxjs';
 import { HealthService, ServiceHealth } from '../../services/health.service';
 
 @Component({
@@ -74,6 +74,10 @@ export class ServiceDownPage implements OnInit, OnDestroy {
       if (health.isHealthy) {
         console.log('🎉 Service is back online! Redirecting to dashboard...');
         localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
+
+        // Reset retry attempts on successful automatic recovery
+        this.retryAttempts = 0;
+
         this.router.navigate(['/dashboard']);
       }
     });
@@ -109,20 +113,27 @@ export class ServiceDownPage implements OnInit, OnDestroy {
     this.retryAttempts++;
 
     try {
-      // Perform actual health check
-      const health = await this.healthService.checkHealth().toPromise();
+      console.log(`🔄 Attempting connection retry ${this.retryAttempts}/${this.maxRetryAttempts}...`);
+
+      // Perform actual health check using firstValueFrom instead of deprecated toPromise()
+      const health = await firstValueFrom(this.healthService.checkHealth());
 
       if (health?.isHealthy) {
         // If successful, navigate back to dashboard
         console.log('🎉 Connection restored! Redirecting to dashboard...');
         localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
+
+        // Reset retry attempts on successful connection
+        this.retryAttempts = 0;
+
+        // Navigate to dashboard
         this.router.navigate(['/dashboard']);
       } else {
         throw new Error(health?.error || 'Service still unavailable');
       }
 
     } catch (error) {
-      console.error('Connection retry failed:', error);
+      console.error(`❌ Connection retry ${this.retryAttempts} failed:`, error);
 
       if (this.retryAttempts >= this.maxRetryAttempts) {
         // Show message that max retries reached
@@ -156,8 +167,13 @@ export class ServiceDownPage implements OnInit, OnDestroy {
   }
 
   private showMaxRetriesMessage() {
-    // In a real app, you might show a toast or modal
-    console.log('Maximum retry attempts reached. Please try again later.');
+    console.log('⚠️ Maximum retry attempts reached. Please wait before trying again.');
+
+    // Reset retry attempts after 30 seconds to allow user to try again
+    setTimeout(() => {
+      console.log('🔄 Retry attempts reset. User can try again.');
+      this.retryAttempts = 0;
+    }, 30000);
   }
 
   goToOfflineMode() {
@@ -178,13 +194,21 @@ export class ServiceDownPage implements OnInit, OnDestroy {
     if (this.isRetrying) {
       return 'Connecting...';
     }
-    
+
     if (this.retryAttempts >= this.maxRetryAttempts) {
       return 'Max Retries Reached';
     }
-    
-    return this.retryAttempts > 0 
-      ? `Retry Connection (${this.retryAttempts}/${this.maxRetryAttempts})` 
+
+    return this.retryAttempts > 0
+      ? `Retry Connection (${this.retryAttempts}/${this.maxRetryAttempts})`
       : 'Retry Connection';
+  }
+
+  /**
+   * Reset retry attempts (useful for testing or manual reset)
+   */
+  resetRetryAttempts(): void {
+    this.retryAttempts = 0;
+    console.log('🔄 Retry attempts manually reset');
   }
 }

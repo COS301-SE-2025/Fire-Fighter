@@ -3,7 +3,9 @@ import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { AuthService } from './services/auth.service';
 import { HealthService } from './services/health.service';
 import { HealthMonitorService } from './services/health-monitor.service';
+import { AppLoadingService } from './services/app-loading.service';
 import { LanguageService } from './services/language.service';
+import { AppLoadingScreenComponent } from './components/app-loading-screen/app-loading-screen.component';
 import { Capacitor } from '@capacitor/core';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { initFlowbite } from 'flowbite';
@@ -13,7 +15,7 @@ import { App } from '@capacitor/app';
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
-  imports: [IonApp, IonRouterOutlet],
+  imports: [IonApp, IonRouterOutlet, AppLoadingScreenComponent],
   standalone: true,
 })
 export class AppComponent implements OnInit {
@@ -21,6 +23,7 @@ export class AppComponent implements OnInit {
     private authService: AuthService,
     private healthService: HealthService,
     private healthMonitorService: HealthMonitorService,
+    private appLoadingService: AppLoadingService,
     private languageService: LanguageService
   ) {}
 
@@ -29,36 +32,35 @@ export class AppComponent implements OnInit {
     console.log('1. App component initialized');
     console.log('2. Platform:', Capacitor.getPlatform());
     console.log('3. Is native platform:', Capacitor.isNativePlatform());
-    
-    // Test Firebase initialization
-    console.log('4. Testing Firebase Auth service injection...');
-    if (this.authService) {
-      console.log('✅ Auth service injected successfully');
-      
-      // Subscribe to auth state to see if Firebase is working
-      this.authService.user$.subscribe(user => {
-        console.log('5. Firebase auth state change:', user ? `User: ${user.uid}` : 'No user');
-      });
-    } else {
-      console.error('❌ Auth service injection failed');
-    }
-    
-    // Initialize Firebase Authentication with Capacitor on mobile platforms
+
+    // Initialize platform-specific features first
     if (Capacitor.isNativePlatform()) {
       this.initializeCapacitorAuth();
       this.setupStatusBar();
     }
 
+    // Initialize FlowBite
     initFlowbite();
 
-    // Initialize language service
-    console.log('6. Initializing language service...');
-    console.log('Current language:', this.languageService.getCurrentLanguage());
+    // Start the coordinated app initialization process first
+    console.log('4. Starting app loading sequence...');
+    this.appLoadingService.initializeApp().then(() => {
+      console.log('✅ App initialization complete');
 
-    // Start health monitoring
-    console.log('7. Starting health monitoring...');
-    this.healthService.startMonitoring();
-    this.healthMonitorService.startMonitoring();
+      // After app loading is complete, start health monitoring
+      console.log('5. Starting health monitoring...');
+      this.healthService.startMonitoring();
+      this.healthMonitorService.startMonitoring();
+
+    }).catch((error: any) => {
+      console.error('❌ App initialization failed:', error);
+
+      // Even if initialization fails, start health monitoring
+      // This ensures the app can still function with limited connectivity
+      console.log('6. Starting health monitoring (fallback mode)...');
+      this.healthService.startMonitoring();
+      this.healthMonitorService.startMonitoring();
+    });
 
     console.log('=== END APP INITIALIZATION DEBUG ===');
   }
