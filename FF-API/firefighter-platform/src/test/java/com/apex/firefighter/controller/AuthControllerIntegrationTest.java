@@ -2,7 +2,6 @@ package com.apex.firefighter.controller;
 
 import com.apex.firefighter.model.User;
 import com.apex.firefighter.repository.UserRepository;
-import com.apex.firefighter.service.auth.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
@@ -21,7 +20,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebMvc
 @ActiveProfiles("test")
 @Transactional
