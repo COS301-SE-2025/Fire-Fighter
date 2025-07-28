@@ -4,9 +4,9 @@
   <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)" pullFactor="0.6" pullMin="80" pullMax="140">
     <ion-refresher-content
       pullingIcon="arrow-down-outline"
-      pullingText="Pull to refresh dashboard"
+      [pullingText]="'DASHBOARD.REFRESH.PULL_TEXT' | translate"
       refreshingSpinner="crescent"
-      refreshingText="Updating dashboard...">
+      [refreshingText]="'DASHBOARD.REFRESH.REFRESHING_TEXT' | translate">
     </ion-refresher-content>
   </ion-refresher>
   
@@ -22,7 +22,7 @@
     </div>
 
     <ng-container *ngIf="user$ | async as user">
-      <h1 class="text-2xl font-sans font-bold text-gray-900 dark:text-white">Welcome, {{ user.displayName || user.email }}</h1>
+      <h1 class="text-2xl font-sans font-bold text-gray-900 dark:text-white">{{ 'DASHBOARD.WELCOME' | translate }}, {{ user.displayName || user.email }}</h1>
 
       <!-- Statistics Cards -->
       <div class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -32,15 +32,15 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"></path>
             </svg>
             <a href="#">
-                <h5 class="font-sans text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">Active Sessions</h5>
+                <h5 class="font-sans text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">{{ 'DASHBOARD.STATS.ACTIVE_SESSIONS' | translate }}</h5>
             </a>
           </div>
     
           <h1 class="text-4xl font-sans font-bold text-gray-900 dark:text-white">{{ activeTicketsCount }}</h1>
     
           <p class="mb-3 font-sans text-gray-600 dark:text-gray-400">
-            <span *ngIf="activeTicketsCount > 0">You have active FireFighter privileges</span>
-            <span *ngIf="activeTicketsCount === 0">No active FireFighter sessions</span>
+            <span *ngIf="activeTicketsCount > 0">{{ 'DASHBOARD.STATS.ACTIVE_PRIVILEGES' | translate }}</span>
+            <span *ngIf="activeTicketsCount === 0">{{ 'DASHBOARD.STATS.NO_ACTIVE_SESSIONS' | translate }}</span>
           </p>
         </div>
     
@@ -50,13 +50,13 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z"></path>
             </svg>
             <a href="#">
-                <h5 class="font-sans text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">Total Requests</h5>
+                <h5 class="font-sans text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">{{ 'DASHBOARD.STATS.TOTAL_REQUESTS' | translate }}</h5>
             </a>
           </div>
     
           <h1 class="text-4xl font-sans font-bold text-gray-900 dark:text-white">{{ totalTicketsCount }}</h1>
     
-          <p class="mb-3 font-sans text-gray-600 dark:text-gray-400">FireFighter requests this month</p>
+          <p class="mb-3 font-sans text-gray-600 dark:text-gray-400">{{ 'DASHBOARD.STATS.REQUESTS_THIS_MONTH' | translate }}</p>
         </div>
       </div>
 
@@ -67,19 +67,19 @@
          <div class="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50">
            <div class="flex flex-col space-y-3 lg:flex-row lg:items-center lg:justify-between lg:space-y-0 p-4 border-b border-gray-200 dark:border-gray-700">
              <div class="flex items-center space-x-2">
-               <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+               <svg class="w-6 h-6 text-red-600 dark:text-red-400" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"></path>
                </svg>
                <div>
-                 <h2 class="text-lg lg:text-xl font-semibold text-gray-900 dark:text-white">Active Emergency Requests</h2>
-                 <p class="text-sm text-gray-500 dark:text-gray-400 lg:hidden">{{ activeTicketsCount }} active requests requiring attention</p>
+                 <h2 class="text-lg lg:text-xl font-semibold text-gray-900 dark:text-white">{{ 'DASHBOARD.EMERGENCY_REQUESTS.TITLE' | translate }}</h2>
+                 <p class="text-sm text-gray-500 dark:text-gray-400 lg:hidden">{{ activeTicketsCount }} {{ 'DASHBOARD.EMERGENCY_REQUESTS.SUBTITLE' | translate }}</p>
                </div>
              </div>
              <div class="flex flex-col space-y-2 lg:flex-row lg:items-center lg:space-y-0 lg:space-x-2">
-               <span class="hidden lg:inline text-sm text-gray-500 dark:text-gray-400">{{ activeTicketsCount }} active requests requiring attention</span>
+               <span class="hidden lg:inline text-sm text-gray-500 dark:text-gray-400">{{ activeTicketsCount }} {{ 'DASHBOARD.EMERGENCY_REQUESTS.SUBTITLE' | translate }}</span>
                <button [routerLink]="['/requests']" class="w-full lg:w-auto inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                 <span class="hidden sm:inline">View All Requests</span>
-                 <span class="sm:hidden">View All</span>
+                 <span class="hidden sm:inline">{{ 'DASHBOARD.EMERGENCY_REQUESTS.VIEW_ALL' | translate }}</span>
+                 <span class="sm:hidden">{{ 'DASHBOARD.EMERGENCY_REQUESTS.VIEW_ALL_SHORT' | translate }}</span>
                  <svg class="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
                  </svg>
@@ -94,8 +94,8 @@
                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
                </svg>
-               <h3 class="mt-2 text-lg font-medium text-gray-900 dark:text-white">No active emergency requests</h3>
-               <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">All requests have been resolved</p>
+               <h3 class="mt-2 text-lg font-medium text-gray-900 dark:text-white">{{ 'DASHBOARD.EMERGENCY_REQUESTS.NO_REQUESTS' | translate }}</h3>
+               <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ 'DASHBOARD.EMERGENCY_REQUESTS.ALL_RESOLVED' | translate }}</p>
              </div>
 
              <!-- Table (only show when there are tickets) -->
@@ -103,12 +103,12 @@
                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                  <thead class="bg-gray-50 dark:bg-gray-700">
                    <tr>
-                     <th class="px-3 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
-                     <th class="px-3 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Requester</th>
-                     <th class="hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Reason</th>
-                     <th class="px-3 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                     <th class="px-3 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time Left</th>
-                     <th class="hidden xl:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Requested</th>
+                     <th class="px-3 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ 'DASHBOARD.EMERGENCY_REQUESTS.TABLE.ID' | translate }}</th>
+                     <th class="px-3 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ 'DASHBOARD.EMERGENCY_REQUESTS.TABLE.REQUESTER' | translate }}</th>
+                     <th class="hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ 'DASHBOARD.EMERGENCY_REQUESTS.TABLE.REASON' | translate }}</th>
+                     <th class="px-3 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ 'DASHBOARD.EMERGENCY_REQUESTS.TABLE.STATUS' | translate }}</th>
+                     <th class="px-3 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ 'DASHBOARD.EMERGENCY_REQUESTS.TABLE.TIME_LEFT' | translate }}</th>
+                     <th class="hidden xl:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ 'DASHBOARD.EMERGENCY_REQUESTS.TABLE.REQUESTED' | translate }}</th>
                    </tr>
                  </thead>
                  <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -120,7 +120,7 @@
                      <td class="hidden lg:table-cell px-6 py-4 text-sm text-gray-900 dark:text-white max-w-xs truncate">{{ ticket.reason }}</td>
                      <td class="px-3 lg:px-6 py-4 whitespace-nowrap">
                        <span class="inline-flex items-center px-2 lg:px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
-                         Active
+                         {{ 'DASHBOARD.EMERGENCY_REQUESTS.TABLE.ACTIVE' | translate }}
                        </span>
                      </td>
                      <td class="px-3 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
@@ -128,9 +128,9 @@
                          <svg class="w-4 h-4 mr-1 text-gray-400 hidden lg:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                          </svg>
-                         <span *ngIf="getRemainingTime(ticket) === 'Expired'; else remainingTime" class="text-red-600 dark:text-red-400 text-xs lg:text-sm">{{ getRemainingTime(ticket) }}</span>
+                         <span *ngIf="getRemainingTime(ticket) === 'Expired'; else remainingTime" class="text-red-600 dark:text-red-400 text-xs lg:text-sm">{{ 'DASHBOARD.EMERGENCY_REQUESTS.TABLE.EXPIRED' | translate }}</span>
                          <ng-template #remainingTime>
-                           <span class="text-xs lg:text-sm">{{ getRemainingTime(ticket) }}<span class="hidden lg:inline"> remaining</span></span>
+                           <span class="text-xs lg:text-sm">{{ getRemainingTime(ticket) }}<span class="hidden lg:inline"> {{ 'DASHBOARD.EMERGENCY_REQUESTS.TABLE.REMAINING' | translate }}</span></span>
                          </ng-template>
                        </div>
                      </td>
@@ -157,10 +157,10 @@
                      </div>
                      <div class="flex flex-col items-end space-y-2">
                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
-                         Active
+                         {{ 'DASHBOARD.EMERGENCY_REQUESTS.TABLE.ACTIVE' | translate }}
                        </span>
                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300">
-                         Critical
+                         {{ 'DASHBOARD.EMERGENCY_REQUESTS.TABLE.CRITICAL' | translate }}
                        </span>
                      </div>
                    </div>
@@ -169,23 +169,23 @@
                  <!-- Card Body -->
                  <div class="p-4">
                    <div class="mb-3">
-                     <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Reason</div>
+                     <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{ 'DASHBOARD.EMERGENCY_REQUESTS.TABLE.REASON' | translate }}</div>
                      <div class="text-gray-900 dark:text-white">{{ ticket.reason }}</div>
                    </div>
 
                    <div class="grid grid-cols-2 gap-4 text-sm">
                      <div>
-                       <div class="text-gray-600 dark:text-gray-400 mb-1">Time Remaining</div>
+                       <div class="text-gray-600 dark:text-gray-400 mb-1">{{ 'DASHBOARD.EMERGENCY_REQUESTS.TABLE.TIME_REMAINING' | translate }}</div>
                        <div class="flex items-center text-gray-900 dark:text-white">
                          <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                          </svg>
-                         <span *ngIf="getRemainingTime(ticket) === 'Expired'; else remainingTime" class="text-red-600 dark:text-red-400">{{ getRemainingTime(ticket) }}</span>
+                         <span *ngIf="getRemainingTime(ticket) === 'Expired'; else remainingTime" class="text-red-600 dark:text-red-400">{{ 'DASHBOARD.EMERGENCY_REQUESTS.TABLE.EXPIRED' | translate }}</span>
                          <ng-template #remainingTime>{{ getRemainingTime(ticket) }}</ng-template>
                        </div>
                      </div>
                      <div>
-                       <div class="text-gray-600 dark:text-gray-400 mb-1">Requested</div>
+                       <div class="text-gray-600 dark:text-gray-400 mb-1">{{ 'DASHBOARD.EMERGENCY_REQUESTS.TABLE.REQUESTED' | translate }}</div>
                        <div class="text-gray-900 dark:text-white">{{ formatRequestTime(ticket.dateCreated) }}</div>
                      </div>
                    </div>
@@ -198,8 +198,8 @@
                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
                </svg>
-               <h3 class="mt-2 text-lg font-medium text-gray-900 dark:text-white">No active emergency requests</h3>
-               <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">All requests have been resolved</p>
+               <h3 class="mt-2 text-lg font-medium text-gray-900 dark:text-white">{{ 'DASHBOARD.EMERGENCY_REQUESTS.NO_REQUESTS' | translate }}</h3>
+               <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ 'DASHBOARD.EMERGENCY_REQUESTS.ALL_RESOLVED' | translate }}</p>
              </div>
            </div>
          </div>
@@ -212,8 +212,8 @@
                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                </svg>
                <div>
-                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Quick Actions</h2>
-                 <p class="text-sm text-gray-500 dark:text-gray-400">Emergency management shortcuts</p>
+                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ 'DASHBOARD.QUICK_ACTIONS.TITLE' | translate }}</h2>
+                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ 'DASHBOARD.QUICK_ACTIONS.SUBTITLE' | translate }}</p>
                </div>
              </div>
            </div>
@@ -228,8 +228,8 @@
                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                    </svg>
                    <div class="text-left">
-                     <div class="font-semibold">New Request</div>
-                     <div class="text-sm opacity-90">Submit emergency access request</div>
+                     <div class="font-semibold">{{ 'DASHBOARD.QUICK_ACTIONS.NEW_REQUEST' | translate }}</div>
+                     <div class="text-sm opacity-90">{{ 'DASHBOARD.QUICK_ACTIONS.NEW_REQUEST_DESC' | translate }}</div>
                    </div>
                  </div>
                </button>
@@ -242,10 +242,10 @@
                   </svg>
                    <div class="text-left flex-1">
                      <div class="flex items-center justify-between">
-                       <span class="font-semibold">Notifications</span>
+                       <span class="font-semibold">{{ 'DASHBOARD.QUICK_ACTIONS.NOTIFICATIONS' | translate }}</span>
                        <span *ngIf="unreadNotificationsCount > 0" class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-amber-600 bg-white rounded-full">{{ unreadNotificationsCount }}</span>
                      </div>
-                     <div class="text-sm opacity-90">View pending alerts ({{ unreadNotificationsCount }})</div>
+                     <div class="text-sm opacity-90">{{ 'DASHBOARD.QUICK_ACTIONS.NOTIFICATIONS_DESC' | translate }} ({{ unreadNotificationsCount }})</div>
                    </div>
                  </div>
                </button>
@@ -257,8 +257,8 @@
                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                    </svg>
                    <div class="text-left">
-                     <div class="font-semibold">Audit Logs</div>
-                     <div class="text-sm opacity-90">Review activity logs</div>
+                     <div class="font-semibold">{{ 'DASHBOARD.QUICK_ACTIONS.AUDIT_LOGS' | translate }}</div>
+                     <div class="text-sm opacity-90">{{ 'DASHBOARD.QUICK_ACTIONS.AUDIT_LOGS_DESC' | translate }}</div>
                    </div>
                  </div>
                </button>
@@ -268,8 +268,8 @@
                  <div class="flex items-center space-x-3">
                    <svg fill="currentColor" fill-rule="evenodd" height="24px" style="flex:none;line-height:1" viewBox="0 0 24 24" width="24px" xmlns="http://www.w3.org/2000/svg"><title>Gemini</title><path d="M20.616 10.835a14.147 14.147 0 01-4.45-3.001 14.111 14.111 0 01-3.678-6.452.503.503 0 00-.975 0 14.134 14.134 0 01-3.679 6.452 14.155 14.155 0 01-4.45 3.001c-.65.28-1.318.505-2.002.678a.502.502 0 000 .975c.684.172 1.35.397 2.002.677a14.147 14.147 0 014.45 3.001 14.112 14.112 0 013.679 6.453.502.502 0 00.975 0c.172-.685.397-1.351.677-2.003a14.145 14.145 0 013.001-4.45 14.113 14.113 0 016.453-3.678.503.503 0 000-.975 13.245 13.245 0 01-2.003-.678z"></path></svg>
                    <div class="text-left">
-                     <div class="font-semibold">Gemini</div>
-                     <div class="text-sm opacity-90">Ask AI assistant</div>
+                     <div class="font-semibold">{{ 'DASHBOARD.QUICK_ACTIONS.GEMINI' | translate }}</div>
+                     <div class="text-sm opacity-90">{{ 'DASHBOARD.QUICK_ACTIONS.GEMINI_DESC' | translate }}</div>
                    </div>
                  </div>
                </button>
@@ -291,8 +291,8 @@
                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h3l2-8 4 16 2-8h3"></path>
                </svg>
                <div>
-                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Recent Activity</h2>
-                 <p class="text-sm text-gray-500 dark:text-gray-400">Latest FireFighter system events and actions</p>
+                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ 'DASHBOARD.RECENT_ACTIVITY.TITLE' | translate }}</h2>
+                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ 'DASHBOARD.RECENT_ACTIVITY.SUBTITLE' | translate }}</p>
                </div>
              </div>
            </div>
@@ -302,8 +302,8 @@
              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
              </svg>
-             <h3 class="mt-2 text-lg font-medium text-gray-900 dark:text-white">No recent activity</h3>
-             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">System events and actions will appear here</p>
+             <h3 class="mt-2 text-lg font-medium text-gray-900 dark:text-white">{{ 'DASHBOARD.RECENT_ACTIVITY.NO_ACTIVITY' | translate }}</h3>
+             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ 'DASHBOARD.RECENT_ACTIVITY.NO_ACTIVITY_DESC' | translate }}</p>
            </div>
 
            <!-- Activity List -->
@@ -366,7 +366,7 @@
                            'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300': activity.status === 'pending',
                            'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300': activity.status === 'denied'
                          }">
-                     {{ activity.status }}
+                     {{ 'DASHBOARD.ACTIVITY_STATUS.' + activity.status.toUpperCase() | translate }}
                    </span>
                  </div>
                </div>
@@ -382,8 +382,8 @@
                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                </svg>
                <div>
-                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Monthly Statistics</h2>
-                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ currentMonthName }} 2025 performance overview</p>
+                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ 'DASHBOARD.MONTHLY_STATS.TITLE' | translate }}</h2>
+                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ currentMonthName }} 2025 {{ 'DASHBOARD.MONTHLY_STATS.SUBTITLE' | translate }}</p>
                </div>
              </div>
            </div>
@@ -394,7 +394,7 @@
                <!-- Total Requests Card -->
                <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
                  <div class="flex items-center justify-between mb-2">
-                   <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Requests</h3>
+                   <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ 'DASHBOARD.MONTHLY_STATS.TOTAL_REQUESTS' | translate }}</h3>
                    <div class="flex items-center text-xs">
                      <svg class="w-3 h-3 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
@@ -403,13 +403,13 @@
                    </div>
                  </div>
                  <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ totalTicketsCount }}</div>
-                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">vs last month</p>
+                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ 'DASHBOARD.MONTHLY_STATS.VS_LAST_MONTH' | translate }}</p>
                </div>
 
                <!-- Approval Rate Card -->
                <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
                  <div class="flex items-center justify-between mb-2">
-                   <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400">Approval Rate</h3>
+                   <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ 'DASHBOARD.MONTHLY_STATS.APPROVAL_RATE' | translate }}</h3>
                    <div class="flex items-center text-xs">
                      <svg class="w-3 h-3 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
@@ -418,13 +418,13 @@
                    </div>
                  </div>
                  <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ approvalRate }}%</div>
-                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">approved requests</p>
+                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ 'DASHBOARD.MONTHLY_STATS.APPROVED_REQUESTS' | translate }}</p>
                </div>
 
                <!-- Critical Issues Card -->
                <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
                  <div class="flex items-center justify-between mb-2">
-                   <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400">Critical Issues</h3>
+                   <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ 'DASHBOARD.MONTHLY_STATS.CRITICAL_ISSUES' | translate }}</h3>
                    <div class="flex items-center text-xs">
                      <svg class="w-3 h-3 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
@@ -433,13 +433,13 @@
                    </div>
                  </div>
                  <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ criticalIssuesCount }}</div>
-                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">this month</p>
+                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ 'DASHBOARD.MONTHLY_STATS.THIS_MONTH' | translate }}</p>
                </div>
 
                <!-- Success Rate Card -->
                <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
                  <div class="flex items-center justify-between mb-2">
-                   <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400">Success Rate</h3>
+                   <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ 'DASHBOARD.MONTHLY_STATS.SUCCESS_RATE' | translate }}</h3>
                    <div class="flex items-center text-xs">
                      <svg class="w-3 h-3 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
@@ -448,7 +448,7 @@
                    </div>
                  </div>
                  <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ successRate }}%</div>
-                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">resolved</p>
+                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ 'DASHBOARD.MONTHLY_STATS.RESOLVED' | translate }}</p>
                </div>
 
              </div>
