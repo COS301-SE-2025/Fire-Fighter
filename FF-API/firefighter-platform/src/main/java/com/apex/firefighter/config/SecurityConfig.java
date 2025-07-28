@@ -21,10 +21,21 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
+                // Public endpoints
+                .requestMatchers("/api/users/verify", "/api/auth/**").permitAll()
+                // Admin only endpoints
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                // Protected endpoints requiring authentication
+                .requestMatchers("/api/protected/**").authenticated()
+                // API key protected endpoints
+                .requestMatchers("/api/endpoints/**").authenticated()
+                // Allow other API endpoints
                 .requestMatchers("/api/**").permitAll()
                 .anyRequest().permitAll()
-            );
-            
+            )
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(new ApiKeyAuthFilter(apiKeyRepository), UsernamePasswordAuthenticationFilter.class);
+        
         return http.build();
     }
 
