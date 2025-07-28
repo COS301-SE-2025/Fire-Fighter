@@ -20,10 +20,32 @@ import java.util.Optional;
 public class AuthenticationService {
 
     private final UserRepository userRepository;
+    private final JwtService jwtService;
 
     @Autowired
-    public AuthenticationService(UserRepository userRepository) {
+    public AuthenticationService(UserRepository userRepository, JwtService jwtService) {
         this.userRepository = userRepository;
+        this.jwtService = jwtService;
+    }
+
+    /**
+     * Verify Firebase token and create/update user, return custom JWT
+     */
+    public AuthResponse verifyFirebaseTokenAndCreateJwt(String firebaseIdToken) throws Exception {
+        // Verify Firebase token
+        FirebaseToken firebaseToken = jwtService.verifyFirebaseToken(firebaseIdToken);
+        
+        String firebaseUid = firebaseToken.getUid();
+        String email = firebaseToken.getEmail();
+        String username = firebaseToken.getName() != null ? firebaseToken.getName() : email.split("@")[0];
+        
+        // Create or update user
+        User user = verifyOrCreateUser(firebaseUid, username, email, null);
+        
+        // Generate custom JWT
+        String customJwt = jwtService.generateToken(firebaseUid, email, user.getIsAdmin());
+        
+        return new AuthResponse(customJwt, user);
     }
 
     /**
