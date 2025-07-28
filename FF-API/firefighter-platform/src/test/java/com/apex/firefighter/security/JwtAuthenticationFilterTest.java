@@ -134,8 +134,8 @@ class JwtAuthenticationFilterTest {
         String invalidToken = "invalid.token";
         when(request.getHeader("Authorization")).thenReturn("Bearer " + invalidToken);
         
-        // Only stub what will actually be called
-        when(jwtService.extractFirebaseUid(invalidToken))
+        // Use lenient stubbing to avoid unnecessary stubbing errors
+        lenient().when(jwtService.extractFirebaseUid(invalidToken))
             .thenThrow(new RuntimeException("Invalid JWT token"));
 
         // When
