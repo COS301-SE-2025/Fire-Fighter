@@ -1,4 +1,4 @@
-package com.apex.firefighter.service;
+package com.apex.firefighter.service.auth;
 
 import java.security.SecureRandom;
 import java.util.Base64;

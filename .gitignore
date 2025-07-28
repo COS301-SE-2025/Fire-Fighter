@@ -1,128 +1,44 @@
-# ===================================
-# FireFighter Mono-Repo .gitignore
-# ===================================
-
-# ===================================
-# Node.js & npm
-# ===================================
+# Root gitignore - keep both sets of ignores
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-.pnpm-debug.log*
-*.tgz
-*.tar.gz
-.npm
-.eslintcache
-.yarn-integrity
-.yarn-offline-mirror
-.yarn-offline-mirror-pruning
+.env
+.env.local
+.env.*.local
+
+# Backend specific
+backend/firefighter-platform/target/
+backend/firefighter-platform/.mvn/
+backend/firefighter-platform/HELP.md
+
+# Frontend specific  
+frontend/FireFighter/dist/
+frontend/FireFighter/.angular/
+frontend/FireFighter/coverage/
+
+# Angular specific
+FF-Angular/.angular/
+FF-Angular/.ng_build_cache/
+FF-Angular/.ng_compilation_cache/
+FF-Angular/android/
+FF-Angular/ios/
+FF-Angular/.capacitor/
+FF-Angular/coverage/
+FF-Angular/logs/
+FF-Angular/*.log
+FF-Angular/.npm
+FF-Angular/.eslintcache
+FF-Angular/.firebase/
+FF-Angular/firebase-debug.log
+
+# API specific
+FF-API/target/
+FF-API/.mvn/
+FF-API/HELP.md
 
 # Runtime data
 pids
 *.pid
 *.seed
 *.pid.lock
-
-# ===================================
-# Angular & Ionic
-# ===================================
-# Build outputs
-frontend/FireFighter/dist/
-frontend/FireFighter/www/
-frontend/FireFighter/build/
-
-# Angular specific
-frontend/FireFighter/.angular/
-frontend/FireFighter/.ng_build_cache/
-frontend/FireFighter/.ng_compilation_cache/
-
-# Ionic/Capacitor
-frontend/FireFighter/android/
-frontend/FireFighter/ios/
-frontend/FireFighter/.capacitor/
-frontend/FireFighter/capacitor.config.json
-
-# Coverage and test outputs
-frontend/FireFighter/coverage/
-frontend/FireFighter/.nyc_output/
-frontend/FireFighter/tmp/
-frontend/FireFighter/temp/
-
-# Logs
-frontend/FireFighter/logs/
-frontend/FireFighter/*.log
-frontend/FireFighter/npm-debug.log*
-frontend/FireFighter/yarn-debug.log*
-frontend/FireFighter/yarn-error.log*
-frontend/FireFighter/lerna-debug.log*
-
-# Runtime data
-frontend/FireFighter/pids/
-frontend/FireFighter/*.pid
-frontend/FireFighter/*.seed
-frontend/FireFighter/*.pid.lock
-
-# Optional npm cache directory
-frontend/FireFighter/.npm
-
-# Optional eslint cache
-frontend/FireFighter/.eslintcache
-
-# Optional REPL history
-frontend/FireFighter/.node_repl_history
-
-# Output of 'npm pack'
-frontend/FireFighter/*.tgz
-
-# Yarn Integrity file
-frontend/FireFighter/.yarn-integrity
-
-# Firebase
-frontend/FireFighter/.firebase/
-frontend/FireFighter/firebase-debug.log
-frontend/FireFighter/firestore-debug.log
-
-# Capacitor
-frontend/FireFighter/ios/
-frontend/FireFighter/android/local.properties
-frontend/FireFighter/android/app/google-services.json
-frontend/FireFighter/ios/App/App/GoogleService-Info.plist
-
-# Android specific (for Capacitor)
-frontend/FireFighter/android/*.apk
-frontend/FireFighter/android/*.aar
-frontend/FireFighter/android/*.ap_
-frontend/FireFighter/android/*.aab
-frontend/FireFighter/android/*.dex
-frontend/FireFighter/android/*.class
-frontend/FireFighter/android/bin/
-frontend/FireFighter/android/gen/
-frontend/FireFighter/android/out/
-frontend/FireFighter/android/.gradle/
-frontend/FireFighter/android/build/
-frontend/FireFighter/android/captures/
-frontend/FireFighter/android/.externalNativeBuild
-frontend/FireFighter/android/.cxx/
-frontend/FireFighter/android/freeline.py
-frontend/FireFighter/android/freeline/
-frontend/FireFighter/android/freeline_project_description.json
-frontend/FireFighter/android/fastlane/report.xml
-frontend/FireFighter/android/fastlane/Preview.html
-frontend/FireFighter/android/fastlane/screenshots
-frontend/FireFighter/android/fastlane/test_output
-frontend/FireFighter/android/fastlane/readme.md
-frontend/FireFighter/android/lint/intermediates/
-frontend/FireFighter/android/lint/generated/
-frontend/FireFighter/android/lint/outputs/
-frontend/FireFighter/android/lint/tmp/
-frontend/FireFighter/android/*.hprof
-frontend/FireFighter/android/capacitor-cordova-android-plugins
-frontend/FireFighter/android/app/src/main/assets/public
-frontend/FireFighter/android/app/src/main/assets/capacitor.config.json
-frontend/FireFighter/android/app/src/main/assets/capacitor.plugins.json
-frontend/FireFighter/android/app/src/main/res/xml/config.xml
 
 # ===================================
 # Spring Boot & Maven
