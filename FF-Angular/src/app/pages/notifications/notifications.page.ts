@@ -9,6 +9,7 @@ import { addIcons } from 'ionicons';
 import { logOutOutline } from 'ionicons/icons';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Observable } from 'rxjs';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-notifications',
@@ -16,13 +17,45 @@ import { Observable } from 'rxjs';
   styleUrls: ['./notifications.page.scss'],
   standalone: true,
   imports: [
-    CommonModule, 
+    CommonModule,
     FormsModule,
     RouterModule,
     IonContent,
     IonRefresher,
     IonRefresherContent,
     NavbarComponent
+  ],
+  animations: [
+    trigger('modalBackdrop', [
+      state('hidden', style({
+        opacity: 0
+      })),
+      state('visible', style({
+        opacity: 1
+      })),
+      transition('hidden => visible', [
+        animate('200ms ease-out')
+      ]),
+      transition('visible => hidden', [
+        animate('150ms ease-in')
+      ])
+    ]),
+    trigger('modalPanel', [
+      state('hidden', style({
+        opacity: 0,
+        transform: 'scale(0.95) translateY(-10px)'
+      })),
+      state('visible', style({
+        opacity: 1,
+        transform: 'scale(1) translateY(0)'
+      })),
+      transition('hidden => visible', [
+        animate('250ms cubic-bezier(0.34, 1.56, 0.64, 1)')
+      ]),
+      transition('visible => hidden', [
+        animate('200ms ease-in')
+      ])
+    ])
   ]
 })
 export class NotificationsPage implements OnInit {
@@ -36,6 +69,7 @@ export class NotificationsPage implements OnInit {
   deleteConfirmationType: 'single' | 'multiple' = 'single';
   notificationToDelete: number | null = null;
   loading = false;
+  modalAnimationState: 'hidden' | 'visible' = 'hidden';
 
   constructor(
     private authService: AuthService,
@@ -81,6 +115,10 @@ export class NotificationsPage implements OnInit {
     this.deleteConfirmationType = 'multiple';
     this.notificationToDelete = null;
     this.showDeleteConfirmModal = true;
+    // Small delay to ensure the modal is rendered before animating
+    setTimeout(() => {
+      this.modalAnimationState = 'visible';
+    }, 10);
   }
 
   deleteNotification(notificationId: number, event: Event) {
@@ -90,6 +128,10 @@ export class NotificationsPage implements OnInit {
     this.deleteConfirmationType = 'single';
     this.notificationToDelete = notificationId;
     this.showDeleteConfirmModal = true;
+    // Small delay to ensure the modal is rendered before animating
+    setTimeout(() => {
+      this.modalAnimationState = 'visible';
+    }, 10);
   }
 
   getTimeAgo(timestamp: Date): string {
@@ -147,10 +189,14 @@ export class NotificationsPage implements OnInit {
 
   // Modal control methods
   cancelDeletion() {
-    this.showDeleteConfirmModal = false;
-    this.notificationToDelete = null;
-    this.deleteConfirmationType = 'single';
-    this.loading = false;
+    this.modalAnimationState = 'hidden';
+    // Wait for animation to complete before hiding the modal
+    setTimeout(() => {
+      this.showDeleteConfirmModal = false;
+      this.notificationToDelete = null;
+      this.deleteConfirmationType = 'single';
+      this.loading = false;
+    }, 200);
   }
 
   confirmDeletion() {

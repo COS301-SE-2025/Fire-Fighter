@@ -1,0 +1,257 @@
+{
+  "COMMON": {
+    "LOADING": "Laden...",
+    "SAVE": "Speichern",
+    "CANCEL": "Abbrechen",
+    "DELETE": "Löschen",
+    "EDIT": "Bearbeiten",
+    "CLOSE": "Schließen",
+    "CONFIRM": "Bestätigen",
+    "YES": "Ja",
+    "NO": "Nein",
+    "OK": "OK",
+    "ERROR": "Fehler",
+    "SUCCESS": "Erfolgreich",
+    "WARNING": "Warnung",
+    "INFO": "Information"
+  },
+  "NAVIGATION": {
+    "DASHBOARD": "Dashboard",
+    "REQUESTS": "Meine Anfragen",
+    "NOTIFICATIONS": "Benachrichtigungen",
+    "ACCOUNT": "Konto",
+    "HELP": "Hilfe",
+    "SETTINGS": "Einstellungen",
+    "ADMIN": "Admin-Konsole",
+    "CHAT": "Gemini",
+    "LOGIN": "Anmelden",
+    "REGISTER": "Registrieren",
+    "LOGOUT": "Abmelden"
+  },
+  "NAVBAR": {
+    "BRAND": {
+      "TITLE": "FireFighter",
+      "SUBTITLE": "Notfall-Zugriffsverwaltung"
+    },
+    "MENU": {
+      "OPEN_MAIN_MENU": "Hauptmenü öffnen",
+      "TOGGLE_THEME": "Design umschalten",
+      "VIEW_NOTIFICATIONS": "Benachrichtigungen anzeigen",
+      "OPEN_USER_MENU": "Benutzermenü öffnen"
+    },
+    "NAVIGATION": {
+      "DASHBOARD": "Dashboard",
+      "MY_REQUESTS": "Meine Anfragen",
+      "GEMINI": "Gemini",
+      "ADMIN_CONSOLE": "Admin-Konsole",
+      "NOTIFICATIONS": "Benachrichtigungen"
+    },
+    "PROFILE_MENU": {
+      "HEADER": "Notfall-Zugriff",
+      "SYSTEM": "FireFighter-System",
+      "YOUR_PROFILE": "Ihr Profil",
+      "HELP_SUPPORT": "Hilfe & Support",
+      "SETTINGS": "Einstellungen",
+      "SIGN_OUT": "Abmelden"
+    },
+    "MOBILE_MENU": {
+      "HELP_SUPPORT": "Hilfe & Support"
+    }
+  },
+  "AUTH": {
+    "LOGIN": {
+      "TITLE": "Anmelden",
+      "EMAIL": "E-Mail",
+      "PASSWORD": "Passwort",
+      "REMEMBER_ME": "Angemeldet bleiben",
+      "FORGOT_PASSWORD": "Passwort vergessen?",
+      "SIGN_IN_BUTTON": "Anmelden",
+      "NO_ACCOUNT": "Noch kein Konto?",
+      "CREATE_ACCOUNT": "Hier erstellen"
+    },
+    "REGISTER": {
+      "TITLE": "Konto erstellen",
+      "EMAIL": "E-Mail",
+      "PASSWORD": "Passwort",
+      "CONFIRM_PASSWORD": "Passwort bestätigen",
+      "FIRST_NAME": "Vorname",
+      "LAST_NAME": "Nachname",
+      "DEPARTMENT": "Abteilung",
+      "CREATE_ACCOUNT_BUTTON": "Konto erstellen",
+      "HAVE_ACCOUNT": "Bereits ein Konto?",
+      "SIGN_IN_HERE": "Hier anmelden"
+    }
+  },
+  "SETTINGS": {
+    "TITLE": "Einstellungen",
+    "SUBTITLE": "Verwalten Sie Ihre FireFighter-Einstellungen",
+    "LANGUAGE": {
+      "TITLE": "Sprache",
+      "DESCRIPTION": "Wählen Sie Ihre bevorzugte Sprache für die Anwendungsoberfläche",
+      "LABEL": "Anwendungssprache",
+      "ENGLISH": "English (UK)",
+      "GERMAN": "Deutsch (German)"
+    },
+    "NOTIFICATIONS": {
+      "TITLE": "Push-Benachrichtigungen",
+      "DESCRIPTION": "Notfall-Warnungen und Systembenachrichtigungen konfigurieren",
+      "EMERGENCY_SECTION": "Notfall-Benachrichtigungen",
+      "SYSTEM_SECTION": "System-Benachrichtigungen",
+      "DELIVERY_SECTION": "Zustellungsmethoden",
+      "CRITICAL_ALERTS": "Kritische Systemwarnungen",
+      "CRITICAL_ALERTS_DESC": "Systemausfälle, Sicherheitsverletzungen, Notfälle",
+      "ACCESS_REQUESTS": "Notfall-Zugriffsanfragen",
+      "ACCESS_REQUESTS_DESC": "Neue FireFighter-Rollenanfragen, die eine Genehmigung erfordern",
+      "SESSION_EXPIRY": "Sitzungsablauf-Warnungen",
+      "SESSION_EXPIRY_DESC": "Warnungen, wenn Ihr FireFighter-Zugriff bald abläuft",
+      "REQUEST_UPDATES": "Anfrage-Status-Updates",
+      "REQUEST_UPDATES_DESC": "Genehmigung, Ablehnung oder Änderung Ihrer Anfragen",
+      "AUDIT_ALERTS": "Audit-Trail-Warnungen",
+      "AUDIT_ALERTS_DESC": "Ungewöhnliche Aktivitäten in Ihren Zugriffsprotokollen erkannt",
+      "MAINTENANCE": "Systemwartung",
+      "MAINTENANCE_DESC": "Geplante Wartungsarbeiten und System-Updates",
+      "PUSH_ENABLED": "Push-Benachrichtigungen",
+      "PUSH_ENABLED_DESC": "Browser- und Mobile-Benachrichtigungen",
+      "EMAIL_ENABLED": "E-Mail-Benachrichtigungen",
+      "EMAIL_ENABLED_DESC": "E-Mail-Warnungen für kritische Ereignisse"
+    },
+    "SECURITY": {
+      "TITLE": "Sicherheitseinstellungen",
+      "DESCRIPTION": "Verwalten Sie Ihre Kontosicherheitseinstellungen",
+      "COMING_SOON": "Sicherheitseinstellungen werden in einem zukünftigen Update verfügbar sein"
+    },
+    "PREFERENCES": {
+      "TITLE": "Einstellungen",
+      "DESCRIPTION": "Passen Sie Ihre FireFighter-Erfahrung an",
+      "COMING_SOON": "Zusätzliche Einstellungen werden in einem zukünftigen Update verfügbar sein"
+    },
+    "SAVE_BUTTON": "Benachrichtigungseinstellungen speichern",
+    "SAVING": "Speichern...",
+    "SAVED_SUCCESS": "Einstellungen erfolgreich gespeichert",
+    "SAVE_ERROR": "Fehler beim Speichern der Einstellungen"
+  },
+  "DASHBOARD": {
+    "TITLE": "Dashboard",
+    "WELCOME": "Willkommen",
+    "REFRESH": {
+      "PULL_TEXT": "Zum Aktualisieren des Dashboards ziehen",
+      "REFRESHING_TEXT": "Dashboard wird aktualisiert..."
+    },
+    "STATS": {
+      "ACTIVE_SESSIONS": "Aktive Sitzungen",
+      "TOTAL_REQUESTS": "Gesamtanfragen",
+      "ACTIVE_PRIVILEGES": "Sie haben aktive FireFighter-Berechtigungen",
+      "NO_ACTIVE_SESSIONS": "Keine aktiven FireFighter-Sitzungen",
+      "REQUESTS_THIS_MONTH": "FireFighter-Anfragen diesen Monat"
+    },
+    "EMERGENCY_REQUESTS": {
+      "TITLE": "Aktive Notfallanfragen",
+      "SUBTITLE": "aktive Anfragen, die Aufmerksamkeit erfordern",
+      "NO_REQUESTS": "Keine aktiven Notfallanfragen",
+      "ALL_RESOLVED": "Alle Anfragen wurden gelöst",
+      "VIEW_ALL": "Alle Anfragen anzeigen",
+      "VIEW_ALL_SHORT": "Alle anzeigen",
+      "TABLE": {
+        "ID": "ID",
+        "REQUESTER": "Antragsteller",
+        "REASON": "Grund",
+        "STATUS": "Status",
+        "TIME_LEFT": "Verbleibende Zeit",
+        "REQUESTED": "Angefragt",
+        "ACTIVE": "Aktiv",
+        "CRITICAL": "Kritisch",
+        "EXPIRED": "Abgelaufen",
+        "REMAINING": "verbleibend",
+        "TIME_REMAINING": "Verbleibende Zeit"
+      }
+    },
+    "QUICK_ACTIONS": {
+      "TITLE": "Schnellaktionen",
+      "SUBTITLE": "Notfall-Management-Verknüpfungen",
+      "NEW_REQUEST": "Neue Anfrage",
+      "NEW_REQUEST_DESC": "Notfall-Zugriffsanfrage einreichen",
+      "NOTIFICATIONS": "Benachrichtigungen",
+      "NOTIFICATIONS_DESC": "Ausstehende Warnungen anzeigen",
+      "AUDIT_LOGS": "Audit-Protokolle",
+      "AUDIT_LOGS_DESC": "Aktivitätsprotokolle überprüfen",
+      "GEMINI": "Gemini",
+      "GEMINI_DESC": "KI-Assistenten fragen"
+    },
+    "RECENT_ACTIVITY": {
+      "TITLE": "Letzte Aktivitäten",
+      "SUBTITLE": "Neueste FireFighter-Systemereignisse und -aktionen",
+      "NO_ACTIVITY": "Keine aktuellen Aktivitäten",
+      "NO_ACTIVITY_DESC": "Systemereignisse und -aktionen werden hier angezeigt"
+    },
+    "MONTHLY_STATS": {
+      "TITLE": "Monatsstatistiken",
+      "SUBTITLE": "Leistungsübersicht",
+      "TOTAL_REQUESTS": "Gesamtanfragen",
+      "APPROVAL_RATE": "Genehmigungsrate",
+      "CRITICAL_ISSUES": "Kritische Probleme",
+      "SUCCESS_RATE": "Erfolgsrate",
+      "VS_LAST_MONTH": "vs. letzter Monat",
+      "APPROVED_REQUESTS": "genehmigte Anfragen",
+      "THIS_MONTH": "diesen Monat",
+      "RESOLVED": "gelöst"
+    },
+    "ACTIVITY_STATUS": {
+      "ACTIVE": "aktiv",
+      "COMPLETED": "abgeschlossen",
+      "PENDING": "ausstehend",
+      "DENIED": "abgelehnt"
+    }
+  },
+  "REQUESTS": {
+    "TITLE": "Anfragen",
+    "NEW_REQUEST": "Neue Anfrage",
+    "MY_REQUESTS": "Meine Anfragen",
+    "ALL_REQUESTS": "Alle Anfragen",
+    "STATUS": {
+      "PENDING": "Ausstehend",
+      "APPROVED": "Genehmigt",
+      "REJECTED": "Abgelehnt",
+      "IN_PROGRESS": "In Bearbeitung",
+      "COMPLETED": "Abgeschlossen"
+    }
+  },
+  "NOTIFICATIONS": {
+    "TITLE": "Benachrichtigungen",
+    "MARK_ALL_READ": "Alle als gelesen markieren",
+    "NO_NOTIFICATIONS": "Keine Benachrichtigungen",
+    "CLEAR_ALL": "Alle löschen"
+  },
+  "ACCOUNT": {
+    "TITLE": "Konto",
+    "PROFILE": "Profil",
+    "SECURITY": "Sicherheit",
+    "PREFERENCES": "Einstellungen"
+  },
+  "HELP": {
+    "TITLE": "Hilfe",
+    "FAQ": "Häufig gestellte Fragen",
+    "CONTACT": "Support kontaktieren",
+    "DOCUMENTATION": "Dokumentation"
+  },
+  "ADMIN": {
+    "TITLE": "Admin",
+    "USER_MANAGEMENT": "Benutzerverwaltung",
+    "SYSTEM_CONFIG": "Systemkonfiguration",
+    "AUDIT_LOGS": "Audit-Protokolle"
+  },
+  "CHAT": {
+    "TITLE": "KI-Assistent",
+    "PLACEHOLDER": "Geben Sie Ihre Nachricht ein...",
+    "SEND": "Senden",
+    "THINKING": "KI denkt nach...",
+    "ERROR": "Entschuldigung, es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
+  },
+  "ERRORS": {
+    "NETWORK_ERROR": "Netzwerkverbindungsfehler",
+    "UNAUTHORIZED": "Sie sind nicht berechtigt, diese Aktion auszuführen",
+    "FORBIDDEN": "Zugriff verweigert",
+    "NOT_FOUND": "Ressource nicht gefunden",
+    "SERVER_ERROR": "Interner Serverfehler",
+    "UNKNOWN_ERROR": "Ein unbekannter Fehler ist aufgetreten"
+  }
+}

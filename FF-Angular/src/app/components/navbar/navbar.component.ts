@@ -6,6 +6,7 @@ import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
 import { ThemeService } from '../../services/theme.service';
 import { Observable, map } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-navbar',
@@ -14,7 +15,8 @@ import { Observable, map } from 'rxjs';
   standalone: true,
   imports: [
     CommonModule,
-    IonHeader
+    IonHeader,
+    TranslateModule
   ]
 })
 export class NavbarComponent implements OnInit {

@@ -10,6 +10,7 @@ import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { calculateTimeAgo } from '../../services/mock-ticket-database';
 import { catchError, finalize } from 'rxjs/operators';
 import { of, Subscription } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
 
 export interface Activity {
   type: 'granted' | 'revoked' | 'denied' | 'submitted';
@@ -32,7 +33,8 @@ export interface Activity {
     IonContent,
     IonRefresher,
     IonRefresherContent,
-    NavbarComponent
+    NavbarComponent,
+    TranslateModule
   ]
 })
 export class DashboardPage implements OnInit, OnDestroy {

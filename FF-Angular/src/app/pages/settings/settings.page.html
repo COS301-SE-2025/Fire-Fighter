@@ -13,8 +13,72 @@
           </svg>
         </div>
         <div class="flex-1 min-w-0">
-          <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
-          <p class="text-sm text-gray-600 dark:text-gray-400">Manage your FireFighter preferences</p>
+          <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">{{ 'SETTINGS.TITLE' | translate }}</h1>
+          <p class="text-sm text-gray-600 dark:text-gray-400">{{ 'SETTINGS.SUBTITLE' | translate }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Language Selection Section -->
+    <div class="mb-8">
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center space-x-3">
+            <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
+            </svg>
+            <div>
+              <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ 'SETTINGS.LANGUAGE.TITLE' | translate }}</h2>
+              <p class="text-sm text-gray-600 dark:text-gray-400">{{ 'SETTINGS.LANGUAGE.DESCRIPTION' | translate }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-6">
+          <div class="relative">
+            <label for="language-select" class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+              {{ 'SETTINGS.LANGUAGE.LABEL' | translate }}
+            </label>
+            <button
+              id="language-dropdown-button"
+              (click)="toggleLanguageDropdown()"
+              data-dropdown-toggle="language-dropdown"
+              class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-between w-full dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+              type="button"
+            >
+              <span class="font-medium">{{ selectedLanguage.name }}</span>
+              <svg class="w-2.5 h-2.5 ms-3 transition-transform duration-200"
+                   [class.rotate-180]="languageDropdownOpen"
+                   aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+              </svg>
+            </button>
+
+            <!-- Dropdown menu -->
+            <div
+              id="language-dropdown"
+              [class.hidden]="!languageDropdownOpen"
+              class="language-dropdown absolute z-10 mt-1 w-full bg-white divide-y divide-gray-100 rounded-lg shadow-lg dark:bg-gray-700 dark:divide-gray-600 border border-gray-200 dark:border-gray-600"
+            >
+              <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="language-dropdown-button">
+                <li *ngFor="let language of availableLanguages">
+                  <button
+                    (click)="selectLanguage(language)"
+                    class="language-option w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white flex items-center justify-between transition-colors duration-200"
+                    [class.bg-gray-50]="selectedLanguage.code === language.code"
+                    [class.dark:bg-gray-600]="selectedLanguage.code === language.code"
+                  >
+                    <span class="font-medium">{{ language.name }}</span>
+                    <svg *ngIf="selectedLanguage.code === language.code"
+                         class="w-4 h-4 text-indigo-600 dark:text-indigo-400"
+                         fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -28,8 +92,8 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5"></path>
             </svg>
             <div>
-              <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Push Notifications</h2>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Configure emergency alerts and system notifications</p>
+              <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ 'SETTINGS.NOTIFICATIONS.TITLE' | translate }}</h2>
+              <p class="text-sm text-gray-600 dark:text-gray-400">{{ 'SETTINGS.NOTIFICATIONS.DESCRIPTION' | translate }}</p>
             </div>
           </div>
         </div>
@@ -38,89 +102,89 @@
           
           <!-- Emergency Notifications -->
           <div class="space-y-4">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Emergency Notifications</h3>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ 'SETTINGS.NOTIFICATIONS.EMERGENCY_SECTION' | translate }}</h3>
             
             <!-- Critical System Alerts -->
-            <div class="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
               <div class="flex items-center space-x-3">
                 <div class="flex-shrink-0">
-                  <div class="w-10 h-10 bg-red-100 dark:bg-red-900/50 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                  <div class="w-10 h-10 bg-red-600 dark:bg-red-600 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"></path>
                     </svg>
                   </div>
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-white">Critical System Alerts</p>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">System outages, security breaches, emergency incidents</p>
+                  <p class="text-sm font-medium text-gray-900 dark:text-white">{{ 'SETTINGS.NOTIFICATIONS.CRITICAL_ALERTS' | translate }}</p>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'SETTINGS.NOTIFICATIONS.CRITICAL_ALERTS_DESC' | translate }}</p>
                 </div>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" [(ngModel)]="notificationSettings.criticalAlerts" class="sr-only peer">
-                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 dark:peer-focus:ring-red-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-red-600"></div>
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </div>
 
             <!-- FireFighter Access Requests -->
-            <div class="flex items-center justify-between p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
               <div class="flex items-center space-x-3">
                 <div class="flex-shrink-0">
-                  <div class="w-10 h-10 bg-orange-100 dark:bg-orange-900/50 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div class="w-10 h-10 bg-slate-600 dark:bg-slate-600 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                     </svg>
                   </div>
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-white">Emergency Access Requests</p>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">New FireFighter role requests requiring approval</p>
+                  <p class="text-sm font-medium text-gray-900 dark:text-white">{{ 'SETTINGS.NOTIFICATIONS.ACCESS_REQUESTS' | translate }}</p>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'SETTINGS.NOTIFICATIONS.ACCESS_REQUESTS_DESC' | translate }}</p>
                 </div>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" [(ngModel)]="notificationSettings.accessRequests" class="sr-only peer">
-                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 dark:peer-focus:ring-orange-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-600"></div>
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </div>
 
             <!-- Session Expiry Warnings -->
-            <div class="flex items-center justify-between p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
               <div class="flex items-center space-x-3">
                 <div class="flex-shrink-0">
-                  <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/50 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div class="w-10 h-10 bg-amber-600 dark:bg-amber-600 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                   </div>
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-white">Session Expiry Warnings</p>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">Alerts when your FireFighter access is about to expire</p>
+                  <p class="text-sm font-medium text-gray-900 dark:text-white">{{ 'SETTINGS.NOTIFICATIONS.SESSION_EXPIRY' | translate }}</p>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'SETTINGS.NOTIFICATIONS.SESSION_EXPIRY_DESC' | translate }}</p>
                 </div>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" [(ngModel)]="notificationSettings.sessionExpiry" class="sr-only peer">
-                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 dark:peer-focus:ring-yellow-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-600"></div>
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </div>
           </div>
 
           <!-- System Notifications -->
           <div class="space-y-4 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white">System Notifications</h3>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ 'SETTINGS.NOTIFICATIONS.SYSTEM_SECTION' | translate }}</h3>
             
             <!-- Request Status Updates -->
-            <div class="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
               <div class="flex items-center space-x-3">
                 <div class="flex-shrink-0">
-                  <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div class="w-10 h-10 bg-blue-600 dark:bg-blue-600 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                   </div>
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-white">Request Status Updates</p>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">Approval, rejection, or modification of your requests</p>
+                  <p class="text-sm font-medium text-gray-900 dark:text-white">{{ 'SETTINGS.NOTIFICATIONS.REQUEST_UPDATES' | translate }}</p>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'SETTINGS.NOTIFICATIONS.REQUEST_UPDATES_DESC' | translate }}</p>
                 </div>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
@@ -130,52 +194,52 @@
             </div>
 
             <!-- Audit Trail Alerts -->
-            <div class="flex items-center justify-between p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
+            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
               <div class="flex items-center space-x-3">
                 <div class="flex-shrink-0">
-                  <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/50 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div class="w-10 h-10 bg-gray-600 dark:bg-gray-600 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
                   </div>
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-white">Audit Trail Alerts</p>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">Unusual activity detected in your access logs</p>
+                  <p class="text-sm font-medium text-gray-900 dark:text-white">{{ 'SETTINGS.NOTIFICATIONS.AUDIT_ALERTS' | translate }}</p>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'SETTINGS.NOTIFICATIONS.AUDIT_ALERTS_DESC' | translate }}</p>
                 </div>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" [(ngModel)]="notificationSettings.auditAlerts" class="sr-only peer">
-                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-purple-600"></div>
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </div>
 
             <!-- System Maintenance -->
-            <div class="flex items-center justify-between p-4 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg">
+            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
               <div class="flex items-center space-x-3">
                 <div class="flex-shrink-0">
-                  <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div class="w-10 h-10 bg-emerald-600 dark:bg-emerald-600 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     </svg>
                   </div>
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-white">System Maintenance</p>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">Scheduled maintenance and system updates</p>
+                  <p class="text-sm font-medium text-gray-900 dark:text-white">{{ 'SETTINGS.NOTIFICATIONS.MAINTENANCE' | translate }}</p>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'SETTINGS.NOTIFICATIONS.MAINTENANCE_DESC' | translate }}</p>
                 </div>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" [(ngModel)]="notificationSettings.maintenance" class="sr-only peer">
-                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </div>
           </div>
 
           <!-- Notification Delivery Methods -->
           <div class="space-y-4 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Delivery Methods</h3>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ 'SETTINGS.NOTIFICATIONS.DELIVERY_SECTION' | translate }}</h3>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <!-- Push Notifications -->
@@ -188,12 +252,12 @@
                 >
                 <label for="push-notifications" class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">
                   <div class="flex items-center space-x-2">
-                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"></path>
                     </svg>
-                    <span>Push Notifications</span>
+                    <span>{{ 'SETTINGS.NOTIFICATIONS.PUSH_ENABLED' | translate }}</span>
                   </div>
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Browser and mobile notifications</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ 'SETTINGS.NOTIFICATIONS.PUSH_ENABLED_DESC' | translate }}</p>
                 </label>
               </div>
 
@@ -208,12 +272,12 @@
                 >
                 <label for="email-notifications" class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">
                   <div class="flex items-center space-x-2">
-                    <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                     </svg>
-                    <span>Email Notifications</span>
+                    <span>{{ 'SETTINGS.NOTIFICATIONS.EMAIL_ENABLED' | translate }}</span>
                   </div>
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Email alerts for ticket events (creation, completion, revocation, warnings)</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ 'SETTINGS.NOTIFICATIONS.EMAIL_ENABLED_DESC' | translate }}</p>
                 </label>
               </div>
             </div>
@@ -264,7 +328,7 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              {{ isSaving ? 'Saving...' : 'Save Notification Settings' }}
+              {{ isSaving ? ('SETTINGS.SAVING' | translate) : ('SETTINGS.SAVE_BUTTON' | translate) }}
             </button>
           </div>
         </div>
@@ -282,14 +346,14 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
             </svg>
             <div>
-              <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Security Settings</h2>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Manage your account security preferences</p>
+              <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ 'SETTINGS.SECURITY.TITLE' | translate }}</h2>
+              <p class="text-sm text-gray-600 dark:text-gray-400">{{ 'SETTINGS.SECURITY.DESCRIPTION' | translate }}</p>
             </div>
           </div>
         </div>
         <div class="p-6">
           <div class="text-center py-8">
-            <p class="text-gray-500 dark:text-gray-400">Security settings will be available in a future update</p>
+            <p class="text-gray-500 dark:text-gray-400">{{ 'SETTINGS.SECURITY.COMING_SOON' | translate }}</p>
           </div>
         </div>
       </div>
@@ -302,14 +366,14 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75"></path>
             </svg>
             <div>
-              <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Preferences</h2>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Customise your FireFighter experience</p>
+              <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ 'SETTINGS.PREFERENCES.TITLE' | translate }}</h2>
+              <p class="text-sm text-gray-600 dark:text-gray-400">{{ 'SETTINGS.PREFERENCES.DESCRIPTION' | translate }}</p>
             </div>
           </div>
         </div>
         <div class="p-6">
           <div class="text-center py-8">
-            <p class="text-gray-500 dark:text-gray-400">Additional preferences will be available in a future update</p>
+            <p class="text-gray-500 dark:text-gray-400">{{ 'SETTINGS.PREFERENCES.COMING_SOON' | translate }}</p>
           </div>
         </div>
       </div>

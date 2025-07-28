@@ -1,9 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent } from '@ionic/angular/standalone';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { VersionService } from '../../services/version.service';
+import { LanguageService, Language } from '../../services/language.service';
+import { TranslateModule } from '@ngx-translate/core';
 import { UserPreferencesService, NotificationSettings, UserPreferences } from '../../services/user-preferences.service';
 import { AuthService } from '../../services/auth.service';
 import { Subscription } from 'rxjs';
@@ -13,12 +15,12 @@ import { Subscription } from 'rxjs';
   templateUrl: './settings.page.html',
   styleUrls: ['./settings.page.scss'],
   standalone: true,
-  imports: [IonContent, CommonModule, FormsModule, NavbarComponent]
+  imports: [IonContent, CommonModule, FormsModule, NavbarComponent, TranslateModule]
 })
 export class SettingsPage implements OnInit, OnDestroy {
-
   isSaving = false;
   appVersion: string = '';
+  languageDropdownOpen = false;
   currentUserId: string | null = null;
   private subscriptions: Subscription[] = [];
 
@@ -30,18 +32,28 @@ export class SettingsPage implements OnInit, OnDestroy {
     auditAlerts: false,
     maintenance: false,
     pushEnabled: true,
-    emailEnabled: false // Default to false as per requirements
+    emailEnabled: false
   };
+
+  availableLanguages: Language[] = [];
+  selectedLanguage: Language = { code: 'en', name: 'English (UK)' };
 
   constructor(
     private versionService: VersionService,
+    private languageService: LanguageService,
     private userPreferencesService: UserPreferencesService,
     private authService: AuthService
   ) { }
 
   ngOnInit() {
-    this.appVersion = this.versionService.getVersion();
     this.loadNotificationSettings();
+    this.loadLanguageSettings();
+    this.appVersion = this.versionService.getVersion();
+
+    // Debug: Test translation service
+    console.log('Settings page initialized');
+    console.log('Current language:', this.languageService.getCurrentLanguage());
+    console.log('Available languages:', this.languageService.availableLanguages);
   }
 
   ngOnDestroy() {
@@ -94,6 +106,19 @@ export class SettingsPage implements OnInit, OnDestroy {
         console.error('Error loading notification settings from localStorage:', error);
       }
     }
+  }
+
+  private loadLanguageSettings() {
+    // Get available languages from the language service
+    this.availableLanguages = this.languageService.availableLanguages;
+
+    // Get current language from the language service
+    this.selectedLanguage = this.languageService.getCurrentLanguageObject();
+
+    // Subscribe to language changes
+    this.languageService.currentLanguage$.subscribe(languageCode => {
+      this.selectedLanguage = this.languageService.getCurrentLanguageObject();
+    });
   }
 
   async saveNotificationSettings() {
@@ -225,6 +250,36 @@ export class SettingsPage implements OnInit, OnDestroy {
         icon: '/assets/icon/favicon.png',
         badge: '/assets/icon/favicon.png'
       });
+    }
+  }
+
+  toggleLanguageDropdown() {
+    this.languageDropdownOpen = !this.languageDropdownOpen;
+  }
+
+  selectLanguage(language: Language) {
+    this.selectedLanguage = language;
+    this.languageDropdownOpen = false;
+
+    // Use the language service to switch languages
+    this.languageService.setLanguage(language.code);
+
+    console.log('Language switched to:', language.name, language.code);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    const target = event.target as HTMLElement;
+    const dropdownButton = document.getElementById('language-dropdown-button');
+    const dropdown = document.getElementById('language-dropdown');
+
+    // Close dropdown if clicking outside of it
+    if (this.languageDropdownOpen &&
+        dropdownButton &&
+        dropdown &&
+        !dropdownButton.contains(target) &&
+        !dropdown.contains(target)) {
+      this.languageDropdownOpen = false;
     }
   }
 }
