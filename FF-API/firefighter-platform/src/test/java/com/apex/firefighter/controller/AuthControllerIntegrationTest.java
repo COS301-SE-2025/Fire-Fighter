@@ -1,6 +1,5 @@
 package com.apex.firefighter.controller;
 
-import com.apex.firefighter.config.TestConfig;
 import com.apex.firefighter.model.User;
 import com.apex.firefighter.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,7 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -25,8 +26,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureWebMvc
 @ActiveProfiles("test")
 @Transactional
-@Import(TestConfig.class)
 class AuthControllerIntegrationTest {
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        @Primary
+        public FirebaseAuth firebaseAuth() {
+            return mock(FirebaseAuth.class);
+        }
+    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -35,7 +44,7 @@ class AuthControllerIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private FirebaseAuth firebaseAuth; // This will be the mock from TestConfig
+    private FirebaseAuth firebaseAuth;
 
     @Autowired
     private UserRepository userRepository;
