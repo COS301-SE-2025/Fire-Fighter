@@ -1,9 +1,10 @@
-package com.apex.firefighter.service;
+package com.apex.firefighter.service.auth;
 
 import com.apex.firefighter.model.ApiKey;
-import com.apex.firefighter.model.User;
 import com.apex.firefighter.repository.ApiKeyRepository;
 import com.apex.firefighter.repository.UserRepository;
+import com.apex.firefighter.model.User;
+import com.apex.firefighter.service.auth.ApiKeyGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
