@@ -1,7 +1,7 @@
 package com.apex.firefighter.controller;
 
 import com.apex.firefighter.model.ConnectionTest;
-import com.apex.firefighter.service.DatabaseConnectionTestService;
+import com.apex.firefighter.service.user.DatabaseConnectionTestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
