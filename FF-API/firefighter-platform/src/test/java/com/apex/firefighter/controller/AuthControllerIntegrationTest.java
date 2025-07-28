@@ -7,29 +7,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(controllers = AuthController.class, 
-    excludeAutoConfiguration = {
-        org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-        org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration.class
-    })
-@TestPropertySource(properties = {
-    "spring.autoconfigure.exclude=com.apex.firefighter.config.FirebaseConfig"
-})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@ActiveProfiles("test")
 class AuthControllerIntegrationTest {
 
-    @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private WebApplicationContext webApplicationContext;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -40,6 +38,9 @@ class AuthControllerIntegrationTest {
     @Test
     @DisplayName("Should authenticate user with valid Firebase token")
     void shouldAuthenticateUserWithValidFirebaseToken() throws Exception {
+        // Setup MockMvc
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+
         // Given
         String firebaseIdToken = "valid-firebase-token";
         String firebaseUid = "firebase-uid-123";
@@ -74,6 +75,9 @@ class AuthControllerIntegrationTest {
     @Test
     @DisplayName("Should return bad request for invalid Firebase token")
     void shouldReturnBadRequestForInvalidFirebaseToken() throws Exception {
+        // Setup MockMvc
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+
         // Given
         String invalidToken = "invalid-firebase-token";
         when(authenticationService.verifyFirebaseTokenAndCreateJwt(invalidToken))
