@@ -13,7 +13,7 @@ import {
   signInWithCredential
 }                               from 'firebase/auth';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { Capacitor }            from '@capacitor/core';
 import { Platform }             from '@ionic/angular/standalone';
@@ -38,6 +38,7 @@ interface UserVerificationResponse {
   role: string;
   createdAt: string;
   lastLogin: string;
+  contactNumber?: string;
   userRoles: Array<{
     id: number;
     role: {
@@ -502,6 +503,49 @@ export class AuthService {
           return throwError(() => error);
         })
       );
+  }
+
+  /**
+   * Update user contact number
+   * Endpoint: PUT /api/users/{userId}/contact
+   */
+  updateContactNumber(userId: string, contactNumber: string): Observable<UserVerificationResponse> {
+    const params = new HttpParams().set('contactNumber', contactNumber);
+    const headers = {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    };
+
+    return this.http.put<UserVerificationResponse>(
+      `${environment.apiUrl}/users/${userId}/contact`,
+      params.toString(),
+      { headers }
+    ).pipe(
+      tap((updatedProfile: UserVerificationResponse) => {
+        // Update the local user profile with the new contact number
+        this.userProfileSubject.next(updatedProfile);
+        this.storeUserData(updatedProfile);
+      }),
+      catchError((error: any) => {
+        console.error('❌ Update contact number failed:', error);
+
+        // Check for connection errors
+        if (this.isConnectionError(error)) {
+          console.error('🔌 Connection error detected in updateContactNumber - redirecting to service down page');
+
+          // Store the last successful connection time
+          localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
+
+          // Redirect to service down page
+          this.router.navigate(['/service-down']);
+
+          // Return a meaningful error
+          return throwError(() => new Error('Service temporarily unavailable'));
+        }
+
+        // Re-throw other errors
+        return throwError(() => error);
+      })
+    );
   }
 
   /**
