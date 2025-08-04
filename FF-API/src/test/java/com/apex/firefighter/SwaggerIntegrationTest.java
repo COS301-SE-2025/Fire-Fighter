@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
     "spring.datasource.url=jdbc:h2:mem:testdb",
     "spring.jpa.hibernate.ddl-auto=create-drop"
 })
+@org.springframework.test.context.ActiveProfiles("test")
 public class SwaggerIntegrationTest {
 
     @LocalServerPort
