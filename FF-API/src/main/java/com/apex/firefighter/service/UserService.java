@@ -127,6 +127,13 @@ public class UserService {
     }
 
     /**
+     * Update user contact number - Delegates to UserProfileService
+     */
+    public User updateContactNumber(String firebaseUid, String contactNumber) {
+        return userProfileService.updateContactNumber(firebaseUid, contactNumber);
+    }
+
+    /**
      * Remove role from user - Delegates to RoleService
      */
     public User removeRole(String firebaseUid, String roleName) {
