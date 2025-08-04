@@ -506,16 +506,33 @@
             <div>
               <label for="contact" class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
                 Emergency Contact
+                <span *ngIf="newTicket.emergencyContact && userProfile?.contactNumber === newTicket.emergencyContact" class="text-xs text-green-600 dark:text-green-400 font-normal ml-1">(Auto-filled from profile)</span>
               </label>
-              <input
-                id="contact"
-                type="text"
-                [(ngModel)]="newTicket.emergencyContact"
-                name="emergencyContact"
-                placeholder="Phone number or email for urgent contact"
-                [disabled]="isLoading"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-red-500 dark:focus:border-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              />
+              <div class="relative">
+                <input
+                  id="contact"
+                  type="text"
+                  [(ngModel)]="newTicket.emergencyContact"
+                  name="emergencyContact"
+                  placeholder="Phone number or email for urgent contact"
+                  [disabled]="isLoading"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 pr-20 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-red-500 dark:focus:border-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+                <button
+                  *ngIf="userProfile?.contactNumber && newTicket.emergencyContact !== userProfile.contactNumber"
+                  type="button"
+                  (click)="fillContactNumber()"
+                  [disabled]="isLoading"
+                  class="absolute inset-y-0 right-0 flex items-center px-3 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Use Saved
+                </button>
+              </div>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                <span *ngIf="!userProfile?.contactNumber">You can add a contact number in your account settings to auto-fill this field.</span>
+                <span *ngIf="userProfile?.contactNumber && newTicket.emergencyContact === userProfile.contactNumber">Contact number auto-filled from your profile. You can edit it if needed.</span>
+                <span *ngIf="userProfile?.contactNumber && newTicket.emergencyContact !== userProfile.contactNumber">Your saved contact number ({{ userProfile.contactNumber }}) is available. Click "Use Saved" to fill it.</span>
+              </p>
             </div>
 
             <!-- Duration Selector -->
