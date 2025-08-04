@@ -37,6 +37,9 @@ public class User {
     @Column(name = "is_admin", nullable = true, columnDefinition = "boolean default false")
     private Boolean isAdmin = false;
 
+    @Column(name = "contact_number", nullable = true)
+    private String contactNumber;
+
     // Simple role relationship - commented out complex role system for now
     // @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     // private Set<UserRole> userRoles = new HashSet<>();
@@ -130,6 +133,14 @@ public class User {
         this.isAdmin = isAdmin;
     }
 
+    public String getContactNumber() {
+        return contactNumber;
+    }
+
+    public void setContactNumber(String contactNumber) {
+        this.contactNumber = contactNumber;
+    }
+
     // Complex role methods commented out - using simple role column instead
     /*
     public Set<UserRole> getUserRoles() {
@@ -187,6 +198,7 @@ public class User {
                 ", createdAt=" + createdAt +
                 ", lastLogin=" + lastLogin +
                 ", role='" + role + '\'' +
+                ", contactNumber='" + contactNumber + '\'' +
                 '}';
     }
 }
