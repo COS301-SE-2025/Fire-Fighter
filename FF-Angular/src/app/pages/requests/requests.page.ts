@@ -66,6 +66,7 @@ export class RequestsPage implements OnInit {
   tickets: Ticket[] = [];
   error: string | null = null;
   private currentUid: string = '';
+  userProfile: any = null;
 
   // Add getter and setter for searchQuery
   get searchQuery(): string {
@@ -155,6 +156,15 @@ export class RequestsPage implements OnInit {
         this.notificationService.forceRefresh();
       }
     });
+
+    // Subscribe to user profile to get contact number
+    this.authService.userProfile$.subscribe(profile => {
+      this.userProfile = profile;
+      // Auto-fill contact number immediately if modal is open and field is empty
+      if (this.isModalOpen && profile?.contactNumber && !this.newTicket.emergencyContact) {
+        this.newTicket.emergencyContact = profile.contactNumber;
+      }
+    });
   }
 
   loadTickets() {
@@ -241,9 +251,14 @@ export class RequestsPage implements OnInit {
   setOpen(isOpen: boolean) {
     if (isOpen) {
       this.isModalOpen = true;
+      // Auto-fill contact number immediately if available
+      this.autoFillContactNumber();
+
       // Small delay to ensure the modal is rendered before animating
       setTimeout(() => {
         this.modalAnimationState = 'visible';
+        // Try auto-fill again after modal is rendered in case profile loaded during animation
+        this.autoFillContactNumber();
       }, 10);
     } else {
       this.modalAnimationState = 'hidden';
@@ -260,6 +275,20 @@ export class RequestsPage implements OnInit {
           duration: 60 // Default 1 hour
         };
       }, 200);
+    }
+  }
+
+  // Helper method to auto-fill contact number
+  private autoFillContactNumber() {
+    if (this.userProfile?.contactNumber && !this.newTicket.emergencyContact) {
+      this.newTicket.emergencyContact = this.userProfile.contactNumber;
+    }
+  }
+
+  // Manual method to fill contact number (called by "Use Saved" button)
+  fillContactNumber() {
+    if (this.userProfile?.contactNumber) {
+      this.newTicket.emergencyContact = this.userProfile.contactNumber;
     }
   }
 

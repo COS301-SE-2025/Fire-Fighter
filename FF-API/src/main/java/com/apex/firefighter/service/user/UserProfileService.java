@@ -63,20 +63,40 @@ public class UserProfileService {
      */
     public User updateUserProfile(String firebaseUid, String username, String email, String department) {
         System.out.println("🔵 UPDATE PROFILE: Updating profile for UID - " + firebaseUid);
-        
+
         Optional<User> userOpt = userRepository.findByUserId(firebaseUid);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            
+
             if (username != null) user.setUsername(username);
             if (email != null) user.setEmail(email);
             if (department != null) user.setDepartment(department);
-            
+
             User updatedUser = userRepository.save(user);
             System.out.println("✅ PROFILE UPDATED: " + updatedUser);
             return updatedUser;
         } else {
             System.out.println("❌ UPDATE FAILED: User not found for UID - " + firebaseUid);
+            throw new RuntimeException("User not found with Firebase UID: " + firebaseUid);
+        }
+    }
+
+    /**
+     * Update user contact number
+     */
+    public User updateContactNumber(String firebaseUid, String contactNumber) {
+        System.out.println("🔵 UPDATE CONTACT: Updating contact number for UID - " + firebaseUid);
+
+        Optional<User> userOpt = userRepository.findByUserId(firebaseUid);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setContactNumber(contactNumber);
+
+            User updatedUser = userRepository.save(user);
+            System.out.println("✅ CONTACT UPDATED: " + updatedUser.getContactNumber());
+            return updatedUser;
+        } else {
+            System.out.println("❌ CONTACT UPDATE FAILED: User not found for UID - " + firebaseUid);
             throw new RuntimeException("User not found with Firebase UID: " + firebaseUid);
         }
     }
