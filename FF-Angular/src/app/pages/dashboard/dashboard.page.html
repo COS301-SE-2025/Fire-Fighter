@@ -10,7 +10,7 @@
     </ion-refresher-content>
   </ion-refresher>
   
-  <div class="min-h-full bg-gray-50 dark:bg-gray-900 pb-24 mb-8 pt-2">
+  <div class="min-h-full bg-gray-50 dark:bg-gray-900 pb-20 mb-0.25 pt-2">
     <!-- Admin Access Denied Message -->
     <div *ngIf="adminAccessDeniedMessage" class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg dark:bg-red-900/50 dark:border-red-600 dark:text-red-300">
       <div class="flex items-center">
@@ -19,6 +19,16 @@
         </svg>
         <span class="font-medium">{{ adminAccessDeniedMessage }}</span>
       </div>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="error" class="mb-6 p-4 bg-red-100 text-red-700 rounded-md dark:bg-red-900/50 dark:text-red-300">
+      {{ error }}
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="mb-6 flex justify-center items-center py-8">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
     </div>
 
     <ng-container *ngIf="user$ | async as user">
@@ -456,16 +466,6 @@
          </div>
 
        </div>
-
-      <!-- Error Message -->
-      <div *ngIf="error" class="mt-4 p-4 bg-red-100 text-red-700 rounded-md dark:bg-red-900/50 dark:text-red-300">
-        {{ error }}
-      </div>
-
-      <!-- Loading State -->
-      <div *ngIf="isLoading" class="mt-4 flex justify-center items-center py-8">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
 
       <!-- Footer Info -->
       <div class="text-center mt-8 text-xs text-gray-500">
