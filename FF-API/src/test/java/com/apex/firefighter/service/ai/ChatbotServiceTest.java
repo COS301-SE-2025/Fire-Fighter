@@ -68,6 +68,7 @@ public class ChatbotServiceTest {
     void testProcessQuery_UserNotFound_ReturnsError() {
         // Arrange
         String userId = "nonexistent-user";
+        when(geminiAIService.isConfigured()).thenReturn(true);
         when(userService.getUserByFirebaseUid(userId)).thenReturn(Optional.empty());
 
         // Act
