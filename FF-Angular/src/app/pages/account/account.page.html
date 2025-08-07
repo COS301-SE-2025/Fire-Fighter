@@ -270,13 +270,13 @@
     </div>
 
     <!-- Contact Number Edit Modal -->
-    <div *ngIf="isContactNumberEditOpen" class="fixed inset-0 z-[9999] overflow-y-auto" aria-labelledby="contact-modal-title" role="dialog" aria-modal="true">
+    <div *ngIf="isContactNumberEditOpen" class="fixed inset-0 z-[9999] overflow-y-auto" aria-labelledby="contact-modal-title" role="dialog" aria-modal="true" (click)="cancelContactNumberEdit()">
       <!-- Background overlay -->
-      <div class="flex items-center justify-center min-h-screen pt-20 px-4 pb-20 text-center">
-        <div class="fixed inset-0 bg-black bg-opacity-50" aria-hidden="true" (click)="cancelContactNumberEdit()"></div>
+      <div [@modalBackdrop]="contactModalAnimationState" class="fixed inset-0 bg-black bg-opacity-50" aria-hidden="true"></div>
 
-        <!-- Modal panel -->
-        <div class="relative inline-block align-middle bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all w-full max-w-md mx-auto border border-gray-200 dark:border-gray-700 z-10">
+      <!-- Modal panel -->
+      <div class="flex min-h-full items-center justify-center p-4">
+        <div [@modalPanel]="contactModalAnimationState" (click)="$event.stopPropagation()" class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
 
           <!-- Modal Header -->
           <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
