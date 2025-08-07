@@ -36,9 +36,51 @@ input[type="checkbox"]:focus {
   }
 }
 
+// Language dropdown specific styles
+.language-dropdown {
+  animation: fadeInScale 200ms ease-out;
+  transform-origin: top;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+// Language dropdown button hover effects
+#language-dropdown-button {
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+}
+
+// Language option hover effects
+.language-option {
+  transition: all 0.15s ease-in-out;
+
+  &:hover {
+    transform: translateX(2px);
+  }
+}
+
 // Dark mode specific adjustments
 :host-context(.dark) {
   .notification-card {
+    &:hover {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  #language-dropdown-button {
     &:hover {
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
     }
