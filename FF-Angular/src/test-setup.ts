@@ -7,6 +7,8 @@ import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
 import { provideRouter } from '@angular/router';
 import { RouteReuseStrategy } from '@angular/router';
 import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalone';
+import { TranslateModule, TranslateLoader, TranslateService } from '@ngx-translate/core';
+import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 
 // Mock Firebase config for testing
@@ -34,6 +36,24 @@ if (typeof window !== 'undefined' && !('_FirebaseTest' in window)) {
   }
 }
 
+// Mock TranslateLoader for testing
+export class MockTranslateLoader implements TranslateLoader {
+  getTranslation(lang: string) {
+    return of({
+      'COMMON.LOADING': 'Loading...',
+      'COMMON.ERROR': 'Error',
+      'COMMON.SUCCESS': 'Success',
+      'NOTIFICATIONS.TITLE': 'Notifications',
+      'ACCOUNT.TITLE': 'Account',
+      'DASHBOARD.TITLE': 'Dashboard',
+      'HELP.TITLE': 'Help',
+      'SETTINGS.TITLE': 'Settings',
+      'REQUESTS.TITLE': 'Requests',
+      'CHAT.TITLE': 'Chat'
+    });
+  }
+}
+
 // Test providers that can be used in all tests
 export const testProviders = [
   { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
@@ -43,6 +63,16 @@ export const testProviders = [
   provideHttpClientTesting(),
   provideFirebaseApp(() => testApp),
   provideAuth(() => testAuth),
+  // Add TranslateModule for testing
+  importProvidersFrom(
+    TranslateModule.forRoot({
+      loader: {
+        provide: TranslateLoader,
+        useClass: MockTranslateLoader
+      },
+      defaultLanguage: 'en'
+    })
+  ),
 ];
 
 // Mock user for testing
@@ -76,6 +106,8 @@ export const mockAuthService = {
   logout: jasmine.createSpy('logout'),
   navigateToDashboard: jasmine.createSpy('navigateToDashboard'),
   getUserProfileById: jasmine.createSpy('getUserProfileById').and.returnValue(of({ username: 'Test User', email: 'test@example.com' })),
+  isCurrentUserAdmin: jasmine.createSpy('isCurrentUserAdmin').and.returnValue(of(false)),
+  getCurrentUserProfile: jasmine.createSpy('getCurrentUserProfile').and.returnValue(of({ username: 'Test User', email: 'test@example.com' })),
 };
 
 // Mock TicketService for tests
