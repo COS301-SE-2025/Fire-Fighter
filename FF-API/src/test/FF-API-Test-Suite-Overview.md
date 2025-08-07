@@ -2,7 +2,7 @@
 
 This directory contains the complete test suite for the FireFighter Access Management API. The tests are organized into logical categories for better maintainability and understanding.
 
-## 📁 Directory Structure
+## Directory Structure
 
 ```
 src/test/
@@ -29,7 +29,7 @@ src/test/
 └── README.md                  # This file
 ```
 
-## 🎯 Test Categories
+## Test Categories
 
 ### Unit Tests (`unit/`)
 **Purpose**: Test individual components in isolation
@@ -60,7 +60,7 @@ src/test/
 - **Helpers** - Utility methods for testing
 - **Mocks** - Pre-configured mock objects
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Run All Tests
 ```bash
@@ -85,7 +85,7 @@ mvn clean test jacoco:report
 ```
 View report: `target/site/jacoco/index.html`
 
-## 📊 Current Test Status
+## Current Test Status
 
 ### Overall Coverage: 17%
 - **Instructions**: 2,116 of 12,017 covered
@@ -101,13 +101,13 @@ View report: `target/site/jacoco/index.html`
 ### Coverage by Component
 | Component | Coverage | Status | Priority |
 |-----------|----------|--------|----------|
-| Controllers | 11% | ❌ Needs Work | High |
-| Services | 9-52% | ⚠️ Variable | High |
-| Repositories | Good | ✅ Complete | Low |
-| Models | 40% | ⚠️ Partial | Medium |
-| Config | 67% | ✅ Good | Low |
+| Controllers | 11% | Needs Work | High |
+| Services | 9-52% | Variable | High |
+| Repositories | Good | Complete | Low |
+| Models | 40% | Partial | Medium |
+| Config | 67% | Good | Low |
 
-## 🎯 Testing Strategy
+## Testing Strategy
 
 ### Test Pyramid
 ```
@@ -127,7 +127,7 @@ View report: `target/site/jacoco/index.html`
 - **Security Tests**: Validate authentication/authorization
 - **Contract Tests**: API compatibility verification
 
-## 🛠️ Development Workflow
+## Development Workflow
 
 ### Before Committing
 ```bash
@@ -149,7 +149,7 @@ mvn clean test jacoco:report
 3. Update existing tests if behavior changes
 4. Ensure coverage targets are met
 
-## 📋 Test Guidelines
+## Test Guidelines
 
 ### Naming Conventions
 - **Test Classes**: `{ClassUnderTest}Test.java`
@@ -175,15 +175,15 @@ void shouldReturnUser_whenValidIdProvided() {
 ```
 
 ### Best Practices
-- ✅ **One assertion per test** (when possible)
-- ✅ **Mock external dependencies**
-- ✅ **Use descriptive test names**
-- ✅ **Test edge cases and error scenarios**
-- ✅ **Keep tests independent**
-- ❌ **Don't test framework code**
-- ❌ **Don't use real external services in unit tests**
+- **One assertion per test** (when possible)
+- **Mock external dependencies**
+- **Use descriptive test names**
+- **Test edge cases and error scenarios**
+- **Keep tests independent**
+- **Don't test framework code**
+- **Don't use real external services in unit tests**
 
-## 🔧 Test Configuration
+## Test Configuration
 
 ### Test Profiles
 - **test**: Default profile with mocked dependencies
@@ -200,29 +200,29 @@ void shouldReturnUser_whenValidIdProvided() {
 - **External APIs**: WireMock for HTTP service mocking
 - **Database**: @DataJpaTest for repository testing
 
-## 📈 Improvement Roadmap
+## Improvement Roadmap
 
 ### Phase 1: Foundation (Current)
-- ✅ Organize test structure
-- ✅ Document test guidelines
-- ✅ Set up coverage reporting
+- Organize test structure
+- Document test guidelines
+- Set up coverage reporting
 
 ### Phase 2: Coverage Improvement
-- 🎯 Increase controller test coverage to 80%
-- 🎯 Add missing service tests (GmailEmailService, UserService, etc.)
-- 🎯 Improve overall coverage to 70%
+- Increase controller test coverage to 80%
+- Add missing service tests (GmailEmailService, UserService, etc.)
+- Improve overall coverage to 70%
 
 ### Phase 3: Quality Enhancement
-- 🎯 Add performance tests for critical endpoints
-- 🎯 Implement contract testing for API versioning
-- 🎯 Add security testing for authentication/authorization
+- Add performance tests for critical endpoints
+- Implement contract testing for API versioning
+- Add security testing for authentication/authorization
 
 ### Phase 4: Automation
-- 🎯 Set up automated test execution in CI/CD
-- 🎯 Add test quality gates (coverage thresholds)
-- 🎯 Implement test result reporting and notifications
+- Set up automated test execution in CI/CD
+- Add test quality gates (coverage thresholds)
+- Implement test result reporting and notifications
 
-## 🆘 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 - **Tests fail locally but pass in CI**: Check test isolation and cleanup
@@ -234,7 +234,7 @@ void shouldReturnUser_whenValidIdProvided() {
 - Review existing test examples for patterns
 - Consult team documentation for project-specific guidelines
 
-## 📚 Resources
+## Resources
 
 - [JUnit 5 Documentation](https://junit.org/junit5/docs/current/user-guide/)
 - [Mockito Documentation](https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html)
