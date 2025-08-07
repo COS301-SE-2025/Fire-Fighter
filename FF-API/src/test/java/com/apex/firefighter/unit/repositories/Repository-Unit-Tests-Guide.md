@@ -321,13 +321,13 @@ void shouldExecuteQueryEfficiently() {
 ## Coverage Status
 
 All repository tests are currently implemented with good coverage:
-- ✅ **AccessLogRepositoryTest** - Complete
-- ✅ **AccessRequestRepositoryTest** - Complete  
-- ✅ **AccessSessionRepositoryTest** - Complete
-- ✅ **NotificationRepositoryTest** - Complete
-- ✅ **RoleRepositoryTest** - Complete
-- ✅ **TicketRepositoryTest** - Complete
-- ✅ **UserRepositoryTest** - Complete
+- **AccessLogRepositoryTest** - Complete
+- **AccessRequestRepositoryTest** - Complete
+- **AccessSessionRepositoryTest** - Complete
+- **NotificationRepositoryTest** - Complete
+- **RoleRepositoryTest** - Complete
+- **TicketRepositoryTest** - Complete
+- **UserRepositoryTest** - Complete
 
 ## Next Steps
 
