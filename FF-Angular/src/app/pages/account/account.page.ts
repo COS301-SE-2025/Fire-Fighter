@@ -9,13 +9,46 @@ import { Router } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { User } from 'firebase/auth';
 import { ToastController } from '@ionic/angular';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-account',
   templateUrl: './account.page.html',
   styleUrls: ['./account.page.scss'],
   standalone: true,
-  imports: [IonContent, CommonModule, FormsModule, RouterModule, NavbarComponent]
+  imports: [IonContent, CommonModule, FormsModule, RouterModule, NavbarComponent],
+  animations: [
+    trigger('modalBackdrop', [
+      state('hidden', style({
+        opacity: 0
+      })),
+      state('visible', style({
+        opacity: 1
+      })),
+      transition('hidden => visible', [
+        animate('200ms ease-out')
+      ]),
+      transition('visible => hidden', [
+        animate('150ms ease-in')
+      ])
+    ]),
+    trigger('modalPanel', [
+      state('hidden', style({
+        opacity: 0,
+        transform: 'scale(0.95) translateY(-10px)'
+      })),
+      state('visible', style({
+        opacity: 1,
+        transform: 'scale(1) translateY(0)'
+      })),
+      transition('hidden => visible', [
+        animate('200ms ease-out')
+      ]),
+      transition('visible => hidden', [
+        animate('150ms ease-in')
+      ])
+    ])
+  ]
 })
 export class AccountPage implements OnInit, OnDestroy {
   user$: Observable<User | null>;
@@ -27,6 +60,7 @@ export class AccountPage implements OnInit, OnDestroy {
   isContactNumberEditOpen = false;
   editingContactNumber = '';
   isUpdatingContact = false;
+  contactModalAnimationState = 'hidden';
 
   constructor(
     private authService: AuthService,
@@ -154,11 +188,19 @@ export class AccountPage implements OnInit, OnDestroy {
   toggleContactNumberEdit() {
     this.isContactNumberEditOpen = true;
     this.editingContactNumber = this.userProfile?.contactNumber || '';
+    // Trigger animation
+    setTimeout(() => {
+      this.contactModalAnimationState = 'visible';
+    }, 10);
   }
 
   cancelContactNumberEdit() {
-    this.isContactNumberEditOpen = false;
-    this.editingContactNumber = '';
+    this.contactModalAnimationState = 'hidden';
+    // Wait for animation to complete before hiding modal
+    setTimeout(() => {
+      this.isContactNumberEditOpen = false;
+      this.editingContactNumber = '';
+    }, 150);
   }
 
   // Contact number validation
@@ -209,9 +251,12 @@ export class AccountPage implements OnInit, OnDestroy {
         // but we can also update our local reference for immediate UI update
         this.userProfile = updatedProfile;
 
-        // Close the modal
-        this.isContactNumberEditOpen = false;
-        this.editingContactNumber = '';
+        // Close the modal with animation
+        this.contactModalAnimationState = 'hidden';
+        setTimeout(() => {
+          this.isContactNumberEditOpen = false;
+          this.editingContactNumber = '';
+        }, 150);
 
         await this.presentToast('Contact number updated successfully!', 'success');
       }
