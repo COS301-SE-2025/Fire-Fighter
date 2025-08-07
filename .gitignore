@@ -4,6 +4,10 @@ node_modules/
 .env.local
 .env.*.local
 
+# Firebase service account (contains sensitive credentials)
+firebase-service-account.json
+**/firebase-service-account.json
+
 # Backend specific
 backend/firefighter-platform/target/
 backend/firefighter-platform/.mvn/

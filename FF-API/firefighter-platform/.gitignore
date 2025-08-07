@@ -71,4 +71,8 @@ build/
 .env
 .env.local
 .env.*.local
+
+# Firebase service account (contains sensitive credentials)
+firebase-service-account.json
+**/firebase-service-account.json
 >>>>>>>> origin/develop:FF-API/.gitignore
