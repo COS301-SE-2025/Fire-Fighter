@@ -6,11 +6,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 
 import javax.sql.DataSource;
 import jakarta.annotation.PostConstruct;
 
 @Configuration
+@Profile("!test") // Only activate this configuration when NOT in test profile
 public class DatabaseConfig {
 
     @Value("${DB_HOST:100.83.111.92}")

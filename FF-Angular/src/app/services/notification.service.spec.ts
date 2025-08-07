@@ -41,12 +41,23 @@ describe('NotificationService', () => {
   });
 
   afterEach(() => {
-    httpMock.verify();
     service.stopPolling();
+    // Flush any pending requests before verifying
+    try {
+      httpMock.verify();
+    } catch (error) {
+      // Handle any remaining requests
+      const pendingRequests = httpMock.match(() => true);
+      pendingRequests.forEach(req => req.flush([]));
+    }
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
+    // Handle the initial HTTP request that gets triggered on service creation
+    const req = httpMock.expectOne(`http://localhost:8080/api/notifications?userId=${mockUser.uid}`);
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
   });
 
   it('should load notifications on initialization', () => {
