@@ -1,11 +1,13 @@
 package com.apex.firefighter.ticket;
 
+import com.apex.firefighter.config.TestConfig;
 import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.repository.TicketRepository;
 import com.apex.firefighter.service.ticket.TicketService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -17,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
+@Import(TestConfig.class)
 @Transactional
 class TicketServiceTest {
 
