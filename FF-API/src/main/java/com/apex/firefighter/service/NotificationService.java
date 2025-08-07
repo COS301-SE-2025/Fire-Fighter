@@ -46,12 +46,12 @@ public class NotificationService {
      * Create a new notification for a user
      */
     public Notification createNotification(String userId, String type, String title, String message) {
-        System.out.println("🔔 CREATE NOTIFICATION: Creating notification for user - " + userId + ", type - " + type);
+        System.out.println("CREATE NOTIFICATION: Creating notification for user - " + userId + ", type - " + type);
         
         Notification notification = new Notification(userId, type, title, message);
         Notification savedNotification = notificationRepository.save(notification);
         
-        System.out.println("✅ NOTIFICATION CREATED: " + savedNotification);
+        System.out.println("NOTIFICATION CREATED: " + savedNotification);
         return savedNotification;
     }
 
@@ -59,12 +59,12 @@ public class NotificationService {
      * Create a new notification for a user with ticket reference
      */
     public Notification createNotification(String userId, String type, String title, String message, String ticketId) {
-        System.out.println("🔔 CREATE NOTIFICATION: Creating notification for user - " + userId + ", type - " + type + ", ticket - " + ticketId);
+        System.out.println("CREATE NOTIFICATION: Creating notification for user - " + userId + ", type - " + type + ", ticket - " + ticketId);
         
         Notification notification = new Notification(userId, type, title, message, ticketId);
         Notification savedNotification = notificationRepository.save(notification);
         
-        System.out.println("✅ NOTIFICATION CREATED: " + savedNotification);
+        System.out.println("NOTIFICATION CREATED: " + savedNotification);
         return savedNotification;
     }
 
@@ -72,7 +72,7 @@ public class NotificationService {
      * Get all notifications for a user
      */
     public List<Notification> getNotificationsForUser(String userId) {
-        System.out.println("📋 GET NOTIFICATIONS: Retrieving notifications for user - " + userId);
+        System.out.println("GET NOTIFICATIONS: Retrieving notifications for user - " + userId);
         return notificationRepository.findByUserIdOrderByTimestampDesc(userId);
     }
 
@@ -80,7 +80,7 @@ public class NotificationService {
      * Get unread notifications for a user
      */
     public List<Notification> getUnreadNotificationsForUser(String userId) {
-        System.out.println("📋 GET UNREAD NOTIFICATIONS: Retrieving unread notifications for user - " + userId);
+        System.out.println("GET UNREAD NOTIFICATIONS: Retrieving unread notifications for user - " + userId);
         return notificationRepository.findByUserIdAndReadFalseOrderByTimestampDesc(userId);
     }
 
@@ -88,7 +88,7 @@ public class NotificationService {
      * Get read notifications for a user
      */
     public List<Notification> getReadNotificationsForUser(String userId) {
-        System.out.println("📋 GET READ NOTIFICATIONS: Retrieving read notifications for user - " + userId);
+        System.out.println("GET READ NOTIFICATIONS: Retrieving read notifications for user - " + userId);
         return notificationRepository.findByUserIdAndReadTrueOrderByTimestampDesc(userId);
     }
 
@@ -96,7 +96,7 @@ public class NotificationService {
      * Get recent notifications for a user (limited count)
      */
     public List<Notification> getRecentNotificationsForUser(String userId, int limit) {
-        System.out.println("📋 GET RECENT NOTIFICATIONS: Retrieving " + limit + " recent notifications for user - " + userId);
+        System.out.println("GET RECENT NOTIFICATIONS: Retrieving " + limit + " recent notifications for user - " + userId);
         return notificationRepository.findRecentNotificationsForUser(userId, limit);
     }
 
@@ -104,15 +104,15 @@ public class NotificationService {
      * Mark a specific notification as read
      */
     public boolean markNotificationAsRead(Long notificationId, String userId) {
-        System.out.println("✅ MARK AS READ: Marking notification " + notificationId + " as read for user - " + userId);
+        System.out.println("MARK AS READ: Marking notification " + notificationId + " as read for user - " + userId);
         
         int updatedRows = notificationRepository.markAsRead(notificationId, userId);
         boolean success = updatedRows > 0;
         
         if (success) {
-            System.out.println("✅ NOTIFICATION MARKED AS READ: " + notificationId);
+            System.out.println("NOTIFICATION MARKED AS READ: " + notificationId);
         } else {
-            System.out.println("⚠️ NOTIFICATION NOT FOUND OR ALREADY READ: " + notificationId);
+            System.out.println("NOTIFICATION NOT FOUND OR ALREADY READ: " + notificationId);
         }
         
         return success;
@@ -122,10 +122,10 @@ public class NotificationService {
      * Mark all notifications as read for a user
      */
     public int markAllNotificationsAsRead(String userId) {
-        System.out.println("✅ MARK ALL AS READ: Marking all notifications as read for user - " + userId);
+        System.out.println("MARK ALL AS READ: Marking all notifications as read for user - " + userId);
         
         int updatedRows = notificationRepository.markAllAsReadForUser(userId);
-        System.out.println("✅ MARKED " + updatedRows + " NOTIFICATIONS AS READ for user - " + userId);
+        System.out.println("MARKED " + updatedRows + " NOTIFICATIONS AS READ for user - " + userId);
         
         return updatedRows;
     }
@@ -134,10 +134,10 @@ public class NotificationService {
      * Delete all read notifications for a user
      */
     public int deleteReadNotifications(String userId) {
-        System.out.println("🗑️ DELETE READ NOTIFICATIONS: Deleting read notifications for user - " + userId);
+        System.out.println("DELETE READ NOTIFICATIONS: Deleting read notifications for user - " + userId);
         
         int deletedRows = notificationRepository.deleteReadNotificationsForUser(userId);
-        System.out.println("🗑️ DELETED " + deletedRows + " READ NOTIFICATIONS for user - " + userId);
+        System.out.println("DELETED " + deletedRows + " READ NOTIFICATIONS for user - " + userId);
         
         return deletedRows;
     }
@@ -146,15 +146,15 @@ public class NotificationService {
      * Delete a specific notification (only if it belongs to the user)
      */
     public boolean deleteNotification(Long notificationId, String userId) {
-        System.out.println("🗑️ DELETE NOTIFICATION: Deleting notification " + notificationId + " for user - " + userId);
+        System.out.println("DELETE NOTIFICATION: Deleting notification " + notificationId + " for user - " + userId);
         
         int deletedRows = notificationRepository.deleteNotificationForUser(notificationId, userId);
         boolean success = deletedRows > 0;
         
         if (success) {
-            System.out.println("🗑️ NOTIFICATION DELETED: " + notificationId);
+            System.out.println("NOTIFICATION DELETED: " + notificationId);
         } else {
-            System.out.println("⚠️ NOTIFICATION NOT FOUND OR NOT OWNED BY USER: " + notificationId);
+            System.out.println("NOTIFICATION NOT FOUND OR NOT OWNED BY USER: " + notificationId);
         }
         
         return success;
@@ -164,7 +164,7 @@ public class NotificationService {
      * Get notification counts for a user
      */
     public NotificationStats getNotificationStats(String userId) {
-        System.out.println("📊 GET NOTIFICATION STATS: Getting stats for user - " + userId);
+        System.out.println("GET NOTIFICATION STATS: Getting stats for user - " + userId);
         
         long totalCount = notificationRepository.countByUserId(userId);
         long unreadCount = notificationRepository.countByUserIdAndReadFalse(userId);
@@ -192,7 +192,7 @@ public class NotificationService {
      * Get notifications by type for a user
      */
     public List<Notification> getNotificationsByType(String userId, String type) {
-        System.out.println("📋 GET NOTIFICATIONS BY TYPE: Retrieving " + type + " notifications for user - " + userId);
+        System.out.println("GET NOTIFICATIONS BY TYPE: Retrieving " + type + " notifications for user - " + userId);
         return notificationRepository.findByUserIdAndTypeOrderByTimestampDesc(userId, type);
     }
 
@@ -200,7 +200,7 @@ public class NotificationService {
      * Get notifications related to a specific ticket for a user
      */
     public List<Notification> getNotificationsForTicket(String userId, String ticketId) {
-        System.out.println("📋 GET TICKET NOTIFICATIONS: Retrieving notifications for ticket " + ticketId + " and user - " + userId);
+        System.out.println("GET TICKET NOTIFICATIONS: Retrieving notifications for ticket " + ticketId + " and user - " + userId);
         return notificationRepository.findByUserIdAndTicketIdOrderByTimestampDesc(userId, ticketId);
     }
 
@@ -208,12 +208,12 @@ public class NotificationService {
      * Clean up old read notifications (older than specified days)
      */
     public int cleanupOldReadNotifications(int daysOld) {
-        System.out.println("🧹 CLEANUP: Deleting read notifications older than " + daysOld + " days");
+        System.out.println("CLEANUP: Deleting read notifications older than " + daysOld + " days");
         
         LocalDateTime cutoffDate = LocalDateTime.now().minusDays(daysOld);
         int deletedRows = notificationRepository.deleteOldReadNotifications(cutoffDate);
         
-        System.out.println("🧹 CLEANUP COMPLETE: Deleted " + deletedRows + " old read notifications");
+        System.out.println("CLEANUP COMPLETE: Deleted " + deletedRows + " old read notifications");
         return deletedRows;
     }
 
@@ -221,7 +221,7 @@ public class NotificationService {
      * Create notification with email support for ticket creation
      */
     public Notification createTicketCreationNotification(String userId, String ticketId, Ticket ticket) {
-        System.out.println("🔔 CREATE TICKET CREATION NOTIFICATION: Creating notification for user - " + userId + ", ticket - " + ticketId);
+        System.out.println("CREATE TICKET CREATION NOTIFICATION: Creating notification for user - " + userId + ", ticket - " + ticketId);
 
         // Create in-app notification
         Notification notification = createNotification(
@@ -239,15 +239,15 @@ public class NotificationService {
                 if (userOpt.isPresent()) {
                     User user = userOpt.get();
                     gmailEmailService.sendTicketCreationEmail(user.getEmail(), ticket, user);
-                    System.out.println("📧 EMAIL SENT: Ticket creation email sent to " + user.getEmail());
+                    System.out.println("EMAIL SENT: Ticket creation email sent to " + user.getEmail());
                 } else {
-                    System.err.println("⚠️ EMAIL FAILED: User not found for ticket creation email: " + userId);
+                    System.err.println("EMAIL FAILED: User not found for ticket creation email: " + userId);
                 }
             } else {
-                System.out.println("📧 EMAIL SKIPPED: User has ticket creation email notifications disabled: " + userId);
+                System.out.println("EMAIL SKIPPED: User has ticket creation email notifications disabled: " + userId);
             }
         } catch (Exception e) {
-            System.err.println("⚠️ EMAIL FAILED: Could not send ticket creation email: " + e.getMessage());
+            System.err.println("EMAIL FAILED: Could not send ticket creation email: " + e.getMessage());
         }
 
         return notification;
@@ -257,7 +257,7 @@ public class NotificationService {
      * Create notification with email support for ticket completion
      */
     public Notification createTicketCompletionNotification(String userId, String ticketId, Ticket ticket) {
-        System.out.println("🔔 CREATE TICKET COMPLETION NOTIFICATION: Creating notification for user - " + userId + ", ticket - " + ticketId);
+        System.out.println("CREATE TICKET COMPLETION NOTIFICATION: Creating notification for user - " + userId + ", ticket - " + ticketId);
 
         // Create in-app notification
         Notification notification = createNotification(
@@ -275,15 +275,15 @@ public class NotificationService {
                 if (userOpt.isPresent()) {
                     User user = userOpt.get();
                     gmailEmailService.sendTicketCompletionEmail(user.getEmail(), ticket, user);
-                    System.out.println("📧 EMAIL SENT: Ticket completion email sent to " + user.getEmail());
+                    System.out.println("EMAIL SENT: Ticket completion email sent to " + user.getEmail());
                 } else {
-                    System.err.println("⚠️ EMAIL FAILED: User not found for ticket completion email: " + userId);
+                    System.err.println("EMAIL FAILED: User not found for ticket completion email: " + userId);
                 }
             } else {
-                System.out.println("📧 EMAIL SKIPPED: User has ticket completion email notifications disabled: " + userId);
+                System.out.println("EMAIL SKIPPED: User has ticket completion email notifications disabled: " + userId);
             }
         } catch (Exception e) {
-            System.err.println("⚠️ EMAIL FAILED: Could not send ticket completion email: " + e.getMessage());
+            System.err.println("EMAIL FAILED: Could not send ticket completion email: " + e.getMessage());
         }
 
         return notification;
@@ -293,7 +293,7 @@ public class NotificationService {
      * Create notification with email support for ticket revocation
      */
     public Notification createTicketRevocationNotification(String userId, String ticketId, Ticket ticket, String reason) {
-        System.out.println("🔔 CREATE TICKET REVOCATION NOTIFICATION: Creating notification for user - " + userId + ", ticket - " + ticketId);
+        System.out.println("CREATE TICKET REVOCATION NOTIFICATION: Creating notification for user - " + userId + ", ticket - " + ticketId);
 
         // Create in-app notification
         Notification notification = createNotification(
@@ -311,15 +311,15 @@ public class NotificationService {
                 if (userOpt.isPresent()) {
                     User user = userOpt.get();
                     gmailEmailService.sendTicketRevocationEmail(user.getEmail(), ticket, user, reason);
-                    System.out.println("📧 EMAIL SENT: Ticket revocation email sent to " + user.getEmail());
+                    System.out.println("EMAIL SENT: Ticket revocation email sent to " + user.getEmail());
                 } else {
-                    System.err.println("⚠️ EMAIL FAILED: User not found for ticket revocation email: " + userId);
+                    System.err.println("EMAIL FAILED: User not found for ticket revocation email: " + userId);
                 }
             } else {
-                System.out.println("📧 EMAIL SKIPPED: User has ticket revocation email notifications disabled: " + userId);
+                System.out.println("EMAIL SKIPPED: User has ticket revocation email notifications disabled: " + userId);
             }
         } catch (Exception e) {
-            System.err.println("⚠️ EMAIL FAILED: Could not send ticket revocation email: " + e.getMessage());
+            System.err.println("EMAIL FAILED: Could not send ticket revocation email: " + e.getMessage());
         }
 
         return notification;
@@ -329,7 +329,7 @@ public class NotificationService {
      * Create notification with email support for five-minute warning
      */
     public Notification createFiveMinuteWarningNotification(String userId, String ticketId, Ticket ticket) {
-        System.out.println("🔔 CREATE FIVE-MINUTE WARNING NOTIFICATION: Creating notification for user - " + userId + ", ticket - " + ticketId);
+        System.out.println("CREATE FIVE-MINUTE WARNING NOTIFICATION: Creating notification for user - " + userId + ", ticket - " + ticketId);
 
         // Create in-app notification
         Notification notification = createNotification(
@@ -347,15 +347,15 @@ public class NotificationService {
                 if (userOpt.isPresent()) {
                     User user = userOpt.get();
                     gmailEmailService.sendFiveMinuteWarningEmail(user.getEmail(), ticket, user);
-                    System.out.println("📧 EMAIL SENT: Five-minute warning email sent to " + user.getEmail());
+                    System.out.println("EMAIL SENT: Five-minute warning email sent to " + user.getEmail());
                 } else {
-                    System.err.println("⚠️ EMAIL FAILED: User not found for five-minute warning email: " + userId);
+                    System.err.println("EMAIL FAILED: User not found for five-minute warning email: " + userId);
                 }
             } else {
-                System.out.println("📧 EMAIL SKIPPED: User has five-minute warning email notifications disabled: " + userId);
+                System.out.println("EMAIL SKIPPED: User has five-minute warning email notifications disabled: " + userId);
             }
         } catch (Exception e) {
-            System.err.println("⚠️ EMAIL FAILED: Could not send five-minute warning email: " + e.getMessage());
+            System.err.println("EMAIL FAILED: Could not send five-minute warning email: " + e.getMessage());
         }
 
         return notification;

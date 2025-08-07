@@ -11,16 +11,16 @@ All controller tests have been implemented and are passing successfully!
 ### NotificationControllerTest.java (15 tests)
 Tests for the NotificationController REST endpoints.
 - **Coverage**: Excellent (90%+ instruction coverage)
-- **Status**: ✅ All tests passing
+- **Status**: All tests passing
 - **Endpoints Tested**:
   - GET `/api/notifications/{userId}` - Get notifications for user
   - GET `/api/notifications/{userId}/{notificationId}` - Get specific notification
   - Error handling and edge cases
 
-### ✅ TicketControllerTest.java (15 tests)
+### TicketControllerTest.java (15 tests)
 Tests for the TicketController REST endpoints.
 - **Coverage**: Excellent (90%+ instruction coverage)
-- **Status**: ✅ All tests passing
+- **Status**: All tests passing
 - **Endpoints Tested**:
   - GET `/api/tickets` - Get all tickets
   - GET `/api/tickets/{id}` - Get ticket by ID

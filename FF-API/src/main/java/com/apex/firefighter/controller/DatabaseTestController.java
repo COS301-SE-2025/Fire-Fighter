@@ -26,7 +26,7 @@ public class DatabaseTestController {
      */
     @GetMapping("/cors")
     public ResponseEntity<String> corsTest() {
-        return ResponseEntity.ok("🎉 CORS is working correctly! You can access this API from any device on the network.");
+        return ResponseEntity.ok("CORS is working correctly! You can access this API from any device on the network.");
     }
 
     /**
@@ -37,9 +37,9 @@ public class DatabaseTestController {
     public ResponseEntity<String> runComprehensiveTest() {
         try {
             testService.runComprehensiveTest();
-            return ResponseEntity.ok("✅ Database connection test completed successfully! Check console for details.");
+            return ResponseEntity.ok("Database connection test completed successfully! Check console for details.");
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("❌ Test failed: " + e.getMessage());
+            return ResponseEntity.status(500).body("Test failed: " + e.getMessage());
         }
     }
 
@@ -142,7 +142,7 @@ public class DatabaseTestController {
     public ResponseEntity<String> deleteTest(@PathVariable Long id) {
         boolean deleted = testService.deleteTestById(id);
         if (deleted) {
-            return ResponseEntity.ok("✅ Test deleted successfully");
+            return ResponseEntity.ok("Test deleted successfully");
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -155,7 +155,7 @@ public class DatabaseTestController {
     @DeleteMapping("/all")
     public ResponseEntity<String> deleteAllTests() {
         testService.deleteAllTests();
-        return ResponseEntity.ok("✅ All tests deleted successfully");
+        return ResponseEntity.ok("All tests deleted successfully");
     }
 
     /**
