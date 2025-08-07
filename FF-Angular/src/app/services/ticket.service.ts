@@ -16,6 +16,7 @@ export interface Ticket {
   emergencyType?: string;
   emergencyContact?: string;
   duration: number; // Duration in minutes
+  fiveMinuteWarningSent?: boolean; // Tracks if 5-minute warning notification was sent
 }
 
 @Injectable({
@@ -104,12 +105,10 @@ export class TicketService {
       return this.http.post<any>(this.apiUrl, backendTicketData).pipe(
         map(ticket => this.mapBackendTicketToFrontend(ticket)),
         tap(ticket => {
-          this.notificationService.addNotification({
-            type: 'ticket_created',
-            title: 'New Ticket Created',
-            message: `A new ticket ${ticket.id} has been created`,
-            ticketId: ticket.id
-          });
+          // Force refresh notifications to get the backend-created notification
+          setTimeout(() => {
+            this.notificationService.forceRefresh();
+          }, 1000); // Small delay to ensure backend notification is created
         })
       );
     }
@@ -162,7 +161,13 @@ export class TicketService {
       return of(ticket);
     }
     return this.http.patch<any>(`${this.apiUrl}/${ticketId}`, { status }).pipe(
-      map(ticket => this.mapBackendTicketToFrontend(ticket))
+      map(ticket => this.mapBackendTicketToFrontend(ticket)),
+      tap(() => {
+        // Force refresh notifications after status update
+        setTimeout(() => {
+          this.notificationService.forceRefresh();
+        }, 1000);
+      })
     );
   }
 }
