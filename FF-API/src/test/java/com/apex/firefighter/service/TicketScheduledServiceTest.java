@@ -56,12 +56,10 @@ public class TicketScheduledServiceTest {
         ticketScheduledService.sendFiveMinuteWarnings();
 
         // Assert
-        verify(notificationService, times(1)).createNotification(
+        verify(notificationService, times(1)).createFiveMinuteWarningNotification(
             eq("test-user"),
-            eq("time_warning"),
-            eq("Ticket Expiring Soon"),
-            eq("Your request TEST-001 will expire in 5 minutes"),
-            eq("TEST-001")
+            eq("TEST-001"),
+            eq(testTicket)
         );
         verify(ticketRepository, times(1)).save(testTicket);
         assert(testTicket.getFiveMinuteWarningSent());
@@ -78,7 +76,7 @@ public class TicketScheduledServiceTest {
         ticketScheduledService.sendFiveMinuteWarnings();
 
         // Assert
-        verify(notificationService, never()).createNotification(anyString(), anyString(), anyString(), anyString(), anyString());
+        verify(notificationService, never()).createFiveMinuteWarningNotification(anyString(), anyString(), any(Ticket.class));
         verify(ticketRepository, never()).save(any(Ticket.class));
     }
 
@@ -93,7 +91,7 @@ public class TicketScheduledServiceTest {
         ticketScheduledService.sendFiveMinuteWarnings();
 
         // Assert
-        verify(notificationService, never()).createNotification(anyString(), anyString(), anyString(), anyString(), anyString());
+        verify(notificationService, never()).createFiveMinuteWarningNotification(anyString(), anyString(), any(Ticket.class));
         verify(ticketRepository, never()).save(any(Ticket.class));
     }
 
@@ -108,7 +106,7 @@ public class TicketScheduledServiceTest {
         ticketScheduledService.sendFiveMinuteWarnings();
 
         // Assert
-        verify(notificationService, never()).createNotification(anyString(), anyString(), anyString(), anyString(), anyString());
+        verify(notificationService, never()).createFiveMinuteWarningNotification(anyString(), anyString(), any(Ticket.class));
         verify(ticketRepository, never()).save(any(Ticket.class));
     }
 
@@ -117,14 +115,14 @@ public class TicketScheduledServiceTest {
         // Arrange
         List<Ticket> activeTickets = Arrays.asList(testTicket);
         when(ticketRepository.findActiveTicketsWithDuration()).thenReturn(activeTickets);
-        when(notificationService.createNotification(anyString(), anyString(), anyString(), anyString(), anyString()))
+        when(notificationService.createFiveMinuteWarningNotification(anyString(), anyString(), any(Ticket.class)))
             .thenThrow(new RuntimeException("Notification service error"));
 
         // Act
         ticketScheduledService.sendFiveMinuteWarnings();
 
         // Assert
-        verify(notificationService, times(1)).createNotification(anyString(), anyString(), anyString(), anyString(), anyString());
+        verify(notificationService, times(1)).createFiveMinuteWarningNotification(anyString(), anyString(), any(Ticket.class));
         // Should not save the ticket if notification fails
         verify(ticketRepository, never()).save(any(Ticket.class));
         assert(!testTicket.getFiveMinuteWarningSent());

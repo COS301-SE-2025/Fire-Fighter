@@ -38,7 +38,8 @@ describe('AppLoadingScreenComponent', () => {
 
   it('should display loading state', () => {
     const compiled = fixture.nativeElement;
-    expect(compiled.querySelector('.loading-message-professional')).toBeTruthy();
+    expect(compiled.querySelector('h1')).toBeTruthy();
+    expect(compiled.querySelector('h1').textContent.trim()).toBe('FireFighter');
   });
 
   it('should update loading state when service emits new state', () => {
