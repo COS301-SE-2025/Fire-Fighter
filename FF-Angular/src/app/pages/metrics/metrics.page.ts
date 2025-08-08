@@ -17,9 +17,10 @@ export class MetricsPage implements OnInit {
   constructor() { }
 
   ngOnInit() {
-    // Initialize chart after view is ready
+    // Initialize charts after view is ready
     setTimeout(() => {
       this.initializeChart();
+      this.initializeDonutChart();
     }, 100);
   }
 
@@ -151,6 +152,160 @@ export class MetricsPage implements OnInit {
     if (chartElement) {
       const chart = new ApexCharts(chartElement, options);
       chart.render();
+    }
+  }
+
+  private initializeDonutChart() {
+    const getChartOptions = () => {
+      return {
+        series: [48, 48, 6], // Opened, Closed, Revoked (matching current month data)
+        colors: ["#1A56DB", "#7E3AF2", "#DC2626"], // Blue, Purple, Red - matching line chart
+        chart: {
+          height: 320,
+          width: "100%",
+          type: "donut",
+          fontFamily: "Inter, sans-serif"
+        },
+        tooltip: {
+          enabled: true,
+          style: {
+            fontSize: '12px',
+            fontFamily: 'Inter, sans-serif',
+          },
+          custom: function({series, seriesIndex, dataPointIndex, w}: {series: any, seriesIndex: any, dataPointIndex: any, w: any}) {
+            const labels = ['Opened', 'Closed', 'Revoked'];
+            const colors = ['#1A56DB', '#7E3AF2', '#DC2626'];
+            const value = series[seriesIndex];
+            const label = labels[seriesIndex];
+            const total = series.reduce((sum: number, val: number) => sum + val, 0);
+            const percentage = ((value / total) * 100).toFixed(1);
+            
+            let tooltipHTML = `<div class="bg-gray-900 dark:bg-gray-800 text-white dark:text-gray-200 p-3 rounded-lg shadow-lg border border-gray-700">`;
+            tooltipHTML += `<div class="font-semibold mb-2">Status Distribution</div>`;
+            tooltipHTML += `<div style="color: ${colors[seriesIndex]}">`;
+            tooltipHTML += `<span class="inline-block w-2 h-2 rounded-full mr-2" style="background-color: ${colors[seriesIndex]}"></span>`;
+            tooltipHTML += `${label}: ${value} (${percentage}%)`;
+            tooltipHTML += `</div>`;
+            tooltipHTML += `<div class="text-xs text-gray-400 mt-1">Total: ${total} tickets</div>`;
+            tooltipHTML += `</div>`;
+            return tooltipHTML;
+          }
+        },
+        stroke: {
+          colors: ["transparent"],
+          lineCap: "",
+        },
+        plotOptions: {
+          pie: {
+            donut: {
+              labels: {
+                show: true,
+                name: {
+                  show: true,
+                  fontFamily: "Inter, sans-serif",
+                  offsetY: 20,
+                },
+                total: {
+                  showAlways: true,
+                  show: true,
+                  label: "Total tickets",
+                  fontFamily: "Inter, sans-serif",
+                  formatter: function (w: any) {
+                    const sum = w.globals.seriesTotals.reduce((a: any, b: any) => {
+                      return a + b
+                    }, 0)
+                    return sum.toString()
+                  },
+                },
+                value: {
+                  show: true,
+                  fontFamily: "Inter, sans-serif",
+                  offsetY: -20,
+                  formatter: function (value: any) {
+                    return value.toString()
+                  },
+                },
+              },
+              size: "80%",
+            },
+          },
+        },
+        grid: {
+          padding: {
+            top: -2,
+          },
+        },
+        labels: ["Opened", "Closed", "Revoked"],
+        dataLabels: {
+          enabled: false,
+        },
+        legend: {
+          position: "bottom",
+          fontFamily: "Inter, sans-serif",
+        },
+        yaxis: {
+          labels: {
+            formatter: function (value: any) {
+              return value.toString()
+            },
+          },
+        },
+        xaxis: {
+          labels: {
+            formatter: function (value: any) {
+              return value.toString()
+            },
+          },
+          axisTicks: {
+            show: false,
+          },
+          axisBorder: {
+            show: false,
+          },
+        },
+      }
+    }
+
+    const chartElement = document.getElementById("status-donut-chart");
+    if (chartElement && typeof ApexCharts !== 'undefined') {
+      const chart = new ApexCharts(chartElement, getChartOptions());
+      chart.render();
+
+      // Get all the checkboxes by their class name
+      const checkboxes = document.querySelectorAll('#status-filters input[type="checkbox"]');
+
+      // Function to handle the checkbox change event
+      const handleCheckboxChange = (event: any, chart: any) => {
+        const checkbox = event.target;
+        const checkedBoxes = document.querySelectorAll('#status-filters input[type="checkbox"]:checked');
+        
+        if (checkedBoxes.length === 0) {
+          // If no checkboxes are checked, show all data
+          chart.updateSeries([48, 48, 6]);
+        } else {
+          // Show only selected data
+          let series = [0, 0, 0];
+          checkedBoxes.forEach((cb: any) => {
+            switch(cb.value) {
+              case 'opened':
+                series[0] = 48;
+                break;
+              case 'closed':
+                series[1] = 48;
+                break;
+              case 'revoked':
+                series[2] = 6;
+                break;
+            }
+          });
+          chart.updateSeries(series);
+        }
+      }
+
+      // Attach the event listener to each checkbox
+      checkboxes.forEach((checkbox) => {
+        checkbox.addEventListener('change', (event) => handleCheckboxChange(event, chart));
+      });
     }
   }
 
