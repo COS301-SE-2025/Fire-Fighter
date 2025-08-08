@@ -7,6 +7,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +27,7 @@ public class JwtService {
 
     private final FirebaseAuth firebaseAuth;
 
-    public JwtService(FirebaseAuth firebaseAuth) {
+    public JwtService(@Autowired(required = false) FirebaseAuth firebaseAuth) {
         this.firebaseAuth = firebaseAuth;
     }
 
@@ -38,6 +39,10 @@ public class JwtService {
      * Verify Firebase ID token and extract user info
      */
     public FirebaseToken verifyFirebaseToken(String idToken) throws Exception {
+        if (firebaseAuth == null) {
+            // In development mode, return null - this will be handled by the authentication filter
+            throw new RuntimeException("Firebase authentication not available in development mode");
+        }
         return firebaseAuth.verifyIdToken(idToken);
     }
 
