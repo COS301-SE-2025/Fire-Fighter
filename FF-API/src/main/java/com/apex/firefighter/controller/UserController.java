@@ -206,10 +206,10 @@ public class UserController {
 
             User updatedUser = userService.updateContactNumber(firebaseUid, contactNumber);
 
-            System.out.println("✅ CONTACT UPDATE SUCCESS: " + updatedUser.getContactNumber());
+            System.out.println("CONTACT UPDATE SUCCESS: " + updatedUser.getContactNumber());
             return ResponseEntity.ok(updatedUser);
         } catch (RuntimeException e) {
-            System.err.println("❌ CONTACT UPDATE FAILED:");
+            System.err.println("CONTACT UPDATE FAILED:");
             System.err.println("  Error Type: " + e.getClass().getSimpleName());
             System.err.println("  Error Message: " + e.getMessage());
 
@@ -217,13 +217,7 @@ public class UserController {
                 return ResponseEntity.notFound().build();
             }
             return ResponseEntity.status(500).build();
-        } catch (Exception e) {
-            System.err.println("❌ UNEXPECTED ERROR IN CONTACT UPDATE:");
-            System.err.println("  Error Type: " + e.getClass().getSimpleName());
-            System.err.println("  Error Message: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.status(500).build();
-        }
+        } 
     }
 
     /**
