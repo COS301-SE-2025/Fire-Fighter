@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, interval, of } from 'rxjs';
+import { Observable, BehaviorSubject, interval, of, Subscription } from 'rxjs';
 import { catchError, map, switchMap, tap, timeout } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
@@ -42,6 +42,7 @@ export class HealthService {
   public health$ = this.healthSubject.asObservable();
   private isMonitoring = false;
   private monitoringInterval = 30000; // 30 seconds
+  private monitoringSubscription?: Subscription;
 
   constructor(private http: HttpClient) {}
 
@@ -54,13 +55,9 @@ export class HealthService {
     }
 
     this.isMonitoring = true;
-    console.log('🏥 Starting health monitoring...');
-
-    // Initial health check
     this.checkHealth().subscribe();
 
-    // Set up periodic health checks
-    interval(this.monitoringInterval).pipe(
+    this.monitoringSubscription = interval(this.monitoringInterval).pipe(
       switchMap(() => this.checkHealth())
     ).subscribe();
   }
@@ -70,7 +67,11 @@ export class HealthService {
    */
   stopMonitoring(): void {
     this.isMonitoring = false;
-    console.log('🏥 Stopping health monitoring...');
+    
+    if (this.monitoringSubscription) {
+      this.monitoringSubscription.unsubscribe();
+      this.monitoringSubscription = undefined;
+    }
   }
 
   /**
@@ -80,13 +81,12 @@ export class HealthService {
     return this.http.get<HealthStatus>(this.apiUrl).pipe(
       map((status: HealthStatus) => {
         const health: ServiceHealth = {
-          isHealthy: status.status === 'UP',
+          isHealthy: status && status.status === 'UP',
           status: status,
           lastChecked: new Date(),
           error: null
         };
 
-        console.log('🏥 Health check successful:', health);
         this.healthSubject.next(health);
         return health;
       }),
@@ -98,7 +98,6 @@ export class HealthService {
           error: this.getErrorMessage(error)
         };
 
-        console.warn('🏥 Health check failed:', health);
         this.healthSubject.next(health);
         return of(health);
       })
@@ -110,8 +109,6 @@ export class HealthService {
    * Used during app startup for better UX
    */
   checkInitialConnectivity(timeoutMs: number = 8000): Observable<ServiceHealth> {
-    console.log(`🏥 Performing initial connectivity check (timeout: ${timeoutMs}ms)...`);
-
     return this.http.get<HealthStatus>(this.apiUrl).pipe(
       timeout(timeoutMs),
       map((status: HealthStatus) => {
@@ -122,7 +119,6 @@ export class HealthService {
           error: null
         };
 
-        console.log('🏥 Initial connectivity check successful:', health);
         this.healthSubject.next(health);
         return health;
       }),
@@ -134,7 +130,6 @@ export class HealthService {
           error: this.getErrorMessage(error)
         };
 
-        console.warn('🏥 Initial connectivity check failed:', health);
         this.healthSubject.next(health);
         return of(health);
       })

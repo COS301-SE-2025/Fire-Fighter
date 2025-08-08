@@ -25,9 +25,6 @@ export class HealthMonitorService {
    * Only starts monitoring after initial app load is complete
    */
   startMonitoring(): void {
-    console.log('🏥 Starting global health monitoring...');
-
-    // Wait for initial app loading to complete before starting health monitoring
     this.appLoadingService.loadingState$.pipe(
       filter((state: AppLoadingState) => !state.isLoading)
     ).subscribe(() => {
@@ -45,7 +42,6 @@ export class HealthMonitorService {
     }
 
     this.healthSubscription = this.healthService.health$.subscribe(health => {
-      // Skip health monitoring during initial load
       if (!this.isInitialLoadComplete) {
         return;
       }
@@ -53,17 +49,16 @@ export class HealthMonitorService {
       const currentRoute = this.router.url;
       this.isOnServiceDownPage = currentRoute === '/service-down';
 
-      // If service becomes unhealthy and we're not already on service-down page
+      // Navigate to service-down page when service becomes unhealthy
       if (!health.isHealthy && this.wasHealthy && !this.isOnServiceDownPage) {
-        console.warn('🚨 Service became unhealthy, redirecting to service-down page');
         localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
         this.router.navigate(['/service-down']);
       }
 
-      // If service becomes healthy and we're on service-down page
+      // Navigate to dashboard when service recovers
       if (health.isHealthy && !this.wasHealthy && this.isOnServiceDownPage) {
-        console.log('🎉 Service is healthy again, redirecting to dashboard');
         localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
+        this.isOnServiceDownPage = false;
         this.router.navigate(['/dashboard']);
       }
 
@@ -77,7 +72,6 @@ export class HealthMonitorService {
   stopMonitoring(): void {
     if (this.healthSubscription) {
       this.healthSubscription.unsubscribe();
-      console.log('🏥 Stopped global health monitoring');
     }
     this.isInitialLoadComplete = false;
   }
@@ -90,11 +84,24 @@ export class HealthMonitorService {
   }
 
   /**
+   * Manually update service down page status (useful for manual retry scenarios)
+   */
+  setServiceDownPageStatus(status: boolean): void {
+    this.isOnServiceDownPage = status;
+    
+    if (status && !this.healthSubscription) {
+      this.forceStartMonitoring();
+    }
+  }
+
+  /**
    * Force start monitoring (for testing or manual override)
    */
   forceStartMonitoring(): void {
     this.isInitialLoadComplete = true;
     this.startHealthSubscription();
+    this.healthService.startMonitoring();
+    this.healthService.checkHealth().subscribe();
   }
 
   /**
@@ -106,4 +113,6 @@ export class HealthMonitorService {
     this.isOnServiceDownPage = false;
     this.isInitialLoadComplete = false;
   }
+
+
 }

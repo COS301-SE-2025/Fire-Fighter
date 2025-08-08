@@ -13,7 +13,7 @@ import { Subscription } from 'rxjs';
 export class AppLoadingScreenComponent implements OnInit, OnDestroy {
   loadingState: AppLoadingState = {
     isLoading: true,
-    message: 'Loading...',
+    message: 'Starting FireFighter platform...',
     progress: 0
   };
 
