@@ -8,13 +8,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockitoBean;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,14 +41,12 @@ class ChatbotControllerTest {
     private final String BASE_URL = "/api/chatbot";
 
     @BeforeEach
-    void setUp() {
-        // Setup can be added here if needed
-    }
+    void setUp() {}
 
     @Test
     @WithMockUser
     void processQuery_WithValidInput_ShouldReturnChatbotResponse() throws Exception {
-        // Arrange
+        
         Map<String, String> request = new HashMap<>();
         request.put("query", "What are my active tickets?");
         request.put("userId", TEST_USER_ID);
@@ -56,7 +55,6 @@ class ChatbotControllerTest {
         when(chatbotService.processQuery("What are my active tickets?", TEST_USER_ID))
                 .thenReturn(expectedResponse);
 
-        // Act & Assert
         mockMvc.perform(post(BASE_URL + "/query")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
@@ -72,12 +70,11 @@ class ChatbotControllerTest {
     @Test
     @WithMockUser
     void processQuery_WithEmptyQuery_ShouldReturnBadRequest() throws Exception {
-        // Arrange
+        
         Map<String, String> request = new HashMap<>();
         request.put("query", "");
         request.put("userId", TEST_USER_ID);
 
-        // Act & Assert
         mockMvc.perform(post(BASE_URL + "/query")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
@@ -93,12 +90,10 @@ class ChatbotControllerTest {
     @Test
     @WithMockUser
     void processQuery_WithNullQuery_ShouldReturnBadRequest() throws Exception {
-        // Arrange
+        
         Map<String, String> request = new HashMap<>();
         request.put("userId", TEST_USER_ID);
-        // query is null
-
-        // Act & Assert
+        
         mockMvc.perform(post(BASE_URL + "/query")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
@@ -114,12 +109,11 @@ class ChatbotControllerTest {
     @Test
     @WithMockUser
     void processQuery_WithEmptyUserId_ShouldReturnBadRequest() throws Exception {
-        // Arrange
+        
         Map<String, String> request = new HashMap<>();
         request.put("query", "What are my tickets?");
         request.put("userId", "");
 
-        // Act & Assert
         mockMvc.perform(post(BASE_URL + "/query")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
@@ -135,12 +129,10 @@ class ChatbotControllerTest {
     @Test
     @WithMockUser
     void processQuery_WithNullUserId_ShouldReturnBadRequest() throws Exception {
-        // Arrange
+        
         Map<String, String> request = new HashMap<>();
         request.put("query", "What are my tickets?");
-        // userId is null
-
-        // Act & Assert
+        
         mockMvc.perform(post(BASE_URL + "/query")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
@@ -156,7 +148,7 @@ class ChatbotControllerTest {
     @Test
     @WithMockUser
     void processQuery_WhenServiceThrowsException_ShouldReturnInternalServerError() throws Exception {
-        // Arrange
+        
         Map<String, String> request = new HashMap<>();
         request.put("query", "What are my tickets?");
         request.put("userId", TEST_USER_ID);
@@ -164,7 +156,6 @@ class ChatbotControllerTest {
         when(chatbotService.processQuery(anyString(), anyString()))
                 .thenThrow(new RuntimeException("AI service error"));
 
-        // Act & Assert
         mockMvc.perform(post(BASE_URL + "/query")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
@@ -180,7 +171,7 @@ class ChatbotControllerTest {
     @Test
     @WithMockUser
     void processAdminQuery_WithValidInput_ShouldReturnChatbotResponse() throws Exception {
-        // Arrange
+        
         Map<String, String> request = new HashMap<>();
         request.put("query", "Show all active tickets");
         request.put("userId", TEST_USER_ID);
@@ -189,7 +180,6 @@ class ChatbotControllerTest {
         when(chatbotService.processAdminQuery("Show all active tickets", TEST_USER_ID))
                 .thenReturn(expectedResponse);
 
-        // Act & Assert
         mockMvc.perform(post(BASE_URL + "/admin/query")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
@@ -205,12 +195,11 @@ class ChatbotControllerTest {
     @Test
     @WithMockUser
     void processAdminQuery_WithEmptyQuery_ShouldReturnBadRequest() throws Exception {
-        // Arrange
+        
         Map<String, String> request = new HashMap<>();
         request.put("query", "");
         request.put("userId", TEST_USER_ID);
 
-        // Act & Assert
         mockMvc.perform(post(BASE_URL + "/admin/query")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
@@ -225,8 +214,27 @@ class ChatbotControllerTest {
 
     @Test
     @WithMockUser
+    void processAdminQuery_WithNullUserId_ShouldReturnBadRequest() throws Exception {
+        
+        Map<String, String> request = new HashMap<>();
+        request.put("query", "What are my tickets?");
+        
+        mockMvc.perform(post(BASE_URL + "/admin/query")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+                .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("User ID is required"))
+                .andExpect(jsonPath("$.success").value(false));
+
+        verifyNoInteractions(chatbotService);
+    }
+
+    @Test
+    @WithMockUser
     void processAdminQuery_WhenNotAuthorized_ShouldReturnForbidden() throws Exception {
-        // Arrange
+        
         Map<String, String> request = new HashMap<>();
         request.put("query", "Show all tickets");
         request.put("userId", TEST_USER_ID);
@@ -235,7 +243,6 @@ class ChatbotControllerTest {
         when(chatbotService.processAdminQuery("Show all tickets", TEST_USER_ID))
                 .thenReturn(unauthorizedResponse);
 
-        // Act & Assert
         mockMvc.perform(post(BASE_URL + "/admin/query")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
@@ -251,7 +258,7 @@ class ChatbotControllerTest {
     @Test
     @WithMockUser
     void processAdminQuery_WhenServiceThrowsException_ShouldReturnInternalServerError() throws Exception {
-        // Arrange
+        
         Map<String, String> request = new HashMap<>();
         request.put("query", "Show all tickets");
         request.put("userId", TEST_USER_ID);
@@ -259,7 +266,6 @@ class ChatbotControllerTest {
         when(chatbotService.processAdminQuery(anyString(), anyString()))
                 .thenThrow(new RuntimeException("Database error"));
 
-        // Act & Assert
         mockMvc.perform(post(BASE_URL + "/admin/query")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
@@ -275,11 +281,10 @@ class ChatbotControllerTest {
     @Test
     @WithMockUser
     void getCapabilities_ShouldReturnChatbotCapabilities() throws Exception {
-        // Arrange
+        
         ChatbotCapabilities capabilities = new ChatbotCapabilities(true, false, "Personal ticket access", new String[]{"Show my tickets"});
         when(chatbotService.getCapabilities(TEST_USER_ID)).thenReturn(capabilities);
 
-        // Act & Assert
         mockMvc.perform(get(BASE_URL + "/capabilities/" + TEST_USER_ID))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
@@ -289,11 +294,20 @@ class ChatbotControllerTest {
 
     @Test
     @WithMockUser
+    void getCapabilities_WithEmptyUserId_ShouldReturnBadRequest() throws Exception {
+
+        mockMvc.perform(get(BASE_URL + "/capabilities/ "))  
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(chatbotService);
+    }
+
+    @Test
+    @WithMockUser
     void getCapabilities_WhenServiceThrowsException_ShouldReturnInternalServerError() throws Exception {
-        // Arrange
+        
         when(chatbotService.getCapabilities(TEST_USER_ID)).thenThrow(new RuntimeException("Service error"));
 
-        // Act & Assert
         mockMvc.perform(get(BASE_URL + "/capabilities/" + TEST_USER_ID))
                 .andExpect(status().isInternalServerError());
 
@@ -303,11 +317,10 @@ class ChatbotControllerTest {
     @Test
     @WithMockUser
     void getDebugContext_ShouldReturnDebugContext() throws Exception {
-        // Arrange
+        
         String debugContext = "Debug context information";
         when(chatbotService.getDebugContext("test query", TEST_USER_ID)).thenReturn(debugContext);
 
-        // Act & Assert
         mockMvc.perform(get(BASE_URL + "/debug/context/" + TEST_USER_ID)
                 .param("query", "test query"))
                 .andExpect(status().isOk())
@@ -320,11 +333,10 @@ class ChatbotControllerTest {
     @Test
     @WithMockUser
     void getDebugContext_WhenServiceThrowsException_ShouldReturnInternalServerError() throws Exception {
-        // Arrange
+        
         when(chatbotService.getDebugContext("test query", TEST_USER_ID))
                 .thenThrow(new RuntimeException("Debug error"));
 
-        // Act & Assert
         mockMvc.perform(get(BASE_URL + "/debug/context/" + TEST_USER_ID)
                 .param("query", "test query"))
                 .andExpect(status().isInternalServerError())
@@ -332,4 +344,164 @@ class ChatbotControllerTest {
 
         verify(chatbotService).getDebugContext("test query", TEST_USER_ID);
     }
+
+    @Test
+    @WithMockUser
+    void healthCheck_ShouldReturnHealthyStatus() throws Exception {
+
+        mockMvc.perform(get(BASE_URL + "/health"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value("healthy"))
+                .andExpect(jsonPath("$.service").value("AI Chatbot"))
+                .andExpect(jsonPath("$.version").value("1.0.0"))
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.timestamp").isString());
+
+        verifyNoInteractions(chatbotService);
+    }
+
+    @Test
+    @WithMockUser
+    void healthCheck_ResponseStructure_ShouldContainAllRequiredFields() throws Exception {
+        mockMvc.perform(get(BASE_URL + "/health"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").exists())
+                .andExpect(jsonPath("$.service").exists())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.version").exists())
+                .andExpect(jsonPath("$.*", hasSize(4)));
+
+        verifyNoInteractions(chatbotService);
+    }
+
+    @Test
+    @WithMockUser
+    void getSuggestions_ForRegularUser_ShouldReturnUserSuggestions() throws Exception {
+         
+        ChatbotCapabilities userCapabilities = new ChatbotCapabilities(true, false, 
+            "Personal ticket access",
+            new String[]{"Show my tickets", "What are my tasks?"}
+        );
+        when(chatbotService.getCapabilities(TEST_USER_ID)).thenReturn(userCapabilities);
+
+        mockMvc.perform(get(BASE_URL + "/suggestions/" + TEST_USER_ID))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.available").value(true))
+                .andExpect(jsonPath("$.userRole").value("User"))
+                .andExpect(jsonPath("$.accessLevel").value("Personal ticket access"))
+                .andExpect(jsonPath("$.suggestedQueries").isArray())
+                .andExpect(jsonPath("$.suggestedQueries[0]").value("Show my tickets"))
+                .andExpect(jsonPath("$.suggestedQueries[1]").value("What are my tasks?"))
+                .andExpect(jsonPath("$.examples").isArray())
+                .andExpect(jsonPath("$.examples[0]").value("What tickets am I assigned to?"))
+                .andExpect(jsonPath("$.examples[1]").value("Do I have any urgent tasks?"))
+                .andExpect(jsonPath("$.examples[2]").value("How do I update my ticket status?"))
+                .andExpect(jsonPath("$.examples[3]").value("Show my recent activity"))
+                .andExpect(jsonPath("$.examples[4]").value("Help me with emergency procedures"));
+
+        verify(chatbotService).getCapabilities(TEST_USER_ID);
+    }
+
+    @Test
+    @WithMockUser
+    void getSuggestions_ForAdminUser_ShouldReturnAdminSuggestions() throws Exception {
+        
+        ChatbotCapabilities adminCapabilities = new ChatbotCapabilities(true, true, "Full system access",
+            new String[]{"Show all tickets", "System overview"}
+        );
+        when(chatbotService.getCapabilities(TEST_USER_ID)).thenReturn(adminCapabilities);
+
+        mockMvc.perform(get(BASE_URL + "/suggestions/" + TEST_USER_ID))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.available").value(true))
+                .andExpect(jsonPath("$.userRole").value("Administrator"))
+                .andExpect(jsonPath("$.accessLevel").value("Full system access"))
+                .andExpect(jsonPath("$.suggestedQueries").isArray())
+                .andExpect(jsonPath("$.suggestedQueries[0]").value("Show all tickets"))
+                .andExpect(jsonPath("$.suggestedQueries[1]").value("System overview"))
+                .andExpect(jsonPath("$.examples").isArray())
+                .andExpect(jsonPath("$.examples[0]").value("How many active fire emergencies do we have?"))
+                .andExpect(jsonPath("$.examples[1]").value("Show me today's ticket summary"))
+                .andExpect(jsonPath("$.examples[2]").value("Which tickets need immediate attention?"))
+                .andExpect(jsonPath("$.examples[3]").value("What's the average response time this week?"))
+                .andExpect(jsonPath("$.examples[4]").value("Export current active tickets"));
+
+        verify(chatbotService).getCapabilities(TEST_USER_ID);
+    }
+
+    @Test
+    @WithMockUser
+    void getSuggestions_WithNullSuggestedQueries_ShouldReturnEmptyArray() throws Exception {
+        
+        ChatbotCapabilities capabilitiesWithNullQueries = new ChatbotCapabilities(true,false,
+            "Personal ticket access"
+        );
+        when(chatbotService.getCapabilities(TEST_USER_ID)).thenReturn(capabilitiesWithNullQueries);
+
+        mockMvc.perform(get(BASE_URL + "/suggestions/" + TEST_USER_ID))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.available").value(true))
+                .andExpect(jsonPath("$.userRole").value("User"))
+                .andExpect(jsonPath("$.accessLevel").value("Personal ticket access"))
+                .andExpect(jsonPath("$.suggestedQueries").isArray())
+                .andExpect(jsonPath("$.suggestedQueries").isEmpty())
+                .andExpect(jsonPath("$.examples").isArray());
+
+        verify(chatbotService).getCapabilities(TEST_USER_ID);
+    }
+
+    @Test
+    @WithMockUser
+    void getSuggestions_WithEmptyUserId_ShouldReturnBadRequest() throws Exception {
+        
+        mockMvc.perform(get(BASE_URL + "/suggestions/ "))  
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(chatbotService);
+    }
+
+    @Test
+    @WithMockUser
+    void getSuggestions_WhenServiceThrowsException_ShouldReturnInternalServerError() throws Exception {
+        
+        when(chatbotService.getCapabilities(TEST_USER_ID))
+                .thenThrow(new RuntimeException("Service unavailable"));
+
+        mockMvc.perform(get(BASE_URL + "/suggestions/" + TEST_USER_ID))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.available").value(false))
+                .andExpect(jsonPath("$.error").value("Unable to retrieve suggestions"));
+
+        verify(chatbotService).getCapabilities(TEST_USER_ID);
+    }
+
+    @Test
+    @WithMockUser
+    void getSuggestions_WithUnavailableCapabilities_ShouldReturnUnavailableResponse() throws Exception {
+        
+        ChatbotCapabilities unavailableCapabilities = new ChatbotCapabilities(false, false,
+            "Authentication required",
+            new String[]{}
+        );
+        when(chatbotService.getCapabilities(TEST_USER_ID)).thenReturn(unavailableCapabilities);
+
+        mockMvc.perform(get(BASE_URL + "/suggestions/" + TEST_USER_ID))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.available").value(false))
+                .andExpect(jsonPath("$.userRole").value("User"))
+                .andExpect(jsonPath("$.accessLevel").value("Authentication required"))
+                .andExpect(jsonPath("$.suggestedQueries").isArray())
+                .andExpect(jsonPath("$.suggestedQueries").isEmpty())
+                .andExpect(jsonPath("$.examples").isArray());
+
+        verify(chatbotService).getCapabilities(TEST_USER_ID);
+    }
+
 }
