@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../../node_modules/@ionic/core/dist/esm/ion-text.entry.js"],
+  "sourcesContent": ["/*!\n * (C) Ionic http://ionicframework.com - MIT License\n */\nimport { r as registerInstance, e as getIonMode, h, j as Host } from './index-B_U9CtaY.js';\nimport { c as createColorClasses } from './theme-DiVJyqlX.js';\nconst textCss = \":host(.ion-color){color:var(--ion-color-base)}\";\nconst Text = class {\n  constructor(hostRef) {\n    registerInstance(this, hostRef);\n  }\n  render() {\n    const mode = getIonMode(this);\n    return h(Host, {\n      key: '361035eae7b92dc109794348d39bad2f596eb6be',\n      class: createColorClasses(this.color, {\n        [mode]: true\n      })\n    }, h(\"slot\", {\n      key: 'c7b8835cf485ba9ecd73298f0529276ce1ea0852'\n    }));\n  }\n};\nText.style = textCss;\nexport { Text as ion_text };"],
+  "mappings": ";;;;;;;;;;;;AAKA,IAAM,UAAU;AAChB,IAAM,OAAO,MAAM;AAAA,EACjB,YAAY,SAAS;AACnB,qBAAiB,MAAM,OAAO;AAAA,EAChC;AAAA,EACA,SAAS;AACP,UAAM,OAAO,WAAW,IAAI;AAC5B,WAAO,EAAE,MAAM;AAAA,MACb,KAAK;AAAA,MACL,OAAO,mBAAmB,KAAK,OAAO;AAAA,QACpC,CAAC,IAAI,GAAG;AAAA,MACV,CAAC;AAAA,IACH,GAAG,EAAE,QAAQ;AAAA,MACX,KAAK;AAAA,IACP,CAAC,CAAC;AAAA,EACJ;AACF;AACA,KAAK,QAAQ;",
+  "names": []
+}
