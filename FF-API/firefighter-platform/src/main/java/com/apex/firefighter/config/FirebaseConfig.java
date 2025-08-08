@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @Configuration
-@Profile("!test")
+@Profile("!test & !dev")
 public class FirebaseConfig {
 
     @PostConstruct
