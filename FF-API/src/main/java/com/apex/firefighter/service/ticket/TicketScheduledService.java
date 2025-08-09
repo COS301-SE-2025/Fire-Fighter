@@ -71,9 +71,9 @@ public class TicketScheduledService {
                         ticketRepository.save(ticket);
 
                         warningsSent++;
-                        System.out.println("🔔 5-MINUTE WARNING SENT: Notification sent to user " + ticket.getUserId() + " for ticket " + ticket.getTicketId());
+                        System.out.println("5-MINUTE WARNING SENT: Notification sent to user " + ticket.getUserId() + " for ticket " + ticket.getTicketId());
                     } catch (Exception e) {
-                        System.err.println("⚠️ WARNING NOTIFICATION FAILED: Could not send 5-minute warning for ticket " + ticket.getTicketId() + ": " + e.getMessage());
+                        System.err.println("WARNING NOTIFICATION FAILED: Could not send 5-minute warning for ticket " + ticket.getTicketId() + ": " + e.getMessage());
                     }
                 }
             }
@@ -111,9 +111,9 @@ public class TicketScheduledService {
                             ticket.getTicketId(),
                             ticket
                         );
-                        System.out.println("🔔 NOTIFICATION CREATED: Ticket completion notification sent to user " + ticket.getUserId());
+                        System.out.println("NOTIFICATION CREATED: Ticket completion notification sent to user " + ticket.getUserId());
                     } catch (Exception e) {
-                        System.err.println("⚠️ NOTIFICATION FAILED: Could not create ticket completion notification: " + e.getMessage());
+                        System.err.println("NOTIFICATION FAILED: Could not create ticket completion notification: " + e.getMessage());
                     }
 
                     closedCount++;
