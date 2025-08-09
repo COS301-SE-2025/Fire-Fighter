@@ -48,7 +48,6 @@ public class TicketScheduledService {
             LocalDateTime currentTime = LocalDateTime.now();
 
             for (Ticket ticket : activeTicketsWithDuration) {
-                // Skip if warning already sent
                 if (ticket.getFiveMinuteWarningSent() != null && ticket.getFiveMinuteWarningSent()) {
                     continue;
                 }
@@ -56,9 +55,7 @@ public class TicketScheduledService {
                 LocalDateTime expirationTime = ticket.getDateCreated().plusMinutes(ticket.getDuration());
                 LocalDateTime warningTime = expirationTime.minusMinutes(5);
 
-                // Check if current time is at or past the warning time but before expiration
                 if (currentTime.isAfter(warningTime) && currentTime.isBefore(expirationTime)) {
-                    // Send 5-minute warning notification (with email support)
                     try {
                         notificationService.createFiveMinuteWarningNotification(
                             ticket.getUserId(),
@@ -66,7 +63,6 @@ public class TicketScheduledService {
                             ticket
                         );
 
-                        // Mark warning as sent
                         ticket.setFiveMinuteWarningSent(true);
                         ticketRepository.save(ticket);
 
@@ -104,7 +100,6 @@ public class TicketScheduledService {
                     ticket.setDateCompleted(currentTime);
                     ticketRepository.save(ticket);
 
-                    // Create notification for ticket completion (with email support)
                     try {
                         notificationService.createTicketCompletionNotification(
                             ticket.getUserId(),
