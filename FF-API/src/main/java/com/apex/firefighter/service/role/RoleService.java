@@ -34,7 +34,7 @@ public class RoleService {
      * SIMPLE ROLE MANAGEMENT
      */
     public User assignRole(String firebaseUid, String roleName, String assignedBy) {
-        System.out.println("🔵 ASSIGN ROLE: Assigning role '" + roleName + "' to UID - " + firebaseUid);
+        System.out.println("ASSIGN ROLE: Assigning role '" + roleName + "' to UID - " + firebaseUid);
         
         Optional<User> userOpt = userRepository.findByUserId(firebaseUid);
         
@@ -44,10 +44,10 @@ public class RoleService {
             // Simply set the role in the role column
             user.setRole(roleName);
             User updatedUser = userRepository.save(user);
-            System.out.println("✅ ROLE ASSIGNED: Role '" + roleName + "' assigned to user by " + assignedBy);
+            System.out.println("ROLE ASSIGNED: Role '" + roleName + "' assigned to user by " + assignedBy);
             return updatedUser;
         } else {
-            System.out.println("❌ ASSIGN FAILED: User not found");
+            System.out.println("ASSIGN FAILED: User not found");
             throw new RuntimeException("User not found with Firebase UID: " + firebaseUid);
         }
     }
@@ -56,7 +56,7 @@ public class RoleService {
      * Remove role from user
      */
     public User removeRole(String firebaseUid, String roleName) {
-        System.out.println("🔵 REMOVE ROLE: Removing role '" + roleName + "' from UID - " + firebaseUid);
+        System.out.println("REMOVE ROLE: Removing role '" + roleName + "' from UID - " + firebaseUid);
         
         Optional<User> userOpt = userRepository.findByUserId(firebaseUid);
         if (userOpt.isPresent()) {
@@ -66,14 +66,14 @@ public class RoleService {
             if (roleName.equals(user.getRole())) {
                 user.setRole(null);
                 User updatedUser = userRepository.save(user);
-                System.out.println("✅ ROLE REMOVED: Role '" + roleName + "' removed from user");
+                System.out.println("ROLE REMOVED: Role '" + roleName + "' removed from user");
                 return updatedUser;
             } else {
-                System.out.println("⚠️ ROLE MISMATCH: User doesn't have role '" + roleName + "'");
+                System.out.println("ROLE MISMATCH: User doesn't have role '" + roleName + "'");
                 return user;
             }
         } else {
-            System.out.println("❌ REMOVE FAILED: User not found");
+            System.out.println("REMOVE FAILED: User not found");
             throw new RuntimeException("User not found with Firebase UID: " + firebaseUid);
         }
     }
