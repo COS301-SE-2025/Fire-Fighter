@@ -1,7 +1,13 @@
-package com.apex.firefighter.service;
+package com.apex.firefighter.unit.services;
 
 import com.apex.firefighter.model.Notification;
+import com.apex.firefighter.model.Ticket;
+import com.apex.firefighter.model.User;
 import com.apex.firefighter.repository.NotificationRepository;
+import com.apex.firefighter.repository.UserRepository;
+import com.apex.firefighter.service.GmailEmailService;
+import com.apex.firefighter.service.NotificationService;
+import com.apex.firefighter.service.UserPreferencesService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -24,10 +31,21 @@ class NotificationServiceTest {
     @Mock
     private NotificationRepository notificationRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private UserPreferencesService userPreferencesService;
+
+    @Mock
+    private GmailEmailService gmailEmailService;
+
     @InjectMocks
     private NotificationService notificationService;
 
     private Notification testNotification;
+    private User testUser;
+    private Ticket testTicket;
     private final String TEST_USER_ID = "test-user-123";
     private final String TEST_TICKET_ID = "TICKET-001";
 
@@ -42,6 +60,19 @@ class NotificationServiceTest {
         testNotification.setTimestamp(LocalDateTime.now());
         testNotification.setRead(false);
         testNotification.setTicketId(TEST_TICKET_ID);
+
+        testUser = new User();
+        testUser.setUserId(TEST_USER_ID);
+        testUser.setUsername("testuser");
+        testUser.setEmail("test@example.com");
+        testUser.setIsAuthorized(true);
+
+        testTicket = new Ticket();
+        testTicket.setTicketId(TEST_TICKET_ID);
+        testTicket.setDescription("Test emergency");
+        testTicket.setUserId(TEST_USER_ID);
+        testTicket.setEmergencyType("fire");
+        testTicket.setStatus("Active");
     }
 
     @Test
@@ -270,5 +301,178 @@ class NotificationServiceTest {
         // Assert
         assertEquals(5, result);
         verify(notificationRepository).deleteOldReadNotifications(any(LocalDateTime.class));
+    }
+
+    @Test
+    void getReadNotificationsForUser_ShouldReturnReadNotifications() {
+        // Arrange
+        List<Notification> readNotifications = Arrays.asList(testNotification);
+        when(notificationRepository.findByUserIdAndReadTrueOrderByTimestampDesc(TEST_USER_ID)).thenReturn(readNotifications);
+
+        // Act
+        List<Notification> result = notificationService.getReadNotificationsForUser(TEST_USER_ID);
+
+        // Assert
+        assertThat(result).isEqualTo(readNotifications);
+        verify(notificationRepository).findByUserIdAndReadTrueOrderByTimestampDesc(TEST_USER_ID);
+    }
+
+    @Test
+    void getRecentNotificationsForUser_ShouldReturnLimitedNotifications() {
+        // Arrange
+        List<Notification> recentNotifications = Arrays.asList(testNotification);
+        when(notificationRepository.findRecentNotificationsForUser(TEST_USER_ID, 5)).thenReturn(recentNotifications);
+
+        // Act
+        List<Notification> result = notificationService.getRecentNotificationsForUser(TEST_USER_ID, 5);
+
+        // Assert
+        assertThat(result).isEqualTo(recentNotifications);
+        verify(notificationRepository).findRecentNotificationsForUser(TEST_USER_ID, 5);
+    }
+
+    @Test
+    void getNotificationsForTicket_ShouldReturnTicketNotifications() {
+        // Arrange
+        List<Notification> ticketNotifications = Arrays.asList(testNotification);
+        when(notificationRepository.findByUserIdAndTicketIdOrderByTimestampDesc(TEST_USER_ID, TEST_TICKET_ID)).thenReturn(ticketNotifications);
+
+        // Act
+        List<Notification> result = notificationService.getNotificationsForTicket(TEST_USER_ID, TEST_TICKET_ID);
+
+        // Assert
+        assertThat(result).isEqualTo(ticketNotifications);
+        verify(notificationRepository).findByUserIdAndTicketIdOrderByTimestampDesc(TEST_USER_ID, TEST_TICKET_ID);
+    }
+
+    // ==================== SPECIALIZED NOTIFICATION CREATION TESTS ====================
+
+    @Test
+    void createTicketCreationNotification_WithEmailEnabled_ShouldCreateNotificationAndSendEmail() throws Exception {
+        // Arrange
+        when(notificationRepository.save(any(Notification.class))).thenReturn(testNotification);
+        when(userPreferencesService.isTicketCreationEmailEnabled(TEST_USER_ID)).thenReturn(true);
+        when(userRepository.findByUserId(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+        doNothing().when(gmailEmailService).sendTicketCreationEmail(anyString(), any(Ticket.class), any(User.class));
+
+        // Act
+        Notification result = notificationService.createTicketCreationNotification(TEST_USER_ID, TEST_TICKET_ID, testTicket);
+
+        // Assert
+        assertThat(result).isEqualTo(testNotification);
+        verify(notificationRepository).save(any(Notification.class));
+        verify(userPreferencesService).isTicketCreationEmailEnabled(TEST_USER_ID);
+        verify(userRepository).findByUserId(TEST_USER_ID);
+        verify(gmailEmailService).sendTicketCreationEmail(testUser.getEmail(), testTicket, testUser);
+    }
+
+    @Test
+    void createTicketCreationNotification_WithEmailDisabled_ShouldCreateNotificationOnly() throws Exception {
+        // Arrange
+        when(notificationRepository.save(any(Notification.class))).thenReturn(testNotification);
+        when(userPreferencesService.isTicketCreationEmailEnabled(TEST_USER_ID)).thenReturn(false);
+
+        // Act
+        Notification result = notificationService.createTicketCreationNotification(TEST_USER_ID, TEST_TICKET_ID, testTicket);
+
+        // Assert
+        assertThat(result).isEqualTo(testNotification);
+        verify(notificationRepository).save(any(Notification.class));
+        verify(userPreferencesService).isTicketCreationEmailEnabled(TEST_USER_ID);
+        verify(userRepository, never()).findByUserId(anyString());
+        verify(gmailEmailService, never()).sendTicketCreationEmail(anyString(), any(Ticket.class), any(User.class));
+    }
+
+    @Test
+    void createTicketCreationNotification_WithUserNotFound_ShouldCreateNotificationWithoutEmail() throws Exception {
+        // Arrange
+        when(notificationRepository.save(any(Notification.class))).thenReturn(testNotification);
+        when(userPreferencesService.isTicketCreationEmailEnabled(TEST_USER_ID)).thenReturn(true);
+        when(userRepository.findByUserId(TEST_USER_ID)).thenReturn(Optional.empty());
+
+        // Act
+        Notification result = notificationService.createTicketCreationNotification(TEST_USER_ID, TEST_TICKET_ID, testTicket);
+
+        // Assert
+        assertThat(result).isEqualTo(testNotification);
+        verify(notificationRepository).save(any(Notification.class));
+        verify(userPreferencesService).isTicketCreationEmailEnabled(TEST_USER_ID);
+        verify(userRepository).findByUserId(TEST_USER_ID);
+        verify(gmailEmailService, never()).sendTicketCreationEmail(anyString(), any(Ticket.class), any(User.class));
+    }
+
+    @Test
+    void createTicketCreationNotification_WithEmailServiceException_ShouldCreateNotificationAndHandleException() throws Exception {
+        // Arrange
+        when(notificationRepository.save(any(Notification.class))).thenReturn(testNotification);
+        when(userPreferencesService.isTicketCreationEmailEnabled(TEST_USER_ID)).thenReturn(true);
+        when(userRepository.findByUserId(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+        doThrow(new RuntimeException("Email service error")).when(gmailEmailService).sendTicketCreationEmail(anyString(), any(Ticket.class), any(User.class));
+
+        // Act
+        Notification result = notificationService.createTicketCreationNotification(TEST_USER_ID, TEST_TICKET_ID, testTicket);
+
+        // Assert
+        assertThat(result).isEqualTo(testNotification);
+        verify(notificationRepository).save(any(Notification.class));
+        verify(gmailEmailService).sendTicketCreationEmail(testUser.getEmail(), testTicket, testUser);
+    }
+
+    @Test
+    void createTicketCompletionNotification_WithEmailEnabled_ShouldCreateNotificationAndSendEmail() throws Exception {
+        // Arrange
+        when(notificationRepository.save(any(Notification.class))).thenReturn(testNotification);
+        when(userPreferencesService.isTicketCompletionEmailEnabled(TEST_USER_ID)).thenReturn(true);
+        when(userRepository.findByUserId(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+        doNothing().when(gmailEmailService).sendTicketCompletionEmail(anyString(), any(Ticket.class), any(User.class));
+
+        // Act
+        Notification result = notificationService.createTicketCompletionNotification(TEST_USER_ID, TEST_TICKET_ID, testTicket);
+
+        // Assert
+        assertThat(result).isEqualTo(testNotification);
+        verify(notificationRepository).save(any(Notification.class));
+        verify(userPreferencesService).isTicketCompletionEmailEnabled(TEST_USER_ID);
+        verify(userRepository).findByUserId(TEST_USER_ID);
+        verify(gmailEmailService).sendTicketCompletionEmail(testUser.getEmail(), testTicket, testUser);
+    }
+
+    @Test
+    void createTicketRevocationNotification_WithEmailEnabled_ShouldCreateNotificationAndSendEmail() throws Exception {
+        // Arrange
+        String reason = "Policy violation";
+        when(notificationRepository.save(any(Notification.class))).thenReturn(testNotification);
+        when(userPreferencesService.isTicketRevocationEmailEnabled(TEST_USER_ID)).thenReturn(true);
+        when(userRepository.findByUserId(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+        doNothing().when(gmailEmailService).sendTicketRevocationEmail(anyString(), any(Ticket.class), any(User.class), anyString());
+
+        // Act
+        Notification result = notificationService.createTicketRevocationNotification(TEST_USER_ID, TEST_TICKET_ID, testTicket, reason);
+
+        // Assert
+        assertThat(result).isEqualTo(testNotification);
+        verify(notificationRepository).save(any(Notification.class));
+        verify(userPreferencesService).isTicketRevocationEmailEnabled(TEST_USER_ID);
+        verify(userRepository).findByUserId(TEST_USER_ID);
+        verify(gmailEmailService).sendTicketRevocationEmail(testUser.getEmail(), testTicket, testUser, reason);
+    }
+
+    @Test
+    void createFiveMinuteWarningNotification_WithEmailEnabled_ShouldCreateNotificationAndSendEmail() throws Exception {
+        // Arrange
+        when(notificationRepository.save(any(Notification.class))).thenReturn(testNotification);
+        when(userPreferencesService.isFiveMinuteWarningEmailEnabled(TEST_USER_ID)).thenReturn(true);
+        when(userRepository.findByUserId(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+        doNothing().when(gmailEmailService).sendFiveMinuteWarningEmail(anyString(), any(Ticket.class), any(User.class));
+
+        // Act
+        Notification result = notificationService.createFiveMinuteWarningNotification(TEST_USER_ID, TEST_TICKET_ID, testTicket);
+
+        // Assert
+        assertThat(result).isEqualTo(testNotification);
+        verify(notificationRepository).save(any(Notification.class));
+        verify(userPreferencesService).isFiveMinuteWarningEmailEnabled(TEST_USER_ID);
+        verify(userRepository).findByUserId(TEST_USER_ID);
+        verify(gmailEmailService).sendFiveMinuteWarningEmail(testUser.getEmail(), testTicket, testUser);
     }
 }
