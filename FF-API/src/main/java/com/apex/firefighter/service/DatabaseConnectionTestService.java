@@ -26,12 +26,12 @@ public class DatabaseConnectionTestService {
      * Demonstrates how to save new entities to the database
      */
     public ConnectionTest createTestEntry(String testName, String testValue, Integer testNumber, Boolean isActive) {
-        System.out.println("🔵 CREATE: Creating new test entry - " + testName);
+        System.out.println("CREATE: Creating new test entry - " + testName);
         
         ConnectionTest test = new ConnectionTest(testName, testValue, testNumber, isActive);
         ConnectionTest savedTest = connectionTestRepository.save(test);
         
-        System.out.println("✅ Created: " + savedTest);
+        System.out.println("Created: " + savedTest);
         return savedTest;
     }
 
@@ -39,54 +39,54 @@ public class DatabaseConnectionTestService {
      * READ OPERATIONS - Various ways to fetch data
      */
     public List<ConnectionTest> getAllTests() {
-        System.out.println("🔵 READ: Fetching all test entries");
+        System.out.println("READ: Fetching all test entries");
         
         List<ConnectionTest> tests = connectionTestRepository.findAll();
-        System.out.println("✅ Found " + tests.size() + " test entries");
+        System.out.println("Found " + tests.size() + " test entries");
         
         return tests;
     }
 
     public Optional<ConnectionTest> getTestById(Long id) {
-        System.out.println("🔵 READ: Fetching test entry by ID - " + id);
+        System.out.println("READ: Fetching test entry by ID - " + id);
         
         Optional<ConnectionTest> test = connectionTestRepository.findById(id);
         if (test.isPresent()) {
-            System.out.println("✅ Found: " + test.get());
+            System.out.println("Found: " + test.get());
         } else {
-            System.out.println("❌ Not found: Test with ID " + id);
+            System.out.println("Not found: Test with ID " + id);
         }
         
         return test;
     }
 
     public Optional<ConnectionTest> getTestByName(String testName) {
-        System.out.println("🔵 READ: Fetching test entry by name - " + testName);
+        System.out.println("READ: Fetching test entry by name - " + testName);
         
         Optional<ConnectionTest> test = connectionTestRepository.findByTestName(testName);
         if (test.isPresent()) {
-            System.out.println("✅ Found: " + test.get());
+            System.out.println("Found: " + test.get());
         } else {
-            System.out.println("❌ Not found: Test with name " + testName);
+            System.out.println("Not found: Test with name " + testName);
         }
         
         return test;
     }
 
     public List<ConnectionTest> getActiveTests() {
-        System.out.println("🔵 READ: Fetching all active test entries");
+        System.out.println("READ: Fetching all active test entries");
         
         List<ConnectionTest> activeTests = connectionTestRepository.findByIsActive(true);
-        System.out.println("✅ Found " + activeTests.size() + " active test entries");
+        System.out.println("Found " + activeTests.size() + " active test entries");
         
         return activeTests;
     }
 
     public List<ConnectionTest> searchTestsByName(String searchTerm) {
-        System.out.println("🔵 READ: Searching tests by name containing - " + searchTerm);
+        System.out.println("READ: Searching tests by name containing - " + searchTerm);
         
         List<ConnectionTest> tests = connectionTestRepository.findByTestNameContainingIgnoreCase(searchTerm);
-        System.out.println("✅ Found " + tests.size() + " matching test entries");
+        System.out.println("Found " + tests.size() + " matching test entries");
         
         return tests;
     }
@@ -95,7 +95,7 @@ public class DatabaseConnectionTestService {
      * UPDATE OPERATION - Modify existing data
      */
     public ConnectionTest updateTestEntry(Long id, String newTestValue, Integer newTestNumber) {
-        System.out.println("🔵 UPDATE: Updating test entry with ID - " + id);
+        System.out.println("UPDATE: Updating test entry with ID - " + id);
         
         Optional<ConnectionTest> existingTest = connectionTestRepository.findById(id);
         
@@ -106,16 +106,16 @@ public class DatabaseConnectionTestService {
             test.setUpdatedAt(LocalDateTime.now());
             
             ConnectionTest updatedTest = connectionTestRepository.save(test);
-            System.out.println("✅ Updated: " + updatedTest);
+            System.out.println("Updated: " + updatedTest);
             return updatedTest;
         } else {
-            System.out.println("❌ Update failed: Test with ID " + id + " not found");
+            System.out.println("Update failed: Test with ID " + id + " not found");
             throw new RuntimeException("Test not found with ID: " + id);
         }
     }
 
     public ConnectionTest toggleTestStatus(Long id) {
-        System.out.println("🔵 UPDATE: Toggling active status for test ID - " + id);
+        System.out.println("UPDATE: Toggling active status for test ID - " + id);
         
         Optional<ConnectionTest> existingTest = connectionTestRepository.findById(id);
         
@@ -125,10 +125,10 @@ public class DatabaseConnectionTestService {
             test.setUpdatedAt(LocalDateTime.now());
             
             ConnectionTest updatedTest = connectionTestRepository.save(test);
-            System.out.println("✅ Status toggled: " + updatedTest);
+            System.out.println("Status toggled: " + updatedTest);
             return updatedTest;
         } else {
-            System.out.println("❌ Toggle failed: Test with ID " + id + " not found");
+            System.out.println("Toggle failed: Test with ID " + id + " not found");
             throw new RuntimeException("Test not found with ID: " + id);
         }
     }
@@ -137,44 +137,44 @@ public class DatabaseConnectionTestService {
      * DELETE OPERATIONS - Remove data
      */
     public boolean deleteTestById(Long id) {
-        System.out.println("🔵 DELETE: Deleting test entry with ID - " + id);
+        System.out.println("DELETE: Deleting test entry with ID - " + id);
         
         if (connectionTestRepository.existsById(id)) {
             connectionTestRepository.deleteById(id);
-            System.out.println("✅ Deleted: Test with ID " + id);
+            System.out.println("Deleted: Test with ID " + id);
             return true;
         } else {
-            System.out.println("❌ Delete failed: Test with ID " + id + " not found");
+            System.out.println("Delete failed: Test with ID " + id + " not found");
             return false;
         }
     }
 
     public void deleteAllTests() {
-        System.out.println("🔵 DELETE: Deleting all test entries");
+        System.out.println("DELETE: Deleting all test entries");
         
         Long count = connectionTestRepository.count();
         connectionTestRepository.deleteAll();
         
-        System.out.println("✅ Deleted " + count + " test entries");
+        System.out.println("Deleted " + count + " test entries");
     }
 
     /**
      * COMPLEX OPERATIONS - Demonstrating advanced queries
      */
     public List<ConnectionTest> getTestsInNumberRange(Integer start, Integer end) {
-        System.out.println("🔵 QUERY: Finding active tests with numbers between " + start + " and " + end);
+        System.out.println("QUERY: Finding active tests with numbers between " + start + " and " + end);
         
         List<ConnectionTest> tests = connectionTestRepository.findByIsActiveTrueAndTestNumberBetween(start, end);
-        System.out.println("✅ Found " + tests.size() + " tests in range");
+        System.out.println("Found " + tests.size() + " tests in range");
         
         return tests;
     }
 
     public Long countActiveTests() {
-        System.out.println("🔵 COUNT: Counting active test entries");
+        System.out.println("COUNT: Counting active test entries");
         
         Long count = connectionTestRepository.countByIsActive(true);
-        System.out.println("✅ Active tests count: " + count);
+        System.out.println("Active tests count: " + count);
         
         return count;
     }
@@ -183,17 +183,17 @@ public class DatabaseConnectionTestService {
      * COMPREHENSIVE TEST METHOD - Demonstrates all CRUD operations
      */
     public void runComprehensiveTest() {
-        System.out.println("\n🚀 Starting Comprehensive Database Connection Test");
+        System.out.println("\nStarting Comprehensive Database Connection Test");
         System.out.println("=" .repeat(60));
         
         try {
             // CREATE
-            System.out.println("\n📝 Testing CREATE operations...");
+            System.out.println("\nTesting CREATE operations...");
             ConnectionTest test1 = createTestEntry("Daemon Test 1", "SUCCESS", 100, true);
             ConnectionTest test2 = createTestEntry("Daemon Test 2", "PENDING", 200, false);
             
             // READ
-            System.out.println("\n📖 Testing READ operations...");
+            System.out.println("\nTesting READ operations...");
             getAllTests();
             getTestById(test1.getId());
             getTestByName("Daemon Test 1");
@@ -201,28 +201,28 @@ public class DatabaseConnectionTestService {
             searchTestsByName("Daemon");
             
             // UPDATE
-            System.out.println("\n✏️ Testing UPDATE operations...");
+            System.out.println("\nTesting UPDATE operations...");
             updateTestEntry(test1.getId(), "UPDATED_SUCCESS", 150);
             toggleTestStatus(test2.getId());
             
             // COMPLEX QUERIES
-            System.out.println("\n🔍 Testing COMPLEX QUERIES...");
+            System.out.println("\nTesting COMPLEX QUERIES...");
             getTestsInNumberRange(100, 200);
             countActiveTests();
             
             // DELETE
-            System.out.println("\n🗑️ Testing DELETE operations...");
+            System.out.println("\nTesting DELETE operations...");
             deleteTestById(test2.getId());
             
-            System.out.println("\n✅ Comprehensive test completed successfully!");
+            System.out.println("\nComprehensive test completed successfully!");
             
         } catch (Exception e) {
-            System.err.println("❌ Test failed: " + e.getMessage());
+            System.err.println("Test failed: " + e.getMessage());
             e.printStackTrace();
         }
         
         System.out.println("=" .repeat(60));
-        System.out.println("🎯 Database Connection Test Summary:");
+        System.out.println("Database Connection Test Summary:");
         System.out.println("   - CREATE: ✅ Working");
         System.out.println("   - READ:   ✅ Working");
         System.out.println("   - UPDATE: ✅ Working");
