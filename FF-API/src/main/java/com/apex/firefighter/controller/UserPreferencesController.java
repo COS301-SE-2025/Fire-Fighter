@@ -21,22 +21,18 @@ public class UserPreferencesController {
         this.userPreferencesService = userPreferencesService;
     }
 
-    /**
-     * Get user preferences by user ID
-     * GET /api/user-preferences/{userId}
-     */
     @GetMapping("/{userId}")
     public ResponseEntity<?> getUserPreferences(@PathVariable String userId) {
         try {
-            System.out.println("🔵 GET USER PREFERENCES: Request for user - " + userId);
+            System.out.println("GET USER PREFERENCES: Request for user - " + userId);
             
             UserPreferences preferences = userPreferencesService.getUserPreferences(userId);
             
-            System.out.println("✅ USER PREFERENCES RETRIEVED: " + preferences);
+            System.out.println("USER PREFERENCES RETRIEVED: " + preferences);
             return ResponseEntity.ok(preferences);
             
         } catch (Exception e) {
-            System.err.println("❌ GET USER PREFERENCES FAILED: " + e.getMessage());
+            System.err.println("GET USER PREFERENCES FAILED: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Failed to retrieve user preferences: " + e.getMessage());
         }
@@ -51,8 +47,8 @@ public class UserPreferencesController {
             @PathVariable String userId,
             @RequestBody Map<String, Object> preferencesData) {
         try {
-            System.out.println("🔵 UPDATE USER PREFERENCES: Request for user - " + userId);
-            System.out.println("🔵 PREFERENCES DATA: " + preferencesData);
+            System.out.println("UPDATE USER PREFERENCES: Request for user - " + userId);
+            System.out.println("PREFERENCES DATA: " + preferencesData);
             
             // Extract preferences from request body
             Boolean emailNotificationsEnabled = (Boolean) preferencesData.get("emailNotificationsEnabled");
@@ -70,11 +66,11 @@ public class UserPreferencesController {
                 emailFiveMinuteWarning
             );
             
-            System.out.println("✅ USER PREFERENCES UPDATED: " + updatedPreferences);
+            System.out.println("USER PREFERENCES UPDATED: " + updatedPreferences);
             return ResponseEntity.ok(updatedPreferences);
             
         } catch (Exception e) {
-            System.err.println("❌ UPDATE USER PREFERENCES FAILED: " + e.getMessage());
+            System.err.println("UPDATE USER PREFERENCES FAILED: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Failed to update user preferences: " + e.getMessage());
         }
@@ -90,7 +86,7 @@ public class UserPreferencesController {
             @PathVariable String setting,
             @RequestBody Map<String, Boolean> requestBody) {
         try {
-            System.out.println("🔵 UPDATE SPECIFIC PREFERENCE: " + setting + " for user - " + userId);
+            System.out.println("UPDATE SPECIFIC PREFERENCE: " + setting + " for user - " + userId);
             
             Boolean value = requestBody.get("enabled");
             if (value == null) {
@@ -119,11 +115,11 @@ public class UserPreferencesController {
                     return ResponseEntity.badRequest().body("Invalid setting: " + setting);
             }
             
-            System.out.println("✅ SPECIFIC PREFERENCE UPDATED: " + updatedPreferences);
+            System.out.println("SPECIFIC PREFERENCE UPDATED: " + updatedPreferences);
             return ResponseEntity.ok(updatedPreferences);
             
         } catch (Exception e) {
-            System.err.println("❌ UPDATE SPECIFIC PREFERENCE FAILED: " + e.getMessage());
+            System.err.println("UPDATE SPECIFIC PREFERENCE FAILED: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Failed to update preference: " + e.getMessage());
         }
@@ -136,15 +132,15 @@ public class UserPreferencesController {
     @PostMapping("/{userId}/enable-all")
     public ResponseEntity<?> enableAllEmailNotifications(@PathVariable String userId) {
         try {
-            System.out.println("🔵 ENABLE ALL EMAIL NOTIFICATIONS: Request for user - " + userId);
+            System.out.println("ENABLE ALL EMAIL NOTIFICATIONS: Request for user - " + userId);
             
             UserPreferences updatedPreferences = userPreferencesService.enableAllEmailNotifications(userId);
             
-            System.out.println("✅ ALL EMAIL NOTIFICATIONS ENABLED: " + updatedPreferences);
+            System.out.println("ALL EMAIL NOTIFICATIONS ENABLED: " + updatedPreferences);
             return ResponseEntity.ok(updatedPreferences);
             
         } catch (Exception e) {
-            System.err.println("❌ ENABLE ALL EMAIL NOTIFICATIONS FAILED: " + e.getMessage());
+            System.err.println("ENABLE ALL EMAIL NOTIFICATIONS FAILED: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Failed to enable all email notifications: " + e.getMessage());
         }
@@ -157,15 +153,15 @@ public class UserPreferencesController {
     @PostMapping("/{userId}/disable-all")
     public ResponseEntity<?> disableAllEmailNotifications(@PathVariable String userId) {
         try {
-            System.out.println("🔵 DISABLE ALL EMAIL NOTIFICATIONS: Request for user - " + userId);
+            System.out.println("DISABLE ALL EMAIL NOTIFICATIONS: Request for user - " + userId);
             
             UserPreferences updatedPreferences = userPreferencesService.disableAllEmailNotifications(userId);
             
-            System.out.println("✅ ALL EMAIL NOTIFICATIONS DISABLED: " + updatedPreferences);
+            System.out.println("ALL EMAIL NOTIFICATIONS DISABLED: " + updatedPreferences);
             return ResponseEntity.ok(updatedPreferences);
             
         } catch (Exception e) {
-            System.err.println("❌ DISABLE ALL EMAIL NOTIFICATIONS FAILED: " + e.getMessage());
+            System.err.println("DISABLE ALL EMAIL NOTIFICATIONS FAILED: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Failed to disable all email notifications: " + e.getMessage());
         }
@@ -178,15 +174,15 @@ public class UserPreferencesController {
     @PostMapping("/{userId}/reset")
     public ResponseEntity<?> resetUserPreferences(@PathVariable String userId) {
         try {
-            System.out.println("🔵 RESET USER PREFERENCES: Request for user - " + userId);
+            System.out.println("RESET USER PREFERENCES: Request for user - " + userId);
             
             UserPreferences resetPreferences = userPreferencesService.resetToDefault(userId);
             
-            System.out.println("✅ USER PREFERENCES RESET: " + resetPreferences);
+            System.out.println("USER PREFERENCES RESET: " + resetPreferences);
             return ResponseEntity.ok(resetPreferences);
             
         } catch (Exception e) {
-            System.err.println("❌ RESET USER PREFERENCES FAILED: " + e.getMessage());
+            System.err.println("RESET USER PREFERENCES FAILED: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Failed to reset user preferences: " + e.getMessage());
         }
@@ -201,7 +197,7 @@ public class UserPreferencesController {
             @PathVariable String userId,
             @PathVariable String setting) {
         try {
-            System.out.println("🔵 CHECK SPECIFIC PREFERENCE: " + setting + " for user - " + userId);
+            System.out.println("CHECK SPECIFIC PREFERENCE: " + setting + " for user - " + userId);
             
             boolean enabled;
             
@@ -225,11 +221,11 @@ public class UserPreferencesController {
                     return ResponseEntity.badRequest().body("Invalid setting: " + setting);
             }
             
-            System.out.println("✅ PREFERENCE CHECK RESULT: " + setting + " = " + enabled);
+            System.out.println("PREFERENCE CHECK RESULT: " + setting + " = " + enabled);
             return ResponseEntity.ok(Map.of("setting", setting, "enabled", enabled));
             
         } catch (Exception e) {
-            System.err.println("❌ CHECK SPECIFIC PREFERENCE FAILED: " + e.getMessage());
+            System.err.println("CHECK SPECIFIC PREFERENCE FAILED: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Failed to check preference: " + e.getMessage());
         }
