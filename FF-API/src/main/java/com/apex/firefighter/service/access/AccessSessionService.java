@@ -43,7 +43,7 @@ public class AccessSessionService {
      * Create a new access session from an approved access request
      */
     public AccessSession createAccessSession(Long accessRequestId) {
-        System.out.println("🔵 CREATE ACCESS SESSION: Creating session for request ID - " + accessRequestId);
+        System.out.println("CREATE ACCESS SESSION: Creating session for request ID - " + accessRequestId);
         
         Optional<AccessRequest> requestOpt = accessRequestRepository.findById(accessRequestId);
         if (requestOpt.isPresent()) {
@@ -52,10 +52,10 @@ public class AccessSessionService {
             
             AccessSession session = new AccessSession(user, request, LocalDateTime.now(), null, true);
             AccessSession savedSession = accessSessionRepository.save(session);
-            System.out.println("✅ ACCESS SESSION CREATED: " + savedSession);
+            System.out.println("ACCESS SESSION CREATED: " + savedSession);
             return savedSession;
         } else {
-            System.out.println("❌ CREATE FAILED: Access request not found with ID - " + accessRequestId);
+            System.out.println("CREATE FAILED: Access request not found with ID - " + accessRequestId);
             throw new RuntimeException("Access request not found with ID: " + accessRequestId);
         }
     }
@@ -64,7 +64,7 @@ public class AccessSessionService {
      * End an access session
      */
     public AccessSession endAccessSession(Long sessionId) {
-        System.out.println("🔵 END SESSION: Ending session ID - " + sessionId);
+        System.out.println("END SESSION: Ending session ID - " + sessionId);
         
         Optional<AccessSession> sessionOpt = accessSessionRepository.findById(sessionId);
         if (sessionOpt.isPresent()) {
@@ -72,10 +72,10 @@ public class AccessSessionService {
             session.setEndTime(LocalDateTime.now());
             session.setActive(false);
             AccessSession updatedSession = accessSessionRepository.save(session);
-            System.out.println("✅ SESSION ENDED: " + updatedSession);
+            System.out.println("SESSION ENDED: " + updatedSession);
             return updatedSession;
         } else {
-            System.out.println("❌ END FAILED: Session not found with ID - " + sessionId);
+            System.out.println("END FAILED: Session not found with ID - " + sessionId);
             throw new RuntimeException("Access session not found with ID: " + sessionId);
         }
     }
@@ -151,7 +151,7 @@ public class AccessSessionService {
             session.setActive(false);
             accessSessionRepository.save(session);
         }
-        System.out.println("✅ ALL ACTIVE SESSIONS ENDED for UID: " + firebaseUid);
+        System.out.println("ALL ACTIVE SESSIONS ENDED for UID: " + firebaseUid);
     }
 
     /**
@@ -174,10 +174,10 @@ public class AccessSessionService {
     public boolean deleteAccessSession(Long sessionId) {
         if (accessSessionRepository.existsById(sessionId)) {
             accessSessionRepository.deleteById(sessionId);
-            System.out.println("✅ ACCESS SESSION DELETED: ID - " + sessionId);
+            System.out.println("ACCESS SESSION DELETED: ID - " + sessionId);
             return true;
         }
-        System.out.println("❌ DELETE FAILED: Session not found with ID - " + sessionId);
+        System.out.println("DELETE FAILED: Session not found with ID - " + sessionId);
         return false;
     }
 } 
