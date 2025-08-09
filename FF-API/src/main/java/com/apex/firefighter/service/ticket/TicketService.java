@@ -206,7 +206,7 @@ public class TicketService {
     public List<Ticket> getActiveTickets() {
         System.out.println("ADMIN: Getting all active tickets");
         List<Ticket> activeTickets = ticketRepository.findActiveTickets();
-        System.out.println("✅ ADMIN: Found " + activeTickets.size() + " active tickets");
+        System.out.println("ADMIN: Found " + activeTickets.size() + " active tickets");
         return activeTickets;
     }
 
@@ -243,7 +243,7 @@ public class TicketService {
         // Find and update the ticket
         Optional<Ticket> ticketOpt = ticketRepository.findById(ticketId);
         if (ticketOpt.isEmpty()) {
-            System.out.println("❌ REVOKE FAILED: Ticket not found with ID - " + ticketId);
+            System.out.println("REVOKE FAILED: Ticket not found with ID - " + ticketId);
             throw new RuntimeException("Ticket not found with ID: " + ticketId);
         }
         
