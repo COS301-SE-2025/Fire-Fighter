@@ -588,7 +588,7 @@ class TicketControllerTest {
     @Test
     @WithMockUser
     void checkAdminStatus_WhenUserIsNotAdmin_ShouldReturnFalse() throws Exception {
-        
+
         String userId = "regular-user-123";
         when(ticketService.isUserAdmin(userId)).thenReturn(false);
 
@@ -598,5 +598,428 @@ class TicketControllerTest {
                 .andExpect(jsonPath("$.isAdmin").value(false));
 
         verify(ticketService).isUserAdmin(userId);
+    }
+
+    // ==================== EXPORT FUNCTIONALITY ADDITIONAL TESTS ====================
+
+    @Test
+    @WithMockUser
+    void exportTickets_WithEmailLookup_ShouldReturnSuccess() throws Exception {
+
+        String targetEmail = "admin@example.com";
+        String userEmail = "test@example.com"; // This is the actual user's email from testUser
+        List<Ticket> tickets = Arrays.asList(testTicket);
+        String csvContent = "id,ticketId,description\n1,TICKET-001,Test emergency";
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("email", targetEmail);
+
+        when(userService.getUserByEmail(targetEmail)).thenReturn(Optional.of(testUser));
+        when(ticketService.getAllTickets()).thenReturn(tickets);
+        when(gmailEmailService.exportTicketsToCsv(tickets)).thenReturn(csvContent);
+        doNothing().when(gmailEmailService).sendTicketsCsv(userEmail, csvContent, testUser);
+
+        mockMvc.perform(post(BASE_URL + "/admin/export")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload))
+                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Tickets exported and emailed successfully to " + userEmail)));
+
+        verify(userService).getUserByEmail(targetEmail);
+        verify(ticketService).getAllTickets();
+        verify(gmailEmailService).exportTicketsToCsv(tickets);
+        verify(gmailEmailService).sendTicketsCsv(userEmail, csvContent, testUser);
+    }
+
+    @Test
+    @WithMockUser
+    void exportTickets_WithDateRange_ShouldReturnSuccessWithDateInfo() throws Exception {
+
+        String targetEmail = "test@example.com";
+        List<Ticket> tickets = Arrays.asList(testTicket);
+        String csvContent = "id,ticketId,description\n1,TICKET-001,Test emergency";
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("userId", TEST_USER_ID);
+        payload.put("startDate", "2024-01-01T00:00:00");
+        payload.put("endDate", "2024-12-31T23:59:59");
+
+        when(userService.getUserWithRoles(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+        when(ticketService.getTicketsByDateRange(any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(tickets);
+        when(gmailEmailService.exportTicketsToCsv(tickets)).thenReturn(csvContent);
+        doNothing().when(gmailEmailService).sendTicketsCsv(targetEmail, csvContent, testUser);
+
+        mockMvc.perform(post(BASE_URL + "/admin/export")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload))
+                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Tickets exported and emailed successfully to " + targetEmail)))
+                .andExpect(content().string(containsString("(filtered by date range)")));
+
+        verify(userService).getUserWithRoles(TEST_USER_ID);
+        verify(ticketService).getTicketsByDateRange(any(LocalDateTime.class), any(LocalDateTime.class));
+        verify(gmailEmailService).exportTicketsToCsv(tickets);
+        verify(gmailEmailService).sendTicketsCsv(targetEmail, csvContent, testUser);
+    }
+
+    @Test
+    @WithMockUser
+    void exportTickets_WithStartDateOnly_ShouldFilterFromStartDate() throws Exception {
+
+        String targetEmail = "test@example.com";
+        List<Ticket> tickets = Arrays.asList(testTicket);
+        String csvContent = "id,ticketId,description\n1,TICKET-001,Test emergency";
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("userId", TEST_USER_ID);
+        payload.put("startDate", "2024-01-01T00:00:00");
+
+        when(userService.getUserWithRoles(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+        when(ticketService.getTicketsByDateRange(any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(tickets);
+        when(gmailEmailService.exportTicketsToCsv(tickets)).thenReturn(csvContent);
+        doNothing().when(gmailEmailService).sendTicketsCsv(targetEmail, csvContent, testUser);
+
+        mockMvc.perform(post(BASE_URL + "/admin/export")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload))
+                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Tickets exported and emailed successfully to " + targetEmail)));
+
+        verify(userService).getUserWithRoles(TEST_USER_ID);
+        verify(ticketService).getTicketsByDateRange(any(LocalDateTime.class), any(LocalDateTime.class));
+        verify(gmailEmailService).exportTicketsToCsv(tickets);
+        verify(gmailEmailService).sendTicketsCsv(targetEmail, csvContent, testUser);
+    }
+
+    @Test
+    @WithMockUser
+    void exportTickets_WithEndDateOnly_ShouldFilterToEndDate() throws Exception {
+
+        String targetEmail = "test@example.com";
+        List<Ticket> tickets = Arrays.asList(testTicket);
+        String csvContent = "id,ticketId,description\n1,TICKET-001,Test emergency";
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("userId", TEST_USER_ID);
+        payload.put("endDate", "2024-12-31T23:59:59");
+
+        when(userService.getUserWithRoles(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+        when(ticketService.getTicketsByDateRange(any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(tickets);
+        when(gmailEmailService.exportTicketsToCsv(tickets)).thenReturn(csvContent);
+        doNothing().when(gmailEmailService).sendTicketsCsv(targetEmail, csvContent, testUser);
+
+        mockMvc.perform(post(BASE_URL + "/admin/export")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload))
+                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Tickets exported and emailed successfully to " + targetEmail)));
+
+        verify(userService).getUserWithRoles(TEST_USER_ID);
+        verify(ticketService).getTicketsByDateRange(any(LocalDateTime.class), any(LocalDateTime.class));
+        verify(gmailEmailService).exportTicketsToCsv(tickets);
+        verify(gmailEmailService).sendTicketsCsv(targetEmail, csvContent, testUser);
+    }
+
+    @Test
+    @WithMockUser
+    void exportTickets_WithInvalidDateFormat_ShouldReturnBadRequest() throws Exception {
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("userId", TEST_USER_ID);
+        payload.put("startDate", "invalid-date-format");
+
+        mockMvc.perform(post(BASE_URL + "/admin/export")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload))
+                .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString("Invalid date format. Use ISO format: yyyy-MM-ddTHH:mm:ss")));
+
+        verifyNoInteractions(userService);
+        verifyNoInteractions(ticketService);
+        verifyNoInteractions(gmailEmailService);
+    }
+
+    @Test
+    @WithMockUser
+    void exportTickets_WithStartDateAfterEndDate_ShouldReturnBadRequest() throws Exception {
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("userId", TEST_USER_ID);
+        payload.put("startDate", "2024-12-31T23:59:59");
+        payload.put("endDate", "2024-01-01T00:00:00");
+
+        mockMvc.perform(post(BASE_URL + "/admin/export")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload))
+                .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Start date cannot be after end date."));
+
+        verifyNoInteractions(userService);
+        verifyNoInteractions(ticketService);
+        verifyNoInteractions(gmailEmailService);
+    }
+
+    @Test
+    @WithMockUser
+    void exportTickets_WithoutUserIdOrEmail_ShouldReturnBadRequest() throws Exception {
+
+        Map<String, Object> payload = new HashMap<>();
+        // No userId or email provided
+
+        mockMvc.perform(post(BASE_URL + "/admin/export")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload))
+                .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Either userId or email is required."));
+
+        verifyNoInteractions(userService);
+        verifyNoInteractions(ticketService);
+        verifyNoInteractions(gmailEmailService);
+    }
+
+    @Test
+    @WithMockUser
+    void exportTickets_WhenEmailServiceFails_ShouldReturnInternalServerError() throws Exception {
+
+        String targetEmail = "test@example.com";
+        List<Ticket> tickets = Arrays.asList(testTicket);
+        String csvContent = "id,ticketId,description\n1,TICKET-001,Test emergency";
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("userId", TEST_USER_ID);
+
+        when(userService.getUserWithRoles(TEST_USER_ID)).thenReturn(Optional.of(testUser));
+        when(ticketService.getAllTickets()).thenReturn(tickets);
+        when(gmailEmailService.exportTicketsToCsv(tickets)).thenReturn(csvContent);
+        doThrow(new RuntimeException("Email service error")).when(gmailEmailService).sendTicketsCsv(targetEmail, csvContent, testUser);
+
+        mockMvc.perform(post(BASE_URL + "/admin/export")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload))
+                .with(csrf()))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().string(containsString("Failed to send email: Email service error")));
+
+        verify(userService).getUserWithRoles(TEST_USER_ID);
+        verify(ticketService).getAllTickets();
+        verify(gmailEmailService).exportTicketsToCsv(tickets);
+        verify(gmailEmailService).sendTicketsCsv(targetEmail, csvContent, testUser);
+    }
+
+    // ==================== REVOKE TICKET VALIDATION TESTS ====================
+
+    @Test
+    @WithMockUser
+    void revokeTicket_WithMissingAdminUserId_ShouldReturnBadRequest() throws Exception {
+
+        Long ticketId = 1L;
+        Map<String, String> payload = new HashMap<>();
+        payload.put("rejectReason", "Security violation");
+        // Missing adminUserId
+
+        mockMvc.perform(put(BASE_URL + "/admin/revoke/" + ticketId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload))
+                .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Admin user ID is required"));
+
+        verifyNoInteractions(ticketService);
+    }
+
+    @Test
+    @WithMockUser
+    void revokeTicket_WithEmptyAdminUserId_ShouldReturnBadRequest() throws Exception {
+
+        Long ticketId = 1L;
+        Map<String, String> payload = new HashMap<>();
+        payload.put("adminUserId", "");
+        payload.put("rejectReason", "Security violation");
+
+        mockMvc.perform(put(BASE_URL + "/admin/revoke/" + ticketId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload))
+                .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Admin user ID is required"));
+
+        verifyNoInteractions(ticketService);
+    }
+
+    @Test
+    @WithMockUser
+    void revokeTicket_WithMissingRejectReason_ShouldReturnBadRequest() throws Exception {
+
+        Long ticketId = 1L;
+        Map<String, String> payload = new HashMap<>();
+        payload.put("adminUserId", "admin-user");
+        // Missing rejectReason
+
+        mockMvc.perform(put(BASE_URL + "/admin/revoke/" + ticketId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload))
+                .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Reject reason is required"));
+
+        verifyNoInteractions(ticketService);
+    }
+
+    @Test
+    @WithMockUser
+    void revokeTicket_WithEmptyRejectReason_ShouldReturnBadRequest() throws Exception {
+
+        Long ticketId = 1L;
+        Map<String, String> payload = new HashMap<>();
+        payload.put("adminUserId", "admin-user");
+        payload.put("rejectReason", "");
+
+        mockMvc.perform(put(BASE_URL + "/admin/revoke/" + ticketId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload))
+                .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Reject reason is required"));
+
+        verifyNoInteractions(ticketService);
+    }
+
+    @Test
+    @WithMockUser
+    void revokeTicket_WhenServiceThrowsGenericException_ShouldReturnInternalServerError() throws Exception {
+
+        Long ticketId = 1L;
+        String adminUserId = "admin-user";
+        String rejectReason = "Security violation";
+
+        Map<String, String> payload = new HashMap<>();
+        payload.put("adminUserId", adminUserId);
+        payload.put("rejectReason", rejectReason);
+
+        when(ticketService.revokeTicket(ticketId, adminUserId, rejectReason))
+                .thenThrow(new RuntimeException("Database connection failed"));
+
+        mockMvc.perform(put(BASE_URL + "/admin/revoke/" + ticketId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload))
+                .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Database connection failed"));
+
+        verify(ticketService).revokeTicket(ticketId, adminUserId, rejectReason);
+    }
+
+    @Test
+    @WithMockUser
+    void revokeTicketByTicketId_WithMissingAdminUserId_ShouldReturnBadRequest() throws Exception {
+
+        String ticketId = "TICKET-001";
+        Map<String, String> payload = new HashMap<>();
+        payload.put("rejectReason", "Policy violation");
+        // Missing adminUserId
+
+        mockMvc.perform(put(BASE_URL + "/admin/revoke/ticket-id/" + ticketId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload))
+                .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Admin user ID is required"));
+
+        verifyNoInteractions(ticketService);
+    }
+
+    @Test
+    @WithMockUser
+    void revokeTicketByTicketId_WithEmptyRejectReason_ShouldReturnBadRequest() throws Exception {
+
+        String ticketId = "TICKET-001";
+        Map<String, String> payload = new HashMap<>();
+        payload.put("adminUserId", "admin-user");
+        payload.put("rejectReason", "   ");
+
+        mockMvc.perform(put(BASE_URL + "/admin/revoke/ticket-id/" + ticketId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload))
+                .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Reject reason is required"));
+
+        verifyNoInteractions(ticketService);
+    }
+
+    @Test
+    @WithMockUser
+    void revokeTicketByTicketId_WhenServiceThrowsGenericException_ShouldReturnInternalServerError() throws Exception {
+
+        String ticketId = "TICKET-001";
+        String adminUserId = "admin-user";
+        String rejectReason = "Policy violation";
+
+        Map<String, String> payload = new HashMap<>();
+        payload.put("adminUserId", adminUserId);
+        payload.put("rejectReason", rejectReason);
+
+        when(ticketService.revokeTicketByTicketId(ticketId, adminUserId, rejectReason))
+                .thenThrow(new RuntimeException("Database connection failed"));
+
+        mockMvc.perform(put(BASE_URL + "/admin/revoke/ticket-id/" + ticketId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload))
+                .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Database connection failed"));
+
+        verify(ticketService).revokeTicketByTicketId(ticketId, adminUserId, rejectReason);
+    }
+
+    // ==================== ADMIN ENDPOINT ERROR HANDLING TESTS ====================
+
+    @Test
+    @WithMockUser
+    void getTicketHistory_WhenServiceThrowsException_ShouldReturnInternalServerError() throws Exception {
+
+        when(ticketService.getTicketHistory()).thenThrow(new RuntimeException("Database error"));
+
+        mockMvc.perform(get(BASE_URL + "/admin/history"))
+                .andExpect(status().isInternalServerError());
+
+        verify(ticketService).getTicketHistory();
+    }
+
+    @Test
+    @WithMockUser
+    void updateTicket_WithNullDuration_ShouldHandleCorrectly() throws Exception {
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("description", "Updated description");
+        payload.put("status", "COMPLETED");
+        payload.put("emergencyType", "MEDICAL");
+        payload.put("emergencyContact", "987-654-3210");
+        // duration is null
+
+        Ticket updatedTicket = new Ticket();
+        updatedTicket.setDescription("Updated description");
+        updatedTicket.setStatus("COMPLETED");
+
+        when(ticketService.updateTicket(eq(1L), anyString(), anyString(), anyString(), anyString(), eq(null)))
+                .thenReturn(updatedTicket);
+
+        mockMvc.perform(put(BASE_URL + "/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload))
+                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.description").value("Updated description"))
+                .andExpect(jsonPath("$.status").value("COMPLETED"));
+
+        verify(ticketService).updateTicket(1L, "Updated description", "COMPLETED", "MEDICAL", "987-654-3210", null);
     }
 }
