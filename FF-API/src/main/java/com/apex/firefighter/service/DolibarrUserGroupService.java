@@ -87,8 +87,7 @@ public class DolibarrUserGroupService {
         putHeaders.set("DOLAPIKEY", apiKey);
         putHeaders.setContentType(MediaType.APPLICATION_JSON);
 
-        String requestBody = "{\"groups\":\"" + groupsExlFF + "\"}";
-        HttpEntity<String> putRequest = new HttpEntity<>(requestBody, putHeaders);
+        HttpEntity<String> putRequest = new HttpEntity<>(groupsExlFF, putHeaders);
 
         ResponseEntity<String> putResponse = restTemplate.exchange(putURL, HttpMethod.PUT, putRequest, String.class);
         if (!putResponse.getStatusCode().is2xxSuccessful()) {
