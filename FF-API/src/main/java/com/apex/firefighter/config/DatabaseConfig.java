@@ -27,7 +27,7 @@ public class DatabaseConfig {
     @Value("${DB_USERNAME:ff_admin}")
     private String dbUsername;
 
-    @Value("${DB_PASSWORD}")
+    @Value("${DB_PASSWORD:dev_password}")
     private String dbPassword;
 
     @Value("${DB_SSL_MODE:require}")
@@ -47,10 +47,28 @@ public class DatabaseConfig {
     @Bean
     @Primary
     public DataSource dataSource() {
-        if (dbPassword == null || dbPassword.trim().isEmpty()) {
-            throw new RuntimeException("DB_PASSWORD environment variable is required but not set!");
+        // For development, use H2 if no PostgreSQL password is provided
+        if (dbPassword == null || dbPassword.trim().isEmpty() || "dev_password".equals(dbPassword)) {
+            System.out.println("🔧 Development Mode: Using H2 in-memory database");
+            
+            HikariConfig config = new HikariConfig();
+            config.setJdbcUrl("jdbc:h2:mem:firefighterdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE");
+            config.setUsername("sa");
+            config.setPassword("");
+            config.setDriverClassName("org.h2.Driver");
+            
+            // Connection pool settings
+            config.setMaximumPoolSize(10);
+            config.setMinimumIdle(2);
+            config.setConnectionTimeout(30000);
+            config.setIdleTimeout(600000);
+            config.setMaxLifetime(1800000);
+            
+            System.out.println("✅ H2 Database initialized for development");
+            return new HikariDataSource(config);
         }
 
+        // Production PostgreSQL configuration
         HikariConfig config = new HikariConfig();
         
         // Build the JDBC URL
@@ -69,7 +87,7 @@ public class DatabaseConfig {
         config.setIdleTimeout(600000);
         config.setMaxLifetime(1800000);
         
-        System.out.println("✅ Creating DataSource with URL: " + jdbcUrl);
+        System.out.println("✅ Creating PostgreSQL DataSource with URL: " + jdbcUrl);
         System.out.println("✅ Using username: " + dbUsername);
         
         return new HikariDataSource(config);
