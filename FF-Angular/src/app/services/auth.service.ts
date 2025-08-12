@@ -121,6 +121,7 @@ export class AuthService {
   private clearUserData(): void {
     this.isAdminSubject.next(false);
     this.userProfileSubject.next(null);
+    this.clearJwtToken();
     // Clear localStorage data
     localStorage.removeItem('firebase_user_profile');
     localStorage.removeItem('firebase_user_admin_status');
