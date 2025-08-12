@@ -21,7 +21,7 @@ public class HttpsConfig {
      * This allows the server to accept requests on both HTTP (8080) and HTTPS (8443) ports
      */
     @Bean
-    public WebServerFactoryCustomizer<TomcatServletWebServerFactory> servletContainer() {
+    public WebServerFactoryCustomizer<TomcatServletWebServerFactory> httpsServletContainer() {
         return server -> {
             if (sslEnabled) {
                 // Add HTTP connector when HTTPS is enabled
