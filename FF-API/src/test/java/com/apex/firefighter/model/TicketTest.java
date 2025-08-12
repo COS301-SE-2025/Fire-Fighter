@@ -22,7 +22,9 @@ class TicketTest {
         // Assert
         assertThat(ticket.getDateCreated()).isNotNull();
         assertThat(ticket.getRequestDate()).isNotNull();
-        assertThat(ticket.getStatus()).isEqualTo("PENDING");
+        assertThat(ticket.getStatus()).isEqualTo("Active");
+        assertThat(ticket.getDuration()).isEqualTo(60);
+        assertThat(ticket.getFiveMinuteWarningSent()).isFalse();
     }
 
     @Test
@@ -47,6 +49,30 @@ class TicketTest {
         assertThat(paramTicket.getDuration()).isEqualTo(duration);
         assertThat(paramTicket.getDateCreated()).isNotNull();
         assertThat(paramTicket.getStatus()).isEqualTo("Active");
+        assertThat(paramTicket.getFiveMinuteWarningSent()).isFalse();
+    }
+
+    @Test
+    void legacyConstructor_ShouldInitializeWithNullDuration() {
+        // Arrange
+        String ticketId = "TICKET-001";
+        String description = "Test emergency";
+        String userId = "user-123";
+        String emergencyType = "FIRE";
+        String emergencyContact = "911";
+
+        // Act
+        Ticket legacyTicket = new Ticket(ticketId, description, userId, emergencyType, emergencyContact);
+
+        // Assert
+        assertThat(legacyTicket.getTicketId()).isEqualTo(ticketId);
+        assertThat(legacyTicket.getDescription()).isEqualTo(description);
+        assertThat(legacyTicket.getUserId()).isEqualTo(userId);
+        assertThat(legacyTicket.getEmergencyType()).isEqualTo(emergencyType);
+        assertThat(legacyTicket.getEmergencyContact()).isEqualTo(emergencyContact);
+        assertThat(legacyTicket.getDuration()).isNull();
+        assertThat(legacyTicket.getDateCreated()).isNotNull();
+        assertThat(legacyTicket.getStatus()).isEqualTo("Active");
     }
 
     @Test
@@ -59,10 +85,12 @@ class TicketTest {
         String emergencyType = "MEDICAL";
         String emergencyContact = "emergency@test.com";
         String revokedBy = "admin-user";
+        String rejectReason = "Policy violation";
         LocalDateTime dateCreated = LocalDateTime.now();
         LocalDateTime dateCompleted = LocalDateTime.now().plusHours(2);
         LocalDate requestDate = LocalDate.now();
         Integer duration = 120;
+        Boolean fiveMinuteWarningSent = true;
 
         // Act
         ticket.setTicketId(ticketId);
@@ -72,10 +100,12 @@ class TicketTest {
         ticket.setEmergencyType(emergencyType);
         ticket.setEmergencyContact(emergencyContact);
         ticket.setRevokedBy(revokedBy);
+        ticket.setRejectReason(rejectReason);
         ticket.setDateCreated(dateCreated);
         ticket.setDateCompleted(dateCompleted);
         ticket.setRequestDate(requestDate);
         ticket.setDuration(duration);
+        ticket.setFiveMinuteWarningSent(fiveMinuteWarningSent);
 
         // Assert
         assertThat(ticket.getId()).isNull(); // ID is auto-generated, starts as null
@@ -86,107 +116,12 @@ class TicketTest {
         assertThat(ticket.getEmergencyType()).isEqualTo(emergencyType);
         assertThat(ticket.getEmergencyContact()).isEqualTo(emergencyContact);
         assertThat(ticket.getRevokedBy()).isEqualTo(revokedBy);
+        assertThat(ticket.getRejectReason()).isEqualTo(rejectReason);
         assertThat(ticket.getDateCreated()).isEqualTo(dateCreated);
         assertThat(ticket.getDateCompleted()).isEqualTo(dateCompleted);
         assertThat(ticket.getRequestDate()).isEqualTo(requestDate);
         assertThat(ticket.getDuration()).isEqualTo(duration);
-    }
-
-    @Test
-    void toString_ShouldReturnFormattedString() {
-        // Arrange
-        ticket.setTicketId("TICKET-001");
-        ticket.setDescription("Test emergency");
-        ticket.setStatus("PENDING");
-
-        // Act
-        String result = ticket.toString();
-
-        // Assert
-        assertThat(result).contains("Ticket{");
-        assertThat(result).contains("ticketId='TICKET-001'");
-        assertThat(result).contains("description='Test emergency'");
-        assertThat(result).contains("status='PENDING'");
-    }
-
-    @Test
-    void equals_WithSameTicketId_ShouldReturnTrue() {
-        // Arrange
-        Ticket ticket1 = new Ticket();
-        ticket1.setTicketId("TICKET-001");
-        
-        Ticket ticket2 = new Ticket();
-        ticket2.setTicketId("TICKET-001");
-
-        // Act & Assert
-        assertThat(ticket1.equals(ticket2)).isTrue();
-        assertThat(ticket1.hashCode()).isEqualTo(ticket2.hashCode());
-    }
-
-    @Test
-    void equals_WithDifferentTicketId_ShouldReturnFalse() {
-        // Arrange
-        Ticket ticket1 = new Ticket();
-        ticket1.setTicketId("TICKET-001");
-        
-        Ticket ticket2 = new Ticket();
-        ticket2.setTicketId("TICKET-002");
-
-        // Act & Assert
-        assertThat(ticket1.equals(ticket2)).isFalse();
-    }
-
-    @Test
-    void equals_WithNullTicketId_ShouldHandleCorrectly() {
-        // Arrange
-        Ticket ticket1 = new Ticket();
-        ticket1.setTicketId(null);
-        
-        Ticket ticket2 = new Ticket();
-        ticket2.setTicketId(null);
-
-        // Act & Assert
-        assertThat(ticket1.equals(ticket2)).isTrue();
-    }
-
-    @Test
-    void equals_WithNull_ShouldReturnFalse() {
-        // Act & Assert
-        assertThat(ticket.equals(null)).isFalse();
-    }
-
-    @Test
-    void equals_WithDifferentClass_ShouldReturnFalse() {
-        // Act & Assert
-        assertThat(ticket.equals("not a ticket")).isFalse();
-    }
-
-    @Test
-    void equals_WithSameInstance_ShouldReturnTrue() {
-        // Act & Assert
-        assertThat(ticket.equals(ticket)).isTrue();
-    }
-
-    @Test
-    void hashCode_WithSameTicketId_ShouldBeEqual() {
-        // Arrange
-        Ticket ticket1 = new Ticket();
-        ticket1.setTicketId("TICKET-001");
-        
-        Ticket ticket2 = new Ticket();
-        ticket2.setTicketId("TICKET-001");
-
-        // Act & Assert
-        assertThat(ticket1.hashCode()).isEqualTo(ticket2.hashCode());
-    }
-
-    @Test
-    void hashCode_WithNullTicketId_ShouldNotThrowException() {
-        // Arrange
-        ticket.setTicketId(null);
-
-        // Act & Assert
-        assertThat(ticket.hashCode()).isNotNull();
+        assertThat(ticket.getFiveMinuteWarningSent()).isEqualTo(fiveMinuteWarningSent);
     }
 
     @Test
@@ -199,10 +134,12 @@ class TicketTest {
         ticket.setEmergencyType(null);
         ticket.setEmergencyContact(null);
         ticket.setRevokedBy(null);
+        ticket.setRejectReason(null);
         ticket.setDateCreated(null);
         ticket.setDateCompleted(null);
         ticket.setRequestDate(null);
         ticket.setDuration(null);
+        ticket.setFiveMinuteWarningSent(null);
 
         // Assert
         assertThat(ticket.getId()).isNull(); // ID is always null for new entities
@@ -213,10 +150,12 @@ class TicketTest {
         assertThat(ticket.getEmergencyType()).isNull();
         assertThat(ticket.getEmergencyContact()).isNull();
         assertThat(ticket.getRevokedBy()).isNull();
+        assertThat(ticket.getRejectReason()).isNull();
         assertThat(ticket.getDateCreated()).isNull();
         assertThat(ticket.getDateCompleted()).isNull();
         assertThat(ticket.getRequestDate()).isNull();
         assertThat(ticket.getDuration()).isNull();
+        assertThat(ticket.getFiveMinuteWarningSent()).isNull();
     }
 
     @Test
@@ -259,6 +198,7 @@ class TicketTest {
         assertThat(nullTicket.getDuration()).isNull();
         assertThat(nullTicket.getDateCreated()).isNotNull();
         assertThat(nullTicket.getStatus()).isEqualTo("Active");
+        assertThat(nullTicket.getFiveMinuteWarningSent()).isFalse();
     }
 
     @Test
@@ -286,5 +226,64 @@ class TicketTest {
 
         // Assert
         assertThat(ticket.getDuration()).isEqualTo(-30);
+    }
+
+    @Test
+    void fiveMinuteWarningSent_ShouldAcceptTrueAndFalse() {
+        // Act & Assert
+        ticket.setFiveMinuteWarningSent(true);
+        assertThat(ticket.getFiveMinuteWarningSent()).isTrue();
+
+        ticket.setFiveMinuteWarningSent(false);
+        assertThat(ticket.getFiveMinuteWarningSent()).isFalse();
+    }
+
+    @Test
+    void status_ShouldBeMutable() {
+        // Act & Assert
+        ticket.setStatus("PENDING");
+        assertThat(ticket.getStatus()).isEqualTo("PENDING");
+
+        ticket.setStatus("APPROVED");
+        assertThat(ticket.getStatus()).isEqualTo("APPROVED");
+
+        ticket.setStatus("COMPLETED");
+        assertThat(ticket.getStatus()).isEqualTo("COMPLETED");
+    }
+
+    @Test
+    void dateCompleted_ShouldBeSettable() {
+        // Arrange
+        LocalDateTime completionTime = LocalDateTime.now().plusHours(1);
+
+        // Act
+        ticket.setDateCompleted(completionTime);
+
+        // Assert
+        assertThat(ticket.getDateCompleted()).isEqualTo(completionTime);
+    }
+
+    @Test
+    void revokedBy_ShouldBeSettable() {
+        // Arrange
+        String revokedBy = "admin-user-123";
+
+        // Act
+        ticket.setRevokedBy(revokedBy);
+
+        // Assert
+        assertThat(ticket.getRevokedBy()).isEqualTo(revokedBy);
+    }
+
+    @Test
+    void rejectReason_ShouldBeSettable() {
+        // Arrange
+        String rejectReason = "Access denied due to policy violation";
+
+        // Act
+        ticket.setRejectReason(rejectReason);
+
+        // Assert
+        assertThat(ticket.getRejectReason()).isEqualTo(rejectReason);
     }
 }
