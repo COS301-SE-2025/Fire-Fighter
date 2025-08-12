@@ -21,17 +21,17 @@ public class UserPreferencesService {
      * Get user preferences by user ID, create default if not exists
      */
     public UserPreferences getUserPreferences(String userId) {
-        System.out.println("🔵 GET USER PREFERENCES: Fetching preferences for user - " + userId);
+        System.out.println("GET USER PREFERENCES: Fetching preferences for user - " + userId);
         
         Optional<UserPreferences> preferences = userPreferencesRepository.findByUserId(userId);
         if (preferences.isPresent()) {
-            System.out.println("✅ PREFERENCES FOUND: " + preferences.get());
+            System.out.println("PREFERENCES FOUND: " + preferences.get());
             return preferences.get();
         } else {
             // Create default preferences for new user
             UserPreferences defaultPreferences = new UserPreferences(userId);
             UserPreferences savedPreferences = userPreferencesRepository.save(defaultPreferences);
-            System.out.println("✅ DEFAULT PREFERENCES CREATED: " + savedPreferences);
+            System.out.println("DEFAULT PREFERENCES CREATED: " + savedPreferences);
             return savedPreferences;
         }
     }
@@ -42,7 +42,7 @@ public class UserPreferencesService {
     public UserPreferences updateUserPreferences(String userId, Boolean emailNotificationsEnabled,
                                                 Boolean emailTicketCreation, Boolean emailTicketCompletion,
                                                 Boolean emailTicketRevocation, Boolean emailFiveMinuteWarning) {
-        System.out.println("🔵 UPDATE USER PREFERENCES: Updating preferences for user - " + userId);
+        System.out.println("UPDATE USER PREFERENCES: Updating preferences for user - " + userId);
         
         UserPreferences preferences = getUserPreferences(userId); // This will create if not exists
         
@@ -63,7 +63,7 @@ public class UserPreferencesService {
         }
         
         UserPreferences updatedPreferences = userPreferencesRepository.save(preferences);
-        System.out.println("✅ PREFERENCES UPDATED: " + updatedPreferences);
+        System.out.println("PREFERENCES UPDATED: " + updatedPreferences);
         return updatedPreferences;
     }
 
@@ -107,7 +107,7 @@ public class UserPreferencesService {
      * Enable all email notifications for a user
      */
     public UserPreferences enableAllEmailNotifications(String userId) {
-        System.out.println("🔵 ENABLE ALL EMAIL NOTIFICATIONS: Enabling all for user - " + userId);
+        System.out.println("ENABLE ALL EMAIL NOTIFICATIONS: Enabling all for user - " + userId);
         return updateUserPreferences(userId, true, true, true, true, true);
     }
 
@@ -115,7 +115,7 @@ public class UserPreferencesService {
      * Disable all email notifications for a user
      */
     public UserPreferences disableAllEmailNotifications(String userId) {
-        System.out.println("🔵 DISABLE ALL EMAIL NOTIFICATIONS: Disabling all for user - " + userId);
+        System.out.println("DISABLE ALL EMAIL NOTIFICATIONS: Disabling all for user - " + userId);
         return updateUserPreferences(userId, false, false, false, false, false);
     }
 
@@ -123,7 +123,7 @@ public class UserPreferencesService {
      * Reset user preferences to default
      */
     public UserPreferences resetToDefault(String userId) {
-        System.out.println("🔵 RESET PREFERENCES: Resetting to default for user - " + userId);
+        System.out.println("RESET PREFERENCES: Resetting to default for user - " + userId);
         
         Optional<UserPreferences> existingPreferences = userPreferencesRepository.findByUserId(userId);
         if (existingPreferences.isPresent()) {
@@ -132,7 +132,7 @@ public class UserPreferencesService {
         
         UserPreferences defaultPreferences = new UserPreferences(userId);
         UserPreferences savedPreferences = userPreferencesRepository.save(defaultPreferences);
-        System.out.println("✅ PREFERENCES RESET: " + savedPreferences);
+        System.out.println("PREFERENCES RESET: " + savedPreferences);
         return savedPreferences;
     }
 }

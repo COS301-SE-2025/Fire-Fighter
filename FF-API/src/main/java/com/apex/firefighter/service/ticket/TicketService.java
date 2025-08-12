@@ -41,25 +41,25 @@ public class TicketService {
      * Create a new ticket
      */
     public Ticket createTicket(String ticketId, String description, String userId, String emergencyType, String emergencyContact, Integer duration) {
-        System.out.println("🔵 CREATE TICKET: Creating ticket - " + ticketId);
+        System.out.println("CREATE TICKET: Creating ticket - " + ticketId);
 
         // Check if ticket ID already exists
         Optional<Ticket> existingTicket = ticketRepository.findByTicketId(ticketId);
         if (existingTicket.isPresent()) {
-            System.out.println("⚠️ TICKET EXISTS: Ticket with ID '" + ticketId + "' already exists");
+            System.out.println("TICKET EXISTS: Ticket with ID '" + ticketId + "' already exists");
             throw new RuntimeException("Ticket with ID '" + ticketId + "' already exists");
         }
 
         Ticket ticket = new Ticket(ticketId, description, userId, emergencyType, emergencyContact, duration);
         Ticket savedTicket = ticketRepository.save(ticket);
-        System.out.println("✅ TICKET CREATED: " + savedTicket);
+        System.out.println("TICKET CREATED: " + savedTicket);
 
         // Create notification for ticket creation (with email support)
         try {
             notificationService.createTicketCreationNotification(userId, ticketId, savedTicket);
-            System.out.println("🔔 NOTIFICATION CREATED: Ticket creation notification sent to user " + userId);
+            System.out.println("NOTIFICATION CREATED: Ticket creation notification sent to user " + userId);
         } catch (Exception e) {
-            System.err.println("⚠️ NOTIFICATION FAILED: Could not create ticket creation notification: " + e.getMessage());
+            System.err.println("NOTIFICATION FAILED: Could not create ticket creation notification: " + e.getMessage());
         }
 
         return savedTicket;
@@ -69,7 +69,7 @@ public class TicketService {
      * Update ticket information
      */
     public Ticket updateTicket(Long id, String description, String status, String emergencyType, String emergencyContact, Integer duration) {
-        System.out.println("🔵 UPDATE TICKET: Updating ticket ID - " + id);
+        System.out.println("UPDATE TICKET: Updating ticket ID - " + id);
         
         Optional<Ticket> ticketOpt = ticketRepository.findById(id);
         if (ticketOpt.isPresent()) {
@@ -92,10 +92,10 @@ public class TicketService {
             }
             
             Ticket updatedTicket = ticketRepository.save(ticket);
-            System.out.println("✅ TICKET UPDATED: " + updatedTicket);
+            System.out.println("TICKET UPDATED: " + updatedTicket);
             return updatedTicket;
         } else {
-            System.out.println("❌ UPDATE FAILED: Ticket not found with ID - " + id);
+            System.out.println("UPDATE FAILED: Ticket not found with ID - " + id);
             throw new RuntimeException("Ticket not found with ID: " + id);
         }
     }
@@ -155,10 +155,10 @@ public class TicketService {
     public boolean deleteTicket(Long id) {
         if (ticketRepository.existsById(id)) {
             ticketRepository.deleteById(id);
-            System.out.println("✅ TICKET DELETED: ID - " + id);
+            System.out.println("TICKET DELETED: ID - " + id);
             return true;
         }
-        System.out.println("❌ DELETE FAILED: Ticket not found with ID - " + id);
+        System.out.println("DELETE FAILED: Ticket not found with ID - " + id);
         return false;
     }
 
@@ -169,10 +169,10 @@ public class TicketService {
         Optional<Ticket> ticketOpt = ticketRepository.findByTicketId(ticketId);
         if (ticketOpt.isPresent()) {
             ticketRepository.delete(ticketOpt.get());
-            System.out.println("✅ TICKET DELETED: Ticket ID - " + ticketId);
+            System.out.println("TICKET DELETED: Ticket ID - " + ticketId);
             return true;
         }
-        System.out.println("❌ DELETE FAILED: Ticket not found with ticket ID - " + ticketId);
+        System.out.println("DELETE FAILED: Ticket not found with ticket ID - " + ticketId);
         return false;
     }
 
@@ -180,17 +180,17 @@ public class TicketService {
      * Update ticket description
      */
     public Ticket updateTicketDescription(String ticketId, String description) {
-        System.out.println("🔵 UPDATE DESCRIPTION: Updating ticket description - " + ticketId);
+        System.out.println("UPDATE DESCRIPTION: Updating ticket description - " + ticketId);
         
         Optional<Ticket> ticketOpt = ticketRepository.findByTicketId(ticketId);
         if (ticketOpt.isPresent()) {
             Ticket ticket = ticketOpt.get();
             ticket.setDescription(description);
             Ticket updatedTicket = ticketRepository.save(ticket);
-            System.out.println("✅ DESCRIPTION UPDATED: " + updatedTicket);
+            System.out.println("DESCRIPTION UPDATED: " + updatedTicket);
             return updatedTicket;
         } else {
-            System.out.println("❌ UPDATE FAILED: Ticket not found with ID - " + ticketId);
+            System.out.println("UPDATE FAILED: Ticket not found with ID - " + ticketId);
             throw new RuntimeException("Ticket not found with ID: " + ticketId);
         }
     }
@@ -204,9 +204,9 @@ public class TicketService {
      * Returns tickets with status = "Active" sorted by creation date descending
      */
     public List<Ticket> getActiveTickets() {
-        System.out.println("🔵 ADMIN: Getting all active tickets");
+        System.out.println("ADMIN: Getting all active tickets");
         List<Ticket> activeTickets = ticketRepository.findActiveTickets();
-        System.out.println("✅ ADMIN: Found " + activeTickets.size() + " active tickets");
+        System.out.println("ADMIN: Found " + activeTickets.size() + " active tickets");
         return activeTickets;
     }
 
@@ -215,9 +215,9 @@ public class TicketService {
      * Returns all tickets sorted by creation date descending
      */
     public List<Ticket> getTicketHistory() {
-        System.out.println("🔵 ADMIN: Getting ticket history");
+        System.out.println("ADMIN: Getting ticket history");
         List<Ticket> ticketHistory = ticketRepository.findAllByOrderByDateCreatedDesc();
-        System.out.println("✅ ADMIN: Found " + ticketHistory.size() + " tickets in history");
+        System.out.println("ADMIN: Found " + ticketHistory.size() + " tickets in history");
         return ticketHistory;
     }
 
@@ -226,24 +226,24 @@ public class TicketService {
      * Only users with admin flag can revoke tickets
      */
     public Ticket revokeTicket(Long ticketId, String adminUserId, String rejectReason) {
-        System.out.println("🔵 ADMIN REVOKE: Attempting to revoke ticket ID - " + ticketId + " by admin - " + adminUserId);
+        System.out.println("ADMIN REVOKE: Attempting to revoke ticket ID - " + ticketId + " by admin - " + adminUserId);
         
         // Verify admin privileges
         Optional<User> adminUser = userRepository.findById(adminUserId);
         if (adminUser.isEmpty()) {
-            System.out.println("❌ REVOKE FAILED: Admin user not found - " + adminUserId);
+            System.out.println("REVOKE FAILED: Admin user not found - " + adminUserId);
             throw new RuntimeException("Admin user not found: " + adminUserId);
         }
         
         if (!adminUser.get().isAdmin()) {
-            System.out.println("❌ REVOKE FAILED: User does not have admin privileges - " + adminUserId);
+            System.out.println("REVOKE FAILED: User does not have admin privileges - " + adminUserId);
             throw new RuntimeException("User does not have admin privileges: " + adminUserId);
         }
         
         // Find and update the ticket
         Optional<Ticket> ticketOpt = ticketRepository.findById(ticketId);
         if (ticketOpt.isEmpty()) {
-            System.out.println("❌ REVOKE FAILED: Ticket not found with ID - " + ticketId);
+            System.out.println("REVOKE FAILED: Ticket not found with ID - " + ticketId);
             throw new RuntimeException("Ticket not found with ID: " + ticketId);
         }
         
@@ -251,7 +251,7 @@ public class TicketService {
         
         // Check if ticket is already completed or rejected
         if ("Completed".equalsIgnoreCase(ticket.getStatus()) || "Rejected".equalsIgnoreCase(ticket.getStatus())) {
-            System.out.println("⚠️ REVOKE WARNING: Ticket is already " + ticket.getStatus().toLowerCase() + " - " + ticketId);
+            System.out.println("REVOKE WARNING: Ticket is already " + ticket.getStatus().toLowerCase() + " - " + ticketId);
             throw new RuntimeException("Ticket is already " + ticket.getStatus().toLowerCase() + ": " + ticketId);
         }
         
@@ -262,14 +262,14 @@ public class TicketService {
         ticket.setRevokedBy(adminUserId);
 
         Ticket revokedTicket = ticketRepository.save(ticket);
-        System.out.println("✅ TICKET REVOKED: " + revokedTicket.getTicketId() + " by admin " + adminUserId);
+        System.out.println("TICKET REVOKED: " + revokedTicket.getTicketId() + " by admin " + adminUserId);
 
         // Create notification for ticket revocation (with email support)
         try {
             notificationService.createTicketRevocationNotification(ticket.getUserId(), ticket.getTicketId(), ticket, rejectReason);
-            System.out.println("🔔 NOTIFICATION CREATED: Ticket revocation notification sent to user " + ticket.getUserId());
+            System.out.println("NOTIFICATION CREATED: Ticket revocation notification sent to user " + ticket.getUserId());
         } catch (Exception e) {
-            System.err.println("⚠️ NOTIFICATION FAILED: Could not create ticket revocation notification: " + e.getMessage());
+            System.err.println("NOTIFICATION FAILED: Could not create ticket revocation notification: " + e.getMessage());
         }
 
         return revokedTicket;
@@ -279,24 +279,24 @@ public class TicketService {
      * Revoke ticket by ticket ID (Admin function)
      */
     public Ticket revokeTicketByTicketId(String ticketId, String adminUserId, String rejectReason) {
-        System.out.println("🔵 ADMIN REVOKE: Attempting to revoke ticket - " + ticketId + " by admin - " + adminUserId);
+        System.out.println("ADMIN REVOKE: Attempting to revoke ticket - " + ticketId + " by admin - " + adminUserId);
         
         // Verify admin privileges
         Optional<User> adminUser = userRepository.findById(adminUserId);
         if (adminUser.isEmpty()) {
-            System.out.println("❌ REVOKE FAILED: Admin user not found - " + adminUserId);
+            System.out.println("REVOKE FAILED: Admin user not found - " + adminUserId);
             throw new RuntimeException("Admin user not found: " + adminUserId);
         }
         
         if (!adminUser.get().isAdmin()) {
-            System.out.println("❌ REVOKE FAILED: User does not have admin privileges - " + adminUserId);
+            System.out.println("REVOKE FAILED: User does not have admin privileges - " + adminUserId);
             throw new RuntimeException("User does not have admin privileges: " + adminUserId);
         }
         
         // Find and update the ticket
         Optional<Ticket> ticketOpt = ticketRepository.findByTicketId(ticketId);
         if (ticketOpt.isEmpty()) {
-            System.out.println("❌ REVOKE FAILED: Ticket not found with ticket ID - " + ticketId);
+            System.out.println("REVOKE FAILED: Ticket not found with ticket ID - " + ticketId);
             throw new RuntimeException("Ticket not found with ticket ID: " + ticketId);
         }
         
@@ -304,7 +304,7 @@ public class TicketService {
         
         // Check if ticket is already completed or rejected
         if ("Completed".equalsIgnoreCase(ticket.getStatus()) || "Rejected".equalsIgnoreCase(ticket.getStatus())) {
-            System.out.println("⚠️ REVOKE WARNING: Ticket is already " + ticket.getStatus().toLowerCase() + " - " + ticketId);
+            System.out.println("REVOKE WARNING: Ticket is already " + ticket.getStatus().toLowerCase() + " - " + ticketId);
             throw new RuntimeException("Ticket is already " + ticket.getStatus().toLowerCase() + ": " + ticketId);
         }
         
@@ -315,14 +315,14 @@ public class TicketService {
         ticket.setRevokedBy(adminUserId);
 
         Ticket revokedTicket = ticketRepository.save(ticket);
-        System.out.println("✅ TICKET REVOKED: " + revokedTicket.getTicketId() + " by admin " + adminUserId);
+        System.out.println("TICKET REVOKED: " + revokedTicket.getTicketId() + " by admin " + adminUserId);
 
         // Create notification for ticket revocation (with email support)
         try {
             notificationService.createTicketRevocationNotification(ticket.getUserId(), ticket.getTicketId(), ticket, rejectReason);
-            System.out.println("🔔 NOTIFICATION CREATED: Ticket revocation notification sent to user " + ticket.getUserId());
+            System.out.println("NOTIFICATION CREATED: Ticket revocation notification sent to user " + ticket.getUserId());
         } catch (Exception e) {
-            System.err.println("⚠️ NOTIFICATION FAILED: Could not create ticket revocation notification: " + e.getMessage());
+            System.err.println("NOTIFICATION FAILED: Could not create ticket revocation notification: " + e.getMessage());
         }
 
         return revokedTicket;
@@ -340,9 +340,9 @@ public class TicketService {
      * Get tickets by status
      */
     public List<Ticket> getTicketsByStatus(String status) {
-        System.out.println("🔵 QUERY: Getting tickets with status - " + status);
+        System.out.println("QUERY: Getting tickets with status - " + status);
         List<Ticket> tickets = ticketRepository.findByStatus(status);
-        System.out.println("✅ QUERY: Found " + tickets.size() + " tickets with status " + status);
+        System.out.println("QUERY: Found " + tickets.size() + " tickets with status " + status);
         return tickets;
     }
 
@@ -350,9 +350,9 @@ public class TicketService {
      * Get tickets by user ID
      */
     public List<Ticket> getTicketsByUserId(String userId) {
-        System.out.println("🔵 QUERY: Getting tickets for user - " + userId);
+        System.out.println("QUERY: Getting tickets for user - " + userId);
         List<Ticket> userTickets = ticketRepository.findByUserId(userId);
-        System.out.println("✅ QUERY: Found " + userTickets.size() + " tickets for user " + userId);
+        System.out.println("QUERY: Found " + userTickets.size() + " tickets for user " + userId);
         return userTickets;
     }
 
@@ -361,9 +361,9 @@ public class TicketService {
      * Returns tickets created between startDate and endDate (inclusive)
      */
     public List<Ticket> getTicketsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
-        System.out.println("🔵 ADMIN: Getting tickets between " + startDate + " and " + endDate);
+        System.out.println("ADMIN: Getting tickets between " + startDate + " and " + endDate);
         List<Ticket> tickets = ticketRepository.findByDateCreatedBetween(startDate, endDate);
-        System.out.println("✅ ADMIN: Found " + tickets.size() + " tickets in date range");
+        System.out.println("ADMIN: Found " + tickets.size() + " tickets in date range");
         return tickets;
     }
 } 

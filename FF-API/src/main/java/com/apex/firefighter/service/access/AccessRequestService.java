@@ -36,17 +36,17 @@ public class AccessRequestService {
      * Create a new access request
      */
     public AccessRequest createAccessRequest(String firebaseUid, String ticketId) {
-        System.out.println("🔵 CREATE ACCESS REQUEST: Creating request for UID - " + firebaseUid + " ticket - " + ticketId);
+        System.out.println("CREATE ACCESS REQUEST: Creating request for UID - " + firebaseUid + " ticket - " + ticketId);
         
         Optional<User> userOpt = userRepository.findByUserId(firebaseUid);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             AccessRequest request = new AccessRequest(ticketId, user);
             AccessRequest savedRequest = accessRequestRepository.save(request);
-            System.out.println("✅ ACCESS REQUEST CREATED: " + savedRequest);
+            System.out.println("ACCESS REQUEST CREATED: " + savedRequest);
             return savedRequest;
         } else {
-            System.out.println("❌ CREATE FAILED: User not found for UID - " + firebaseUid);
+            System.out.println("CREATE FAILED: User not found for UID - " + firebaseUid);
             throw new RuntimeException("User not found with Firebase UID: " + firebaseUid);
         }
     }
@@ -55,17 +55,17 @@ public class AccessRequestService {
      * Approve an access request
      */
     public AccessRequest approveAccessRequest(Long requestId, String approvedBy) {
-        System.out.println("🔵 APPROVE REQUEST: Approving request ID - " + requestId);
+        System.out.println("APPROVE REQUEST: Approving request ID - " + requestId);
         
         Optional<AccessRequest> requestOpt = accessRequestRepository.findById(requestId);
         if (requestOpt.isPresent()) {
             AccessRequest request = requestOpt.get();
             request.approve(approvedBy);
             AccessRequest updatedRequest = accessRequestRepository.save(request);
-            System.out.println("✅ REQUEST APPROVED: " + updatedRequest);
+            System.out.println("REQUEST APPROVED: " + updatedRequest);
             return updatedRequest;
         } else {
-            System.out.println("❌ APPROVE FAILED: Request not found with ID - " + requestId);
+            System.out.println("APPROVE FAILED: Request not found with ID - " + requestId);
             throw new RuntimeException("Access request not found with ID: " + requestId);
         }
     }
@@ -74,17 +74,17 @@ public class AccessRequestService {
      * Deny an access request
      */
     public AccessRequest denyAccessRequest(Long requestId, String deniedBy) {
-        System.out.println("🔵 DENY REQUEST: Denying request ID - " + requestId);
+        System.out.println("DENY REQUEST: Denying request ID - " + requestId);
         
         Optional<AccessRequest> requestOpt = accessRequestRepository.findById(requestId);
         if (requestOpt.isPresent()) {
             AccessRequest request = requestOpt.get();
             request.deny(deniedBy);
             AccessRequest updatedRequest = accessRequestRepository.save(request);
-            System.out.println("✅ REQUEST DENIED: " + updatedRequest);
+            System.out.println("REQUEST DENIED: " + updatedRequest);
             return updatedRequest;
         } else {
-            System.out.println("❌ DENY FAILED: Request not found with ID - " + requestId);
+            System.out.println("DENY FAILED: Request not found with ID - " + requestId);
             throw new RuntimeException("Access request not found with ID: " + requestId);
         }
     }
@@ -93,17 +93,17 @@ public class AccessRequestService {
      * Revoke an access request
      */
     public AccessRequest revokeAccessRequest(Long requestId, String revokedBy) {
-        System.out.println("🔵 REVOKE REQUEST: Revoking request ID - " + requestId);
+        System.out.println("REVOKE REQUEST: Revoking request ID - " + requestId);
         
         Optional<AccessRequest> requestOpt = accessRequestRepository.findById(requestId);
         if (requestOpt.isPresent()) {
             AccessRequest request = requestOpt.get();
             request.revoke(revokedBy);
             AccessRequest updatedRequest = accessRequestRepository.save(request);
-            System.out.println("✅ REQUEST REVOKED: " + updatedRequest);
+            System.out.println("REQUEST REVOKED: " + updatedRequest);
             return updatedRequest;
         } else {
-            System.out.println("❌ REVOKE FAILED: Request not found with ID - " + requestId);
+            System.out.println("REVOKE FAILED: Request not found with ID - " + requestId);
             throw new RuntimeException("Access request not found with ID: " + requestId);
         }
     }
@@ -160,10 +160,10 @@ public class AccessRequestService {
     public boolean deleteAccessRequest(Long requestId) {
         if (accessRequestRepository.existsById(requestId)) {
             accessRequestRepository.deleteById(requestId);
-            System.out.println("✅ ACCESS REQUEST DELETED: ID - " + requestId);
+            System.out.println("ACCESS REQUEST DELETED: ID - " + requestId);
             return true;
         }
-        System.out.println("❌ DELETE FAILED: Request not found with ID - " + requestId);
+        System.out.println("DELETE FAILED: Request not found with ID - " + requestId);
         return false;
     }
 } 

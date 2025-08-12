@@ -48,7 +48,6 @@ public class TicketScheduledService {
             LocalDateTime currentTime = LocalDateTime.now();
 
             for (Ticket ticket : activeTicketsWithDuration) {
-                // Skip if warning already sent
                 if (ticket.getFiveMinuteWarningSent() != null && ticket.getFiveMinuteWarningSent()) {
                     continue;
                 }
@@ -56,9 +55,7 @@ public class TicketScheduledService {
                 LocalDateTime expirationTime = ticket.getDateCreated().plusMinutes(ticket.getDuration());
                 LocalDateTime warningTime = expirationTime.minusMinutes(5);
 
-                // Check if current time is at or past the warning time but before expiration
                 if (currentTime.isAfter(warningTime) && currentTime.isBefore(expirationTime)) {
-                    // Send 5-minute warning notification (with email support)
                     try {
                         notificationService.createFiveMinuteWarningNotification(
                             ticket.getUserId(),
@@ -66,14 +63,13 @@ public class TicketScheduledService {
                             ticket
                         );
 
-                        // Mark warning as sent
                         ticket.setFiveMinuteWarningSent(true);
                         ticketRepository.save(ticket);
 
                         warningsSent++;
-                        System.out.println("🔔 5-MINUTE WARNING SENT: Notification sent to user " + ticket.getUserId() + " for ticket " + ticket.getTicketId());
+                        System.out.println("5-MINUTE WARNING SENT: Notification sent to user " + ticket.getUserId() + " for ticket " + ticket.getTicketId());
                     } catch (Exception e) {
-                        System.err.println("⚠️ WARNING NOTIFICATION FAILED: Could not send 5-minute warning for ticket " + ticket.getTicketId() + ": " + e.getMessage());
+                        System.err.println("WARNING NOTIFICATION FAILED: Could not send 5-minute warning for ticket " + ticket.getTicketId() + ": " + e.getMessage());
                     }
                 }
             }
@@ -104,16 +100,15 @@ public class TicketScheduledService {
                     ticket.setDateCompleted(currentTime);
                     ticketRepository.save(ticket);
 
-                    // Create notification for ticket completion (with email support)
                     try {
                         notificationService.createTicketCompletionNotification(
                             ticket.getUserId(),
                             ticket.getTicketId(),
                             ticket
                         );
-                        System.out.println("🔔 NOTIFICATION CREATED: Ticket completion notification sent to user " + ticket.getUserId());
+                        System.out.println("NOTIFICATION CREATED: Ticket completion notification sent to user " + ticket.getUserId());
                     } catch (Exception e) {
-                        System.err.println("⚠️ NOTIFICATION FAILED: Could not create ticket completion notification: " + e.getMessage());
+                        System.err.println("NOTIFICATION FAILED: Could not create ticket completion notification: " + e.getMessage());
                     }
 
                     closedCount++;
