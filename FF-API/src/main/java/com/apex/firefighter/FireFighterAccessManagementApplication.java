@@ -1,20 +1,3 @@
-<<<<<<<< HEAD:FF-API/firefighter-platform/src/main/java/com/apex/firefighter/FireFighterAccessManagementApplication.java
-package com.apex.firefighter;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
-
-@SpringBootApplication
-@EnableScheduling
-public class FireFighterAccessManagementApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(FireFighterAccessManagementApplication.class, args);
-	}
-
-}
-========
 package com.apex.firefighter;
 
 import org.springframework.boot.SpringApplication;
@@ -39,4 +22,3 @@ public class FireFighterAccessManagementApplication {
 	}
 
 }
->>>>>>>> origin/develop:FF-API/src/main/java/com/apex/firefighter/FireFighterAccessManagementApplication.java
