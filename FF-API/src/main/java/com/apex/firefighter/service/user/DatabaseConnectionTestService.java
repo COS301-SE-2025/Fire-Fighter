@@ -1,4 +1,4 @@
-package com.apex.firefighter.service;
+package com.apex.firefighter.service.user;
 
 import com.apex.firefighter.model.ConnectionTest;
 import com.apex.firefighter.repository.ConnectionTestRepository;

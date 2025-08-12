@@ -29,15 +29,14 @@ class TicketServiceTest {
     @Test
     void testCreateAndGetTicket() {
         // Create a new ticket
-        Ticket ticket = ticketService.createTicket("JIRA-123", "Test ticket", "user1", "critical-system-failure", "12345", 45);
+        Ticket ticket = ticketService.createTicket("Test ticket", "user1", "critical-system-failure", "12345");
         assertThat(ticket).isNotNull();
-        assertThat(ticket.getTicketId()).isEqualTo("JIRA-123");
+        assertThat(ticket.getTicketId()).isNotNull(); // Generated ID
         assertThat(ticket.getDescription()).isEqualTo("Test ticket");
         assertThat(ticket.getUserId()).isEqualTo("user1");
         assertThat(ticket.getEmergencyType()).isEqualTo("critical-system-failure");
         assertThat(ticket.getEmergencyContact()).isEqualTo("12345");
         assertThat(ticket.getStatus()).isEqualTo("Active");
-        assertThat(ticket.getDuration()).isEqualTo(45);
 
         // Get ticket by ID
         Optional<Ticket> foundById = ticketService.getTicketById(ticket.getId());
@@ -55,10 +54,10 @@ class TicketServiceTest {
     @Test
     void testUpdateTicket() {
         // Create a ticket
-        Ticket ticket = ticketService.createTicket("JIRA-456", "Original description", "user2", "network-outage", "67890", null);
+        Ticket ticket = ticketService.createTicket("Original description", "user2", "network-outage", "67890");
 
         // Update ticket
-        Ticket updatedTicket = ticketService.updateTicket(ticket.getId(), "Updated description", "Completed", "security-incident", "09876", null);
+        Ticket updatedTicket = ticketService.updateTicket(ticket.getId(), "Updated description", "Completed", "security-incident", "09876");
         assertThat(updatedTicket.getDescription()).isEqualTo("Updated description");
         assertThat(updatedTicket.getStatus()).isEqualTo("Completed");
         assertThat(updatedTicket.getEmergencyType()).isEqualTo("security-incident");
@@ -74,41 +73,39 @@ class TicketServiceTest {
     @Test
     void testDeleteTicket() {
         // Create a ticket
-        Ticket ticket = ticketService.createTicket("JIRA-789", "To be deleted", "user3", "user-lockout", "11223", null);
+        Ticket ticket = ticketService.createTicket("To be deleted", "user3", "user-lockout", "11223");
 
-        // Delete by ID
-        boolean deletedById = ticketService.deleteTicket(ticket.getId());
-        assertThat(deletedById).isTrue();
+        // Delete by ticket ID
+        ticketService.deleteTicket(ticket.getTicketId());
         assertThat(ticketService.getTicketById(ticket.getId())).isEmpty();
 
         // Create another ticket
-        Ticket ticket2 = ticketService.createTicket("JIRA-101", "To be deleted by ticket ID", "user4", "data-recovery", "44556", null);
+        Ticket ticket2 = ticketService.createTicket("To be deleted by ticket ID", "user4", "data-recovery", "44556");
 
         // Delete by ticket ID
-        boolean deletedByTicketId = ticketService.deleteTicketByTicketId("JIRA-101");
-        assertThat(deletedByTicketId).isTrue();
-        assertThat(ticketService.getTicketByTicketId("JIRA-101")).isEmpty();
+        ticketService.deleteTicket(ticket2.getTicketId());
+        assertThat(ticketService.getTicketByTicketId(ticket2.getTicketId())).isEmpty();
     }
 
     @Test
     void testGetAllTickets() {
         // Create multiple tickets
-        ticketService.createTicket("JIRA-1", "First ticket", "user1", "type1", "111", null);
-        ticketService.createTicket("JIRA-2", "Second ticket", "user2", "type2", "222", null);
-        ticketService.createTicket("JIRA-3", "Third ticket", "user3", "type3", "333", null);
+        Ticket ticket1 = ticketService.createTicket("First ticket", "user1", "type1", "111");
+        Ticket ticket2 = ticketService.createTicket("Second ticket", "user2", "type2", "222");
+        Ticket ticket3 = ticketService.createTicket("Third ticket", "user3", "type3", "333");
 
         // Get all tickets
         List<Ticket> allTickets = ticketService.getAllTickets();
         assertThat(allTickets).hasSize(3);
         assertThat(allTickets).extracting(Ticket::getTicketId)
-                .containsExactlyInAnyOrder("JIRA-1", "JIRA-2", "JIRA-3");
+                .containsExactlyInAnyOrder(ticket1.getTicketId(), ticket2.getTicketId(), ticket3.getTicketId());
     }
 
     @Test
     void testUpdateNonExistentTicket() {
         // Try to update non-existent ticket
         assertThrows(RuntimeException.class, () -> {
-            ticketService.updateTicket(999L, "New description", "new status", "new type", "new contact", null);
+            ticketService.updateTicket(999L, "New description", "new status", "new type", "new contact");
         });
     }
 } 

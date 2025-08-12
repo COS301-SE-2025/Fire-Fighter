@@ -1,5 +1,6 @@
 package com.apex.firefighter.service.auth;
 
+import com.apex.firefighter.dto.AuthResponse;
 import com.apex.firefighter.model.User;
 import com.apex.firefighter.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +21,12 @@ import java.util.Optional;
 public class AuthenticationService {
 
     private final UserRepository userRepository;
+    private final JwtService jwtService;
 
     @Autowired
-    public AuthenticationService(UserRepository userRepository) {
+    public AuthenticationService(UserRepository userRepository, JwtService jwtService) {
         this.userRepository = userRepository;
+        this.jwtService = jwtService;
     }
 
     /**
@@ -65,5 +68,26 @@ public class AuthenticationService {
      */
     public boolean userExists(String firebaseUid) {
         return userRepository.existsByUserId(firebaseUid);
+    }
+
+    /**
+     * Verify Firebase token and create JWT
+     * This method combines Firebase verification with JWT creation
+     */
+    public AuthResponse verifyFirebaseTokenAndCreateJwt(String firebaseToken) throws Exception {
+        // Verify the Firebase token using JwtService
+        var token = jwtService.verifyFirebaseToken(firebaseToken);
+        
+        String firebaseUid = token.getUid();
+        String email = token.getEmail();
+        String username = token.getName();
+        
+        // Find or create user
+        User user = verifyOrCreateUser(firebaseUid, username, email, null);
+        
+        // Generate JWT token
+        String jwtToken = jwtService.generateToken(firebaseUid, email, false);
+        
+        return new AuthResponse(jwtToken, user);
     }
 } 
