@@ -85,8 +85,8 @@ public class AuthenticationService {
         // Find or create user
         User user = verifyOrCreateUser(firebaseUid, username, email, null);
         
-        // Generate JWT token
-        String jwtToken = jwtService.generateToken(firebaseUid, email, false);
+        // Generate JWT token with user's admin status
+        String jwtToken = jwtService.generateToken(firebaseUid, email, user.getIsAdmin());
         
         return new AuthResponse(jwtToken, user);
     }
