@@ -346,6 +346,19 @@ class AccessSessionServiceTest {
     }
 
     @Test
+    void getAccessSessionById_WithNullId_ShouldReturnEmpty() {
+        // Arrange
+        when(accessSessionRepository.findById(null)).thenReturn(Optional.empty());
+
+        // Act
+        Optional<AccessSession> result = accessSessionService.getAccessSessionById(null);
+
+        // Assert
+        assertThat(result).isEmpty();
+        verify(accessSessionRepository).findById(null);
+    }
+
+    @Test
     void getAccessSessionsByUser_ShouldReturnUserSessions() {
         // Arrange
         List<AccessSession> userSessions = Arrays.asList(testAccessSession);
@@ -371,6 +384,19 @@ class AccessSessionServiceTest {
         // Assert
         assertThat(result).isEmpty();
         verify(accessSessionRepository).findByUserId(FIREBASE_UID);
+    }
+
+    @Test
+    void getAccessSessionsByUser_WithNullUserId_ShouldReturnEmptyList() {
+        // Arrange
+        when(accessSessionRepository.findByUserId(null)).thenReturn(Collections.emptyList());
+
+        // Act
+        List<AccessSession> result = accessSessionService.getAccessSessionsByUser(null);
+
+        // Assert
+        assertThat(result).isEmpty();
+        verify(accessSessionRepository).findByUserId(null);
     }
 
     @Test
@@ -430,6 +456,19 @@ class AccessSessionServiceTest {
     }
 
     @Test
+    void getAccessSessionsByTicket_WithNullTicketId_ShouldReturnEmptyList() {
+        // Arrange
+        when(accessSessionRepository.findByTicketId(null)).thenReturn(Collections.emptyList());
+
+        // Act
+        List<AccessSession> result = accessSessionService.getAccessSessionsByTicket(null);
+
+        // Assert
+        assertThat(result).isEmpty();
+        verify(accessSessionRepository).findByTicketId(null);
+    }
+
+    @Test
     void getSessionByToken_WithExistingToken_ShouldReturnSession() {
         // Arrange
         when(accessSessionRepository.findBySessionToken(SESSION_TOKEN)).thenReturn(Optional.of(testAccessSession));
@@ -467,6 +506,19 @@ class AccessSessionServiceTest {
         // Assert
         assertThat(result).isEmpty();
         verify(accessSessionRepository).findBySessionToken(null);
+    }
+
+    @Test
+    void getActiveSessionForUser_WithNullUserId_ShouldReturnEmpty() {
+        // Arrange
+        when(accessSessionRepository.findActiveByUserId(null)).thenReturn(Collections.emptyList());
+
+        // Act
+        Optional<AccessSession> result = accessSessionService.getActiveSessionForUser(null);
+
+        // Assert
+        assertThat(result).isEmpty();
+        verify(accessSessionRepository).findActiveByUserId(null);
     }
 
     // ==================== BULK OPERATIONS TESTS ====================
@@ -604,6 +656,21 @@ class AccessSessionServiceTest {
         assertThat(result).isFalse();
         verify(accessSessionRepository).existsById(SESSION_ID);
         verify(accessSessionRepository, never()).deleteById(SESSION_ID);
+    }
+
+    @Test
+    void deleteAccessSession_WhenDeleteThrowsException_ShouldPropagateException() {
+        // Arrange
+        when(accessSessionRepository.existsById(SESSION_ID)).thenReturn(true);
+        doThrow(new RuntimeException("Database error")).when(accessSessionRepository).deleteById(SESSION_ID);
+
+        // Act & Assert
+        assertThatThrownBy(() -> accessSessionService.deleteAccessSession(SESSION_ID))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessage("Database error");
+
+        verify(accessSessionRepository).existsById(SESSION_ID);
+        verify(accessSessionRepository).deleteById(SESSION_ID);
     }
 
     @Test

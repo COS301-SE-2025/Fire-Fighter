@@ -1,5 +1,6 @@
-package com.apex.firefighter.model;
+package com.apex.firefighter.unit.models;
 
+import com.apex.firefighter.model.Ticket;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
