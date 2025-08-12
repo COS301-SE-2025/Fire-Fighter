@@ -178,6 +178,19 @@ class TicketQueryServiceTest {
     }
 
     @Test
+    void getUserTicketContext_WithUnknownEmergencyType_ShouldFallbackToAllTicketsContext() {
+        // Arrange
+        when(ticketService.getTicketsByUserId("test-user")).thenReturn(testTickets);
+
+        // Act - Use a keyword that doesn't map to known types
+        String result = ticketQueryService.getUserTicketContext("my foobar tickets", "test-user");
+
+        // Assert
+        assertThat(result).contains("access tickets");
+        verify(ticketService).getTicketsByUserId("test-user");
+    }
+
+    @Test
     void getUserTicketContext_WithGenericQuery_ShouldReturnAllTicketsContext() {
         // Arrange
         when(ticketService.getTicketsByUserId("test-user")).thenReturn(testTickets);
@@ -318,6 +331,24 @@ class TicketQueryServiceTest {
         // Assert
         assertThat(result).isNotEmpty();
         assertThat(result).contains("NULL-001");
+        verify(ticketService).getTicketsByUserId("test-user");
+    }
+
+    @Test
+    void getUserTicketContext_WhenDurationIsNull_ShouldReportNotSpecified() {
+        // Arrange
+        Ticket t = new Ticket();
+        t.setTicketId("NO-DUR-1");
+        t.setStatus("Active");
+        t.setDateCreated(LocalDateTime.now().minusMinutes(5));
+        t.setDuration(null);
+        when(ticketService.getTicketsByUserId("test-user")).thenReturn(Arrays.asList(t));
+
+        // Act
+        String result = ticketQueryService.getUserTicketContext("time remaining", "test-user");
+
+        // Assert
+        assertThat(result).contains("Duration not specified");
         verify(ticketService).getTicketsByUserId("test-user");
     }
 
