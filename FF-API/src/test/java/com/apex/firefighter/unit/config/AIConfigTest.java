@@ -1,5 +1,6 @@
-package com.apex.firefighter.config;
+package com.apex.firefighter.unit.config;
 
+import com.apex.firefighter.config.AIConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -150,3 +151,5 @@ class AIConfigTest {
         System.setErr(originalErr);
     }
 }
+
+

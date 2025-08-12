@@ -10,7 +10,8 @@ unit/
 ├── services/        # Service layer tests  
 ├── repositories/    # Repository layer tests
 ├── models/          # Model/Entity tests
-├── config/          # Configuration tests
+├── config/          # Configuration tests (moved here from top-level test package)
+├── dto/             # DTO tests (moved here from top-level test package)
 └── README.md        # This file
 ```
 
@@ -59,7 +60,13 @@ Tests for entity classes and data models.
 - **Current Coverage**: Good (40% instruction coverage)
 
 **Files:**
-- *No model tests currently exist - needs to be added*
+- `AccessLogTest.java`
+- `AccessRequestTest.java`
+- `AccessSessionTest.java`
+- `TicketTest.java`
+- `UserPreferencesTest.java`
+- `UserRoleTest.java`
+- `UserTest.java`
 
 ### Config (`config/`)
 Tests for configuration classes and beans.
@@ -68,7 +75,16 @@ Tests for configuration classes and beans.
 - **Current Coverage**: Excellent (67% instruction coverage)
 
 **Files:**
-- *No config tests currently exist - needs to be added*
+- `AIConfigTest.java`
+- `SecurityConfigTest.java`
+
+### DTO (`dto/`)
+Tests for Data Transfer Objects.
+- **Purpose**: Verify DTO construction, getters/setters, and `toString` formatting
+- **Scope**: Pure POJOs, no Spring context
+
+**Files:**
+- `TicketCreateRequestTest.java`
 
 ## Running Unit Tests
 
@@ -87,6 +103,15 @@ mvn test -Dtest="com.apex.firefighter.unit.services.**"
 
 # Repositories only
 mvn test -Dtest="com.apex.firefighter.unit.repositories.**"
+
+# Models only
+mvn test -Dtest="com.apex.firefighter.unit.models.**"
+
+# Config only
+mvn test -Dtest="com.apex.firefighter.unit.config.**"
+
+# DTO only
+mvn test -Dtest="com.apex.firefighter.unit.dto.**"
 ```
 
 ### Run Individual Test Classes

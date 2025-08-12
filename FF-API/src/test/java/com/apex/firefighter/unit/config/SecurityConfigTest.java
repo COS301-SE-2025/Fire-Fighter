@@ -1,5 +1,6 @@
-package com.apex.firefighter.config;
+package com.apex.firefighter.unit.config;
 
+import com.apex.firefighter.config.SecurityConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -109,10 +110,6 @@ class SecurityConfigTest {
         assertThat(corsConfig.getMaxAge()).isEqualTo(3600L);
     }
 
-    // Web-layer and filter-chain instantiation tests were removed because this unit test
-    // focuses on verifying the CORS configuration produced by SecurityConfig without
-    // bootstrapping the full Spring MVC context.
-
     @Test
     void securityConfig_ShouldBeConfigurationClass() {
         // Assert
@@ -120,3 +117,5 @@ class SecurityConfigTest {
         assertThat(SecurityConfig.class.isAnnotationPresent(org.springframework.security.config.annotation.web.configuration.EnableWebSecurity.class)).isTrue();
     }
 }
+
+

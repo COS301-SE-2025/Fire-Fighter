@@ -62,7 +62,6 @@ public class RoleService {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             
-            // Clear the role if it matches
             if (roleName.equals(user.getRole())) {
                 user.setRole(null);
                 User updatedUser = userRepository.save(user);
