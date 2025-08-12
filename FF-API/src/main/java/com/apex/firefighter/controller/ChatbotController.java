@@ -4,6 +4,7 @@ import com.apex.firefighter.service.ai.ChatbotService;
 import com.apex.firefighter.service.ai.ChatbotService.ChatbotResponse;
 import com.apex.firefighter.service.ai.ChatbotService.ChatbotCapabilities;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +20,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/chatbot")
 @Tag(name = "AI Chatbot", description = "AI-powered chatbot for ticket queries and emergency response assistance")
+@ConditionalOnProperty(name = "GOOGLE_GEMINI_API_KEY", matchIfMissing = false)
 public class ChatbotController {
 
     @Autowired
