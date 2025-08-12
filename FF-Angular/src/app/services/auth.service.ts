@@ -50,6 +50,21 @@ interface UserVerificationResponse {
   }>;
 }
 
+interface JwtAuthResponse {
+  token: string;
+  user: {
+    userId: string;
+    username: string;
+    email: string;
+    department: string;
+    isAdmin: boolean;
+  };
+}
+
+interface FirebaseLoginRequest {
+  idToken: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -71,6 +86,10 @@ export class AuthService {
   // User profile data
   private userProfileSubject = new BehaviorSubject<UserVerificationResponse | null>(null);
   public userProfile$ = this.userProfileSubject.asObservable();
+
+  // JWT Token management
+  private jwtTokenSubject = new BehaviorSubject<string | null>(null);
+  public jwtToken$ = this.jwtTokenSubject.asObservable();
 
   usernames: { [userId: string]: string } = {};
 
@@ -166,6 +185,93 @@ export class AuthService {
     // this.router.navigate(['/dashboard'], { 
     //   replaceUrl: true // Replace URL in history instead of pushing
     // });
+  }
+
+  /**
+   * JWT Token Management Methods
+   */
+  
+  /**
+   * Store JWT token securely
+   */
+  private storeJwtToken(token: string): void {
+    try {
+      localStorage.setItem('jwt_token', token);
+      this.jwtTokenSubject.next(token);
+      console.log('✅ JWT token stored successfully');
+    } catch (error) {
+      console.error('Failed to store JWT token:', error);
+    }
+  }
+
+  /**
+   * Get stored JWT token
+   */
+  getJwtToken(): string | null {
+    try {
+      return localStorage.getItem('jwt_token');
+    } catch (error) {
+      console.error('Failed to retrieve JWT token:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Clear JWT token
+   */
+  private clearJwtToken(): void {
+    try {
+      localStorage.removeItem('jwt_token');
+      this.jwtTokenSubject.next(null);
+      console.log('✅ JWT token cleared');
+    } catch (error) {
+      console.error('Failed to clear JWT token:', error);
+    }
+  }
+
+  /**
+   * Exchange Firebase ID token for backend JWT token
+   */
+  private async exchangeFirebaseTokenForJwt(firebaseUser: User): Promise<JwtAuthResponse> {
+    try {
+      console.log('🔄 Exchanging Firebase token for JWT...');
+      
+      // Get Firebase ID token
+      const idToken = await firebaseUser.getIdToken();
+      
+      // Send to backend auth endpoint
+      const response = await this.http.post<JwtAuthResponse>(
+        `${this.getCurrentApiUrl()}/api/auth/firebase-login`,
+        { idToken } as FirebaseLoginRequest
+      ).toPromise();
+
+      if (response) {
+        // Store the JWT token
+        this.storeJwtToken(response.token);
+        
+        console.log('✅ JWT token exchange successful:', {
+          tokenReceived: !!response.token,
+          userId: response.user.userId,
+          username: response.user.username,
+          isAdmin: response.user.isAdmin
+        });
+
+        return response;
+      } else {
+        throw new Error('No response received from JWT exchange');
+      }
+    } catch (error) {
+      console.error('❌ JWT token exchange failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get current API URL from ApiConfigService
+   */
+  private getCurrentApiUrl(): string {
+    // You may need to inject ApiConfigService here
+    return environment.apiUrl; // Fallback to environment
   }
 
   /**
@@ -368,11 +474,30 @@ export class AuthService {
       user = credential.user;
     }
 
-    console.log('Firebase authentication successful, verifying with backend...');
-    // Verify user with backend after successful Firebase authentication
-    await this.verifyUserWithBackend(user);
+    console.log('Firebase authentication successful, exchanging for JWT...');
+    // Exchange Firebase token for JWT and get user info
+    const jwtResponse = await this.exchangeFirebaseTokenForJwt(user);
     
-    console.log('Backend verification successful');
+    // Update user profile with response data
+    const userProfile: UserVerificationResponse = {
+      userId: jwtResponse.user.userId,
+      username: jwtResponse.user.username,
+      email: jwtResponse.user.email,
+      department: jwtResponse.user.department,
+      isAuthorized: true,
+      isAdmin: jwtResponse.user.isAdmin,
+      role: jwtResponse.user.isAdmin ? 'ADMIN' : 'USER',
+      createdAt: new Date().toISOString(),
+      lastLogin: new Date().toISOString(),
+      userRoles: []
+    };
+
+    // Store user data and admin status
+    this.storeUserData(userProfile);
+    this.userProfileSubject.next(userProfile);
+    this.isAdminSubject.next(jwtResponse.user.isAdmin);
+    
+    console.log('JWT exchange and user setup successful');
     return user;
   }
 
