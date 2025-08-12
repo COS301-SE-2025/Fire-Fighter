@@ -3,6 +3,7 @@ package com.apex.firefighter.service.ai;
 import com.apex.firefighter.model.User;
 import com.apex.firefighter.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -10,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Service
+@ConditionalOnProperty(name = "GOOGLE_GEMINI_API_KEY", matchIfMissing = false)
 public class ChatbotService {
 
     @Autowired

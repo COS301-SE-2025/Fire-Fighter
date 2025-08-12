@@ -52,7 +52,7 @@ public class DatabaseConfig {
             System.out.println("🔧 Development Mode: Using H2 in-memory database");
             
             HikariConfig config = new HikariConfig();
-            config.setJdbcUrl("jdbc:h2:mem:firefighterdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE");
+            config.setJdbcUrl("jdbc:h2:mem:firefighterdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;INIT=CREATE SCHEMA IF NOT EXISTS FIREFIGHTER");
             config.setUsername("sa");
             config.setPassword("");
             config.setDriverClassName("org.h2.Driver");
@@ -64,7 +64,7 @@ public class DatabaseConfig {
             config.setIdleTimeout(600000);
             config.setMaxLifetime(1800000);
             
-            System.out.println("✅ H2 Database initialized for development");
+            System.out.println("✅ H2 Database initialized for development with FIREFIGHTER schema");
             return new HikariDataSource(config);
         }
 

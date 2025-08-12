@@ -3,6 +3,7 @@
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -12,9 +13,10 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@ConditionalOnProperty(name = "GOOGLE_GEMINI_API_KEY", matchIfMissing = false)
 public class GeminiAIService {
 
-    @Value("${GOOGLE_GEMINI_API_KEY}")
+    @Value("${GOOGLE_GEMINI_API_KEY:disabled-for-dev}")
     private String apiKey;
 
     private final WebClient webClient;
@@ -169,6 +171,8 @@ public class GeminiAIService {
      * Check if API key is configured
      */
     public boolean isConfigured() {
-        return apiKey != null && !apiKey.trim().isEmpty() && !apiKey.equals("${GOOGLE_GEMINI_API_KEY}");
+        return apiKey != null && !apiKey.trim().isEmpty() && 
+               !apiKey.equals("${GOOGLE_GEMINI_API_KEY}") && 
+               !apiKey.equals("disabled-for-dev");
     }
 }
