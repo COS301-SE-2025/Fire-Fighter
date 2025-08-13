@@ -2,9 +2,10 @@
 
 <ion-content [fullscreen]="true" class="ion-padding">
   <div class="min-h-full bg-gray-50 dark:bg-gray-900 pb-4">
-    
-    <!-- Header Section -->
-    <div class="mb-8">
+    <div class="max-w-4xl mx-auto">
+      
+      <!-- Header Section -->
+      <div class="mb-8">
       <div class="flex items-center space-x-3 mb-2">
         <div class="flex-shrink-0 w-12 h-12 bg-gray-600 rounded-lg flex items-center justify-center">
           <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -43,7 +44,7 @@
               id="language-dropdown-button"
               (click)="toggleLanguageDropdown()"
               data-dropdown-toggle="language-dropdown"
-              class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-between w-full dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+              class="text-gray-900 bg-gray-50 border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-between w-full dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:border-gray-500 dark:focus:ring-gray-600"
               type="button"
             >
               <span class="font-medium">{{ selectedLanguage.name }}</span>
@@ -336,7 +337,7 @@
     </div>
 
     <!-- Additional Settings Sections -->
-    <div class="space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       
       <!-- Security Settings -->
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50">
@@ -379,5 +380,6 @@
       </div>
     </div>
 
+    </div>
   </div>
 </ion-content>
