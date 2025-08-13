@@ -265,7 +265,7 @@
     </ng-container>
 
     <!-- Loading State -->
-    <div *ngIf="!(user$ | async)" class="flex justify-center items-center py-16">
+    <div *ngIf="(user$ | async) === null" class="flex justify-center items-center py-16">
       <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
     </div>
 
