@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
@@ -12,15 +12,47 @@ import ApexCharts from 'apexcharts';
   standalone: true,
   imports: [IonContent, IonRefresher, IonRefresherContent, CommonModule, FormsModule, NavbarComponent]
 })
-export class MetricsPage implements OnInit {
+export class MetricsPage implements OnInit, OnDestroy, AfterViewInit {
+  private themeObserver?: MutationObserver;
+  private lineChart?: ApexCharts;
+  private pieChart?: ApexCharts;
+  private barChart?: ApexCharts;
 
   constructor() { }
 
+  private getThemeColors() {
+    const isDark = document.documentElement.classList.contains('dark');
+    return {
+      text: isDark ? '#F9FAFB' : '#111827',
+      textSecondary: isDark ? '#9CA3AF' : '#6B7280'
+    };
+  }
+
   ngOnInit() {
-    // Initialize charts after view is ready
+    // Listen for theme changes
+    this.themeObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          // Theme changed, refresh charts
+          setTimeout(() => {
+            this.refreshChartsForTheme();
+          }, 50);
+        }
+      });
+    });
+
+    this.themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+  }
+
+  ngAfterViewInit() {
+    // Initialize all charts after view is fully loaded
     setTimeout(() => {
       this.initializeChart();
-      this.initializeDonutChart();
+      this.initializePieChart();
+      this.initializeBarChart();
     }, 100);
   }
 
@@ -150,20 +182,25 @@ export class MetricsPage implements OnInit {
 
     const chartElement = document.getElementById("tickets-trend-chart");
     if (chartElement) {
-      const chart = new ApexCharts(chartElement, options);
-      chart.render();
+      if (this.lineChart) {
+        this.lineChart.destroy();
+      }
+      this.lineChart = new ApexCharts(chartElement, options);
+      this.lineChart.render();
     }
   }
 
-  private initializeDonutChart() {
+  private initializePieChart() {
+    const themeColors = this.getThemeColors();
+    
     const getChartOptions = () => {
       return {
-        series: [48, 48, 6], // Opened, Closed, Revoked (matching current month data)
+        series: [47.1, 47.1, 5.8], // Percentages: Opened (48/102), Closed (48/102), Revoked (6/102)
         colors: ["#1A56DB", "#7E3AF2", "#DC2626"], // Blue, Purple, Red - matching line chart
         chart: {
-          height: 320,
+          height: 420,
           width: "100%",
-          type: "donut",
+          type: "pie",
           fontFamily: "Inter, sans-serif"
         },
         tooltip: {
@@ -175,85 +212,79 @@ export class MetricsPage implements OnInit {
           custom: function({series, seriesIndex, dataPointIndex, w}: {series: any, seriesIndex: any, dataPointIndex: any, w: any}) {
             const labels = ['Opened', 'Closed', 'Revoked'];
             const colors = ['#1A56DB', '#7E3AF2', '#DC2626'];
+            const counts = [48, 48, 6]; // Actual ticket counts
             const value = series[seriesIndex];
             const label = labels[seriesIndex];
-            const total = series.reduce((sum: number, val: number) => sum + val, 0);
-            const percentage = ((value / total) * 100).toFixed(1);
+            const count = counts[seriesIndex];
             
             let tooltipHTML = `<div class="bg-gray-900 dark:bg-gray-800 text-white dark:text-gray-200 p-3 rounded-lg shadow-lg border border-gray-700">`;
             tooltipHTML += `<div class="font-semibold mb-2">Status Distribution</div>`;
             tooltipHTML += `<div style="color: ${colors[seriesIndex]}">`;
             tooltipHTML += `<span class="inline-block w-2 h-2 rounded-full mr-2" style="background-color: ${colors[seriesIndex]}"></span>`;
-            tooltipHTML += `${label}: ${value} (${percentage}%)`;
+            tooltipHTML += `${label}: ${count} tickets (${value.toFixed(1)}%)`;
             tooltipHTML += `</div>`;
-            tooltipHTML += `<div class="text-xs text-gray-400 mt-1">Total: ${total} tickets</div>`;
+            tooltipHTML += `<div class="text-xs text-gray-400 mt-1">Total: 102 tickets</div>`;
             tooltipHTML += `</div>`;
             return tooltipHTML;
           }
         },
         stroke: {
-          colors: ["transparent"],
+          colors: ["white"],
           lineCap: "",
         },
         plotOptions: {
           pie: {
-            donut: {
-              labels: {
-                show: true,
-                name: {
-                  show: true,
-                  fontFamily: "Inter, sans-serif",
-                  offsetY: 20,
-                },
-                total: {
-                  showAlways: true,
-                  show: true,
-                  label: "Total tickets",
-                  fontFamily: "Inter, sans-serif",
-                  formatter: function (w: any) {
-                    const sum = w.globals.seriesTotals.reduce((a: any, b: any) => {
-                      return a + b
-                    }, 0)
-                    return sum.toString()
-                  },
-                },
-                value: {
-                  show: true,
-                  fontFamily: "Inter, sans-serif",
-                  offsetY: -20,
-                  formatter: function (value: any) {
-                    return value.toString()
-                  },
-                },
-              },
-              size: "80%",
+            labels: {
+              show: true,
             },
-          },
-        },
-        grid: {
-          padding: {
-            top: -2,
+            size: "100%",
+            dataLabels: {
+              offset: -25
+            }
           },
         },
         labels: ["Opened", "Closed", "Revoked"],
         dataLabels: {
-          enabled: false,
+          enabled: true,
+          style: {
+            fontFamily: "Inter, sans-serif",
+          },
         },
         legend: {
           position: "bottom",
           fontFamily: "Inter, sans-serif",
+          fontSize: '14px',
+          labels: {
+            colors: [themeColors.text],
+            useSeriesColors: false
+          },
+          formatter: function(seriesName: string, opts: any) {
+            const counts = [48, 48, 6]; // Actual ticket counts
+            const count = counts[opts.seriesIndex];
+            const percentage = opts.w.globals.series[opts.seriesIndex].toFixed(1);
+            return `${seriesName}: ${count} tickets (${percentage}%)`;
+          },
+          markers: {
+            width: 12,
+            height: 12,
+            radius: 2,
+          },
+          itemMargin: {
+            horizontal: 15,
+            vertical: 8
+          }
         },
         yaxis: {
           labels: {
             formatter: function (value: any) {
-              return value.toString()
+              return value + "%"
             },
           },
         },
         xaxis: {
           labels: {
             formatter: function (value: any) {
-              return value.toString()
+              return value  + "%"
             },
           },
           axisTicks: {
@@ -266,47 +297,20 @@ export class MetricsPage implements OnInit {
       }
     }
 
-    const chartElement = document.getElementById("status-donut-chart");
+    const chartElement = document.getElementById("status-pie-chart");
     if (chartElement && typeof ApexCharts !== 'undefined') {
-      const chart = new ApexCharts(chartElement, getChartOptions());
-      chart.render();
-
-      // Get all the checkboxes by their class name
-      const checkboxes = document.querySelectorAll('#status-filters input[type="checkbox"]');
-
-      // Function to handle the checkbox change event
-      const handleCheckboxChange = (event: any, chart: any) => {
-        const checkbox = event.target;
-        const checkedBoxes = document.querySelectorAll('#status-filters input[type="checkbox"]:checked');
-        
-        if (checkedBoxes.length === 0) {
-          // If no checkboxes are checked, show all data
-          chart.updateSeries([48, 48, 6]);
-        } else {
-          // Show only selected data
-          let series = [0, 0, 0];
-          checkedBoxes.forEach((cb: any) => {
-            switch(cb.value) {
-              case 'opened':
-                series[0] = 48;
-                break;
-              case 'closed':
-                series[1] = 48;
-                break;
-              case 'revoked':
-                series[2] = 6;
-                break;
-            }
-          });
-          chart.updateSeries(series);
-        }
+      if (this.pieChart) {
+        this.pieChart.destroy();
       }
-
-      // Attach the event listener to each checkbox
-      checkboxes.forEach((checkbox) => {
-        checkbox.addEventListener('change', (event) => handleCheckboxChange(event, chart));
-      });
+      this.pieChart = new ApexCharts(chartElement, getChartOptions());
+      this.pieChart.render();
     }
+  }
+
+  refreshChartsForTheme() {
+    // Re-initialize charts when theme changes
+    this.initializeChart();
+    this.initializePieChart();
   }
 
   doRefresh(event: any) {
@@ -314,6 +318,147 @@ export class MetricsPage implements OnInit {
     setTimeout(() => {
       event.target.complete();
     }, 1000);
+  }
+
+  private initializeBarChart() {
+    // Mock data for requests by reason chart
+    const options = {
+      colors: ["#1A56DB", "#FDBA8C"],
+      series: [
+        {
+          name: "Incident Response",
+          color: "#1A56DB",
+          data: [
+            { x: "Mon", y: 12 },
+            { x: "Tue", y: 11 },
+            { x: "Wed", y: 9 },
+            { x: "Thu", y: 8 },
+            { x: "Fri", y: 7 },
+            { x: "Sat", y: 5 },
+            { x: "Sun", y: 3 },
+          ],
+        },
+        {
+          name: "Database Access",
+          color: "#FDBA8C",
+          data: [
+            { x: "Mon", y: 8 },
+            { x: "Tue", y: 7 },
+            { x: "Wed", y: 6 },
+            { x: "Thu", y: 9 },
+            { x: "Fri", y: 5 },
+            { x: "Sat", y: 4 },
+            { x: "Sun", y: 2 },
+          ],
+        },
+      ],
+      chart: {
+        type: "bar",
+        height: "320px",
+        fontFamily: "Inter, sans-serif",
+        toolbar: {
+          show: false,
+        },
+      },
+      plotOptions: {
+        bar: {
+          horizontal: false,
+          columnWidth: "70%",
+          borderRadiusApplication: "end",
+          borderRadius: 8,
+        },
+      },
+      tooltip: {
+        shared: true,
+        intersect: false,
+        style: {
+          fontFamily: "Inter, sans-serif",
+        },
+      },
+      states: {
+        hover: {
+          filter: {
+            type: "darken",
+            value: 1,
+          },
+        },
+      },
+      stroke: {
+        show: true,
+        width: 0,
+        colors: ["transparent"],
+      },
+      grid: {
+        show: false,
+        strokeDashArray: 4,
+        padding: {
+          left: 2,
+          right: 2,
+          top: -14
+        },
+      },
+      dataLabels: {
+        enabled: false,
+      },
+      legend: {
+        show: false,
+      },
+      xaxis: {
+        floating: false,
+        labels: {
+          show: true,
+          style: {
+            fontFamily: "Inter, sans-serif",
+            cssClass: 'text-xs font-normal fill-gray-500 dark:fill-gray-400'
+          }
+        },
+        axisBorder: {
+          show: false,
+        },
+        axisTicks: {
+          show: false,
+        },
+      },
+      yaxis: {
+        show: false,
+      },
+      fill: {
+        opacity: 1,
+      },
+    };
+
+    const chartElement = document.getElementById('requests-bar-chart');
+    if (chartElement && typeof ApexCharts !== 'undefined') {
+      // Clear any existing chart
+      chartElement.innerHTML = '';
+      
+      this.barChart = new ApexCharts(chartElement, options);
+      this.barChart.render().then(() => {
+        console.log('Bar chart rendered successfully');
+      }).catch((error: any) => {
+        console.error('Error rendering bar chart:', error);
+      });
+    } else {
+      console.error('Bar chart element not found or ApexCharts not loaded');
+    }
+  }
+
+  ngOnDestroy() {
+    // Clean up theme observer
+    if (this.themeObserver) {
+      this.themeObserver.disconnect();
+    }
+    
+    // Clean up charts
+    if (this.lineChart) {
+      this.lineChart.destroy();
+    }
+    if (this.pieChart) {
+      this.pieChart.destroy();
+    }
+    if (this.barChart) {
+      this.barChart.destroy();
+    }
   }
 
 }

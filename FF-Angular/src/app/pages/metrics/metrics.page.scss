@@ -42,6 +42,32 @@
   font-weight: 400 !important;
 }
 
+/* Pie chart data label styling */
+.apexcharts-datalabels .apexcharts-datalabel {
+  fill: #374151 !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 600 !important;
+}
+
+#status-pie-chart .apexcharts-datalabels .apexcharts-datalabel {
+  fill: #ffffff !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+}
+
+/* Pie chart legend styling */
+#status-pie-chart .apexcharts-legend {
+  justify-content: center !important;
+}
+
+#status-pie-chart .apexcharts-legend-text {
+  color: #374151 !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
 /* Dark mode overrides */
 :host-context(.dark) {
   .apexcharts-tooltip {
@@ -73,6 +99,20 @@
   }
 
   .apexcharts-legend-text {
+    color: #f9fafb !important;
+  }
+
+  /* Dark mode pie chart data labels */
+  .apexcharts-datalabels .apexcharts-datalabel {
+    fill: #f9fafb !important;
+  }
+
+  #status-pie-chart .apexcharts-datalabels .apexcharts-datalabel {
+    fill: #ffffff !important;
+  }
+
+  /* Dark mode pie chart legend */
+  #status-pie-chart .apexcharts-legend-text {
     color: #f9fafb !important;
   }
 }
