@@ -27,7 +27,7 @@ pipeline {
                 stage('Frontend Dependencies') {
                     steps {
                         dir('FF-Angular') {
-                            sh 'npm ci'
+                            sh 'npm install'
                         }
                     }
                 }
