@@ -30,7 +30,13 @@ public class NotificationControllerIT {
     void setup() {
         userService.verifyOrCreateUser("user1", "Normal User", "user1@example.com", "Medical Department");
         // Create a notification for user1 for testing
-        notificationId = notificationService.createNotification("user1", "Test notification", "info");
+        notificationId = notificationService.createNotification(
+            "user1",
+            "info",
+            "Test notification",
+            "This is a test notification",
+            "TICKET123"
+        ).getId();
     }
 
     @Test
