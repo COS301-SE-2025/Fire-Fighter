@@ -31,5 +31,6 @@ services:
 
       # Spring Profile
       - SPRING_PROFILES_ACTIVE=prod
-    network_mode: "host"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped

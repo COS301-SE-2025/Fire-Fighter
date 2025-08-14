@@ -98,17 +98,32 @@ pipeline {
                         docker system prune -f || true
                     '''
 
-                    // Deploy with docker-compose
-                    sh '''
-                        docker-compose up -d
+                    // Deploy with docker-compose using Jenkins environment variables
+                    withEnv([
+                        "DB_HOST=${env.DB_HOST}",
+                        "DB_PORT=${env.DB_PORT}",
+                        "DB_NAME=${env.DB_NAME}",
+                        "DB_USERNAME=${env.DB_USERNAME}",
+                        "DB_PASSWORD=${env.DB_PASSWORD}",
+                        "DB_SSL_MODE=${env.DB_SSL_MODE}",
+                        "JWT_SECRET=${env.JWT_SECRET}",
+                        "JWT_EXPIRATION=${env.JWT_EXPIRATION}",
+                        "GMAIL_USERNAME=${env.GMAIL_USERNAME}",
+                        "GMAIL_APP_PASSWORD=${env.GMAIL_APP_PASSWORD}",
+                        "GMAIL_SENDER_NAME=${env.GMAIL_SENDER_NAME}",
+                        "GOOGLE_GEMINI_API_KEY=${env.GOOGLE_GEMINI_API_KEY}"
+                    ]) {
+                        sh '''
+                            docker-compose up -d
 
-                        # Wait for services to be healthy
-                        echo "Waiting for services to start..."
-                        sleep 30
+                            # Wait for services to be healthy
+                            echo "Waiting for services to start..."
+                            sleep 30
 
-                        # Check if API is responding
-                        timeout 60 bash -c 'until curl -f http://localhost:8081/actuator/health; do sleep 5; done' || echo "API health check timeout"
-                    '''
+                            # Check if API is responding
+                            timeout 60 bash -c 'until curl -f http://localhost:8081/actuator/health; do sleep 5; done' || echo "API health check timeout"
+                        '''
+                    }
 
                     echo "✅ Deployment completed!"
                 }
