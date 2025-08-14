@@ -1,7 +1,10 @@
 package com.apex.firefighter.integration.api;
 
+import com.apex.firefighter.model.Ticket;
+import com.apex.firefighter.model.User;
 import com.apex.firefighter.service.UserService;
 import com.apex.firefighter.service.ticket.TicketService;
+import com.apex.firefighter.repository.UserRepository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,8 +12,17 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.mock.mockito.MockBean;
+
+import jakarta.mail.MessagingException;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -25,12 +37,33 @@ public class TicketControllerIT {
     @Autowired
     private WebTestClient webTestClient;
 
+    @Autowired
+    private UserRepository userRepository;
+    
+    @MockBean
+    private com.apex.firefighter.service.GmailEmailService gmailEmailService;
+    
+    private User adminUser;
+    private User normalUser;
+    private Ticket ticket;
+
     @BeforeEach
     @Transactional
     void setup() {
-        userService.verifyOrCreateUser("admin1", "Admin User", "admin1@example.com", "Fire Department");
-        userService.authorizeUser("admin1", "system");
-        userService.verifyOrCreateUser("user1", "Normal User", "user1@example.com", "Medical Department");
+        // Create admin and normal user
+        adminUser = new User("admin1", "Admin User", "admin1@example.com", "Fire Department");
+        adminUser.setIsAdmin(true);
+        userRepository.save(adminUser);
+
+        normalUser = new User("user1", "Normal User", "user1@example.com", "Medical Department");
+        normalUser.setIsAdmin(false);
+        userRepository.save(normalUser);
+    }
+
+    @BeforeEach
+    void setupMocks() throws MessagingException {
+        doNothing().when(gmailEmailService).sendTicketsCsv(anyString(), anyString(), any(User.class));
+        when(gmailEmailService.exportTicketsToCsv(anyList())).thenReturn("csv,data");
     }
 
     @Test
@@ -186,7 +219,6 @@ public class TicketControllerIT {
             .expectStatus().isOk();
     }
 
-	/*
 
     @Test
     void testAdminActiveTickets() {
@@ -215,6 +247,8 @@ public class TicketControllerIT {
             .jsonPath("$").isArray();
     }
 
+    /*
+
     @Test
     void testAdminRevokeById() {
         Map<String, Object> payload = new HashMap<>();
@@ -234,7 +268,11 @@ public class TicketControllerIT {
             .expectBody()
             .jsonPath("$.id").value(id -> idHolder[0] = Long.valueOf(id.toString()));
 
+        Map<String, Object> revokePayload = new HashMap<>();
+        revokePayload.put("rejectReason", "Test reason");
         webTestClient.put().uri("/api/tickets/admin/revoke/" + idHolder[0])
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(revokePayload)
             .exchange()
             .expectStatus().isOk();
     }
@@ -288,11 +326,14 @@ public class TicketControllerIT {
         payload.put("endDate", "2024-12-31");
         payload.put("userId", "admin1"); // admin
 
-        webTestClient.post().uri("/api/tickets/admin/export")
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(payload)
-            .exchange()
-            .expectStatus().isOk();
+        webTestClient.post().uri(uriBuilder -> uriBuilder
+    .path("/api/tickets/admin/export")
+    .queryParam("startDate", "2024-01-01")
+    .queryParam("endDate", "2024-12-31")
+    .queryParam("userId", "admin1")
+    .build())
+    .exchange()
+    .expectStatus().isOk();
         // Optionally, check for email sending logic if stubbed
     }
 
@@ -310,5 +351,6 @@ public class TicketControllerIT {
             .expectStatus().isOk();
     }
 
-	*/
+    */
+
 }
