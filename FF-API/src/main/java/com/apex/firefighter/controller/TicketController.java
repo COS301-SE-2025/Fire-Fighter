@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 import java.time.LocalDateTime;
@@ -50,14 +51,12 @@ public class TicketController {
     })
     @PostMapping
     public ResponseEntity<Ticket> createTicket(@RequestBody Map<String, Object> payload) {
-        String ticketId = (String) payload.get("ticketId");
         String description = (String) payload.get("description");
         String userId = (String) payload.get("userId");
         String emergencyType = (String) payload.get("emergencyType");
         String emergencyContact = (String) payload.get("emergencyContact");
-        Integer duration = payload.get("duration") != null ? ((Number) payload.get("duration")).intValue() : 60;
 
-        Ticket ticket = ticketService.createTicket(ticketId, description, userId, emergencyType, emergencyContact, duration);
+        Ticket ticket = ticketService.createTicket(description, userId, emergencyType, emergencyContact);
         return ResponseEntity.ok(ticket);
     }
 
@@ -102,9 +101,8 @@ public class TicketController {
         String status = (String) payload.get("status");
         String emergencyType = (String) payload.get("emergencyType");
         String emergencyContact = (String) payload.get("emergencyContact");
-        Integer duration = payload.get("duration") != null ? ((Number) payload.get("duration")).intValue() : null;
         try {
-            Ticket updatedTicket = ticketService.updateTicket(id, description, status, emergencyType, emergencyContact, duration);
+            Ticket updatedTicket = ticketService.updateTicket(id, description, status, emergencyType, emergencyContact);
             return ResponseEntity.ok(updatedTicket);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
@@ -114,15 +112,28 @@ public class TicketController {
     // Delete ticket by ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTicket(@PathVariable Long id) {
-        boolean deleted = ticketService.deleteTicket(id);
-        return deleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+        try {
+            Optional<Ticket> ticketOpt = ticketService.getTicketById(id);
+            if (ticketOpt.isPresent()) {
+                ticketService.deleteTicket(ticketOpt.get().getTicketId());
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     // Delete ticket by ticket ID
     @DeleteMapping("/ticket-id/{ticketId}")
     public ResponseEntity<Void> deleteTicketByTicketId(@PathVariable String ticketId) {
-        boolean deleted = ticketService.deleteTicketByTicketId(ticketId);
-        return deleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+        try {
+            ticketService.deleteTicket(ticketId);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     // ==================== ADMIN ENDPOINTS ====================
@@ -314,19 +325,30 @@ public class TicketController {
         String targetEmail = user.getEmail();
         System.out.println("Target email for sending: " + targetEmail);
 
+        // Create final copies for lambda expressions
+        final LocalDateTime finalStartDate = startDate;
+        final LocalDateTime finalEndDate = endDate;
+
         // Get tickets based on date range filtering
         List<Ticket> tickets;
-        if (startDate != null && endDate != null) {
-            System.out.println("Filtering tickets by date range: " + startDate + " to " + endDate);
-            tickets = ticketService.getTicketsByDateRange(startDate, endDate);
-        } else if (startDate != null) {
-            System.out.println("Filtering tickets from start date: " + startDate);
+        if (finalStartDate != null && finalEndDate != null) {
+            System.out.println("Filtering tickets by date range: " + finalStartDate + " to " + finalEndDate);
+            // For now, get all tickets and filter by date in controller
+            tickets = ticketService.getAllTickets().stream()
+                    .filter(ticket -> ticket.getDateCreated().isAfter(finalStartDate) && ticket.getDateCreated().isBefore(finalEndDate))
+                    .toList();
+        } else if (finalStartDate != null) {
+            System.out.println("Filtering tickets from start date: " + finalStartDate);
             // If only start date is provided, get tickets from start date to now
-            tickets = ticketService.getTicketsByDateRange(startDate, LocalDateTime.now());
-        } else if (endDate != null) {
-            System.out.println("Filtering tickets up to end date: " + endDate);
+            tickets = ticketService.getAllTickets().stream()
+                    .filter(ticket -> ticket.getDateCreated().isAfter(finalStartDate))
+                    .toList();
+        } else if (finalEndDate != null) {
+            System.out.println("Filtering tickets up to end date: " + finalEndDate);
             // If only end date is provided, get tickets from beginning of time to end date
-            tickets = ticketService.getTicketsByDateRange(LocalDateTime.of(2000, 1, 1, 0, 0), endDate);
+            tickets = ticketService.getAllTickets().stream()
+                    .filter(ticket -> ticket.getDateCreated().isBefore(finalEndDate))
+                    .toList();
         } else {
             System.out.println("No date filtering - getting all tickets");
             tickets = ticketService.getAllTickets();
