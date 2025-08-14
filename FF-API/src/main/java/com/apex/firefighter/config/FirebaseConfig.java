@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 import javax.annotation.PostConstruct;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -20,25 +21,38 @@ public class FirebaseConfig {
 
     @PostConstruct
     public void initialize() {
+        InputStream serviceAccount = null;
         try {
             if (FirebaseApp.getApps().isEmpty()) {
-                // Try to load from service account file first
-                InputStream serviceAccount = null;
                 GoogleCredentials credentials = null;
                 
-                try {
-                    // Try to load from classpath resource
-                    ClassPathResource resource = new ClassPathResource("firebase-service-account.json");
-                    if (resource.exists()) {
-                        serviceAccount = resource.getInputStream();
+                // Method 1: Try environment variable with service account JSON
+                String serviceAccountJson = System.getenv("FIREBASE_SERVICE_ACCOUNT_JSON");
+                if (serviceAccountJson != null && !serviceAccountJson.isEmpty()) {
+                    try {
+                        serviceAccount = new ByteArrayInputStream(serviceAccountJson.getBytes());
                         credentials = GoogleCredentials.fromStream(serviceAccount);
-                        System.out.println("🔥 Firebase credentials loaded from service account file");
+                        System.out.println("🔥 Firebase credentials loaded from environment variable");
+                    } catch (Exception e) {
+                        System.out.println("⚠️  Failed to load Firebase credentials from environment variable: " + e.getMessage());
                     }
-                } catch (Exception e) {
-                    System.out.println("⚠️  Service account file not found, trying application default credentials");
                 }
                 
-                // Fallback to application default credentials
+                // Method 2: Try to load from service account file
+                if (credentials == null) {
+                    try {
+                        ClassPathResource resource = new ClassPathResource("firebase-service-account.json");
+                        if (resource.exists()) {
+                            serviceAccount = resource.getInputStream();
+                            credentials = GoogleCredentials.fromStream(serviceAccount);
+                            System.out.println("🔥 Firebase credentials loaded from service account file");
+                        }
+                    } catch (Exception e) {
+                        System.out.println("⚠️  Service account file not found or invalid");
+                    }
+                }
+                
+                // Method 3: Fallback to application default credentials (for cloud deployment)
                 if (credentials == null) {
                     try {
                         credentials = GoogleCredentials.getApplicationDefault();
@@ -56,10 +70,6 @@ public class FirebaseConfig {
                 
                 FirebaseApp.initializeApp(options);
                 System.out.println("✅ Firebase initialized successfully");
-                
-                if (serviceAccount != null) {
-                    serviceAccount.close();
-                }
             }
         } catch (Exception e) {
             System.out.println("❌ Failed to initialize Firebase: " + e.getMessage());
@@ -67,6 +77,14 @@ public class FirebaseConfig {
             System.out.println("   - Set firebase.enabled=true in application.properties");
             System.out.println("   - Provide firebase-service-account.json in classpath");
             System.out.println("   - Or set up Application Default Credentials");
+        } finally {
+            if (serviceAccount != null) {
+                try {
+                    serviceAccount.close();
+                } catch (IOException e) {
+                    System.out.println("⚠️  Failed to close service account stream: " + e.getMessage());
+                }
+            }
         }
     }
 

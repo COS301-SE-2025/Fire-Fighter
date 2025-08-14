@@ -64,6 +64,11 @@ FF-Angular/.yarn-integrity
 # Firebase
 FF-Angular/.firebase/
 FF-Angular/firebase-debug.log
+
+# Firebase Service Account Keys (NEVER COMMIT THESE!)
+FF-API/src/main/resources/firebase-service-account.json
+**/firebase-service-account.json
+**/firebase-adminsdk-*.json
 FF-Angular/firestore-debug.log
 
 # Capacitor
@@ -240,3 +245,4 @@ id_ed25519*
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
 /node_modules
+FF-API/src/main/resources/firebase-service-account.json.template
