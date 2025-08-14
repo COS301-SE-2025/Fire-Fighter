@@ -1,10 +1,30 @@
 pipeline {
     agent any
+
+    parameters {
+        booleanParam(
+            name: 'SKIP_TESTS',
+            defaultValue: false,
+            description: 'Skip unit tests for faster build'
+        )
+        string(
+            name: 'BUILD_MESSAGE',
+            defaultValue: 'Manual build',
+            description: 'Custom build message'
+        )
+    }
+
+    options {
+        timeout(time: 30, unit: 'MINUTES')
+        timestamps()
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        skipDefaultCheckout(false)
+    }
     
     environment {
         // Java and Node versions
         JAVA_VERSION = '17'
-        NODE_VERSION = '18'
+        NODE_VERSION = '22'
         
         // Project paths
         API_PATH = 'FF-API'
@@ -20,19 +40,30 @@ pipeline {
         DB_NAME = credentials('DB_NAME')
         DB_USERNAME = credentials('DB_USERNAME')
         DB_PASSWORD = credentials('DB_PASSWORD')
-        
+        DB_SSL_MODE = credentials('DB_SSL_MODE')
+
         // JWT Configuration
         JWT_SECRET = credentials('JWT_SECRET')
-        JWT_EXPIRATION = '3600000'
-        
-        // Test profile for Spring Boot
-        SPRING_PROFILES_ACTIVE = 'test'
+        JWT_EXPIRATION = credentials('JWT_EXPIRATION')
+
+        // Email Configuration
+        GMAIL_APP_PASSWORD = credentials('GMAIL_APP_PASSWORD')
+        GMAIL_USERNAME = credentials('GMAIL_USERNAME')
+        GMAIL_SENDER_NAME = credentials('GMAIL_SENDER_NAME')
+
+        // AI API Configuration
+        GOOGLE_GEMINI_API_KEY = credentials('GOOGLE_GEMINI_API_KEY')
+
+        // Environment settings based on branch
+        SPRING_PROFILES_ACTIVE = env.BRANCH_NAME == 'develop' ? 'dev' : 'test'
+        BUILD_ENV = env.BRANCH_NAME == 'develop' ? 'development' : 'production'
+        DEPLOY_TARGET = env.BRANCH_NAME == 'develop' ? 'staging' : 'production'
     }
     
     tools {
-        jdk "jdk-${JAVA_VERSION}"
-        nodejs "nodejs-${NODE_VERSION}"
-        maven 'maven-3.9'
+        jdk "jdk-17"
+        nodejs "nodejs-22"
+        maven 'maven-3.8'
     }
     
     stages {
@@ -45,6 +76,12 @@ pipeline {
                         returnStdout: true
                     ).trim()
                     env.BUILD_VERSION = "${env.BUILD_NUMBER}-${env.GIT_COMMIT_SHORT}"
+
+                    echo "🔥 Fire-Fighter Pipeline"
+                    echo "📦 Build Version: ${env.BUILD_VERSION}"
+                    echo "💬 Message: ${params.BUILD_MESSAGE}"
+                    echo "⚡ Skip Tests: ${params.SKIP_TESTS}"
+                    echo "🌿 Branch: ${env.BRANCH_NAME ?: 'develop'}"
                 }
             }
         }
@@ -58,6 +95,9 @@ pipeline {
                             java -version
                             echo "Maven Version:"
                             mvn -version
+                            echo "JAVA_HOME: $JAVA_HOME"
+                            echo "Available memory:"
+                            free -h
                         '''
                     }
                 }
@@ -68,6 +108,8 @@ pipeline {
                             node --version
                             echo "NPM Version:"
                             npm --version
+                            echo "Available disk space:"
+                            df -h
                         '''
                     }
                 }
@@ -125,6 +167,9 @@ pipeline {
         }
         
         stage('Unit Tests') {
+            when {
+                not { params.SKIP_TESTS }
+            }
             parallel {
                 stage('Backend Tests') {
                     steps {
@@ -234,11 +279,11 @@ pipeline {
                             echo "Starting backend service for integration tests..."
                             nohup java -jar target/${API_JAR} \
                                 --spring.profiles.active=test \
-                                --server.port=8080 > backend.log 2>&1 &
+                                --server.port=8081 > backend.log 2>&1 &
                             echo $! > backend.pid
                             
                             # Wait for backend to be ready
-                            timeout 60 bash -c 'until curl -f http://localhost:8080/actuator/health; do sleep 2; done'
+                            timeout 60 bash -c 'until curl -f http://localhost:8081/actuator/health; do sleep 2; done'
                         '''
                     }
                     
