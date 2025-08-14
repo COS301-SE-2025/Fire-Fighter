@@ -1,0 +1,43 @@
+# Maven
+target/
+!target/firefighter-platform-0.0.1-SNAPSHOT.jar
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Documentation
+*.md
+!README.md
+
+# Git
+.git/
+.gitignore
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Test files
+postman/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Maven wrapper (optional - remove if you want to include it)
+.mvn/
+mvnw
+mvnw.cmd
