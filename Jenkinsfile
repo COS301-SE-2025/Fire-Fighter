@@ -72,17 +72,63 @@ pipeline {
                 }
             }
         }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Build Docker image for the API
+                    def apiImage = docker.build("firefighter-api:${env.BUILD_NUMBER}", "./FF-API")
+
+                    // Tag with latest
+                    apiImage.tag("firefighter-api:latest")
+
+                    echo "🐳 Docker image built: firefighter-api:${env.BUILD_NUMBER}"
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    echo "🚀 Deploying Fire-Fighter application..."
+
+                    // Stop existing containers
+                    sh '''
+                        docker-compose down || true
+                        docker system prune -f || true
+                    '''
+
+                    // Deploy with docker-compose
+                    sh '''
+                        docker-compose up -d
+
+                        # Wait for services to be healthy
+                        echo "Waiting for services to start..."
+                        sleep 30
+
+                        # Check if API is responding
+                        timeout 60 bash -c 'until curl -f http://localhost:8081/actuator/health; do sleep 5; done' || echo "API health check timeout"
+                    '''
+
+                    echo "✅ Deployment completed!"
+                }
+            }
+        }
     }
 
     post {
         always {
-            cleanWs()
+            // Clean up but keep Docker images for deployment
+            sh 'docker system prune -f || true'
         }
         success {
-            echo "✅ Build completed successfully!"
+            echo "✅ Build and deployment completed successfully!"
+            echo "🌐 API available at: http://localhost:8081"
+            echo "📊 Health check: http://localhost:8081/actuator/health"
         }
         failure {
-            echo "❌ Build failed!"
+            echo "❌ Build or deployment failed!"
+            sh 'docker-compose logs || true'
         }
     }
 }
