@@ -311,6 +311,7 @@ export class MetricsPage implements OnInit, OnDestroy, AfterViewInit {
     // Re-initialize charts when theme changes
     this.initializeChart();
     this.initializePieChart();
+    this.initializeBarChart();
   }
 
   doRefresh(event: any) {
@@ -321,34 +322,22 @@ export class MetricsPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private initializeBarChart() {
-    // Mock data for requests by reason chart
+    const themeColors = this.getThemeColors();
+    
+    // Mock data for requests by reason chart - matching the provided image
     const options = {
-      colors: ["#1A56DB", "#FDBA8C"],
+      colors: ["#1A56DB"],
       series: [
         {
-          name: "Incident Response",
+          name: "Requests",
           color: "#1A56DB",
           data: [
-            { x: "Mon", y: 12 },
-            { x: "Tue", y: 11 },
-            { x: "Wed", y: 9 },
-            { x: "Thu", y: 8 },
-            { x: "Fri", y: 7 },
-            { x: "Sat", y: 5 },
-            { x: "Sun", y: 3 },
-          ],
-        },
-        {
-          name: "Database Access",
-          color: "#FDBA8C",
-          data: [
-            { x: "Mon", y: 8 },
-            { x: "Tue", y: 7 },
-            { x: "Wed", y: 6 },
-            { x: "Thu", y: 9 },
-            { x: "Fri", y: 5 },
-            { x: "Sat", y: 4 },
-            { x: "Sun", y: 2 },
+            { x: "Incident Response", y: 13 },
+            { x: "Patch Deployment", y: 11 },
+            { x: "Database Access", y: 9 },
+            { x: "Account Recovery", y: 7 },
+            { x: "Release Hotfix", y: 5 },
+            { x: "Other", y: 3 },
           ],
         },
       ],
@@ -369,11 +358,28 @@ export class MetricsPage implements OnInit, OnDestroy, AfterViewInit {
         },
       },
       tooltip: {
-        shared: true,
+        enabled: true,
+        shared: false,
         intersect: false,
         style: {
-          fontFamily: "Inter, sans-serif",
+          fontSize: '12px',
+          fontFamily: 'Inter, sans-serif',
         },
+        custom: function({series, seriesIndex, dataPointIndex, w}: {series: any, seriesIndex: any, dataPointIndex: any, w: any}) {
+          const categories = ['Incident Response', 'Patch Deployment', 'Database Access', 'Account Recovery', 'Release Hotfix', 'Other'];
+          const requestType = categories[dataPointIndex];
+          const count = series[seriesIndex][dataPointIndex];
+          
+          let tooltipHTML = `<div class="bg-gray-900 dark:bg-gray-800 text-white dark:text-gray-200 p-3 rounded-lg shadow-lg border border-gray-700">`;
+          tooltipHTML += `<div class="font-semibold mb-2">Request Type</div>`;
+          tooltipHTML += `<div class="text-blue-400">`;
+          tooltipHTML += `<span class="inline-block w-2 h-2 bg-blue-500 rounded-full mr-2"></span>`;
+          tooltipHTML += `${requestType}: ${count} requests`;
+          tooltipHTML += `</div>`;
+          tooltipHTML += `<div class="text-xs text-gray-400 mt-1">This Month</div>`;
+          tooltipHTML += `</div>`;
+          return tooltipHTML;
+        }
       },
       states: {
         hover: {
@@ -389,12 +395,23 @@ export class MetricsPage implements OnInit, OnDestroy, AfterViewInit {
         colors: ["transparent"],
       },
       grid: {
-        show: false,
+        show: true,
         strokeDashArray: 4,
+        borderColor: themeColors.textSecondary,
         padding: {
           left: 2,
           right: 2,
           top: -14
+        },
+        yaxis: {
+          lines: {
+            show: true
+          }
+        },
+        xaxis: {
+          lines: {
+            show: false
+          }
         },
       },
       dataLabels: {
@@ -409,7 +426,8 @@ export class MetricsPage implements OnInit, OnDestroy, AfterViewInit {
           show: true,
           style: {
             fontFamily: "Inter, sans-serif",
-            cssClass: 'text-xs font-normal fill-gray-500 dark:fill-gray-400'
+            fontSize: '11px',
+            colors: themeColors.textSecondary
           }
         },
         axisBorder: {
@@ -420,7 +438,30 @@ export class MetricsPage implements OnInit, OnDestroy, AfterViewInit {
         },
       },
       yaxis: {
-        show: false,
+        show: true,
+        title: {
+          text: 'Number of Requests',
+          style: {
+            fontFamily: "Inter, sans-serif",
+            fontSize: '12px',
+            fontWeight: 500,
+            color: themeColors.textSecondary
+          }
+        },
+        labels: {
+          show: true,
+          style: {
+            fontFamily: "Inter, sans-serif",
+            fontSize: '11px',
+            colors: themeColors.textSecondary
+          }
+        },
+        axisBorder: {
+          show: false,
+        },
+        axisTicks: {
+          show: false,
+        },
       },
       fill: {
         opacity: 1,
