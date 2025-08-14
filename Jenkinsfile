@@ -54,10 +54,10 @@ pipeline {
         // AI API Configuration
         GOOGLE_GEMINI_API_KEY = credentials('GOOGLE_GEMINI_API_KEY')
 
-        // Environment settings based on branch
-        SPRING_PROFILES_ACTIVE = env.BRANCH_NAME == 'develop' ? 'dev' : 'test'
-        BUILD_ENV = env.BRANCH_NAME == 'develop' ? 'development' : 'production'
-        DEPLOY_TARGET = env.BRANCH_NAME == 'develop' ? 'staging' : 'production'
+        // Environment settings
+        SPRING_PROFILES_ACTIVE = 'test'
+        BUILD_ENV = 'development'
+        DEPLOY_TARGET = 'staging'
     }
     
     tools {
@@ -77,11 +77,25 @@ pipeline {
                     ).trim()
                     env.BUILD_VERSION = "${env.BUILD_NUMBER}-${env.GIT_COMMIT_SHORT}"
 
+                    // Set environment based on branch
+                    def currentBranch = env.BRANCH_NAME ?: 'develop'
+                    if (currentBranch == 'develop') {
+                        env.SPRING_PROFILES_ACTIVE = 'dev'
+                        env.BUILD_ENV = 'development'
+                        env.DEPLOY_TARGET = 'staging'
+                    } else if (currentBranch == 'main') {
+                        env.SPRING_PROFILES_ACTIVE = 'prod'
+                        env.BUILD_ENV = 'production'
+                        env.DEPLOY_TARGET = 'production'
+                    }
+
                     echo "🔥 Fire-Fighter Pipeline"
                     echo "📦 Build Version: ${env.BUILD_VERSION}"
                     echo "💬 Message: ${params.BUILD_MESSAGE}"
                     echo "⚡ Skip Tests: ${params.SKIP_TESTS}"
-                    echo "🌿 Branch: ${env.BRANCH_NAME ?: 'develop'}"
+                    echo "🌿 Branch: ${currentBranch}"
+                    echo "🎯 Environment: ${env.BUILD_ENV}"
+                    echo "🚀 Deploy Target: ${env.DEPLOY_TARGET}"
                 }
             }
         }
@@ -168,7 +182,9 @@ pipeline {
         
         stage('Unit Tests') {
             when {
-                not { params.SKIP_TESTS }
+                not {
+                    params.SKIP_TESTS == true
+                }
             }
             parallel {
                 stage('Backend Tests') {
