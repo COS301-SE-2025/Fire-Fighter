@@ -75,15 +75,15 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    // Build Docker image for the API
-                    def apiImage = docker.build("firefighter-api:${env.BUILD_NUMBER}", "./FF-API")
+                echo "🐳 Building Docker image for FF-API..."
 
-                    // Tag with latest
-                    apiImage.tag("firefighter-api:latest")
+                sh """
+                    cd FF-API
+                    docker build -t firefighter-api:${env.BUILD_NUMBER} .
+                    docker tag firefighter-api:${env.BUILD_NUMBER} firefighter-api:latest
+                """
 
-                    echo "🐳 Docker image built: firefighter-api:${env.BUILD_NUMBER}"
-                }
+                echo "🐳 Docker image built: firefighter-api:${env.BUILD_NUMBER}"
             }
         }
 
