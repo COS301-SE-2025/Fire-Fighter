@@ -465,14 +465,28 @@ export class AuthService {
         throw new Error('No credential returned from native Google sign-in');
       }
     } else {
-      // On web platforms, always use popup (simplified - no browser detection)
+      // On web platforms, try popup with fallback to redirect
       console.log('Using web platform Google sign-in with popup');
       const provider = new GoogleAuthProvider();
       provider.addScope('email');
       provider.addScope('profile');
       
-      const credential = await signInWithPopup(this.auth, provider);
-      user = credential.user;
+      try {
+        const credential = await signInWithPopup(this.auth, provider);
+        user = credential.user;
+      } catch (error: any) {
+        console.log('Popup failed, checking error type:', error.code);
+        
+        // Handle popup-related errors by rethrowing with better error messages
+        if (error.code === 'auth/popup-blocked' || 
+            error.code === 'auth/popup-closed-by-user' || 
+            error.code === 'auth/cancelled-popup-request') {
+          throw new Error(`Google sign-in popup was blocked or cancelled. Please ensure popups are allowed for this site and try again. Error: ${error.code}`);
+        }
+        
+        // For other errors, rethrow the original error
+        throw error;
+      }
     }
 
     console.log('Firebase authentication successful, exchanging for JWT...');
