@@ -9,13 +9,11 @@ services:
     ports:
       - "8081:8080"
     environment:
-      # Database Configuration
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+      # Database Configuration - connects to external PostgreSQL on host
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:${DB_PORT:-5432}/${DB_NAME:-firefighter}
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
-      - SPRING_DATASOURCE_SSL_MODE=${DB_SSL_MODE:-require}
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+      - SPRING_DATASOURCE_SSL_MODE=${DB_SSL_MODE:-disable}
 
       # JWT Configuration
       - JWT_SECRET=${JWT_SECRET}
@@ -24,7 +22,7 @@ services:
       # Email Configuration
       - GMAIL_USERNAME=${GMAIL_USERNAME}
       - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
-      - GMAIL_SENDER_NAME=${GMAIL_SENDER_NAME:-FireFighter Platform}
+      - GMAIL_SENDER_NAME=${GMAIL_SENDER_NAME:-FireFighter System}
 
       # AI API Configuration
       - GOOGLE_GEMINI_API_KEY=${GOOGLE_GEMINI_API_KEY}
@@ -34,9 +32,3 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
-    networks:
-      - firefighter-network
-
-networks:
-  firefighter-network:
-    driver: bridge

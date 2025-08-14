@@ -1,4 +1,4 @@
-# Multi-stage build for FF-API
+# Multi-stage build for FireFighter Spring Boot API
 # Stage 1: Build the application
 FROM eclipse-temurin:17-jdk-alpine AS builder
 
@@ -21,10 +21,10 @@ COPY src ./src
 RUN mvn clean package -DskipTests=true
 
 # Stage 2: Runtime image
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jre-alpine
 
-# Install curl for health checks
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+# Install curl for health checks and timezone data
+RUN apk add --no-cache curl tzdata
 
 # Set working directory
 WORKDIR /app
@@ -33,16 +33,28 @@ WORKDIR /app
 COPY --from=builder /app/target/firefighter-platform-0.0.1-SNAPSHOT.jar app.jar
 
 # Create a non-root user for security
-RUN groupadd -r firefighter && useradd -r -g firefighter firefighter
+RUN addgroup -g 1001 -S firefighter && \
+    adduser -S firefighter -u 1001 -G firefighter
+
+# Change ownership of the app directory
 RUN chown -R firefighter:firefighter /app
+
+# Switch to non-root user
 USER firefighter
 
 # Expose the port your Spring Boot app runs on
 EXPOSE 8080
 
 # Add health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD curl -f http://localhost:8080/actuator/health || exit 1
 
-# Run the application with optimized JVM settings
-ENTRYPOINT ["java", "-Xmx512m", "-Xms256m", "-jar", "app.jar"]
+# Run the application with optimized JVM settings for containers
+ENTRYPOINT ["java", \
+    "-Xmx512m", \
+    "-Xms256m", \
+    "-XX:+UseContainerSupport", \
+    "-XX:MaxRAMPercentage=75.0", \
+    "-Djava.security.egd=file:/dev/./urandom", \
+    "-jar", \
+    "app.jar"]
