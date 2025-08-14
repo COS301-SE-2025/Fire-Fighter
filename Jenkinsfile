@@ -183,7 +183,7 @@ pipeline {
         stage('Unit Tests') {
             when {
                 not {
-                    params.SKIP_TESTS == true
+                    params.SKIP_TESTS
                 }
             }
             parallel {
