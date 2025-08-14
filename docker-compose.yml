@@ -9,8 +9,8 @@ services:
     ports:
       - "8081:8080"
     environment:
-      # Database Configuration - connects to external PostgreSQL on host
-      - DB_HOST=host.docker.internal
+      # Database Configuration - connects to PostgreSQL via Tailscale IP
+      - DB_HOST=${DB_HOST:-100.83.111.92}
       - DB_PORT=${DB_PORT:-5432}
       - DB_NAME=${DB_NAME:-firefighter}
       - DB_USERNAME=${DB_USERNAME:-ff_admin}
@@ -31,6 +31,4 @@ services:
 
       # Spring Profile
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-prod}
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     restart: unless-stopped
