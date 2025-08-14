@@ -46,7 +46,7 @@ pipeline {
                 stage('Frontend Tests') {
                     steps {
                         dir('FF-Angular') {
-                            sh 'npm test -- --watch=false --browsers=ChromeHeadless'
+                            sh 'ng test --watch=false --browsers=ChromeHeadless'
                         }
                     }
                 }
@@ -65,7 +65,7 @@ pipeline {
                 stage('Build Frontend') {
                     steps {
                         dir('FF-Angular') {
-                            sh 'npm run build'
+                            sh 'ng build'
                         }
                     }
                 }
