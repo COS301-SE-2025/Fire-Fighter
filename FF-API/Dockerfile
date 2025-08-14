@@ -1,6 +1,9 @@
 # Multi-stage build for FF-API
 # Stage 1: Build the application
-FROM maven:3.9.4-openjdk-17-slim AS builder
+FROM eclipse-temurin:17-jdk-alpine AS builder
+
+# Install Maven
+RUN apk add --no-cache maven
 
 # Set working directory
 WORKDIR /app
