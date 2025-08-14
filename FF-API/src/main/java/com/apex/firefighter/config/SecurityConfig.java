@@ -42,6 +42,8 @@ public class SecurityConfig {
             "ionic://localhost",
             "capacitor://localhost",
             "http://100.123.32.43:*",
+            "https://api.firefighter-eam.co.za",
+            "https://*.firefighter-eam.co.za",
             "*"  // Allow all origins for development (remove in production)
         ));
         

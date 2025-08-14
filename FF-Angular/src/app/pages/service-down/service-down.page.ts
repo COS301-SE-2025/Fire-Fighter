@@ -120,15 +120,16 @@ export class ServiceDownPage implements OnInit, OnDestroy {
         this.healthSubscription.unsubscribe();
       }
 
+      // Use the new health check method that supports fallback URLs
       const health = await firstValueFrom(
-        this.healthService.checkHealth().pipe(timeout(10000))
+        this.healthService.checkHealthWithFallback(10000)
       );
 
       if (health?.isHealthy) {
         localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
         this.retryAttempts = 0;
         this.serviceHealth = health;
-        
+
         this.healthMonitorService.setServiceDownPageStatus(false);
         await this.router.navigate(['/dashboard']);
       } else {
@@ -138,7 +139,7 @@ export class ServiceDownPage implements OnInit, OnDestroy {
 
     } catch (error) {
       this.subscribeToHealthUpdates();
-      
+
       if (this.retryAttempts >= this.maxRetryAttempts) {
         this.resetRetriesAfterDelay();
       }

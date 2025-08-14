@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, interval, of, Subscription } from 'rxjs';
 import { catchError, map, switchMap, tap, timeout } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { ApiConfigService } from './api-config.service';
 
 export interface HealthStatus {
   status: 'UP' | 'DOWN' | 'DEGRADED';
@@ -31,7 +32,6 @@ export interface ServiceHealth {
   providedIn: 'root'
 })
 export class HealthService {
-  private apiUrl = `${environment.apiUrl}/health`;
   private healthSubject = new BehaviorSubject<ServiceHealth>({
     isHealthy: false,
     status: null,
@@ -44,7 +44,10 @@ export class HealthService {
   private monitoringInterval = 30000; // 30 seconds
   private monitoringSubscription?: Subscription;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private apiConfigService: ApiConfigService
+  ) {}
 
   /**
    * Start continuous health monitoring
@@ -78,7 +81,10 @@ export class HealthService {
    * Perform a single health check
    */
   checkHealth(): Observable<ServiceHealth> {
-    return this.http.get<HealthStatus>(this.apiUrl).pipe(
+    const currentApiUrl = this.apiConfigService.getCurrentApiUrlSync();
+    const healthUrl = `${currentApiUrl}/health`;
+
+    return this.http.get<HealthStatus>(healthUrl).pipe(
       map((status: HealthStatus) => {
         const health: ServiceHealth = {
           isHealthy: status && status.status === 'UP',
@@ -109,7 +115,10 @@ export class HealthService {
    * Used during app startup for better UX
    */
   checkInitialConnectivity(timeoutMs: number = 8000): Observable<ServiceHealth> {
-    return this.http.get<HealthStatus>(this.apiUrl).pipe(
+    const currentApiUrl = this.apiConfigService.getCurrentApiUrlSync();
+    const healthUrl = `${currentApiUrl}/health`;
+
+    return this.http.get<HealthStatus>(healthUrl).pipe(
       timeout(timeoutMs),
       map((status: HealthStatus) => {
         const health: ServiceHealth = {
@@ -140,7 +149,10 @@ export class HealthService {
    * Get detailed health information
    */
   getDetailedHealth(): Observable<HealthStatus> {
-    return this.http.get<HealthStatus>(`${this.apiUrl}/detailed`).pipe(
+    const currentApiUrl = this.apiConfigService.getCurrentApiUrlSync();
+    const detailedHealthUrl = `${currentApiUrl}/health/detailed`;
+
+    return this.http.get<HealthStatus>(detailedHealthUrl).pipe(
       catchError((error) => {
         throw new Error(this.getErrorMessage(error));
       })
@@ -159,6 +171,89 @@ export class HealthService {
    */
   isServiceHealthy(): boolean {
     return this.healthSubject.value.isHealthy;
+  }
+
+  /**
+   * Try health check with both primary and fallback URLs
+   * Useful for service-down page to test connectivity to both endpoints
+   */
+  checkHealthWithFallback(timeoutMs: number = 8000): Observable<ServiceHealth> {
+    // First try the current API URL
+    const currentApiUrl = this.apiConfigService.getCurrentApiUrlSync();
+    const healthUrl = `${currentApiUrl}/health`;
+
+    return this.http.get<HealthStatus>(healthUrl).pipe(
+      timeout(timeoutMs),
+      map((status: HealthStatus) => {
+        const health: ServiceHealth = {
+          isHealthy: status && status.status === 'UP',
+          status: status,
+          lastChecked: new Date(),
+          error: null
+        };
+
+        this.healthSubject.next(health);
+        return health;
+      }),
+      catchError((error) => {
+        // If current URL fails and we're not already using fallback, try fallback
+        if (!this.apiConfigService.isUsingFallbackApi()) {
+          console.warn('🚨 Health check failed on primary API, trying fallback...', {
+            error: error.message,
+            primaryUrl: currentApiUrl,
+            fallbackUrl: this.apiConfigService.getFallbackApiUrl()
+          });
+
+          // Switch to fallback for future requests
+          this.apiConfigService.switchToFallback();
+
+          // Try health check with fallback URL
+          const fallbackHealthUrl = `${this.apiConfigService.getFallbackApiUrl()}/health`;
+
+          return this.http.get<HealthStatus>(fallbackHealthUrl).pipe(
+            timeout(timeoutMs),
+            map((status: HealthStatus) => {
+              const health: ServiceHealth = {
+                isHealthy: status && status.status === 'UP',
+                status: status,
+                lastChecked: new Date(),
+                error: null
+              };
+
+              this.healthSubject.next(health);
+              return health;
+            }),
+            catchError((fallbackError) => {
+              console.error('❌ Fallback health check also failed:', {
+                error: fallbackError.message,
+                fallbackUrl: fallbackHealthUrl
+              });
+
+              const health: ServiceHealth = {
+                isHealthy: false,
+                status: null,
+                lastChecked: new Date(),
+                error: this.getErrorMessage(fallbackError)
+              };
+
+              this.healthSubject.next(health);
+              return of(health);
+            })
+          );
+        } else {
+          // Already using fallback, just return the error
+          const health: ServiceHealth = {
+            isHealthy: false,
+            status: null,
+            lastChecked: new Date(),
+            error: this.getErrorMessage(error)
+          };
+
+          this.healthSubject.next(health);
+          return of(health);
+        }
+      })
+    );
   }
 
   /**
