@@ -137,6 +137,14 @@
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- GreenMail for testing SMTP interactions in integration tests -->
+		<dependency>
+			<groupId>com.icegreen</groupId>
+			<artifactId>greenmail-junit5</artifactId>
+			<version>1.7.11</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
