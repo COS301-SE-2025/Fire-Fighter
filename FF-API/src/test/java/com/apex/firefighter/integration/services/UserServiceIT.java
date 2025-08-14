@@ -2,6 +2,7 @@ package com.apex.firefighter.integration.services;
 
 import com.apex.firefighter.model.User;
 import com.apex.firefighter.service.UserService;
+import com.apex.firefighter.repository.UserRepository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,18 +19,25 @@ public class UserServiceIT {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private UserRepository userRepository;
+
     private User normalUser;
     private User adminUser;
 
     @BeforeEach
     @Transactional
     void setup() {
-        // Create admin and normal user
-        adminUser = userService.verifyOrCreateUser("adminUid", "Admin User", "admin1@example.com", "Fire Department");
-        adminUser.setIsAdmin(true);
+        userRepository.deleteAll();
 
-        normalUser = userService.verifyOrCreateUser("uid1", "Normal User", "user1@example.com", "Medical Department");
+        // Add test users directly to the repository
+        adminUser = new User("adminUid", "Admin User", "admin1@example.com", "Fire Department");
+        adminUser.setIsAdmin(true);
+        userRepository.save(adminUser);
+
+        normalUser = new User("uid1", "Normal User", "user1@example.com", "Medical Department");
         normalUser.setIsAdmin(false);
+        userRepository.save(normalUser);
     }
 
     @Test
