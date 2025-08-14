@@ -134,6 +134,9 @@ coverage/
 node_modules/
 jspm_packages/
 
+# Keep package-lock.json (should be committed)
+!package-lock.json
+
 # Optional npm cache directory
 .npm
 
