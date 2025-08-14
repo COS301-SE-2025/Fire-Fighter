@@ -242,7 +242,7 @@ export class AuthService {
       
       // Send to backend auth endpoint
       const response = await this.http.post<JwtAuthResponse>(
-        `${this.getCurrentApiUrl()}/api/auth/firebase-login`,
+        `${this.getCurrentApiUrl()}/auth/firebase-login`,
         { idToken } as FirebaseLoginRequest
       ).toPromise();
 
