@@ -240,3 +240,4 @@ id_ed25519*
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
 /node_modules
+FF-API/src/main/resources/firebase-service-account.json
