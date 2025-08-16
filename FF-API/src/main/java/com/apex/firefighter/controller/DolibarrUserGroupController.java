@@ -3,6 +3,7 @@ package com.apex.firefighter.controller;
 import org.springframework.web.bind.annotation.*;
 
 import com.apex.firefighter.service.DolibarrUserGroupService;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/dolibarr/groups")
@@ -22,7 +23,11 @@ public class DolibarrUserGroupController {
 
     @DeleteMapping("/remove/{userId}")
     public String removeFromGroup(@PathVariable Long userId) {
-        service.removeUserFromGroup(userId);
-        return "User " + userId + " removed from group Firefighters";
+        try {
+            service.removeUserFromGroup(userId);
+            return "User " + userId + " removed from group Firefighters";
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException("Failed to remove user from group: " + e.getMessage(), e);
+        }
     }
 }
