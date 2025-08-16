@@ -74,7 +74,7 @@ pipeline {
             steps {
                 dir('FF-Angular') {
                     echo "🧪 Running frontend unit tests..."
-                    sh 'ng test --watch=false --browsers=ChromeHeadless'
+                    sh 'ng test'
                 }
             }
         }
