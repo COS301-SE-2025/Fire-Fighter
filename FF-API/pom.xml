@@ -5,41 +5,32 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.5</version>
+		<version>3.3.5</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
+
 	<groupId>com.apex.firefighter</groupId>
 	<artifactId>firefighter-platform</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>FireFighter Access Management</name>
 	<description>Demo project for Spring Boot</description>
-	<url/>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
+
 	<properties>
 		<java.version>17</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.compiler.encoding>UTF-8</maven.compiler.encoding>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
-
-
-		<dependency> 
-			<groupId>org.springframework.boot</groupId> 
-			<artifactId>spring-boot-starter-data-jpa</artifactId> 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 
 		<dependency>
@@ -82,12 +73,11 @@
 			<version>3.1.0</version>
 		</dependency>
 
-
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>me.paulschwarz</groupId>
 			<artifactId>spring-dotenv</artifactId>
@@ -137,6 +127,7 @@
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -146,11 +137,27 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 
+			<!-- Maven Surefire Plugin for Test Execution -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.2.5</version>
+				<configuration>
+					<forkedProcessExitTimeoutInSeconds>60</forkedProcessExitTimeoutInSeconds>
+					<forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
+					<shutdown>exit</shutdown>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+
 			<!-- JaCoCo Plugin for Test Coverage -->
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.8</version>
+				<configuration>
+					<encoding>UTF-8</encoding>
+				</configuration>
 				<executions>
 					<execution>
 						<goals>
@@ -163,6 +170,10 @@
 						<goals>
 							<goal>report</goal>
 						</goals>
+						<configuration>
+							<encoding>UTF-8</encoding>
+							<outputEncoding>UTF-8</outputEncoding>
+						</configuration>
 					</execution>
 					<execution>
 						<id>jacoco-check</id>

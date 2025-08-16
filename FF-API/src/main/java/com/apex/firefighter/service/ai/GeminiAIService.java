@@ -14,7 +14,7 @@ import java.util.Map;
 @Service
 public class GeminiAIService {
 
-    @Value("${GOOGLE_GEMINI_API_KEY}")
+    @Value("${GOOGLE_GEMINI_API_KEY:}")
     private String apiKey;
 
     private final WebClient webClient;
