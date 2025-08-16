@@ -34,22 +34,47 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            parallel {
-                stage('Backend Tests') {
-                    steps {
-                        dir('FF-API') {
-                            sh 'mvn test -DskipTests=true'
-                        }
+        stage('Unit Tests') {
+            steps {
+                dir('FF-API') {
+                    echo "🧪 Running backend unit tests (unit folder)..."
+                    sh '''
+                        mvn -Dtest=com.apex.firefighter.unit.**.*Test test -Dspring.profiles.active=test
+                    '''
+                }
+            }
+            post {
+                always {
+                    dir('FF-API') {
+                        junit 'target/surefire-reports/*.xml'
                     }
                 }
-                stage('Frontend Tests') {
-                    steps {
-                        dir('FF-Angular') {
-                            echo 'Skipping frontend tests for now'
-                            // sh 'ng test --watch=false --browsers=ChromeHeadless'
-                        }
+            }
+        }
+
+        stage('Integration Tests') {
+            steps {
+                dir('FF-API') {
+                    echo "🔗 Running backend integration tests (integration folder)..."
+                    sh '''
+                        mvn -Dtest=com.apex.firefighter.integration.**.*Test test -Dspring.profiles.active=test
+                    '''
+                }
+            }
+            post {
+                always {
+                    dir('FF-API') {
+                        junit 'target/surefire-reports/*.xml'
                     }
+                }
+            }
+        }
+
+        stage('Test Frontend') {
+            steps {
+                dir('FF-Angular') {
+                    echo "🧪 Running frontend unit tests..."
+                    sh 'ng test --watch=false --browsers=ChromeHeadless'
                 }
             }
         }
