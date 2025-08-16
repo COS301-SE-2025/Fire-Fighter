@@ -14,15 +14,15 @@ public class DolibarrUserGroupController {
         this.service = service;
     }
 
-    @PostMapping("/{groupId}/add/{userId}")
-    public String addToGroup(@PathVariable Long groupId, @PathVariable Long userId) {
-        service.addUserToGroup(userId, groupId);
-        return "User " + userId + " added to group " + groupId;
+    @PostMapping("/add/{userId}")
+    public String addToGroup(@PathVariable Long userId) {
+        service.addUserToGroup(userId);
+        return "User " + userId + " added to group Firefighters";
     }
 
-    @DeleteMapping("/{groupId}/remove/{userId}")
-    public String removeFromGroup(@PathVariable Long groupId, @PathVariable Long userId) {
-        service.removeUserFromGroup(userId, groupId);
-        return "User " + userId + " removed from group " + groupId;
+    @DeleteMapping("/remove/{userId}")
+    public String removeFromGroup(@PathVariable Long userId) {
+        service.removeUserFromGroup(userId);
+        return "User " + userId + " removed from group Firefighters";
     }
 }
