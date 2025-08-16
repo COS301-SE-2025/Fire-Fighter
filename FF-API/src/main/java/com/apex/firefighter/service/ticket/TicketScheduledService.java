@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@Transactional
+// @EnableScheduling // Comment this out temporarily
 public class TicketScheduledService {
 
     private final TicketRepository ticketRepository;
@@ -25,19 +25,26 @@ public class TicketScheduledService {
         this.notificationService = notificationService;
     }
 
-    @PostConstruct
+    // @PostConstruct // Disable startup check
     public void runStartupCheck() {
         System.out.println("🚀 STARTUP CHECK: Running expired ticket check at application startup...");
         sendFiveMinuteWarnings();
         closeExpiredTickets();
     }
 
-    @Scheduled(cron = "0 */2 * * * *")
+    // @Scheduled(cron = "0 */2 * * * *") // Disable scheduled execution
+    @Transactional
     public void scheduledTicketCheck() {
-        sendFiveMinuteWarnings();
-        closeExpiredTickets();
+        try {
+            sendFiveMinuteWarnings();
+            closeExpiredTickets();
+        } catch (Exception e) {
+            System.err.println("❌ Scheduled ticket check failed: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
+    @Transactional
     public void sendFiveMinuteWarnings() {
         System.out.println("Checking for tickets needing 5-minute warnings at " + LocalDateTime.now());
 
@@ -84,9 +91,11 @@ public class TicketScheduledService {
 
         } catch (Exception e) {
             System.err.println("Error sending five-minute warnings: " + e.getMessage());
+            throw e; // Re-throw to trigger transaction rollback
         }
     }
 
+    @Transactional
     public void closeExpiredTickets() {
         System.out.println("Checking for expired tickets at " + LocalDateTime.now());
         
@@ -127,6 +136,7 @@ public class TicketScheduledService {
             
         } catch (Exception e) {
             System.err.println("Error closing expired tickets: " + e.getMessage());
+            throw e; // Re-throw to trigger transaction rollback
         }
     }
 } 

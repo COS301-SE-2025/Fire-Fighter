@@ -37,14 +37,39 @@ public class AuthenticationService {
     public User verifyOrCreateUser(String firebaseUid, String username, String email, String department) {
         System.out.println("🔵 VERIFY: Checking user with Firebase UID - " + firebaseUid);
         
-        Optional<User> existingUser = userRepository.findByUserId(firebaseUid);
+        // First, check if user exists by Firebase UID
+        Optional<User> existingUserByUid = userRepository.findByUserId(firebaseUid);
         
-        if (existingUser.isPresent()) {
-            User user = existingUser.get();
+        if (existingUserByUid.isPresent()) {
+            User user = existingUserByUid.get();
             // Always update last login when user accesses the system
             user.updateLastLogin();
             User updatedUser = userRepository.save(user);
             System.out.println("✅ VERIFIED: Existing user accessed system - " + updatedUser.getUsername() + " (Last login updated)");
+            return updatedUser;
+        }
+        
+        // If not found by Firebase UID, check if user exists by email
+        Optional<User> existingUserByEmail = userRepository.findByEmail(email);
+        
+        if (existingUserByEmail.isPresent()) {
+            User user = existingUserByEmail.get();
+            // Update the existing user's Firebase UID (user might have recreated Firebase account)
+            System.out.println("🔄 UPDATING: Found existing user by email, updating Firebase UID from " + user.getUserId() + " to " + firebaseUid);
+            user.setUserId(firebaseUid);
+            
+            // Update other fields if provided
+            if (username != null && !username.trim().isEmpty()) {
+                user.setUsername(username);
+            }
+            if (department != null && !department.trim().isEmpty()) {
+                user.setDepartment(department);
+            }
+            
+            // Update last login
+            user.updateLastLogin();
+            User updatedUser = userRepository.save(user);
+            System.out.println("✅ UPDATED: User Firebase UID updated - " + updatedUser.getUsername() + " (Last login updated)");
             return updatedUser;
         } else {
             // Create new user from Firebase auth

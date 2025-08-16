@@ -1,4 +1,7 @@
 import {
+  startFocusVisible
+} from "./chunk-7Q5HCUSL.js";
+import {
   isRTL
 } from "./chunk-EUT5B6DW.js";
 import {
@@ -20,9 +23,6 @@ import {
   printIonContentErrorMsg,
   resetContentScrollY
 } from "./chunk-XKT5Q5GU.js";
-import {
-  startFocusVisible
-} from "./chunk-7Q5HCUSL.js";
 import {
   AngularDelegate,
   BACKDROP,
@@ -86,7 +86,7 @@ import {
   setIonicClasses,
   setOverlayId,
   toastController
-} from "./chunk-6LAN327Q.js";
+} from "./chunk-OHM4I5F7.js";
 import {
   iosTransitionAnimation
 } from "./chunk-C3TCO22T.js";
@@ -154,13 +154,14 @@ import {
   printIonWarning
 } from "./chunk-CBIR4FRL.js";
 import {
-  ActivatedRoute,
-  Router
-} from "./chunk-376RXNOM.js";
-import "./chunk-EXKJ5CSO.js";
-import {
   NG_VALUE_ACCESSOR
 } from "./chunk-BPNPSZZ7.js";
+import {
+  ActivatedRoute,
+  Router
+} from "./chunk-XSYUW5RI.js";
+import "./chunk-47P2WZ2Y.js";
+import "./chunk-LBMKVY6G.js";
 import "./chunk-QDJMIV5P.js";
 import {
   CommonModule,
@@ -168,7 +169,6 @@ import {
   NgIf,
   NgTemplateOutlet
 } from "./chunk-W7H6JUOX.js";
-import "./chunk-LBMKVY6G.js";
 import {
   DOCUMENT
 } from "./chunk-ROWOOGPI.js";
@@ -1737,7 +1737,7 @@ var createSheetGesture = (baseEl, backdropEl, wrapperEl, initialBreakpoint, back
   let offset = 0;
   let canDismissBlocksGesture = false;
   let cachedScrollEl = null;
-  let cachedFooterEls = null;
+  let cachedFooterEl = null;
   let cachedFooterYPosition = null;
   let currentFooterState = null;
   const canDismissMaxStep = 0.95;
@@ -1757,55 +1757,42 @@ var createSheetGesture = (baseEl, backdropEl, wrapperEl, initialBreakpoint, back
     baseEl.classList.add(FOCUS_TRAP_DISABLE_CLASS);
   };
   const swapFooterPosition = (newPosition) => {
-    if (!cachedFooterEls) {
-      cachedFooterEls = Array.from(baseEl.querySelectorAll("ion-footer"));
-      if (!cachedFooterEls.length) {
+    if (!cachedFooterEl) {
+      cachedFooterEl = baseEl.querySelector("ion-footer");
+      if (!cachedFooterEl) {
         return;
       }
     }
     const page = baseEl.querySelector(".ion-page");
     currentFooterState = newPosition;
     if (newPosition === "stationary") {
-      cachedFooterEls.forEach((cachedFooterEl) => {
-        cachedFooterEl.classList.remove("modal-footer-moving");
-        cachedFooterEl.style.removeProperty("position");
-        cachedFooterEl.style.removeProperty("width");
-        cachedFooterEl.style.removeProperty("height");
-        cachedFooterEl.style.removeProperty("top");
-        cachedFooterEl.style.removeProperty("left");
-        page === null || page === void 0 ? void 0 : page.style.removeProperty("padding-bottom");
-        page === null || page === void 0 ? void 0 : page.appendChild(cachedFooterEl);
-      });
+      cachedFooterEl.classList.remove("modal-footer-moving");
+      cachedFooterEl.style.removeProperty("position");
+      cachedFooterEl.style.removeProperty("width");
+      cachedFooterEl.style.removeProperty("height");
+      cachedFooterEl.style.removeProperty("top");
+      cachedFooterEl.style.removeProperty("left");
+      page === null || page === void 0 ? void 0 : page.style.removeProperty("padding-bottom");
+      page === null || page === void 0 ? void 0 : page.appendChild(cachedFooterEl);
     } else {
-      let footerHeights = 0;
-      cachedFooterEls.forEach((cachedFooterEl, index) => {
-        const cachedFooterElRect = cachedFooterEl.getBoundingClientRect();
-        const bodyRect = document.body.getBoundingClientRect();
-        footerHeights += cachedFooterEl.clientHeight;
-        const absoluteTop = cachedFooterElRect.top - bodyRect.top;
-        const absoluteLeft = cachedFooterElRect.left - bodyRect.left;
-        cachedFooterEl.style.setProperty("--pinned-width", `${cachedFooterEl.clientWidth}px`);
-        cachedFooterEl.style.setProperty("--pinned-height", `${cachedFooterEl.clientHeight}px`);
-        cachedFooterEl.style.setProperty("--pinned-top", `${absoluteTop}px`);
-        cachedFooterEl.style.setProperty("--pinned-left", `${absoluteLeft}px`);
-        if (index === 0) {
-          cachedFooterYPosition = absoluteTop;
-          const header = baseEl.querySelector("ion-header");
-          if (header) {
-            cachedFooterYPosition -= header.clientHeight;
-          }
-        }
-      });
-      cachedFooterEls.forEach((cachedFooterEl) => {
-        page === null || page === void 0 ? void 0 : page.style.setProperty("padding-bottom", `${footerHeights}px`);
-        cachedFooterEl.classList.add("modal-footer-moving");
-        cachedFooterEl.style.setProperty("position", "absolute");
-        cachedFooterEl.style.setProperty("width", "var(--pinned-width)");
-        cachedFooterEl.style.setProperty("height", "var(--pinned-height)");
-        cachedFooterEl.style.setProperty("top", "var(--pinned-top)");
-        cachedFooterEl.style.setProperty("left", "var(--pinned-left)");
-        document.body.appendChild(cachedFooterEl);
-      });
+      const cachedFooterElRect = cachedFooterEl.getBoundingClientRect();
+      const bodyRect = document.body.getBoundingClientRect();
+      const footerHeight = cachedFooterEl.clientHeight;
+      page === null || page === void 0 ? void 0 : page.style.setProperty("padding-bottom", `${footerHeight}px`);
+      cachedFooterEl.classList.add("modal-footer-moving");
+      const absoluteTop = cachedFooterElRect.top - bodyRect.top;
+      const absoluteLeft = cachedFooterElRect.left - bodyRect.left;
+      cachedFooterEl.style.setProperty("position", "absolute");
+      cachedFooterEl.style.setProperty("width", `${cachedFooterEl.clientWidth}px`);
+      cachedFooterEl.style.setProperty("height", `${cachedFooterEl.clientHeight}px`);
+      cachedFooterEl.style.setProperty("top", `${absoluteTop}px`);
+      cachedFooterEl.style.setProperty("left", `${absoluteLeft}px`);
+      cachedFooterYPosition = absoluteTop;
+      const toolbar = baseEl.querySelector("ion-toolbar");
+      if (toolbar) {
+        cachedFooterYPosition -= toolbar.clientHeight;
+      }
+      document.body.appendChild(cachedFooterEl);
     }
   };
   if (wrapperAnimation && backdropAnimation) {
@@ -1879,7 +1866,6 @@ var createSheetGesture = (baseEl, backdropEl, wrapperEl, initialBreakpoint, back
   };
   const onEnd = (detail) => {
     if (!expandToScroll && detail.deltaY <= 0 && cachedScrollEl && cachedScrollEl.scrollTop > 0) {
-      swapFooterPosition("stationary");
       return;
     }
     const velocity = detail.velocityY;
@@ -11160,14 +11146,13 @@ var ItemSliding = proxyCustomElement(class ItemSliding2 extends H {
   }
   updateOptions() {
     return __async(this, null, function* () {
-      var _a92;
       const options = this.el.querySelectorAll("ion-item-options");
       let sides = 0;
       this.leftOptions = this.rightOptions = void 0;
       for (let i = 0; i < options.length; i++) {
         const item = options.item(i);
         const option = item.componentOnReady !== void 0 ? yield item.componentOnReady() : item;
-        const side = isEndSide((_a92 = option.side) !== null && _a92 !== void 0 ? _a92 : option.getAttribute("side")) ? "end" : "start";
+        const side = isEndSide(option.side) ? "end" : "start";
         if (side === "start") {
           this.leftOptions = option;
           sides |= 1;
@@ -11338,7 +11323,7 @@ var ItemSliding = proxyCustomElement(class ItemSliding2 extends H {
   render() {
     const mode = getIonMode(this);
     return h(Host, {
-      key: "d812322c9fb5da4ee16e99dc38bfb24cb4590d03",
+      key: "9880396ad79e06117d572a27f92c4b753d1e26db",
       class: {
         [mode]: true,
         "item-sliding-active-slide": this.state !== 2,
@@ -13264,13 +13249,7 @@ var PickerColumn = proxyCustomElement(class PickerColumn2 extends H {
             return;
           }
           const elementsAtPoint = referenceNode.elementsFromPoint(centerX, centerY);
-          let newActiveElement = elementsAtPoint.find((el2) => el2.tagName === "ION-PICKER-COLUMN-OPTION");
-          if (newActiveElement === void 0) {
-            const fallbackActiveElement = referenceNode.elementFromPoint(centerX, centerY);
-            if ((fallbackActiveElement === null || fallbackActiveElement === void 0 ? void 0 : fallbackActiveElement.tagName) === "ION-PICKER-COLUMN-OPTION") {
-              newActiveElement = fallbackActiveElement;
-            }
-          }
+          const newActiveElement = elementsAtPoint.find((el2) => el2.tagName === "ION-PICKER-COLUMN-OPTION");
           if (activeEl !== void 0) {
             this.setPickerItemActiveState(activeEl, false);
           }
@@ -13536,7 +13515,7 @@ var PickerColumn = proxyCustomElement(class PickerColumn2 extends H {
     } = this;
     const mode = getIonMode(this);
     return h(Host, {
-      key: "ea0280355b2f87895bf7dddd289ccf473aa759f3",
+      key: "a221dc10f1eb7c41637a16d2c7167c16939822fd",
       class: createColorClasses(color, {
         [mode]: true,
         ["picker-column-active"]: isActive,
@@ -13544,10 +13523,10 @@ var PickerColumn = proxyCustomElement(class PickerColumn2 extends H {
         ["picker-column-disabled"]: disabled
       })
     }, this.renderAssistiveFocusable(), h("slot", {
-      key: "482992131cdeb85b1f61430d7fe1322a16345769",
+      key: "81b0656f606856f3dc0a657bf167d81a5011405e",
       name: "prefix"
     }), h("div", {
-      key: "43f7f80d621d411ef366b3ca1396299e8c9a0c97",
+      key: "71b9de67c04150255dd66592601c9d926db0c31c",
       "aria-hidden": "true",
       class: "picker-opts",
       ref: (el) => {
@@ -13573,33 +13552,33 @@ var PickerColumn = proxyCustomElement(class PickerColumn2 extends H {
        */
       tabIndex: -1
     }, h("div", {
-      key: "13a9ee686132af32240710730765de4c0003a9e8",
+      key: "ebdc2f08c83db0cf17b4be29f28fcb00f529601e",
       class: "picker-item-empty",
       "aria-hidden": "true"
     }, " "), h("div", {
-      key: "dbccba4920833cfcebe9b0fc763458ec3053705a",
+      key: "04ab56fcb8e6a7d6af00204c4560feb99ff34a56",
       class: "picker-item-empty",
       "aria-hidden": "true"
     }, " "), h("div", {
-      key: "682b43f83a5ea2e46067457f3af118535e111edb",
+      key: "6cf8f538903faf0fe1e4130f3eaf7b4e2e17cb52",
       class: "picker-item-empty",
       "aria-hidden": "true"
     }, " "), h("slot", {
-      key: "d27e1e1dc0504b2f4627a29912a05bb91e8e413a"
+      key: "1cc392307b70c576be5b81b5226ceba735957f0f"
     }), h("div", {
-      key: "61c948dbb9cf7469aed3018542bc0954211585ba",
+      key: "23e3f28e2a99b9aa8b7c8f68ad9583e3ca63e9e2",
       class: "picker-item-empty",
       "aria-hidden": "true"
     }, " "), h("div", {
-      key: "cf46c277fbee65e35ff44ce0d53ce12aa9cbf9db",
+      key: "8a0563f09780c3116af0caebe4f40587ec1f041f",
       class: "picker-item-empty",
       "aria-hidden": "true"
     }, " "), h("div", {
-      key: "bbc0e2d491d3f836ab849493ade2f7fa6ad9244e",
+      key: "13207e248fc0009f37e0c90a3ee2bac2f130b856",
       class: "picker-item-empty",
       "aria-hidden": "true"
     }, " ")), h("slot", {
-      key: "d25cbbe14b2914fe7b878d43b4e3f4a8c8177d24",
+      key: "55ecf2ab5f214f936c2468cbdb7952daf89416b8",
       name: "suffix"
     }));
   }
@@ -23298,39 +23277,6 @@ var Range = proxyCustomElement(class Range2 extends H {
         this.ionFocus.emit();
       }
     };
-    this.onKnobFocus = (knob) => {
-      if (!this.hasFocus) {
-        this.hasFocus = true;
-        this.ionFocus.emit();
-      }
-      if (this.dualKnobs && this.el.shadowRoot) {
-        const knobA = this.el.shadowRoot.querySelector(".range-knob-a");
-        const knobB = this.el.shadowRoot.querySelector(".range-knob-b");
-        knobA === null || knobA === void 0 ? void 0 : knobA.classList.remove("ion-focused");
-        knobB === null || knobB === void 0 ? void 0 : knobB.classList.remove("ion-focused");
-        const focusedKnobEl = knob === "A" ? knobA : knobB;
-        focusedKnobEl === null || focusedKnobEl === void 0 ? void 0 : focusedKnobEl.classList.add("ion-focused");
-      }
-    };
-    this.onKnobBlur = () => {
-      setTimeout(() => {
-        var _a92;
-        const activeElement = (_a92 = this.el.shadowRoot) === null || _a92 === void 0 ? void 0 : _a92.activeElement;
-        const isStillFocusedOnKnob = activeElement && activeElement.classList.contains("range-knob-handle");
-        if (!isStillFocusedOnKnob) {
-          if (this.hasFocus) {
-            this.hasFocus = false;
-            this.ionBlur.emit();
-          }
-          if (this.dualKnobs && this.el.shadowRoot) {
-            const knobA = this.el.shadowRoot.querySelector(".range-knob-a");
-            const knobB = this.el.shadowRoot.querySelector(".range-knob-b");
-            knobA === null || knobA === void 0 ? void 0 : knobA.classList.remove("ion-focused");
-            knobB === null || knobB === void 0 ? void 0 : knobB.classList.remove("ion-focused");
-          }
-        }
-      }, 0);
-    };
   }
   debounceChanged() {
     const {
@@ -23728,9 +23674,7 @@ var Range = proxyCustomElement(class Range2 extends H {
       handleKeyboard,
       min,
       max,
-      inheritedAttributes,
-      onKnobFocus: this.onKnobFocus,
-      onKnobBlur: this.onKnobBlur
+      inheritedAttributes
     }), this.dualKnobs && renderKnob(rtl, {
       knob: "B",
       pressed: pressedKnob === "B",
@@ -23742,9 +23686,7 @@ var Range = proxyCustomElement(class Range2 extends H {
       handleKeyboard,
       min,
       max,
-      inheritedAttributes,
-      onKnobFocus: this.onKnobFocus,
-      onKnobBlur: this.onKnobBlur
+      inheritedAttributes
     }));
   }
   render() {
@@ -23766,7 +23708,7 @@ var Range = proxyCustomElement(class Range2 extends H {
     const mode = getIonMode(this);
     renderHiddenInput(true, el, this.name, JSON.stringify(this.getValue()), disabled);
     return h(Host, {
-      key: "ef7b01f80515bcaeb2983934ad7f10a6bd5d13ec",
+      key: "124909954930d95f353e8593fd967de1486b0315",
       onFocusin: this.onFocus,
       onFocusout: this.onBlur,
       id: rangeId,
@@ -23781,11 +23723,11 @@ var Range = proxyCustomElement(class Range2 extends H {
         "range-item-end-adjustment": needsEndAdjustment
       })
     }, h("label", {
-      key: "fd8aa90a9d52be9da024b907e68858dae424449d",
+      key: "0af177a2ba5869d3441c4b3f393835218807a418",
       class: "range-wrapper",
       id: "range-label"
     }, h("div", {
-      key: "2172b4f329c22017dd23475c80aac25ba6e753eb",
+      key: "4d834224b9c834e88497f58af4339348cec9ca1c",
       class: {
         "label-text-wrapper": true,
         "label-text-wrapper-hidden": !hasLabel
@@ -23796,13 +23738,13 @@ var Range = proxyCustomElement(class Range2 extends H {
     }, label) : h("slot", {
       name: "label"
     })), h("div", {
-      key: "3c318bf2ea0576646d4c010bf44573fd0f483186",
+      key: "797d39ac73610f6d81d0b99d71982f98f2a66c88",
       class: "native-wrapper"
     }, h("slot", {
-      key: "6586fd6fc96271e73f8a86c202d1913ad1a26f96",
+      key: "88824589cac5bb2134c30bed067ed11f6e81d887",
       name: "start"
     }), this.renderRangeSlider(), h("slot", {
-      key: "74ac0bc2d2cb66ef708bb729f88b6ecbc1b2155d",
+      key: "7207a1164b272f56634435f7bff9114fb5d9f085",
       name: "end"
     }))));
   }
@@ -23866,9 +23808,7 @@ var renderKnob = (rtl, {
   pin,
   handleKeyboard,
   pinFormatter,
-  inheritedAttributes,
-  onKnobFocus,
-  onKnobBlur
+  inheritedAttributes
 }) => {
   const start = rtl ? "right" : "left";
   const knobStyle = () => {
@@ -23890,8 +23830,6 @@ var renderKnob = (rtl, {
         ev.stopPropagation();
       }
     },
-    onFocus: () => onKnobFocus(knob),
-    onBlur: onKnobBlur,
     class: {
       "range-knob-handle": true,
       "range-knob-a": knob === "A",

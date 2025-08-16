@@ -40,10 +40,19 @@ public class JwtService {
      */
     public FirebaseToken verifyFirebaseToken(String idToken) throws Exception {
         if (firebaseAuth == null) {
-            // In development mode, return null - this will be handled by the authentication filter
-            throw new RuntimeException("Firebase authentication not available in development mode");
+            System.out.println("❌ FirebaseAuth is null - Firebase not properly initialized");
+            throw new RuntimeException("Firebase authentication not available - FirebaseAuth bean is null");
         }
-        return firebaseAuth.verifyIdToken(idToken);
+        
+        try {
+            System.out.println("🔍 Verifying Firebase token...");
+            FirebaseToken token = firebaseAuth.verifyIdToken(idToken);
+            System.out.println("✅ Firebase token verified successfully for user: " + token.getEmail());
+            return token;
+        } catch (Exception e) {
+            System.out.println("❌ Firebase token verification failed: " + e.getMessage());
+            throw e;
+        }
     }
 
     /**

@@ -41,14 +41,28 @@ public class DatabaseConfig {
         System.out.println("   - DB_NAME: " + dbName);
         System.out.println("   - DB_USERNAME: " + dbUsername);
         System.out.println("   - DB_PASSWORD: " + (dbPassword != null ? "***SET*** (length: " + dbPassword.length() + ")" : "NULL"));
+        System.out.println("   - DB_PASSWORD actual value: '" + dbPassword + "'");
         System.out.println("   - DB_SSL_MODE: " + dbSslMode);
+        System.out.println("   - Should use H2: " + (dbPassword == null || dbPassword.trim().isEmpty() || "dev_password".equals(dbPassword)));
     }
 
     @Bean
     @Primary
     public DataSource dataSource() {
-        // For development, use H2 if no PostgreSQL password is provided
-        if (dbPassword == null || dbPassword.trim().isEmpty() || "dev_password".equals(dbPassword)) {
+        System.out.println("🔍 Evaluating database configuration...");
+        System.out.println("   - Password check: " + (dbPassword != null ? "SET" : "NULL"));
+        System.out.println("   - Password actual value: '" + dbPassword + "'");
+        System.out.println("   - Password equals dev_password: " + "dev_password".equals(dbPassword));
+        
+        // Force H2 for development - check for null, empty, or dev_password
+        boolean useH2 = dbPassword == null || 
+                       dbPassword.trim().isEmpty() || 
+                       "dev_password".equals(dbPassword) ||
+                       dbPassword.equals("${DB_PASSWORD:dev_password}"); // In case env var isn't resolved
+        
+        System.out.println("   - Use H2 decision: " + useH2);
+        
+        if (useH2) {
             System.out.println("🔧 Development Mode: Using H2 in-memory database");
             
             HikariConfig config = new HikariConfig();
@@ -68,6 +82,7 @@ public class DatabaseConfig {
             return new HikariDataSource(config);
         }
 
+        System.out.println("🔧 Production Mode: Attempting PostgreSQL connection");
         // Production PostgreSQL configuration
         HikariConfig config = new HikariConfig();
         

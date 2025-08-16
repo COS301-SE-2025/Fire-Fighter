@@ -56,12 +56,18 @@ export class RegisterPage implements OnInit {
   }
 
   async onSubmit() {
-    if (this.registerForm.valid) {
+    if (this.registerForm.valid && !this.isSubmitting) {
       try {
         this.isSubmitting = true;
         this.errorMsg = null;
         
         const { email, password } = this.registerForm.value;
+        
+        console.log('🔄 Registration attempt:', { email });
+        console.log('Browser User Agent:', navigator.userAgent);
+        console.log('Current URL:', window.location.href);
+        console.log('Firebase Auth Domain:', window.location.hostname);
+        
         const user = await this.auth.createUserWithEmail(email, password);
         
         console.log('Account created for', user.email);
@@ -69,11 +75,25 @@ export class RegisterPage implements OnInit {
       } catch (err: any) {
         console.error('Registration failed', err);
         
+        // Enhanced error logging for admin-restricted-operation
+        if (err.code === 'auth/admin-restricted-operation') {
+          console.error('🚫 Admin restriction details:', {
+            code: err.code,
+            message: err.message,
+            customData: err.customData,
+            serverResponse: err.serverResponse,
+            authDomain: err.authDomain,
+            projectId: err.projectId
+          });
+        }
+        
         // Handle Firebase auth errors
         if (err.code === 'auth/email-already-in-use') {
           this.errorMsg = 'Email is already in use.';
         } else if (err.code === 'auth/weak-password') {
           this.errorMsg = 'Password is too weak.';
+        } else if (err.code === 'auth/admin-restricted-operation') {
+          this.errorMsg = 'Email/password registration is currently restricted. This may be due to Firebase project settings, billing limitations, or regional restrictions. Please try signing in with Google instead, or contact your administrator.';
         } else if (err.status === 400 || err.status === 401) {
           this.errorMsg = 'Account verification failed. Please contact support.';
         } else if (err.status === 500) {
@@ -88,7 +108,10 @@ export class RegisterPage implements OnInit {
   }
 
   async registerWithGoogle() {
+    if (this.isSubmitting) return;
+    
     try {
+      this.isSubmitting = true;
       this.errorMsg = null;
       console.log('Starting Google registration process...');
       const user = await this.auth.signInWithGoogle();
@@ -119,6 +142,8 @@ export class RegisterPage implements OnInit {
       } else {
         this.errorMsg = 'Google registration failed. Please try again.';
       }
+    } finally {
+      this.isSubmitting = false;
     }
   }
 

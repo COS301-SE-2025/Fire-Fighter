@@ -60,7 +60,7 @@ class AuthControllerIntegrationTest {
         when(authenticationService.verifyFirebaseTokenAndCreateJwt(firebaseIdToken))
             .thenReturn(mockResponse);
 
-        AuthController.FirebaseLoginRequest request = new AuthController.FirebaseLoginRequest();
+        var request = new AuthController.FirebaseLoginRequest();
         request.setIdToken(firebaseIdToken);
 
         // When & Then
@@ -86,7 +86,7 @@ class AuthControllerIntegrationTest {
         when(authenticationService.verifyFirebaseTokenAndCreateJwt(invalidToken))
             .thenThrow(new RuntimeException("Invalid token"));
 
-        AuthController.FirebaseLoginRequest request = new AuthController.FirebaseLoginRequest();
+        var request = new AuthController.FirebaseLoginRequest();
         request.setIdToken(invalidToken);
 
         // When & Then
