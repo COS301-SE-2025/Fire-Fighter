@@ -2,6 +2,8 @@ package com.apex.firefighter.config;
 
 import com.apex.firefighter.repository.ApiKeyRepository;
 import com.apex.firefighter.security.ApiKeyAuthFilter;
+import com.apex.firefighter.security.JwtAuthenticationFilter;
+import com.apex.firefighter.service.auth.JwtService;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -22,23 +24,36 @@ public class SecurityConfig {
     @Autowired
     private ApiKeyRepository apiKeyRepository;
 
+    @Autowired
+    private JwtService jwtService;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enable CORS
-            .csrf(csrf -> csrf.disable()) // Disable CSRF for API endpoints
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
+                // Auth endpoints should be public
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/users/verify").permitAll()
+                // Chatbot endpoints require authentication (except health check)
+                .requestMatchers("/api/chatbot/health").permitAll()
+                .requestMatchers("/api/chatbot/**").authenticated()
+                // Notifications require authentication
+                .requestMatchers("/api/notifications/**").authenticated()
+                // Tickets require authentication
+                .requestMatchers("/api/tickets/**").authenticated()
                 // Require API key for extra secured endpoints
                 .requestMatchers("/api/endpoints/**").authenticated()
-                // Require API key for protected endpoints
+                // Require API key for protected endpoints  
                 .requestMatchers("/api/protected/**").authenticated()
-                // Allow all other API endpoints for development
+                // Allow other API endpoints for development
                 .requestMatchers("/api/**").permitAll()
-                // Allow all other requests
                 .anyRequest().permitAll()
             )
+            .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(new ApiKeyAuthFilter(apiKeyRepository), UsernamePasswordAuthenticationFilter.class);
-            
+        
         return http.build();
     }
 
