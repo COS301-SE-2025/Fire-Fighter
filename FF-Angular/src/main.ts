@@ -42,7 +42,7 @@ import { getAnalytics } from 'firebase/analytics';
 
 // ——— Your Firebase config ———
 const firebaseConfig = {
-  apiKey: "AIzaSyDAIQCimq3CIx07N7WrsmXK3WzPpi0WeRc",
+  apiKey: "AIzaSyBl9MRD2KQCgrZ0QC_GAsz1-JBJloBt5O8", // Updated to match google-services.json
   authDomain: "bwm-it-hub-firefighter.firebaseapp.com",
   projectId: "bwm-it-hub-firefighter",
   storageBucket: "bwm-it-hub-firefighter.firebasestorage.app",
