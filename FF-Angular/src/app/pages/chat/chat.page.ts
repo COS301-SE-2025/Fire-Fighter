@@ -6,7 +6,8 @@ import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { AuthService } from '../../services/auth.service';
 import { ChatbotService, ChatbotResponse } from '../../services/chatbot.service';
 import { User } from '@angular/fire/auth';
-
+import { HttpClient, HttpResponse } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 export interface ChatMessage {
   id: string;
@@ -56,10 +57,19 @@ export class ChatPage implements OnInit, AfterViewChecked {
 
   constructor(
     private authService: AuthService,
-    private chatbotService: ChatbotService
+    private chatbotService: ChatbotService,
+    private http: HttpClient
   ) { }
 
   ngOnInit() {
+    console.log('🔍 Environment check:', {
+      apiUrl: environment.apiUrl,
+      production: environment.production
+    });
+    
+    // Test basic connectivity first
+    this.testConnectivity();
+    
     // Check API health immediately when component loads
     this.checkAPIHealth();
 
@@ -68,6 +78,25 @@ export class ChatPage implements OnInit, AfterViewChecked {
       this.user = user;
       if (user?.uid) {
         this.loadSuggestions(user.uid);
+      }
+    });
+  }
+
+  private testConnectivity(): void {
+    console.log('🌐 Testing basic connectivity...');
+    
+    this.http.get(`${environment.apiUrl}/health`, { 
+      observe: 'response'
+    }).subscribe({
+      next: (response: HttpResponse<any>) => {
+        console.log('✅ Basic connectivity OK:', response.status);
+      },
+      error: (error) => {
+        console.error('❌ Basic connectivity failed:', {
+          status: error.status,
+          message: error.message,
+          url: error.url
+        });
       }
     });
   }
@@ -140,36 +169,29 @@ export class ChatPage implements OnInit, AfterViewChecked {
   /**
    * Check if the chatbot API is healthy
    */
-  checkAPIHealth(): void {
-    // Set initial checking state
-    this.apiHealthy = null;
-    this.apiHealthStatus = 'Checking...';
-
+  public checkAPIHealth(): void {
+    console.log('🔍 Checking API health...');
+    
     this.chatbotService.getHealth().subscribe({
       next: (health) => {
-        console.log('API Health Response:', health);
-
-        if (health.status === 'healthy') {
-          this.apiHealthy = true;
-          this.apiHealthStatus = `Service Online (v${health.version || '1.0.0'})`;
-        } else {
-          this.apiHealthy = false;
-          this.apiHealthStatus = 'Service Degraded';
-        }
+        console.log('✅ API Health Response:', health);
+        this.apiHealthy = true;
+        this.apiHealthStatus = `Service Online (v${health.version || '1.0.0'})`;
       },
       error: (error) => {
-        console.warn('API health check failed:', error);
+        console.error('❌ API health check failed:', error);
         this.apiHealthy = false;
 
-        // Provide more specific error messages based on error type
         if (error.status === 0) {
-          this.apiHealthStatus = 'Service Offline (Connection Failed)';
+          this.apiHealthStatus = 'Backend Server Offline - Check if API is running';
+          console.error('🔌 Connection failed - Backend server may be down');
+          this.addErrorMessage('The AI service is currently offline. Please contact your administrator.');
         } else if (error.status === 404) {
-          this.apiHealthStatus = 'Service Not Found';
+          this.apiHealthStatus = 'API Endpoint Not Found';
         } else if (error.status >= 500) {
-          this.apiHealthStatus = 'Service Error';
+          this.apiHealthStatus = 'Server Error';
         } else {
-          this.apiHealthStatus = 'Service Unavailable';
+          this.apiHealthStatus = `Service Error (${error.status})`;
         }
       }
     });
