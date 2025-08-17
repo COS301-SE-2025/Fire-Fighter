@@ -27,11 +27,14 @@ public class DatabaseConfig {
     @Value("${DB_USERNAME:ff_admin}")
     private String dbUsername;
 
-    @Value("${DB_PASSWORD:dev_password}")
+    @Value("${DB_PASSWORD:}")
     private String dbPassword;
 
     @Value("${DB_SSL_MODE:require}")
     private String dbSslMode;
+    
+    @Value("${FORCE_H2_DB:true}")
+    private boolean forceH2Database;
 
     @PostConstruct
     public void debugDatabaseConfig() {
@@ -40,50 +43,65 @@ public class DatabaseConfig {
         System.out.println("   - DB_PORT: " + dbPort);
         System.out.println("   - DB_NAME: " + dbName);
         System.out.println("   - DB_USERNAME: " + dbUsername);
-        System.out.println("   - DB_PASSWORD: " + (dbPassword != null ? "***SET*** (length: " + dbPassword.length() + ")" : "NULL"));
-        System.out.println("   - DB_PASSWORD actual value: '" + dbPassword + "'");
+        System.out.println("   - DB_PASSWORD: " + (dbPassword != null && !dbPassword.trim().isEmpty() ? "***CONFIGURED***" : "NOT_SET"));
         System.out.println("   - DB_SSL_MODE: " + dbSslMode);
-        System.out.println("   - Should use H2: " + (dbPassword == null || dbPassword.trim().isEmpty() || "dev_password".equals(dbPassword)));
+        System.out.println("   - FORCE_H2_DB: " + forceH2Database);
+        System.out.println("   - Will use H2: " + shouldUseH2Database());
+    }
+    
+    /**
+     * Determines whether to use H2 database based on configuration
+     * Uses H2 if:
+     * - FORCE_H2_DB is true (default for development)
+     * - DB_PASSWORD is not provided or empty
+     */
+    private boolean shouldUseH2Database() {
+        return forceH2Database || dbPassword == null || dbPassword.trim().isEmpty();
     }
 
     @Bean
     @Primary
     public DataSource dataSource() {
         System.out.println("🔍 Evaluating database configuration...");
-        System.out.println("   - Password check: " + (dbPassword != null ? "SET" : "NULL"));
-        System.out.println("   - Password actual value: '" + dbPassword + "'");
-        System.out.println("   - Password equals dev_password: " + "dev_password".equals(dbPassword));
         
-        // Force H2 for development - check for null, empty, or dev_password
-        boolean useH2 = dbPassword == null || 
-                       dbPassword.trim().isEmpty() || 
-                       "dev_password".equals(dbPassword) ||
-                       dbPassword.equals("${DB_PASSWORD:dev_password}"); // In case env var isn't resolved
-        
-        System.out.println("   - Use H2 decision: " + useH2);
-        
-        if (useH2) {
+        if (shouldUseH2Database()) {
             System.out.println("🔧 Development Mode: Using H2 in-memory database");
-            
-            HikariConfig config = new HikariConfig();
-            config.setJdbcUrl("jdbc:h2:mem:firefighterdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;INIT=CREATE SCHEMA IF NOT EXISTS FIREFIGHTER");
-            config.setUsername("sa");
-            config.setPassword("");
-            config.setDriverClassName("org.h2.Driver");
-            
-            // Connection pool settings
-            config.setMaximumPoolSize(10);
-            config.setMinimumIdle(2);
-            config.setConnectionTimeout(30000);
-            config.setIdleTimeout(600000);
-            config.setMaxLifetime(1800000);
-            
-            System.out.println("✅ H2 Database initialized for development with FIREFIGHTER schema");
-            return new HikariDataSource(config);
+            return createH2DataSource();
+        } else {
+            System.out.println("🔧 Production Mode: Using PostgreSQL database");
+            return createPostgreSQLDataSource();
         }
-
-        System.out.println("🔧 Production Mode: Attempting PostgreSQL connection");
-        // Production PostgreSQL configuration
+    }
+    
+    /**
+     * Creates H2 in-memory database datasource for development
+     */
+    private DataSource createH2DataSource() {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl("jdbc:h2:mem:firefighterdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;INIT=CREATE SCHEMA IF NOT EXISTS FIREFIGHTER");
+        config.setUsername("sa");
+        config.setPassword("");
+        config.setDriverClassName("org.h2.Driver");
+        
+        // Connection pool settings for development
+        config.setMaximumPoolSize(10);
+        config.setMinimumIdle(2);
+        config.setConnectionTimeout(30000);
+        config.setIdleTimeout(600000);
+        config.setMaxLifetime(1800000);
+        
+        System.out.println("✅ H2 Database initialized for development with FIREFIGHTER schema");
+        return new HikariDataSource(config);
+    }
+    
+    /**
+     * Creates PostgreSQL database datasource for production
+     */
+    private DataSource createPostgreSQLDataSource() {
+        if (dbPassword == null || dbPassword.trim().isEmpty()) {
+            throw new IllegalStateException("DB_PASSWORD is required for PostgreSQL connection but was not provided");
+        }
+        
         HikariConfig config = new HikariConfig();
         
         // Build the JDBC URL
@@ -95,7 +113,7 @@ public class DatabaseConfig {
         config.setPassword(dbPassword);
         config.setDriverClassName("org.postgresql.Driver");
         
-        // Connection pool settings
+        // Connection pool settings for production
         config.setMaximumPoolSize(20);
         config.setMinimumIdle(5);
         config.setConnectionTimeout(30000);
