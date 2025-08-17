@@ -97,6 +97,19 @@ public class JwtService {
     public Boolean extractIsAdmin(String token) {
         return extractClaim(token, claims -> claims.get("isAdmin", Boolean.class));
     }
+    
+    /**
+     * Check if token is a custom JWT (has our custom claims)
+     * Custom JWTs will have 'firebaseUid' claim, Firebase tokens won't
+     */
+    public boolean isCustomJwt(String token) {
+        try {
+            Claims claims = extractAllClaims(token);
+            return claims.get("firebaseUid") != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     /**
      * Extract expiration date from custom JWT
