@@ -28,35 +28,47 @@ public class ChatbotService {
      */
     public ChatbotResponse processQuery(String query, String userId) {
         try {
+            System.out.println("🤖 CHATBOT SERVICE: Processing query");
+            System.out.println("🤖 CHATBOT SERVICE: Query: " + query);
+            System.out.println("🤖 CHATBOT SERVICE: User ID: " + userId);
+            
             // Validate input
             if (query == null || query.trim().isEmpty()) {
+                System.out.println("🤖 CHATBOT SERVICE: Query is empty");
                 return new ChatbotResponse("Please ask me a question about tickets or the emergency response system.", false);
             }
 
             if (userId == null || userId.trim().isEmpty()) {
+                System.out.println("🤖 CHATBOT SERVICE: User ID is empty");
                 return new ChatbotResponse("User authentication required to access ticket information.", false);
             }
 
             // Check if AI service is configured
             if (!geminiAIService.isConfigured()) {
+                System.out.println("🤖 CHATBOT SERVICE: AI service not configured");
                 return new ChatbotResponse("AI service is not properly configured. Please contact your administrator.", false);
             }
 
+            System.out.println("🤖 CHATBOT SERVICE: Getting user information");
             // Get user information
             Optional<User> userOpt = userService.getUserByFirebaseUid(userId);
             if (userOpt.isEmpty()) {
+                System.out.println("🤖 CHATBOT SERVICE: User not found");
                 return new ChatbotResponse("User not found. Please ensure you are properly authenticated.", false);
             }
 
             User user = userOpt.get();
             boolean isAdmin = user.isAdmin();
             String userRole = isAdmin ? "Administrator" : "User";
+            
+            System.out.println("🤖 CHATBOT SERVICE: User found - " + user.getUsername() + " (admin: " + isAdmin + ")");
 
             // Focus ONLY on ticket data - no navigation guidance
             String ticketContext = "";
 
             // Add request creation context if query is about creating requests
             if (containsRequestCreationKeywords(query)) {
+                System.out.println("🤖 CHATBOT SERVICE: Getting request creation context");
                 String requestContext = ticketQueryService.getRequestCreationContext(query);
                 if (!requestContext.isEmpty()) {
                     ticketContext = requestContext;
@@ -64,6 +76,7 @@ public class ChatbotService {
             }
             // For ALL other queries, show user's ticket data
             else {
+                System.out.println("🤖 CHATBOT SERVICE: Getting user ticket context");
                 // BOTH admin and regular users see their own ticket data
                 ticketContext = ticketQueryService.getUserTicketContext(query, userId);
                 System.out.println("🔍 DEBUG: Generated ticket context for query '" + query + "': " + ticketContext.substring(0, Math.min(100, ticketContext.length())) + "...");
@@ -74,8 +87,10 @@ public class ChatbotService {
                 }
             }
 
+            System.out.println("🤖 CHATBOT SERVICE: Generating AI response");
             // Generate AI response with context
             String aiResponse = geminiAIService.generateResponseWithContext(query, userRole, ticketContext);
+            System.out.println("🤖 CHATBOT SERVICE: AI response generated: " + aiResponse.substring(0, Math.min(100, aiResponse.length())) + "...");
 
             // Create response with metadata
             return new ChatbotResponse(aiResponse, true, userRole, LocalDateTime.now());
