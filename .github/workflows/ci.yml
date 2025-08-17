@@ -27,6 +27,9 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
 
+    - name: Make Maven Wrapper executable
+      run: chmod +x FF-API/mvnw
+
     - name: Run backend tests
       run: cd FF-API && ./mvnw clean test
 
