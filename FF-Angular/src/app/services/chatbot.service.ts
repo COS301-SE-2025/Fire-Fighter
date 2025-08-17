@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { Observable, throwError, timer } from 'rxjs';
+import { catchError, map, retry, delay } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface ChatbotQuery {
@@ -92,11 +92,17 @@ export class ChatbotService {
   }
 
   /**
-   * Check chatbot service health
-   * Endpoint: GET /api/chatbot/health
+   * Check chatbot service health with retry logic
    */
   getHealth(): Observable<ChatbotHealth> {
     return this.http.get<ChatbotHealth>(`${this.apiUrl}/health`).pipe(
+      retry({
+        count: 3,
+        delay: (error, retryCount) => {
+          console.log(`🔄 Retry attempt ${retryCount} for health check`);
+          return timer(1000 * retryCount); // Exponential backoff
+        }
+      }),
       catchError(this.handleError)
     );
   }
