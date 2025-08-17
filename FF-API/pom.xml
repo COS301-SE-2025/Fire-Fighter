@@ -130,7 +130,6 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
-<<<<<<< HEAD
 
 			<!-- Maven Surefire Plugin for Test Execution -->
 			<plugin>
@@ -192,8 +191,6 @@
 					</execution>
 				</executions>
 			</plugin>
-=======
->>>>>>> origin/feature/api-security-merge
 		</plugins>
 	</build>
 
