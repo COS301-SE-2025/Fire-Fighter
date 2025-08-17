@@ -27,11 +27,14 @@ public class DatabaseConfig {
     @Value("${DB_USERNAME:ff_admin}")
     private String dbUsername;
 
-    @Value("${DB_PASSWORD}")
+    @Value("${DB_PASSWORD:}")
     private String dbPassword;
 
     @Value("${DB_SSL_MODE:require}")
     private String dbSslMode;
+    
+    @Value("${FORCE_H2_DB:true}")
+    private boolean forceH2Database;
 
     @PostConstruct
     public void debugDatabaseConfig() {
@@ -40,17 +43,65 @@ public class DatabaseConfig {
         System.out.println("   - DB_PORT: " + dbPort);
         System.out.println("   - DB_NAME: " + dbName);
         System.out.println("   - DB_USERNAME: " + dbUsername);
-        System.out.println("   - DB_PASSWORD: " + (dbPassword != null ? "***SET*** (length: " + dbPassword.length() + ")" : "NULL"));
+        System.out.println("   - DB_PASSWORD: " + (dbPassword != null && !dbPassword.trim().isEmpty() ? "***CONFIGURED***" : "NOT_SET"));
         System.out.println("   - DB_SSL_MODE: " + dbSslMode);
+        System.out.println("   - FORCE_H2_DB: " + forceH2Database);
+        System.out.println("   - Will use H2: " + shouldUseH2Database());
+    }
+    
+    /**
+     * Determines whether to use H2 database based on configuration
+     * Uses H2 if:
+     * - FORCE_H2_DB is true (default for development)
+     * - DB_PASSWORD is not provided or empty
+     */
+    private boolean shouldUseH2Database() {
+        return forceH2Database || dbPassword == null || dbPassword.trim().isEmpty();
     }
 
     @Bean
     @Primary
     public DataSource dataSource() {
-        if (dbPassword == null || dbPassword.trim().isEmpty()) {
-            throw new RuntimeException("DB_PASSWORD environment variable is required but not set!");
+        System.out.println("🔍 Evaluating database configuration...");
+        
+        if (shouldUseH2Database()) {
+            System.out.println("🔧 Development Mode: Using H2 in-memory database");
+            return createH2DataSource();
+        } else {
+            System.out.println("🔧 Production Mode: Using PostgreSQL database");
+            return createPostgreSQLDataSource();
         }
-
+    }
+    
+    /**
+     * Creates H2 in-memory database datasource for development
+     */
+    private DataSource createH2DataSource() {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl("jdbc:h2:mem:firefighterdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;INIT=CREATE SCHEMA IF NOT EXISTS FIREFIGHTER");
+        config.setUsername("sa");
+        config.setPassword("");
+        config.setDriverClassName("org.h2.Driver");
+        
+        // Connection pool settings for development
+        config.setMaximumPoolSize(10);
+        config.setMinimumIdle(2);
+        config.setConnectionTimeout(30000);
+        config.setIdleTimeout(600000);
+        config.setMaxLifetime(1800000);
+        
+        System.out.println("✅ H2 Database initialized for development with FIREFIGHTER schema");
+        return new HikariDataSource(config);
+    }
+    
+    /**
+     * Creates PostgreSQL database datasource for production
+     */
+    private DataSource createPostgreSQLDataSource() {
+        if (dbPassword == null || dbPassword.trim().isEmpty()) {
+            throw new IllegalStateException("DB_PASSWORD is required for PostgreSQL connection but was not provided");
+        }
+        
         HikariConfig config = new HikariConfig();
         
         // Build the JDBC URL
@@ -62,14 +113,14 @@ public class DatabaseConfig {
         config.setPassword(dbPassword);
         config.setDriverClassName("org.postgresql.Driver");
         
-        // Connection pool settings
+        // Connection pool settings for production
         config.setMaximumPoolSize(20);
         config.setMinimumIdle(5);
         config.setConnectionTimeout(30000);
         config.setIdleTimeout(600000);
         config.setMaxLifetime(1800000);
         
-        System.out.println("✅ Creating DataSource with URL: " + jdbcUrl);
+        System.out.println("✅ Creating PostgreSQL DataSource with URL: " + jdbcUrl);
         System.out.println("✅ Using username: " + dbUsername);
         
         return new HikariDataSource(config);

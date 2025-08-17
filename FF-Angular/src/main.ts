@@ -31,6 +31,7 @@ import { routes }       from './app/app.routes';
 import { AppComponent } from './app/app.component';
 import { ApiConfigService } from './app/services/api-config.service';
 import { environment } from './environments/environment';
+import { jwtInterceptor } from './app/interceptors/jwt.interceptor';
 
 // ← THESE imports are from @angular/fire
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
@@ -41,7 +42,7 @@ import { getAnalytics } from 'firebase/analytics';
 
 // ——— Your Firebase config ———
 const firebaseConfig = {
-  apiKey: "AIzaSyDAIQCimq3CIx07N7WrsmXK3WzPpi0WeRc",
+  apiKey: "AIzaSyBl9MRD2KQCgrZ0QC_GAsz1-JBJloBt5O8", // Updated to match google-services.json
   authDomain: "bwm-it-hub-firefighter.firebaseapp.com",
   projectId: "bwm-it-hub-firefighter",
   storageBucket: "bwm-it-hub-firefighter.firebasestorage.app",
@@ -61,6 +62,7 @@ bootstrapApplication(AppComponent, {
     provideIonicAngular(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
     provideHttpClient(withInterceptors([
+      jwtInterceptor, // Add JWT token to all API requests
       (req, next) => {
         const apiConfigService = inject(ApiConfigService);
         const currentApiUrl = apiConfigService.getCurrentApiUrlSync();

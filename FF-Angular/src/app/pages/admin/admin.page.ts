@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { AdminService, AdminTicket } from '../../services/admin.service';
 import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
@@ -109,8 +108,7 @@ export class AdminPage implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private adminService: AdminService,
-    private router: Router
+    private adminService: AdminService
   ) {
     this.isAdmin$ = this.authService.isAdmin$;
     this.userProfile$ = this.authService.userProfile$;
@@ -670,11 +668,6 @@ export class AdminPage implements OnInit {
   }
 
 
-
-  // Navigation method for metrics button
-  navigateToMetrics() {
-    this.router.navigate(['/metrics']);
-  }
 
   // Full export uses modal (top button)
   exportFullAuditLogs() {

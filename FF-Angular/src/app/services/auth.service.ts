@@ -50,6 +50,21 @@ interface UserVerificationResponse {
   }>;
 }
 
+interface JwtAuthResponse {
+  token: string;
+  user: {
+    userId: string;
+    username: string;
+    email: string;
+    department: string;
+    isAdmin: boolean;
+  };
+}
+
+interface FirebaseLoginRequest {
+  idToken: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -71,6 +86,10 @@ export class AuthService {
   // User profile data
   private userProfileSubject = new BehaviorSubject<UserVerificationResponse | null>(null);
   public userProfile$ = this.userProfileSubject.asObservable();
+
+  // JWT Token management
+  private jwtTokenSubject = new BehaviorSubject<string | null>(null);
+  public jwtToken$ = this.jwtTokenSubject.asObservable();
 
   usernames: { [userId: string]: string } = {};
 
@@ -102,6 +121,7 @@ export class AuthService {
   private clearUserData(): void {
     this.isAdminSubject.next(false);
     this.userProfileSubject.next(null);
+    this.clearJwtToken();
     // Clear localStorage data
     localStorage.removeItem('firebase_user_profile');
     localStorage.removeItem('firebase_user_admin_status');
@@ -169,113 +189,161 @@ export class AuthService {
   }
 
   /**
+   * JWT Token Management Methods
+   */
+  
+  /**
+   * Store JWT token securely
+   */
+  private storeJwtToken(token: string): void {
+    try {
+      localStorage.setItem('jwt_token', token);
+      this.jwtTokenSubject.next(token);
+      console.log('✅ JWT token stored successfully');
+    } catch (error) {
+      console.error('Failed to store JWT token:', error);
+    }
+  }
+
+  /**
+   * Get stored JWT token
+   */
+  getJwtToken(): string | null {
+    try {
+      return localStorage.getItem('jwt_token');
+    } catch (error) {
+      console.error('Failed to retrieve JWT token:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Clear JWT token
+   */
+  private clearJwtToken(): void {
+    try {
+      localStorage.removeItem('jwt_token');
+      this.jwtTokenSubject.next(null);
+      console.log('✅ JWT token cleared');
+    } catch (error) {
+      console.error('Failed to clear JWT token:', error);
+    }
+  }
+
+  /**
+   * Exchange Firebase ID token for backend JWT token
+   */
+  private async exchangeFirebaseTokenForJwt(firebaseUser: User): Promise<JwtAuthResponse> {
+    try {
+      console.log('🔄 Exchanging Firebase token for JWT...');
+      
+      // Get Firebase ID token
+      const idToken = await firebaseUser.getIdToken();
+      
+      // Send to backend auth endpoint
+      const response = await this.http.post<JwtAuthResponse>(
+        `${this.getCurrentApiUrl()}/auth/firebase-login`,
+        { idToken } as FirebaseLoginRequest
+      ).toPromise();
+
+      if (response) {
+        // Store the JWT token
+        this.storeJwtToken(response.token);
+        
+        console.log('✅ JWT token exchange successful:', {
+          tokenReceived: !!response.token,
+          userId: response.user.userId,
+          username: response.user.username,
+          isAdmin: response.user.isAdmin
+        });
+
+        return response;
+      } else {
+        throw new Error('No response received from JWT exchange');
+      }
+    } catch (error) {
+      console.error('❌ JWT token exchange failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get current API URL from ApiConfigService
+   */
+  private getCurrentApiUrl(): string {
+    // You may need to inject ApiConfigService here
+    return environment.apiUrl; // Fallback to environment
+  }
+
+  /**
    * Verify user with backend API and store admin status
    * Endpoint: POST /api/users/verify
    * Content-Type: application/x-www-form-urlencoded
    */
   private async verifyUserWithBackend(user: User, department: string = 'Default Department'): Promise<UserVerificationResponse> {
-    console.log('🔄 Starting backend user verification...');
-    console.log('User data from Firebase:', {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName,
-      emailVerified: user.emailVerified
-    });
-
-    // Validate required fields according to API documentation
-    if (!user.uid) {
-      throw new Error('Firebase UID is required but missing');
-    }
-    if (!user.email) {
-      throw new Error('User email is required but missing');
-    }
-
-    // Prepare username - ensure it's not empty
-    const username = user.displayName || user.email.split('@')[0] || 'FireFighter User';
-    
-    // Create form data using HttpParams for application/x-www-form-urlencoded format
-    // Matching the API documentation exactly:
-    const params = new HttpParams()
-      .set('firebaseUid', user.uid)           // Required: Firebase User ID (UID)
-      .set('username', username)              // Required: User's display name
-      .set('email', user.email)               // Required: User's email address
-      .set('department', department);         // Optional: User's department/division
-
-    const headers = {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    };
-
-    console.log('📤 Sending verification request to:', `${environment.apiUrl}/users/verify`);
-    console.log('Request parameters:', {
-      firebaseUid: user.uid,
-      username: username,
-      email: user.email,
-      department: department
-    });
-
     try {
+      console.log('🔄 Verifying user with backend:', {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName
+      });
+
+      // Prepare form data for backend verification
+      const params = new HttpParams()
+        .set('firebaseUid', user.uid)
+        .set('username', user.displayName || user.email?.split('@')[0] || 'Unknown')
+        .set('email', user.email || '')
+        .set('department', department);
+
+      const headers = {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      };
+
+      // Call backend verification endpoint
       const response = await this.http.post<UserVerificationResponse>(
-        `${environment.apiUrl}/users/verify`, 
-        params.toString(), 
+        `${environment.apiUrl}/users/verify`,
+        params.toString(),
         { headers }
       ).toPromise();
-      
-      console.log('✅ User verified successfully with backend:', response);
-      
+
       if (response) {
-        // Store the admin status and user profile
-        this.isAdminSubject.next(response.isAdmin);
+        // Store user profile and admin status
         this.userProfileSubject.next(response);
+        this.isAdminSubject.next(response.isAdmin);
         
-        // Persist to localStorage
+        // Store in localStorage for persistence
         this.storeUserData(response);
-        
-        console.log('👤 User profile loaded:', {
+
+        console.log('✅ User verification successful:', {
           userId: response.userId,
           username: response.username,
-          email: response.email,
-          department: response.department,
           isAdmin: response.isAdmin,
-          role: response.role,
-          rolesCount: response.userRoles?.length || 0
+          isAuthorized: response.isAuthorized
         });
-        
+
+        // Exchange Firebase token for JWT
+        try {
+          await this.exchangeFirebaseTokenForJwt(user);
+        } catch (jwtError) {
+          console.warn('⚠️ JWT exchange failed, continuing with Firebase auth:', jwtError);
+        }
+
         return response;
+      } else {
+        throw new Error('No response received from backend verification');
       }
-      
-      throw new Error('No response received from backend verification');
     } catch (error: any) {
       console.error('❌ Backend verification failed:', error);
 
-      // Check for connection errors (ERR_CONNECTION_REFUSED, network failures, etc.)
+      // Check for connection errors
       if (this.isConnectionError(error)) {
         console.error('🔌 Connection error detected - redirecting to service down page');
-
-        // Store the last successful connection time
         localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
-
-        // Clear user data on connection failure
-        this.clearUserData();
-
-        // Redirect to service down page
         this.router.navigate(['/service-down']);
-
-        // Don't throw the error to prevent further error handling
-        return Promise.reject(new Error('Service temporarily unavailable'));
+        throw new Error('Service temporarily unavailable');
       }
 
-      // Log detailed error information for debugging
-      if (error.status) {
-        console.error(`HTTP ${error.status}: ${error.statusText}`);
-        console.error('Error URL:', error.url);
-        if (error.error) {
-          console.error('Error details:', error.error);
-        }
-      }
-
-      // Clear user data on verification failure
-      this.clearUserData();
-
+      // Re-throw other errors
       throw error;
     }
   }
@@ -335,19 +403,15 @@ export class AuthService {
    * Simplified flow: Firebase auth -> backend verification -> navigation
    */
   async signInWithGoogle(): Promise<User> {
-    let user: User;
+    let user: User | null = null;
     
     console.log('Starting Google sign-in process...');
     
-    // For mobile (Android/iOS) use the native Google Sign In
     if (Capacitor.isNativePlatform()) {
       console.log('Using native platform Google sign-in');
-      // Sign in with Google on native platform
       const result = await FirebaseAuthentication.signInWithGoogle();
       
-      // The user is now signed in on the native layer, but we need to sign in on the web layer too
       if (result.credential) {
-        // Sign in with the credential on the web layer
         const credential = GoogleAuthProvider.credential(
           result.credential.idToken, 
           result.credential.accessToken
@@ -358,21 +422,54 @@ export class AuthService {
         throw new Error('No credential returned from native Google sign-in');
       }
     } else {
-      // On web platforms, always use popup (simplified - no browser detection)
-      console.log('Using web platform Google sign-in with popup');
+      console.log('Using web platform Google sign-in');
       const provider = new GoogleAuthProvider();
       provider.addScope('email');
       provider.addScope('profile');
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
       
-      const credential = await signInWithPopup(this.auth, provider);
-      user = credential.user;
+      try {
+        // Try popup first
+        const credential = await signInWithPopup(this.auth, provider);
+        user = credential.user;
+      } catch (error: any) {
+        console.log('Popup failed:', error.code);
+        
+        // If popup fails due to CORS/security, try redirect
+        if (error.code === 'auth/popup-blocked' || 
+            error.code === 'auth/popup-closed-by-user' ||
+            error.code === 'auth/cancelled-popup-request' ||
+            error.code === 'auth/admin-restricted-operation') {
+          
+          console.log('🔄 Popup blocked, trying redirect method...');
+          
+          // Import redirect methods
+          const { signInWithRedirect, getRedirectResult } = await import('firebase/auth');
+          
+          // Check if we're returning from a redirect
+          const redirectResult = await getRedirectResult(this.auth);
+          if (redirectResult) {
+            user = redirectResult.user;
+          } else {
+            // Start redirect flow
+            await signInWithRedirect(this.auth, provider);
+            // This will redirect the page, so we won't reach here
+            throw new Error('Redirecting to Google sign-in...');
+          }
+        } else {
+          throw error;
+        }
+      }
     }
 
-    console.log('Firebase authentication successful, verifying with backend...');
-    // Verify user with backend after successful Firebase authentication
+    if (!user) {
+      throw new Error('No user returned from Google sign-in');
+    }
+
+    console.log('✅ Firebase authentication successful');
     await this.verifyUserWithBackend(user);
-    
-    console.log('Backend verification successful');
     return user;
   }
 
@@ -428,12 +525,13 @@ export class AuthService {
         throw new Error('No user returned from native account creation');
       }
     } else {
-      // Use Firebase web SDK for browser
+      // Use Firebase web SDK for browser - SIMPLE APPROACH LIKE DEVELOP BRANCH
       const credential = await createUserWithEmailAndPassword(this.auth, email, password);
       user = credential.user;
     }
 
-    // Verify new user with backend after successful Firebase registration
+    console.log('Firebase user created successfully, verifying with backend...');
+    // Use the working approach from develop branch
     await this.verifyUserWithBackend(user);
     
     return user;
