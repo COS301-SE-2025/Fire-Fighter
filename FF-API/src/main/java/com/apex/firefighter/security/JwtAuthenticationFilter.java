@@ -26,45 +26,41 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.jwtService = jwtService;
     }
 
+    
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, 
-                                  FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         
         final String authHeader = request.getHeader("Authorization");
-        
+        System.out.println("🔒 JWT FILTER: Processing request to: " + request.getRequestURI());
+        System.out.println("🔒 JWT FILTER: Authorization header: " + (authHeader != null ? "Present" : "Missing"));
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            System.out.println("🔒 JWT FILTER: No Bearer token found, continuing filter chain");
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
             final String token = authHeader.substring(7);
+            System.out.println("🔒 JWT FILTER: Token extracted (first 20 chars): " + token.substring(0, Math.min(20, token.length())) + "...");
             
-            // Try to verify as Firebase ID token first
+            // Check if this is a valid JWT format
             if (token.contains(".") && token.split("\\.").length == 3) {
-                try {
-                    FirebaseToken firebaseToken = jwtService.verifyFirebaseToken(token);
-                    String firebaseUid = firebaseToken.getUid();
-                    String email = firebaseToken.getEmail();
-                    
-                    if (firebaseUid != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                        // Create authentication with Firebase UID as principal
-                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                                firebaseUid, null, Collections.emptyList());
-                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                        SecurityContextHolder.getContext().setAuthentication(authToken);
-                        
-                        // Add Firebase info to request attributes
-                        request.setAttribute("firebaseUid", firebaseUid);
-                        request.setAttribute("email", email);
-                    }
-                } catch (Exception e) {
-                    // If Firebase token verification fails, try custom JWT
+                System.out.println("🔒 JWT FILTER: Token has valid JWT format");
+                
+                // First check if it's our custom JWT token
+                if (jwtService.isCustomJwt(token)) {
+                    System.out.println("🔒 JWT FILTER: Processing as custom JWT token");
+                    // Handle custom JWT token
                     try {
                         String firebaseUid = jwtService.extractFirebaseUid(token);
                         Boolean isAdmin = jwtService.extractIsAdmin(token);
                         
+                        System.out.println("🔒 JWT FILTER: Extracted from custom JWT - UID: " + firebaseUid + ", Admin: " + isAdmin);
+                        
                         if (firebaseUid != null && jwtService.validateToken(token, firebaseUid)) {
+                            System.out.println("🔒 JWT FILTER: Custom JWT token validated successfully");
                             List<SimpleGrantedAuthority> authorities = isAdmin ? 
                                 List.of(new SimpleGrantedAuthority("ROLE_ADMIN")) : 
                                 Collections.emptyList();
@@ -76,13 +72,48 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             
                             request.setAttribute("firebaseUid", firebaseUid);
                             request.setAttribute("isAdmin", isAdmin);
+                            
+                            System.out.println("🔒 JWT FILTER: Authentication set in SecurityContext for user: " + firebaseUid);
+                        } else {
+                            System.out.println("🔒 JWT FILTER: Custom JWT token validation failed");
                         }
                     } catch (Exception ex) {
-                        logger.warn("JWT token validation failed: " + ex.getMessage());
+                        System.out.println("🔒 JWT FILTER: Custom JWT token validation error: " + ex.getMessage());
+                        logger.warn("Custom JWT token validation failed: " + ex.getMessage());
+                    }
+                } else {
+                    System.out.println("🔒 JWT FILTER: Processing as Firebase ID token");
+                    // Try to verify as Firebase ID token
+                    try {
+                        FirebaseToken firebaseToken = jwtService.verifyFirebaseToken(token);
+                        String firebaseUid = firebaseToken.getUid();
+                        String email = firebaseToken.getEmail();
+                        
+                        System.out.println("🔒 JWT FILTER: Firebase token verified - UID: " + firebaseUid + ", Email: " + email);
+                        
+                        if (firebaseUid != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                            // Create authentication with Firebase UID as principal
+                            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                                    firebaseUid, null, Collections.emptyList());
+                            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                            SecurityContextHolder.getContext().setAuthentication(authToken);
+                            
+                            // Add Firebase info to request attributes
+                            request.setAttribute("firebaseUid", firebaseUid);
+                            request.setAttribute("email", email);
+                            
+                            System.out.println("🔒 JWT FILTER: Firebase authentication set in SecurityContext for user: " + firebaseUid);
+                        }
+                    } catch (Exception e) {
+                        System.out.println("🔒 JWT FILTER: Firebase token verification failed: " + e.getMessage());
+                        logger.warn("Firebase token verification failed: " + e.getMessage());
                     }
                 }
+            } else {
+                System.out.println("🔒 JWT FILTER: Token does not have valid JWT format");
             }
         } catch (Exception e) {
+            System.out.println("🔒 JWT FILTER: General error: " + e.getMessage());
             logger.error("Cannot set user authentication: " + e.getMessage());
         }
 
