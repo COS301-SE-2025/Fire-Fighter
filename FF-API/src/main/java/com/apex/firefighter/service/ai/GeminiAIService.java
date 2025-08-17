@@ -171,8 +171,15 @@ public class GeminiAIService {
      * Check if API key is configured
      */
     public boolean isConfigured() {
-        return apiKey != null && !apiKey.trim().isEmpty() && 
+        boolean configured = apiKey != null && !apiKey.trim().isEmpty() && 
                !apiKey.equals("${GOOGLE_GEMINI_API_KEY}") && 
                !apiKey.equals("disabled-for-dev");
+        
+        System.out.println("🤖 GEMINI AI SERVICE: Configuration check");
+        System.out.println("🤖 GEMINI AI SERVICE: API Key present: " + (apiKey != null));
+        System.out.println("🤖 GEMINI AI SERVICE: API Key value: " + (apiKey != null ? apiKey.substring(0, Math.min(10, apiKey.length())) + "..." : "null"));
+        System.out.println("🤖 GEMINI AI SERVICE: Is configured: " + configured);
+        
+        return configured;
     }
 }
