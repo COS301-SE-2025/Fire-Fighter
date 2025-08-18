@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@ConditionalOnProperty(name = "GOOGLE_GEMINI_API_KEY", matchIfMissing = false)
 public class GeminiAIService {
 
     @Value("${GOOGLE_GEMINI_API_KEY:disabled-for-dev}")

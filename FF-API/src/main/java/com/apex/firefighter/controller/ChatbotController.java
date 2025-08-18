@@ -23,7 +23,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/chatbot")
 @Tag(name = "AI Chatbot", description = "AI-powered chatbot for ticket queries and emergency response assistance")
-@ConditionalOnProperty(name = "GOOGLE_GEMINI_API_KEY", matchIfMissing = false)
 public class ChatbotController {
 
     @Autowired

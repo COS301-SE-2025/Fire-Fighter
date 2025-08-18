@@ -11,7 +11,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Service
-@ConditionalOnProperty(name = "GOOGLE_GEMINI_API_KEY", matchIfMissing = false)
 public class ChatbotService {
 
     @Autowired
