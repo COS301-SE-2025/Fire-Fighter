@@ -46,7 +46,9 @@ public class GmailEmailServiceIntegrationTest {
         user.setEmail("recipient@example.com");
 
         Ticket t1 = new Ticket("T-1", "Test ticket one", "Active", "user-1", "Fire", "+27123456789");
+        t1.setDuration(60); // Set duration to prevent NullPointerException
         Ticket t2 = new Ticket("T-2", "Test ticket two", "Active", "user-2", "Medical", "+27111111111");
+        t2.setDuration(90); // Set duration to prevent NullPointerException
 
         List<Ticket> tickets = List.of(t1, t2);
         String csv = gmailEmailService.exportTicketsToCsv(tickets);
@@ -111,6 +113,7 @@ public class GmailEmailServiceIntegrationTest {
         user.setEmail("user@example.com");
 
         Ticket ticket = new Ticket("T-123", "Emergency ticket", "Active", "user-1", "Fire", "+27123456789");
+        ticket.setDuration(60); // Set duration to prevent NullPointerException
 
         // Act
         gmailEmailService.sendTicketCreationEmail("recipient@example.com", ticket, user);
@@ -190,6 +193,7 @@ public class GmailEmailServiceIntegrationTest {
         user.setEmail("user@example.com");
 
         Ticket ticket = new Ticket("T-999", "Expiring ticket", "Active", "user-4", "Fire", "+27333333333");
+        ticket.setDuration(60); // Set duration to prevent NullPointerException
 
         // Act
         gmailEmailService.sendFiveMinuteWarningEmail("recipient@example.com", ticket, user);

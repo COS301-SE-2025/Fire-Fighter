@@ -509,7 +509,9 @@ public class GmailEmailService {
         String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm"));
         String ticketDateTime = ticket.getDateCreated().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm"));
 
-        LocalDateTime expirationTime = ticket.getDateCreated().plusMinutes(ticket.getDuration());
+        // Use default duration of 60 minutes if duration is null
+        int durationMinutes = ticket.getDuration() != null ? ticket.getDuration() : 60;
+        LocalDateTime expirationTime = ticket.getDateCreated().plusMinutes(durationMinutes);
         String expirationDateTime = expirationTime.format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm"));
 
         StringBuilder html = new StringBuilder();
@@ -547,7 +549,7 @@ public class GmailEmailService {
         html.append("</div>");
         html.append("<div class=\"info-item\">");
         html.append("<span class=\"info-label\">Duration: </span>");
-        html.append("<span class=\"info-value\">").append(ticket.getDuration()).append(" minutes</span>");
+        html.append("<span class=\"info-value\">").append(durationMinutes).append(" minutes</span>");
         html.append("</div>");
         html.append("</div>");
         html.append("<div class=\"security-notice\">");

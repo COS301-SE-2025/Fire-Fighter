@@ -60,7 +60,9 @@ public class TicketScheduledService {
                     continue;
                 }
 
-                LocalDateTime expirationTime = ticket.getDateCreated().plusMinutes(ticket.getDuration());
+                // Use default duration of 60 minutes if duration is null
+                int durationMinutes = ticket.getDuration() != null ? ticket.getDuration() : 60;
+                LocalDateTime expirationTime = ticket.getDateCreated().plusMinutes(durationMinutes);
                 LocalDateTime warningTime = expirationTime.minusMinutes(5);
 
                 // Check if current time is at or past the warning time but before expiration
@@ -106,7 +108,9 @@ public class TicketScheduledService {
             LocalDateTime currentTime = LocalDateTime.now();
             
             for (Ticket ticket : activeTicketsWithDuration) {
-                LocalDateTime expirationTime = ticket.getDateCreated().plusMinutes(ticket.getDuration());
+                // Use default duration of 60 minutes if duration is null
+                int durationMinutes = ticket.getDuration() != null ? ticket.getDuration() : 60;
+                LocalDateTime expirationTime = ticket.getDateCreated().plusMinutes(durationMinutes);
                 
                 if (currentTime.isAfter(expirationTime)) {
                     ticket.setStatus("Closed");
