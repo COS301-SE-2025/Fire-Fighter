@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-// @EnableScheduling // Comment this out temporarily
 public class TicketScheduledService {
 
     private final TicketRepository ticketRepository;
@@ -25,14 +24,14 @@ public class TicketScheduledService {
         this.notificationService = notificationService;
     }
 
-    // @PostConstruct // Disable startup check
+    @PostConstruct
     public void runStartupCheck() {
         System.out.println("🚀 STARTUP CHECK: Running expired ticket check at application startup...");
         sendFiveMinuteWarnings();
         closeExpiredTickets();
     }
 
-    // @Scheduled(cron = "0 */2 * * * *") // Disable scheduled execution
+    @Scheduled(cron = "0 */2 * * * *") // Run every 2 minutes
     @Transactional
     public void scheduledTicketCheck() {
         try {
