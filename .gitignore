@@ -253,3 +253,4 @@ id_ed25519*
 /node_modules
 FF-API/src/main/resources/firebase-service-account.json
 *.tsbuildinfo
+*.tsbuildinfo

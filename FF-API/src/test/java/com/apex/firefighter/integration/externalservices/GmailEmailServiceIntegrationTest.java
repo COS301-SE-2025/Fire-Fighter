@@ -1,5 +1,3 @@
-<<<<<<< Updated upstream
-=======
 package com.apex.firefighter.integration.externalservices;
 
 import com.apex.firefighter.model.Ticket;
@@ -317,4 +315,3 @@ public class GmailEmailServiceIntegrationTest {
         @Override public void send(org.springframework.mail.SimpleMailMessage... simpleMessages) { }
     }
 }
->>>>>>> Stashed changes
