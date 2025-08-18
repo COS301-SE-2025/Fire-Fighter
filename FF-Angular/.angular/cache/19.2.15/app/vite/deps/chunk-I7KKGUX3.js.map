@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["../../../../../../node_modules/@ionic/core/dist/esm/capacitor-CFERIeaU.js"],
-  "sourcesContent": ["/*!\n * (C) Ionic http://ionicframework.com - MIT License\n */\nimport { w as win } from './index-ZjP4CjeZ.js';\nconst getCapacitor = () => {\n  if (win !== undefined) {\n    return win.Capacitor;\n  }\n  return undefined;\n};\nexport { getCapacitor as g };"],
-  "mappings": ";;;;;AAIA,IAAM,eAAe,MAAM;AACzB,MAAI,QAAQ,QAAW;AACrB,WAAO,IAAI;AAAA,EACb;AACA,SAAO;AACT;",
-  "names": []
-}
