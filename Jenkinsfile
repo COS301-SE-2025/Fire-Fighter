@@ -1,3 +1,19 @@
+// Helper function to update GitHub status with error handling
+def updateGitHubStatus(status, description, context) {
+    try {
+        githubNotify(
+            status: status,
+            description: description,
+            context: context,
+            targetUrl: env.BUILD_URL
+        )
+        echo "✅ GitHub status updated: ${context} - ${status}"
+    } catch (Exception e) {
+        echo "⚠️ Could not update GitHub status for ${context}: ${e.getMessage()}"
+        // Don't fail the build if GitHub status update fails
+    }
+}
+
 pipeline {
     agent any
 
@@ -12,6 +28,11 @@ pipeline {
             steps {
                 checkout scm
                 echo "🔥 Fire-Fighter Build Started"
+
+                // Set GitHub status to pending
+                script {
+                    updateGitHubStatus('PENDING', 'Fire-Fighter build started', 'jenkins/build')
+                }
             }
         }
 
@@ -36,6 +57,10 @@ pipeline {
 
         stage('Unit Tests') {
             steps {
+                script {
+                    updateGitHubStatus('PENDING', 'Running unit tests', 'jenkins/tests')
+                }
+
                 dir('FF-API') {
                     echo "🧪 Running backend unit tests (unit folder)..."
                     // Copy Firebase service account key from Jenkins secret to workspace
@@ -114,6 +139,14 @@ pipeline {
         }
 
         stage('Build') {
+            steps {
+                script {
+                    updateGitHubStatus('PENDING', 'Building application', 'jenkins/build')
+                }
+            }
+        }
+
+        stage('Compile & Package') {
             parallel {
                 stage('Build Backend') {
                     steps {
@@ -180,9 +213,28 @@ pipeline {
             echo "📦 JAR file: target/firefighter-platform-0.0.1-SNAPSHOT.jar"
             echo "🌐 Frontend build: www/"
             echo "🐳 Ready for Portainer deployment!"
+
+            // Update GitHub status to success
+            script {
+                updateGitHubStatus('SUCCESS', 'Fire-Fighter build completed successfully', 'jenkins/build')
+                updateGitHubStatus('SUCCESS', 'All tests passed', 'jenkins/tests')
+            }
         }
         failure {
             echo "❌ Build failed!"
+
+            // Update GitHub status to failure
+            script {
+                updateGitHubStatus('FAILURE', 'Fire-Fighter build failed', 'jenkins/build')
+            }
+        }
+        unstable {
+            echo "⚠️ Build unstable!"
+
+            // Update GitHub status to failure for unstable builds
+            script {
+                updateGitHubStatus('FAILURE', 'Fire-Fighter build unstable (tests failed)', 'jenkins/tests')
+            }
         }
     }
 }
