@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@Transactional
+// @EnableScheduling // Comment this out temporarily
 public class TicketScheduledService {
 
     private final TicketRepository ticketRepository;
@@ -25,19 +25,26 @@ public class TicketScheduledService {
         this.notificationService = notificationService;
     }
 
-    @PostConstruct
+    // @PostConstruct // Disable startup check
     public void runStartupCheck() {
         System.out.println("🚀 STARTUP CHECK: Running expired ticket check at application startup...");
         sendFiveMinuteWarnings();
         closeExpiredTickets();
     }
 
-    @Scheduled(cron = "0 */2 * * * *")
+    // @Scheduled(cron = "0 */2 * * * *") // Disable scheduled execution
+    @Transactional
     public void scheduledTicketCheck() {
-        sendFiveMinuteWarnings();
-        closeExpiredTickets();
+        try {
+            sendFiveMinuteWarnings();
+            closeExpiredTickets();
+        } catch (Exception e) {
+            System.err.println("❌ Scheduled ticket check failed: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
+    @Transactional
     public void sendFiveMinuteWarnings() {
         System.out.println("Checking for tickets needing 5-minute warnings at " + LocalDateTime.now());
 
@@ -48,6 +55,7 @@ public class TicketScheduledService {
             LocalDateTime currentTime = LocalDateTime.now();
 
             for (Ticket ticket : activeTicketsWithDuration) {
+                // Skip if warning already sent
                 if (ticket.getFiveMinuteWarningSent() != null && ticket.getFiveMinuteWarningSent()) {
                     continue;
                 }
@@ -55,7 +63,9 @@ public class TicketScheduledService {
                 LocalDateTime expirationTime = ticket.getDateCreated().plusMinutes(ticket.getDuration());
                 LocalDateTime warningTime = expirationTime.minusMinutes(5);
 
+                // Check if current time is at or past the warning time but before expiration
                 if (currentTime.isAfter(warningTime) && currentTime.isBefore(expirationTime)) {
+                    // Send 5-minute warning notification (with email support)
                     try {
                         notificationService.createFiveMinuteWarningNotification(
                             ticket.getUserId(),
@@ -63,13 +73,14 @@ public class TicketScheduledService {
                             ticket
                         );
 
+                        // Mark warning as sent
                         ticket.setFiveMinuteWarningSent(true);
                         ticketRepository.save(ticket);
 
                         warningsSent++;
-                        System.out.println("5-MINUTE WARNING SENT: Notification sent to user " + ticket.getUserId() + " for ticket " + ticket.getTicketId());
+                        System.out.println("🔔 5-MINUTE WARNING SENT: Notification sent to user " + ticket.getUserId() + " for ticket " + ticket.getTicketId());
                     } catch (Exception e) {
-                        System.err.println("WARNING NOTIFICATION FAILED: Could not send 5-minute warning for ticket " + ticket.getTicketId() + ": " + e.getMessage());
+                        System.err.println("⚠️ WARNING NOTIFICATION FAILED: Could not send 5-minute warning for ticket " + ticket.getTicketId() + ": " + e.getMessage());
                     }
                 }
             }
@@ -80,9 +91,11 @@ public class TicketScheduledService {
 
         } catch (Exception e) {
             System.err.println("Error sending five-minute warnings: " + e.getMessage());
+            throw e; // Re-throw to trigger transaction rollback
         }
     }
 
+    @Transactional
     public void closeExpiredTickets() {
         System.out.println("Checking for expired tickets at " + LocalDateTime.now());
         
@@ -100,15 +113,16 @@ public class TicketScheduledService {
                     ticket.setDateCompleted(currentTime);
                     ticketRepository.save(ticket);
 
+                    // Create notification for ticket completion (with email support)
                     try {
                         notificationService.createTicketCompletionNotification(
                             ticket.getUserId(),
                             ticket.getTicketId(),
                             ticket
                         );
-                        System.out.println("NOTIFICATION CREATED: Ticket completion notification sent to user " + ticket.getUserId());
+                        System.out.println("🔔 NOTIFICATION CREATED: Ticket completion notification sent to user " + ticket.getUserId());
                     } catch (Exception e) {
-                        System.err.println("NOTIFICATION FAILED: Could not create ticket completion notification: " + e.getMessage());
+                        System.err.println("⚠️ NOTIFICATION FAILED: Could not create ticket completion notification: " + e.getMessage());
                     }
 
                     closedCount++;
@@ -122,6 +136,7 @@ public class TicketScheduledService {
             
         } catch (Exception e) {
             System.err.println("Error closing expired tickets: " + e.getMessage());
+            throw e; // Re-throw to trigger transaction rollback
         }
     }
 } 

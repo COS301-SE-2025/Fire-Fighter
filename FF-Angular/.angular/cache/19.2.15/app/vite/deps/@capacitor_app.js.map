@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../../node_modules/@capacitor/app/dist/esm/index.js"],
+  "sourcesContent": ["import { registerPlugin } from '@capacitor/core';\nconst App = registerPlugin('App', {\n  web: () => import('./web').then(m => new m.AppWeb())\n});\nexport * from './definitions';\nexport { App };\n"],
+  "mappings": ";;;;;;AACA,IAAM,MAAM,eAAe,OAAO;AAAA,EAChC,KAAK,MAAM,OAAO,mBAAO,EAAE,KAAK,OAAK,IAAI,EAAE,OAAO,CAAC;AACrD,CAAC;",
+  "names": []
+}

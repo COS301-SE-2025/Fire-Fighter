@@ -1,3 +1,5 @@
+<<<<<<< Updated upstream
+=======
 package com.apex.firefighter.integration.externalservices;
 
 import com.apex.firefighter.model.Ticket;
@@ -45,8 +47,8 @@ public class GmailEmailServiceIntegrationTest {
         user.setUsername("integration-user");
         user.setEmail("recipient@example.com");
 
-        Ticket t1 = new Ticket("T-1", "Test ticket one", "user-1", "Fire", "+27123456789", 30);
-        Ticket t2 = new Ticket("T-2", "Test ticket two", "user-2", "Medical", "+27111111111", 45);
+        Ticket t1 = new Ticket("T-1", "Test ticket one", "Active", "user-1", "Fire", "+27123456789");
+        Ticket t2 = new Ticket("T-2", "Test ticket two", "Active", "user-2", "Medical", "+27111111111");
 
         List<Ticket> tickets = List.of(t1, t2);
         String csv = gmailEmailService.exportTicketsToCsv(tickets);
@@ -110,7 +112,7 @@ public class GmailEmailServiceIntegrationTest {
         user.setUsername("test-user");
         user.setEmail("user@example.com");
 
-        Ticket ticket = new Ticket("T-123", "Emergency ticket", "user-1", "Fire", "+27123456789", 30);
+        Ticket ticket = new Ticket("T-123", "Emergency ticket", "Active", "user-1", "Fire", "+27123456789");
 
         // Act
         gmailEmailService.sendTicketCreationEmail("recipient@example.com", ticket, user);
@@ -135,7 +137,7 @@ public class GmailEmailServiceIntegrationTest {
         user.setUsername("test-user");
         user.setEmail("user@example.com");
 
-        Ticket ticket = new Ticket("T-456", "Completed ticket", "user-2", "Medical", "+27111111111", 45);
+        Ticket ticket = new Ticket("T-456", "Completed ticket", "Completed", "user-2", "Medical", "+27111111111");
 
         // Act
         gmailEmailService.sendTicketCompletionEmail("recipient@example.com", ticket, user);
@@ -161,7 +163,7 @@ public class GmailEmailServiceIntegrationTest {
         user.setUsername("test-user");
         user.setEmail("user@example.com");
 
-        Ticket ticket = new Ticket("T-789", "Revoked ticket", "user-3", "Rescue", "+27222222222", 60);
+        Ticket ticket = new Ticket("T-789", "Revoked ticket", "Revoked", "user-3", "Rescue", "+27222222222");
         String reason = "Policy violation";
 
         // Act
@@ -189,7 +191,7 @@ public class GmailEmailServiceIntegrationTest {
         user.setUsername("test-user");
         user.setEmail("user@example.com");
 
-        Ticket ticket = new Ticket("T-999", "Expiring ticket", "user-4", "Fire", "+27333333333", 5);
+        Ticket ticket = new Ticket("T-999", "Expiring ticket", "Active", "user-4", "Fire", "+27333333333");
 
         // Act
         gmailEmailService.sendFiveMinuteWarningEmail("recipient@example.com", ticket, user);
@@ -315,3 +317,4 @@ public class GmailEmailServiceIntegrationTest {
         @Override public void send(org.springframework.mail.SimpleMailMessage... simpleMessages) { }
     }
 }
+>>>>>>> Stashed changes

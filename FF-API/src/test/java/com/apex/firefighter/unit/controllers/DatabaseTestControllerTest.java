@@ -1,7 +1,9 @@
+<<<<<<< Updated upstream
+=======
 package com.apex.firefighter.controller;
 
 import com.apex.firefighter.model.ConnectionTest;
-import com.apex.firefighter.service.DatabaseConnectionTestService;
+import com.apex.firefighter.service.user.DatabaseConnectionTestService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -446,3 +448,4 @@ class DatabaseTestControllerTest {
     }
 
 }
+>>>>>>> Stashed changes

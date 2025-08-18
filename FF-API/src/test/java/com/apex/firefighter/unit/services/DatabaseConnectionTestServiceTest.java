@@ -1,8 +1,10 @@
+<<<<<<< Updated upstream
+=======
 package com.apex.firefighter.unit.services;
 
 import com.apex.firefighter.model.ConnectionTest;
 import com.apex.firefighter.repository.ConnectionTestRepository;
-import com.apex.firefighter.service.DatabaseConnectionTestService;
+import com.apex.firefighter.service.user.DatabaseConnectionTestService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -404,3 +406,4 @@ class DatabaseConnectionTestServiceTest {
         verify(connectionTestRepository, atLeastOnce()).deleteById(any(Long.class));
     }
 }
+>>>>>>> Stashed changes

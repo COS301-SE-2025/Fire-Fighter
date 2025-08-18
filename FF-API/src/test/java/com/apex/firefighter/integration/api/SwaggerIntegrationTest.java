@@ -1,4 +1,4 @@
-package com.apex.firefighter.integration.api;
+package com.apex.firefighter;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

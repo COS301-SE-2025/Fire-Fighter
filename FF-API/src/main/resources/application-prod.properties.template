@@ -1,0 +1,71 @@
+# Production Configuration Template
+# Copy this file to application-prod.properties and fill in actual values
+# DO NOT COMMIT application-prod.properties TO VERSION CONTROL
+
+spring.application.name=FireFighter Access Management
+
+# Database Configuration - Use PostgreSQL in production
+FORCE_H2_DB=false
+DB_HOST=${DB_HOST}
+DB_PORT=${DB_PORT:5432}
+DB_NAME=${DB_NAME:firefighter}
+DB_USERNAME=${DB_USERNAME}
+DB_PASSWORD=${DB_PASSWORD}
+DB_SSL_MODE=${DB_SSL_MODE:require}
+
+# JPA/Hibernate Configuration for PostgreSQL
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.properties.hibernate.format_sql=false
+
+# Disable H2 Console in production
+spring.h2.console.enabled=false
+
+# Database connection pool settings for production
+spring.datasource.hikari.maximum-pool-size=20
+spring.datasource.hikari.minimum-idle=5
+spring.datasource.hikari.idle-timeout=300000
+spring.datasource.hikari.max-lifetime=1200000
+spring.datasource.hikari.connection-timeout=20000
+spring.datasource.hikari.validation-timeout=5000
+spring.datasource.hikari.leak-detection-threshold=60000
+
+# Firebase Configuration
+firebase.enabled=true
+
+# JWT Configuration - Use environment variables
+jwt.secret=${JWT_SECRET}
+jwt.expiration=${JWT_EXPIRATION:3600000}
+
+# CORS Configuration for production (restrict to your domain)
+management.endpoints.web.cors.allowed-origins=${ALLOWED_ORIGINS:https://yourdomain.com}
+management.endpoints.web.cors.allowed-methods=GET,POST,PUT,DELETE,PATCH,OPTIONS
+management.endpoints.web.cors.allowed-headers=*
+
+# Server Configuration
+server.address=0.0.0.0
+server.port=${PORT:8080}
+
+# Gmail SMTP Configuration
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=${GMAIL_USERNAME}
+spring.mail.password=${GMAIL_APP_PASSWORD}
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+
+# Google Gemini API Configuration
+google.gemini.api.key=${GOOGLE_GEMINI_API_KEY}
+
+# Actuator endpoints - restrict in production
+management.endpoints.enabled-by-default=false
+management.endpoint.health.enabled=true
+management.endpoint.info.enabled=true
+management.endpoints.web.exposure.include=health,info
+
+# Logging configuration for production
+logging.level.com.apex.firefighter=INFO
+logging.level.org.springframework.security=WARN
+logging.level.org.hibernate.SQL=ERROR
+logging.pattern.console=%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n

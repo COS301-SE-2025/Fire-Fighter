@@ -1,5 +1,6 @@
 package com.apex.firefighter.controller;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.web.bind.annotation.*;
 
 import com.apex.firefighter.service.DolibarrUserGroupService;
@@ -7,6 +8,7 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/dolibarr/groups")
+@ConditionalOnBean(DolibarrUserGroupService.class)
 public class DolibarrUserGroupController {
 
     private final DolibarrUserGroupService service;

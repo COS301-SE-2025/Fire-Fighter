@@ -16,7 +16,7 @@ public class HttpConfig {
      * Configure HTTP-only server
      */
     @Bean
-    public WebServerFactoryCustomizer<TomcatServletWebServerFactory> servletContainer() {
+    public WebServerFactoryCustomizer<TomcatServletWebServerFactory> httpServletContainer() {
         return server -> {
             System.out.println("🌐 HTTP Configuration:");
             System.out.println("   ✅ HTTP available on port: " + serverPort);

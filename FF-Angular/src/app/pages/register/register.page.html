@@ -61,7 +61,6 @@
               formControlName="email"
               autocomplete="email"
               placeholder="you@company.com"
-              [disabled]="isSubmitting"
               class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 placeholder-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
               [ngClass]="{
                 'border-red-500': registerForm.get('email')?.touched && registerForm.get('email')?.invalid,
@@ -90,7 +89,6 @@
               formControlName="password"
               autocomplete="new-password"
               placeholder="Create a strong password"
-              [disabled]="isSubmitting"
               class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 placeholder-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
               [ngClass]="{
                 'border-red-500': registerForm.get('password')?.touched && registerForm.get('password')?.invalid,
@@ -122,7 +120,6 @@
               formControlName="confirmPassword"
               autocomplete="new-password"
               placeholder="Confirm your password"
-              [disabled]="isSubmitting"
               class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 placeholder-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
               [ngClass]="{
                 'border-red-500': registerForm.get('confirmPassword')?.touched && registerForm.get('confirmPassword')?.invalid,

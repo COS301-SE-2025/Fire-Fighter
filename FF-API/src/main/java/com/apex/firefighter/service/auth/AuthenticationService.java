@@ -1,5 +1,6 @@
 package com.apex.firefighter.service.auth;
 
+import com.apex.firefighter.dto.AuthResponse;
 import com.apex.firefighter.model.User;
 import com.apex.firefighter.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +21,12 @@ import java.util.Optional;
 public class AuthenticationService {
 
     private final UserRepository userRepository;
+    private final JwtService jwtService;
 
     @Autowired
-    public AuthenticationService(UserRepository userRepository) {
+    public AuthenticationService(UserRepository userRepository, JwtService jwtService) {
         this.userRepository = userRepository;
+        this.jwtService = jwtService;
     }
 
     /**
@@ -34,14 +37,39 @@ public class AuthenticationService {
     public User verifyOrCreateUser(String firebaseUid, String username, String email, String department) {
         System.out.println("🔵 VERIFY: Checking user with Firebase UID - " + firebaseUid);
         
-        Optional<User> existingUser = userRepository.findByUserId(firebaseUid);
+        // First, check if user exists by Firebase UID
+        Optional<User> existingUserByUid = userRepository.findByUserId(firebaseUid);
         
-        if (existingUser.isPresent()) {
-            User user = existingUser.get();
+        if (existingUserByUid.isPresent()) {
+            User user = existingUserByUid.get();
             // Always update last login when user accesses the system
             user.updateLastLogin();
             User updatedUser = userRepository.save(user);
             System.out.println("✅ VERIFIED: Existing user accessed system - " + updatedUser.getUsername() + " (Last login updated)");
+            return updatedUser;
+        }
+        
+        // If not found by Firebase UID, check if user exists by email
+        Optional<User> existingUserByEmail = userRepository.findByEmail(email);
+        
+        if (existingUserByEmail.isPresent()) {
+            User user = existingUserByEmail.get();
+            // Update the existing user's Firebase UID (user might have recreated Firebase account)
+            System.out.println("🔄 UPDATING: Found existing user by email, updating Firebase UID from " + user.getUserId() + " to " + firebaseUid);
+            user.setUserId(firebaseUid);
+            
+            // Update other fields if provided
+            if (username != null && !username.trim().isEmpty()) {
+                user.setUsername(username);
+            }
+            if (department != null && !department.trim().isEmpty()) {
+                user.setDepartment(department);
+            }
+            
+            // Update last login
+            user.updateLastLogin();
+            User updatedUser = userRepository.save(user);
+            System.out.println("✅ UPDATED: User Firebase UID updated - " + updatedUser.getUsername() + " (Last login updated)");
             return updatedUser;
         } else {
             // Create new user from Firebase auth
@@ -65,5 +93,26 @@ public class AuthenticationService {
      */
     public boolean userExists(String firebaseUid) {
         return userRepository.existsByUserId(firebaseUid);
+    }
+
+    /**
+     * Verify Firebase token and create JWT
+     * This method combines Firebase verification with JWT creation
+     */
+    public AuthResponse verifyFirebaseTokenAndCreateJwt(String firebaseToken) throws Exception {
+        // Verify the Firebase token using JwtService
+        var token = jwtService.verifyFirebaseToken(firebaseToken);
+        
+        String firebaseUid = token.getUid();
+        String email = token.getEmail();
+        String username = token.getName();
+        
+        // Find or create user
+        User user = verifyOrCreateUser(firebaseUid, username, email, null);
+        
+        // Generate JWT token with user's admin status
+        String jwtToken = jwtService.generateToken(firebaseUid, email, user.getIsAdmin());
+        
+        return new AuthResponse(jwtToken, user);
     }
 } 

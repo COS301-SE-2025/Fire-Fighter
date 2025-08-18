@@ -61,23 +61,23 @@ export class RegisterPage implements OnInit {
         this.isSubmitting = true;
         this.errorMsg = null;
         
+        console.log('🔄 Attempting email registration...');
+        console.log('🔄 Firebase Auth instance:', !!this.auth);
+        
         const { email, password } = this.registerForm.value;
         const user = await this.auth.createUserWithEmail(email, password);
         
-        console.log('Account created for', user.email);
+        console.log('✅ Account created for', user.email);
         this.auth.navigateToDashboard();
       } catch (err: any) {
-        console.error('Registration failed', err);
+        console.error('❌ Registration failed:', err);
+        console.error('❌ Error code:', err.code);
+        console.error('❌ Error details:', err);
         
-        // Handle Firebase auth errors
-        if (err.code === 'auth/email-already-in-use') {
+        if (err.code === 'auth/admin-restricted-operation') {
+          this.errorMsg = 'Account creation is disabled. Please contact your administrator to enable user registration in Firebase Console.';
+        } else if (err.code === 'auth/email-already-in-use') {
           this.errorMsg = 'Email is already in use.';
-        } else if (err.code === 'auth/weak-password') {
-          this.errorMsg = 'Password is too weak.';
-        } else if (err.status === 400 || err.status === 401) {
-          this.errorMsg = 'Account verification failed. Please contact support.';
-        } else if (err.status === 500) {
-          this.errorMsg = 'Server error. Please try again later.';
         } else {
           this.errorMsg = 'Registration failed. Please try again.';
         }
@@ -88,37 +88,30 @@ export class RegisterPage implements OnInit {
   }
 
   async registerWithGoogle() {
+    if (this.isSubmitting) return;
+    
     try {
+      this.isSubmitting = true;
       this.errorMsg = null;
-      console.log('Starting Google registration process...');
+      
       const user = await this.auth.signInWithGoogle();
-      console.log('Registered as', user.displayName);
+      console.log('✅ Registration successful:', user.displayName);
       this.auth.navigateToDashboard();
+      
     } catch (err: any) {
-      console.error('Google registration failed', err);
+      console.error('❌ Google registration failed:', err);
       
-      // Handle Firebase authentication errors (before backend verification)
-      if (err.code && err.code.startsWith('auth/')) {
-        if (err.code === 'auth/popup-closed-by-user') {
-          this.errorMsg = 'Sign-in was cancelled. Please try again.';
-        } else if (err.code === 'auth/popup-blocked') {
-          this.errorMsg = 'Pop-up was blocked. Please allow pop-ups and try again.';
-        } else {
-          this.errorMsg = 'Google authentication failed. Please try again.';
-        }
-        return;
-      }
-      
-      // Handle specific backend verification errors
-      if (err.status === 400 || err.status === 401) {
-        this.errorMsg = 'Account verification failed. Your Google account may not be authorized. Please contact support.';
-      } else if (err.status === 500) {
-        this.errorMsg = 'Server error during account verification. Please try again later.';
-      } else if (err.message && err.message.includes('backend')) {
-        this.errorMsg = 'Account verification failed. Please check your connection and try again.';
+      if (err.code === 'auth/admin-restricted-operation') {
+        this.errorMsg = 'Account registration is currently disabled by the administrator.';
+      } else if (err.code === 'auth/popup-closed-by-user') {
+        this.errorMsg = 'Sign-in was cancelled. Please try again.';
+      } else if (err.code === 'auth/popup-blocked') {
+        this.errorMsg = 'Pop-up was blocked. Please allow pop-ups and try again.';
       } else {
         this.errorMsg = 'Google registration failed. Please try again.';
       }
+    } finally {
+      this.isSubmitting = false;
     }
   }
 

@@ -1,8 +1,10 @@
+<<<<<<< Updated upstream
+=======
 package com.apex.firefighter.integration.services;
 
 import com.apex.firefighter.model.ConnectionTest;
 import com.apex.firefighter.repository.ConnectionTestRepository;
-import com.apex.firefighter.service.DatabaseConnectionTestService;
+import com.apex.firefighter.service.user.DatabaseConnectionTestService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -111,3 +113,4 @@ public class DatabaseConnectionTestServiceIT {
         Assertions.assertTrue(count >= 1);
     }
 }
+>>>>>>> Stashed changes
