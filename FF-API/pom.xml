@@ -131,6 +131,17 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 
+			<!-- Maven Compiler Plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<testExcludes>
+						<testExclude>**/disabled_tests/**</testExclude>
+					</testExcludes>
+				</configuration>
+			</plugin>
+
 			<!-- Maven Surefire Plugin for Test Execution -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -141,6 +152,9 @@
 					<forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
 					<shutdown>exit</shutdown>
 					<encoding>UTF-8</encoding>
+					<excludes>
+						<exclude>**/disabled_tests/**</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
 

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -16,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@ConditionalOnProperty(name = "dolibarr.enabled", havingValue = "true", matchIfMissing = false)
 public class DolibarrUserGroupService {
     private final RestTemplate restTemplate;
     private final String dolibarrBaseUrl;
