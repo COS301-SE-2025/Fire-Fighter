@@ -108,8 +108,7 @@ pipeline {
             steps {
                 dir('FF-Angular') {
                     echo "🧪 Running frontend unit tests..."
-                    // Uncomment below to enable frontend tests
-                    // ng test --watch=false --browsers=ChromeHeadless'
+                    sh 'ng test --watch=false --browsers=ChromeHeadless'
                 }
             }
         }
