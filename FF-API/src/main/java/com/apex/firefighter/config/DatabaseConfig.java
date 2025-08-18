@@ -47,6 +47,14 @@ public class DatabaseConfig {
         System.out.println("   - DB_SSL_MODE: " + dbSslMode);
         System.out.println("   - FORCE_H2_DB: " + forceH2Database);
         System.out.println("   - Will use H2: " + shouldUseH2Database());
+
+        // Check if DB_PASSWORD environment variable exists but is empty
+        String envDbPassword = System.getenv("DB_PASSWORD");
+        if (envDbPassword != null && envDbPassword.trim().isEmpty()) {
+            System.out.println("⚠️  WARNING: DB_PASSWORD environment variable is set but empty!");
+        } else if (envDbPassword == null) {
+            System.out.println("ℹ️  INFO: DB_PASSWORD environment variable not found in environment");
+        }
     }
     
     /**
@@ -99,7 +107,12 @@ public class DatabaseConfig {
      */
     private DataSource createPostgreSQLDataSource() {
         if (dbPassword == null || dbPassword.trim().isEmpty()) {
-            throw new IllegalStateException("DB_PASSWORD is required for PostgreSQL connection but was not provided");
+            String envDbPassword = System.getenv("DB_PASSWORD");
+            String errorMsg = "❌ DB_PASSWORD is required for PostgreSQL connection but was not provided!\n" +
+                            "   Environment variable DB_PASSWORD: " + (envDbPassword == null ? "NOT_FOUND" : "EMPTY") + "\n" +
+                            "   Injected value: " + (dbPassword == null ? "NULL" : "EMPTY_STRING") + "\n" +
+                            "   Suggestion: Ensure DB_PASSWORD is properly set in Jenkins credentials and injected into the environment.";
+            throw new IllegalStateException(errorMsg);
         }
         
         HikariConfig config = new HikariConfig();
