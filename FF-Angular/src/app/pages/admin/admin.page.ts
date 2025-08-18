@@ -817,6 +817,12 @@ export class AdminPage implements OnInit {
     alert('Contact Requester for request ' + id + ' (stub)');
   }
 
+  navigateToMetrics() {
+    // TODO: Implement navigation to metrics page
+    console.log('Navigate to metrics page');
+    alert('Navigate to metrics page (feature coming soon)');
+  }
+
   ngOnInit() {
     console.log('AdminPage initialized');
     
