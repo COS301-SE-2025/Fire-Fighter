@@ -1,4 +1,4 @@
-package main.java.com.apex.firefighter.controller;
+package com.apex.firefighter.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
