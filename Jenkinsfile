@@ -1,13 +1,43 @@
-// Helper function to update GitHub status with error handling
+// Helper function to update GitHub status using GitHub API directly
 def updateGitHubStatus(status, description, context) {
     try {
-        githubNotify(
-            status: status,
-            description: description,
-            context: context,
-            targetUrl: env.BUILD_URL
-        )
-        echo "✅ GitHub status updated: ${context} - ${status}"
+        // Get repository info from SCM
+        def repoUrl = scm.getUserRemoteConfigs()[0].getUrl()
+        def repoName = repoUrl.tokenize('/').last().replace('.git', '')
+        def repoOwner = repoUrl.tokenize('/')[-2]
+
+        // Use GitHub API to update status
+        withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+            def apiUrl = "https://api.github.com/repos/${repoOwner}/${repoName}/statuses/${env.GIT_COMMIT}"
+            def payload = """
+            {
+                "state": "${status}",
+                "description": "${description}",
+                "context": "${context}",
+                "target_url": "${env.BUILD_URL}"
+            }
+            """
+
+            def response = sh(
+                script: """
+                curl -s -w "HTTPSTATUS:%{http_code}" \\
+                -X POST \\
+                -H "Authorization: token \${GITHUB_TOKEN}" \\
+                -H "Content-Type: application/json" \\
+                -H "Accept: application/vnd.github.v3+json" \\
+                -d '${payload}' \\
+                "${apiUrl}"
+                """,
+                returnStdout: true
+            ).trim()
+
+            def httpStatus = response.tokenize("HTTPSTATUS:")[1]
+            if (httpStatus == "201") {
+                echo "✅ GitHub status updated: ${context} - ${status}"
+            } else {
+                echo "⚠️ GitHub API returned status: ${httpStatus}"
+            }
+        }
     } catch (Exception e) {
         echo "⚠️ Could not update GitHub status for ${context}: ${e.getMessage()}"
         // Don't fail the build if GitHub status update fails
@@ -31,7 +61,7 @@ pipeline {
 
                 // Set GitHub status to pending
                 script {
-                    updateGitHubStatus('PENDING', 'Fire-Fighter build started', 'jenkins/build')
+                    updateGitHubStatus('pending', 'Fire-Fighter build started', 'jenkins/build')
                 }
             }
         }
@@ -58,7 +88,7 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 script {
-                    updateGitHubStatus('PENDING', 'Running unit tests', 'jenkins/tests')
+                    updateGitHubStatus('pending', 'Running unit tests', 'jenkins/tests')
                 }
 
                 dir('FF-API') {
@@ -141,7 +171,7 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    updateGitHubStatus('PENDING', 'Building application', 'jenkins/build')
+                    updateGitHubStatus('pending', 'Building application', 'jenkins/build')
                 }
             }
         }
@@ -216,8 +246,8 @@ pipeline {
 
             // Update GitHub status to success
             script {
-                updateGitHubStatus('SUCCESS', 'Fire-Fighter build completed successfully', 'jenkins/build')
-                updateGitHubStatus('SUCCESS', 'All tests passed', 'jenkins/tests')
+                updateGitHubStatus('success', 'Fire-Fighter build completed successfully', 'jenkins/build')
+                updateGitHubStatus('success', 'All tests passed', 'jenkins/tests')
             }
         }
         failure {
@@ -225,7 +255,7 @@ pipeline {
 
             // Update GitHub status to failure
             script {
-                updateGitHubStatus('FAILURE', 'Fire-Fighter build failed', 'jenkins/build')
+                updateGitHubStatus('failure', 'Fire-Fighter build failed', 'jenkins/build')
             }
         }
         unstable {
@@ -233,7 +263,7 @@ pipeline {
 
             // Update GitHub status to failure for unstable builds
             script {
-                updateGitHubStatus('FAILURE', 'Fire-Fighter build unstable (tests failed)', 'jenkins/tests')
+                updateGitHubStatus('failure', 'Fire-Fighter build unstable (tests failed)', 'jenkins/tests')
             }
         }
     }
