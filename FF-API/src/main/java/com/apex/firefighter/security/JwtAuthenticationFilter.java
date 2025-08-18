@@ -60,22 +60,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         System.out.println("🔒 JWT FILTER: Extracted from custom JWT - UID: " + firebaseUid + ", Admin: " + isAdmin);
                         
                         if (firebaseUid != null && jwtService.validateToken(token, firebaseUid)) {
-                            System.out.println("🔒 JWT FILTER: Custom JWT token validated successfully");
-                            List<SimpleGrantedAuthority> authorities = isAdmin ? 
-                                List.of(new SimpleGrantedAuthority("ROLE_ADMIN")) : 
+                            System.out.println("🔒 JWT FILTER: ✅ Custom JWT token validated successfully for user: " + firebaseUid);
+                            List<SimpleGrantedAuthority> authorities = isAdmin ?
+                                List.of(new SimpleGrantedAuthority("ROLE_ADMIN")) :
                                 Collections.emptyList();
-                            
+
                             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                                     firebaseUid, null, authorities);
                             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                             SecurityContextHolder.getContext().setAuthentication(authToken);
-                            
+
+                            // Set request attributes for controllers to access
                             request.setAttribute("firebaseUid", firebaseUid);
-                            request.setAttribute("isAdmin", isAdmin);
-                            
-                            System.out.println("🔒 JWT FILTER: Authentication set in SecurityContext for user: " + firebaseUid);
+                            request.setAttribute("isAdmin", isAdmin != null ? isAdmin : false);
+
+                            System.out.println("🔒 JWT FILTER: ✅ Authentication set in SecurityContext");
+                            System.out.println("🔒 JWT FILTER: ✅ User: " + firebaseUid + ", Admin: " + isAdmin);
                         } else {
-                            System.out.println("🔒 JWT FILTER: Custom JWT token validation failed");
+                            System.out.println("🔒 JWT FILTER: ❌ Custom JWT token validation failed");
+                            System.out.println("🔒 JWT FILTER: ❌ FirebaseUid: " + firebaseUid + ", Token valid: " + (firebaseUid != null ? jwtService.validateToken(token, firebaseUid) : "false"));
                         }
                     } catch (Exception ex) {
                         System.out.println("🔒 JWT FILTER: Custom JWT token validation error: " + ex.getMessage());

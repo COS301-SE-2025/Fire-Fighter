@@ -115,4 +115,33 @@ public class AuthenticationService {
         
         return new AuthResponse(jwtToken, user);
     }
-} 
+
+    /**
+     * Create JWT for development without Firebase verification
+     * This method bypasses Firebase verification for development purposes
+     */
+    public AuthResponse createJwtForDevelopment(String firebaseUid, String email, String username) {
+        try {
+            System.out.println("🔧 DEV AUTH: Creating JWT for development - UID: " + firebaseUid);
+
+            // Find or create user
+            User user = verifyOrCreateUser(firebaseUid, username, email, "Default Department");
+
+            // Generate JWT token with user's admin status
+            String jwtToken = jwtService.generateToken(
+                user.getUserId(),
+                user.getEmail(),
+                user.getIsAdmin() != null ? user.getIsAdmin() : false
+            );
+
+            System.out.println("✅ DEV AUTH: JWT token generated successfully for user: " + user.getUsername());
+
+            return new AuthResponse(jwtToken, user);
+
+        } catch (Exception e) {
+            System.err.println("❌ DEV AUTH ERROR: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Development authentication failed: " + e.getMessage(), e);
+        }
+    }
+}

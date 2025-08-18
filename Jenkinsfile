@@ -38,9 +38,13 @@ pipeline {
             steps {
                 dir('FF-API') {
                     echo "🧪 Running backend unit tests (unit folder)..."
-                    sh '''
-                        mvn -Dtest=com.apex.firefighter.unit.**.*Test test -Dspring.profiles.active=test
-                    '''
+                    // Copy Firebase service account key from Jenkins secret to workspace
+                    withCredentials([file(credentialsId: 'firebase-service-account-key', variable: 'FIREBASE_KEY_FILE')]) {
+                        sh 'cp $FIREBASE_KEY_FILE src/main/resources/firebase-service-account.json'
+                        sh 'mvn -Dtest=com.apex.firefighter.unit.**.*Test test -Dspring.profiles.active=test'
+                        // Clean up Firebase key for security
+                        sh 'rm -f src/main/resources/firebase-service-account.json'
+                    }
                 }
             }
             post {
@@ -56,9 +60,13 @@ pipeline {
             steps {
                 dir('FF-API') {
                     echo "🔗 Running backend integration tests (integration folder)..."
-                    sh '''
-                        mvn -Dtest=com.apex.firefighter.integration.**.*Test test -Dspring.profiles.active=test
-                    '''
+                    // Copy Firebase service account key from Jenkins secret to workspace
+                    withCredentials([file(credentialsId: 'firebase-service-account-key', variable: 'FIREBASE_KEY_FILE')]) {
+                        sh 'cp $FIREBASE_KEY_FILE src/main/resources/firebase-service-account.json'
+                        sh 'mvn -Dtest=com.apex.firefighter.integration.**.*Test test -Dspring.profiles.active=test'
+                        // Clean up Firebase key for security
+                        sh 'rm -f src/main/resources/firebase-service-account.json'
+                    }
                 }
             }
             post {
@@ -85,7 +93,13 @@ pipeline {
                 stage('Build Backend') {
                     steps {
                         dir('FF-API') {
-                            sh 'mvn package -DskipTests=true'
+                            // Copy Firebase service account key from Jenkins secret to workspace
+                            withCredentials([file(credentialsId: 'firebase-service-account-key', variable: 'FIREBASE_KEY_FILE')]) {
+                                sh 'cp $FIREBASE_KEY_FILE src/main/resources/firebase-service-account.json'
+                                sh 'mvn package -DskipTests=true'
+                                // Clean up Firebase key for security
+                                sh 'rm -f src/main/resources/firebase-service-account.json'
+                            }
                         }
                     }
                 }
