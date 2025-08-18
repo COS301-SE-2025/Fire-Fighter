@@ -1,3 +1,49 @@
+// Helper function to update GitHub status using GitHub API directly
+def updateGitHubStatus(status, description, context) {
+    try {
+        // Get repository info from SCM
+        def repoUrl = scm.getUserRemoteConfigs()[0].getUrl()
+        def repoName = repoUrl.tokenize('/').last().replace('.git', '')
+        def repoOwner = repoUrl.tokenize('/')[-2]
+
+        // Use GitHub API to update status
+        withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+            def apiUrl = "https://api.github.com/repos/${repoOwner}/${repoName}/statuses/${env.GIT_COMMIT}"
+            def payload = """
+            {
+                "state": "${status}",
+                "description": "${description}",
+                "context": "${context}",
+                "target_url": "${env.BUILD_URL}"
+            }
+            """
+
+            def response = sh(
+                script: """
+                curl -s -w "HTTPSTATUS:%{http_code}" \\
+                -X POST \\
+                -H "Authorization: token \${GITHUB_TOKEN}" \\
+                -H "Content-Type: application/json" \\
+                -H "Accept: application/vnd.github.v3+json" \\
+                -d '${payload}' \\
+                "${apiUrl}"
+                """,
+                returnStdout: true
+            ).trim()
+
+            def httpStatus = response.tokenize("HTTPSTATUS:")[1]
+            if (httpStatus == "201") {
+                echo "✅ GitHub status updated: ${context} - ${status}"
+            } else {
+                echo "⚠️ GitHub API returned status: ${httpStatus}"
+            }
+        }
+    } catch (Exception e) {
+        echo "⚠️ Could not update GitHub status for ${context}: ${e.getMessage()}"
+        // Don't fail the build if GitHub status update fails
+    }
+}
+
 pipeline {
     agent any
 
@@ -12,6 +58,11 @@ pipeline {
             steps {
                 checkout scm
                 echo "🔥 Fire-Fighter Build Started"
+
+                // Set GitHub status to pending
+                script {
+                    updateGitHubStatus('pending', 'Fire-Fighter build started', 'jenkins/build')
+                }
             }
         }
 
@@ -36,6 +87,10 @@ pipeline {
 
         stage('Unit Tests') {
             steps {
+                script {
+                    updateGitHubStatus('pending', 'Running unit tests', 'jenkins/tests')
+                }
+
                 dir('FF-API') {
                     echo "🧪 Running backend unit tests (unit folder)..."
                     // Copy Firebase service account key from Jenkins secret to workspace
@@ -114,6 +169,14 @@ pipeline {
         }
 
         stage('Build') {
+            steps {
+                script {
+                    updateGitHubStatus('pending', 'Building application', 'jenkins/build')
+                }
+            }
+        }
+
+        stage('Compile & Package') {
             parallel {
                 stage('Build Backend') {
                     steps {
@@ -180,9 +243,28 @@ pipeline {
             echo "📦 JAR file: target/firefighter-platform-0.0.1-SNAPSHOT.jar"
             echo "🌐 Frontend build: www/"
             echo "🐳 Ready for Portainer deployment!"
+
+            // Update GitHub status to success
+            script {
+                updateGitHubStatus('success', 'Fire-Fighter build completed successfully', 'jenkins/build')
+                updateGitHubStatus('success', 'All tests passed', 'jenkins/tests')
+            }
         }
         failure {
             echo "❌ Build failed!"
+
+            // Update GitHub status to failure
+            script {
+                updateGitHubStatus('failure', 'Fire-Fighter build failed', 'jenkins/build')
+            }
+        }
+        unstable {
+            echo "⚠️ Build unstable!"
+
+            // Update GitHub status to failure for unstable builds
+            script {
+                updateGitHubStatus('failure', 'Fire-Fighter build unstable (tests failed)', 'jenkins/tests')
+            }
         }
     }
 }
