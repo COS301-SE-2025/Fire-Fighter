@@ -56,7 +56,17 @@ public class TicketController {
         String emergencyType = (String) payload.get("emergencyType");
         String emergencyContact = (String) payload.get("emergencyContact");
 
-        Ticket ticket = ticketService.createTicket(description, userId, emergencyType, emergencyContact);
+        // Extract duration from payload (default to 60 minutes if not provided)
+        Integer duration = 60; // Default duration
+        if (payload.get("duration") != null) {
+            if (payload.get("duration") instanceof Integer) {
+                duration = (Integer) payload.get("duration");
+            } else if (payload.get("duration") instanceof Number) {
+                duration = ((Number) payload.get("duration")).intValue();
+            }
+        }
+
+        Ticket ticket = ticketService.createTicket(description, userId, emergencyType, emergencyContact, duration);
         return ResponseEntity.ok(ticket);
     }
 
@@ -101,8 +111,19 @@ public class TicketController {
         String status = (String) payload.get("status");
         String emergencyType = (String) payload.get("emergencyType");
         String emergencyContact = (String) payload.get("emergencyContact");
+
+        // Extract duration from payload
+        Integer duration = null;
+        if (payload.get("duration") != null) {
+            if (payload.get("duration") instanceof Integer) {
+                duration = (Integer) payload.get("duration");
+            } else if (payload.get("duration") instanceof Number) {
+                duration = ((Number) payload.get("duration")).intValue();
+            }
+        }
+
         try {
-            Ticket updatedTicket = ticketService.updateTicket(id, description, status, emergencyType, emergencyContact);
+            Ticket updatedTicket = ticketService.updateTicket(id, description, status, emergencyType, emergencyContact, duration);
             return ResponseEntity.ok(updatedTicket);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

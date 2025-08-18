@@ -2,30 +2,45 @@ package com.apex.firefighter.service.ticket;
 
 import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.repository.TicketRepository;
+import com.apex.firefighter.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class TicketService {
 
     private final TicketRepository ticketRepository;
+    private final NotificationService notificationService;
 
     @Autowired
-    public TicketService(TicketRepository ticketRepository) {
+    public TicketService(TicketRepository ticketRepository, NotificationService notificationService) {
         this.ticketRepository = ticketRepository;
+        this.notificationService = notificationService;
     }
 
-    public Ticket createTicket(String description, String userId, String emergencyType, String emergencyContact) {
+    public Ticket createTicket(String description, String userId, String emergencyType, String emergencyContact, Integer duration) {
         String ticketId = generateTicketId();
-        
+
         Ticket ticket = new Ticket(ticketId, description, "Active", userId, emergencyType, emergencyContact);
-        
-        return ticketRepository.save(ticket);
+
+        // Set the duration (default to 60 minutes if null)
+        ticket.setDuration(duration != null ? duration : 60);
+
+        Ticket savedTicket = ticketRepository.save(ticket);
+
+        // Create notification with email support
+        try {
+            notificationService.createTicketCreationNotification(userId, ticketId, savedTicket);
+            System.out.println("✅ TICKET SERVICE: Created notification for ticket creation: " + ticketId + " (Duration: " + ticket.getDuration() + " minutes)");
+        } catch (Exception e) {
+            System.err.println("⚠️ TICKET SERVICE: Failed to create notification for ticket: " + ticketId + " - " + e.getMessage());
+        }
+
+        return savedTicket;
     }
 
     public Optional<Ticket> getTicketById(Long id) {
@@ -52,8 +67,27 @@ public class TicketService {
         Optional<Ticket> ticketOpt = ticketRepository.findByTicketId(ticketId);
         if (ticketOpt.isPresent()) {
             Ticket ticket = ticketOpt.get();
+            String oldStatus = ticket.getStatus();
             ticket.setStatus(newStatus);
-            return ticketRepository.save(ticket);
+
+            // Set completion date if ticket is being completed
+            if ("Completed".equals(newStatus) || "Closed".equals(newStatus)) {
+                ticket.setDateCompleted(LocalDateTime.now());
+            }
+
+            Ticket savedTicket = ticketRepository.save(ticket);
+
+            // Create notification with email support for completion
+            if ("Completed".equals(newStatus) && !"Completed".equals(oldStatus)) {
+                try {
+                    notificationService.createTicketCompletionNotification(ticket.getUserId(), ticket.getTicketId(), savedTicket);
+                    System.out.println("✅ TICKET SERVICE: Created completion notification for ticket: " + ticket.getTicketId());
+                } catch (Exception e) {
+                    System.err.println("⚠️ TICKET SERVICE: Failed to create completion notification for ticket: " + ticket.getTicketId() + " - " + e.getMessage());
+                }
+            }
+
+            return savedTicket;
         }
         throw new RuntimeException("Ticket not found with ID: " + ticketId);
     }
@@ -82,7 +116,9 @@ public class TicketService {
     }
 
     private String generateTicketId() {
-        return "TICKET-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        // Generate 5-digit random number (10000-99999)
+        int randomNumber = 10000 + (int)(Math.random() * 90000);
+        return "BMW-FF-" + randomNumber;
     }
 
     public List<Ticket> getActiveTickets() {
@@ -100,7 +136,17 @@ public class TicketService {
             ticket.setStatus("Rejected");
             ticket.setRejectReason(rejectReason);
             ticket.setDateCompleted(LocalDateTime.now());
-            return ticketRepository.save(ticket);
+            Ticket savedTicket = ticketRepository.save(ticket);
+
+            // Create notification with email support
+            try {
+                notificationService.createTicketRevocationNotification(ticket.getUserId(), ticket.getTicketId(), savedTicket, rejectReason);
+                System.out.println("✅ TICKET SERVICE: Created revocation notification for ticket: " + ticket.getTicketId());
+            } catch (Exception e) {
+                System.err.println("⚠️ TICKET SERVICE: Failed to create revocation notification for ticket: " + ticket.getTicketId() + " - " + e.getMessage());
+            }
+
+            return savedTicket;
         }
         throw new RuntimeException("Ticket not found with ID: " + id);
     }
@@ -112,7 +158,17 @@ public class TicketService {
             ticket.setStatus("Rejected");
             ticket.setRejectReason(rejectReason);
             ticket.setDateCompleted(LocalDateTime.now());
-            return ticketRepository.save(ticket);
+            Ticket savedTicket = ticketRepository.save(ticket);
+
+            // Create notification with email support
+            try {
+                notificationService.createTicketRevocationNotification(ticket.getUserId(), ticket.getTicketId(), savedTicket, rejectReason);
+                System.out.println("✅ TICKET SERVICE: Created revocation notification for ticket: " + ticket.getTicketId());
+            } catch (Exception e) {
+                System.err.println("⚠️ TICKET SERVICE: Failed to create revocation notification for ticket: " + ticket.getTicketId() + " - " + e.getMessage());
+            }
+
+            return savedTicket;
         }
         throw new RuntimeException("Ticket not found with ID: " + ticketId);
     }
@@ -122,11 +178,11 @@ public class TicketService {
         return false; // Placeholder - implement proper admin check
     }
 
-    public Ticket updateTicket(Long id, String description, String status, String emergencyType, String emergencyContact) {
+    public Ticket updateTicket(Long id, String description, String status, String emergencyType, String emergencyContact, Integer duration) {
         Optional<Ticket> ticketOpt = ticketRepository.findById(id);
         if (ticketOpt.isPresent()) {
             Ticket ticket = ticketOpt.get();
-            
+
             if (description != null) {
                 ticket.setDescription(description);
             }
@@ -139,7 +195,10 @@ public class TicketService {
             if (emergencyContact != null) {
                 ticket.setEmergencyContact(emergencyContact);
             }
-            
+            if (duration != null) {
+                ticket.setDuration(duration);
+            }
+
             return ticketRepository.save(ticket);
         }
         throw new RuntimeException("Ticket not found with ID: " + id);

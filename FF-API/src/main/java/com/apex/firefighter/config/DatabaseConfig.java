@@ -33,7 +33,7 @@ public class DatabaseConfig {
     @Value("${DB_SSL_MODE:require}")
     private String dbSslMode;
     
-    @Value("${FORCE_H2_DB:true}")
+    @Value("${FORCE_H2_DB:false}")
     private boolean forceH2Database;
 
     @PostConstruct
@@ -60,11 +60,23 @@ public class DatabaseConfig {
     /**
      * Determines whether to use H2 database based on configuration
      * Uses H2 if:
-     * - FORCE_H2_DB is true (default for development)
-     * - DB_PASSWORD is not provided or empty
+     * - FORCE_H2_DB is explicitly set to true
+     * - DB_PASSWORD is not provided or empty (fallback to H2 for development)
      */
     private boolean shouldUseH2Database() {
-        return forceH2Database || dbPassword == null || dbPassword.trim().isEmpty();
+        // If FORCE_H2_DB is explicitly set to true, use H2
+        if (forceH2Database) {
+            return true;
+        }
+
+        // If no password is provided, fallback to H2 for development
+        if (dbPassword == null || dbPassword.trim().isEmpty()) {
+            System.out.println("⚠️  No PostgreSQL password provided, falling back to H2 for development");
+            return true;
+        }
+
+        // Otherwise use PostgreSQL
+        return false;
     }
 
     @Bean
