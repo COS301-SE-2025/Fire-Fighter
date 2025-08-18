@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FormsModule } from '@angular/forms';
@@ -108,7 +109,8 @@ export class AdminPage implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private adminService: AdminService
+    private adminService: AdminService,
+    private router: Router
   ) {
     this.isAdmin$ = this.authService.isAdmin$;
     this.userProfile$ = this.authService.userProfile$;
@@ -818,9 +820,8 @@ export class AdminPage implements OnInit {
   }
 
   navigateToMetrics() {
-    // TODO: Implement navigation to metrics page
     console.log('Navigate to metrics page');
-    alert('Navigate to metrics page (feature coming soon)');
+    this.router.navigate(['/metrics']);
   }
 
   ngOnInit() {
