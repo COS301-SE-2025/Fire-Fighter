@@ -163,7 +163,15 @@ pipeline {
             steps {
                 dir('FF-Angular') {
                     echo "🧪 Running frontend unit tests..."
-                    sh 'ng test --watch=false --browsers=ChromeHeadless'
+                    script {
+                        def chrome = sh(script: 'which google-chrome || which google-chrome-stable || which chromium-browser || which chromium || true', returnStdout: true).trim()
+                        if (!chrome) {
+                            chrome = '/usr/bin/google-chrome'
+                        }
+                        withEnv(["CHROME_BIN=${chrome}"]) {
+                            sh 'ng test --watch=false --browsers=ChromeHeadless'
+                        }
+                    }
                 }
             }
         }
