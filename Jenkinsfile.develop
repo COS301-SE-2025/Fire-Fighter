@@ -234,7 +234,6 @@ pipeline {
                         dir(env.ANGULAR_PATH) {
                             sh '''
                                 echo "🧪 Running Angular unit tests..."
-                                CHROME_BIN=$(which google-chrome || which google-chrome-stable || which chromium-browser || which chromium || echo /usr/bin/google-chrome) \
                                 npm test -- --watch=false --browsers=ChromeHeadless --code-coverage
                             '''
                         }
