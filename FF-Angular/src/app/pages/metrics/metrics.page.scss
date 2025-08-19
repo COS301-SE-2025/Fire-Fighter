@@ -1,0 +1,118 @@
+/* ApexCharts styling fixes */
+.apexcharts-tooltip {
+  background: #fff !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  color: #374151 !important;
+}
+
+.apexcharts-tooltip-title {
+  background: #f9fafb !important;
+  color: #374151 !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+.apexcharts-tooltip-series-group {
+  background: transparent !important;
+  color: #374151 !important;
+}
+
+.apexcharts-tooltip-text {
+  color: #374151 !important;
+}
+
+.apexcharts-tooltip-y-group .apexcharts-tooltip-text-y-label {
+  color: #374151 !important;
+}
+
+.apexcharts-tooltip-y-group .apexcharts-tooltip-text-y-value {
+  color: #374151 !important;
+  font-weight: 600 !important;
+}
+
+/* Legend styling fixes */
+.apexcharts-legend {
+  color: #374151 !important;
+}
+
+.apexcharts-legend-text {
+  color: #374151 !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+}
+
+/* Pie chart data label styling */
+.apexcharts-datalabels .apexcharts-datalabel {
+  fill: #374151 !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 600 !important;
+}
+
+#status-pie-chart .apexcharts-datalabels .apexcharts-datalabel {
+  fill: #ffffff !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+}
+
+/* Pie chart legend styling */
+#status-pie-chart .apexcharts-legend {
+  justify-content: center !important;
+}
+
+#status-pie-chart .apexcharts-legend-text {
+  color: #374151 !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+/* Dark mode overrides */
+:host-context(.dark) {
+  .apexcharts-tooltip {
+    background: #374151 !important;
+    border: 1px solid #4b5563 !important;
+    color: #f9fafb !important;
+  }
+
+  .apexcharts-tooltip-title {
+    background: #4b5563 !important;
+    color: #f9fafb !important;
+    border-bottom: 1px solid #6b7280 !important;
+  }
+
+  .apexcharts-tooltip-series-group {
+    color: #f9fafb !important;
+  }
+
+  .apexcharts-tooltip-text {
+    color: #f9fafb !important;
+  }
+
+  .apexcharts-tooltip-y-group .apexcharts-tooltip-text-y-label {
+    color: #f9fafb !important;
+  }
+
+  .apexcharts-tooltip-y-group .apexcharts-tooltip-text-y-value {
+    color: #f9fafb !important;
+  }
+
+  .apexcharts-legend-text {
+    color: #f9fafb !important;
+  }
+
+  /* Dark mode pie chart data labels */
+  .apexcharts-datalabels .apexcharts-datalabel {
+    fill: #f9fafb !important;
+  }
+
+  #status-pie-chart .apexcharts-datalabels .apexcharts-datalabel {
+    fill: #ffffff !important;
+  }
+
+  /* Dark mode pie chart legend */
+  #status-pie-chart .apexcharts-legend-text {
+    color: #f9fafb !important;
+  }
+}

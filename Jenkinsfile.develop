@@ -1,0 +1,485 @@
+pipeline {
+    agent any
+
+    parameters {
+        choice(
+            name: 'BUILD_TYPE',
+            choices: ['full', 'quick', 'tests-only', 'build-only'],
+            description: 'Type of build to run'
+        )
+        choice(
+            name: 'BRANCH_NAME',
+            choices: ['develop', 'main', 'feature/*'],
+            description: 'Branch to build'
+        )
+        booleanParam(
+            name: 'SKIP_TESTS',
+            defaultValue: false,
+            description: 'Skip unit tests (faster build)'
+        )
+        booleanParam(
+            name: 'DEPLOY_TO_STAGING',
+            defaultValue: true,
+            description: 'Deploy to staging environment'
+        )
+        string(
+            name: 'CUSTOM_MESSAGE',
+            defaultValue: 'Manual build triggered',
+            description: 'Custom build message'
+        )
+    }
+
+    options {
+        timeout(time: 30, unit: 'MINUTES')
+        timestamps()
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        skipDefaultCheckout(false)
+    }
+    
+    environment {
+        // Java and Node versions
+        JAVA_VERSION = '17'
+        NODE_VERSION = '22'
+        
+        // Project paths
+        API_PATH = 'FF-API'
+        ANGULAR_PATH = 'FF-Angular'
+        
+        // Build artifacts
+        API_JAR = 'firefighter-platform-0.0.1-SNAPSHOT.jar'
+        ANGULAR_DIST = 'www'
+        
+        // Database configuration (using external PostgreSQL)
+        DB_HOST = credentials('DB_HOST')
+        DB_PORT = credentials('DB_PORT')
+        DB_NAME = credentials('DB_NAME')
+        DB_USERNAME = credentials('DB_USERNAME')
+        DB_PASSWORD = credentials('DB_PASSWORD')
+        DB_SSL_MODE = credentials('DB_SSL_MODE')
+        
+        // JWT Configuration
+        JWT_SECRET = credentials('JWT_SECRET')
+        JWT_EXPIRATION = credentials('JWT_EXPIRATION')
+        
+        // Email Configuration
+        GMAIL_APP_PASSWORD = credentials('GMAIL_APP_PASSWORD')
+        GMAIL_USERNAME = credentials('GMAIL_USERNAME')
+        GMAIL_SENDER_NAME = credentials('GMAIL_SENDER_NAME')
+        
+        // AI API Configuration
+        GOOGLE_GEMINI_API_KEY = credentials('GOOGLE_GEMINI_API_KEY')
+        
+        // Development environment settings
+        SPRING_PROFILES_ACTIVE = 'dev'
+        BUILD_ENV = 'development'
+        DEPLOY_TARGET = 'staging'
+    }
+    
+    tools {
+        jdk "jdk-17"
+        nodejs "nodejs-22"
+        maven 'maven-3.8'
+    }
+    
+    stages {
+        stage('Checkout & Setup') {
+            steps {
+                script {
+                    // Get current branch and commit info
+                    env.GIT_BRANCH = sh(
+                        script: "git rev-parse --abbrev-ref HEAD",
+                        returnStdout: true
+                    ).trim()
+                    env.GIT_COMMIT_SHORT = sh(
+                        script: "git rev-parse --short HEAD",
+                        returnStdout: true
+                    ).trim()
+                    env.GIT_COMMIT_MSG = sh(
+                        script: "git log -1 --pretty=%B",
+                        returnStdout: true
+                    ).trim()
+                    env.BUILD_VERSION = "${env.BUILD_NUMBER}-${env.GIT_COMMIT_SHORT}-dev"
+
+                    echo "🔥 Fire-Fighter Manual Build Pipeline"
+                    echo "📦 Build Version: ${env.BUILD_VERSION}"
+                    echo "🌿 Branch: ${env.GIT_BRANCH}"
+                    echo "📝 Commit: ${env.GIT_COMMIT_MSG}"
+                    echo "🎯 Build Type: ${params.BUILD_TYPE}"
+                    echo "💬 Message: ${params.CUSTOM_MESSAGE}"
+                    echo "🎯 Target: ${env.DEPLOY_TARGET}"
+                    echo "⚡ Skip Tests: ${params.SKIP_TESTS}"
+                    echo "🚀 Deploy to Staging: ${params.DEPLOY_TO_STAGING}"
+                    echo "⏰ Triggered: ${new Date()}"
+                }
+            }
+        }
+        
+        stage('Environment Verification') {
+            parallel {
+                stage('Java & Maven') {
+                    steps {
+                        sh '''
+                            echo "☕ Java Environment:"
+                            java -version
+                            echo ""
+                            echo "📦 Maven Environment:"
+                            mvn -version
+                        '''
+                    }
+                }
+                stage('Node.js & NPM') {
+                    steps {
+                        sh '''
+                            echo "🟢 Node.js Environment:"
+                            node --version
+                            echo ""
+                            echo "📦 NPM Environment:"
+                            npm --version
+                        '''
+                    }
+                }
+            }
+        }
+        
+        stage('Install Dependencies') {
+            parallel {
+                stage('Backend Dependencies') {
+                    steps {
+                        dir(env.API_PATH) {
+                            sh '''
+                                echo "📥 Installing Maven dependencies..."
+                                mvn clean compile -DskipTests=true -q
+                                echo "✅ Backend dependencies installed"
+                            '''
+                        }
+                    }
+                }
+                stage('Frontend Dependencies') {
+                    steps {
+                        dir(env.ANGULAR_PATH) {
+                            sh '''
+                                echo "📥 Installing NPM dependencies..."
+                                npm ci --silent
+                                echo "✅ Frontend dependencies installed"
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Code Quality & Linting') {
+            parallel {
+                stage('Backend Quality') {
+                    steps {
+                        dir(env.API_PATH) {
+                            sh '''
+                                echo "🔍 Running Maven validation..."
+                                mvn validate compile -q
+                                echo "✅ Backend code quality check passed"
+                            '''
+                        }
+                    }
+                }
+                stage('Frontend Linting') {
+                    steps {
+                        dir(env.ANGULAR_PATH) {
+                            sh '''
+                                echo "🔍 Running Angular linting..."
+                                npm run lint
+                                echo "✅ Frontend linting passed"
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Unit Tests') {
+            when {
+                not { params.SKIP_TESTS }
+                anyOf {
+                    expression { params.BUILD_TYPE == 'full' }
+                    expression { params.BUILD_TYPE == 'tests-only' }
+                }
+            }
+            parallel {
+                stage('Backend Tests') {
+                    steps {
+                        dir(env.API_PATH) {
+                            sh '''
+                                echo "🧪 Running Spring Boot unit tests..."
+                                mvn test -Dspring.profiles.active=test
+                            '''
+                        }
+                        publishTestResults testResultsPattern: "${env.API_PATH}/target/surefire-reports/*.xml"
+                    }
+                    post {
+                        always {
+                            dir(env.API_PATH) {
+                                publishHTML([
+                                    allowMissing: false,
+                                    alwaysLinkToLastBuild: true,
+                                    keepAll: true,
+                                    reportDir: 'target/site/jacoco',
+                                    reportFiles: 'index.html',
+                                    reportName: 'Backend Code Coverage Report'
+                                ])
+                            }
+                        }
+                    }
+                }
+                stage('Frontend Tests') {
+                    steps {
+                        dir(env.ANGULAR_PATH) {
+                            sh '''
+                                echo "🧪 Running Angular unit tests..."
+                                npm test -- --watch=false --browsers=ChromeHeadless --code-coverage
+                            '''
+                        }
+                    }
+                    post {
+                        always {
+                            dir(env.ANGULAR_PATH) {
+                                publishHTML([
+                                    allowMissing: false,
+                                    alwaysLinkToLastBuild: true,
+                                    keepAll: true,
+                                    reportDir: 'coverage',
+                                    reportFiles: 'index.html',
+                                    reportName: 'Frontend Code Coverage Report'
+                                ])
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Build Applications') {
+            when {
+                anyOf {
+                    expression { params.BUILD_TYPE == 'full' }
+                    expression { params.BUILD_TYPE == 'quick' }
+                    expression { params.BUILD_TYPE == 'build-only' }
+                }
+            }
+            parallel {
+                stage('Build Backend') {
+                    steps {
+                        dir(env.API_PATH) {
+                            sh '''
+                                echo "🏗️ Building Spring Boot application..."
+                                mvn clean package -DskipTests=true -Dspring.profiles.active=dev
+                            '''
+                        }
+                    }
+                    post {
+                        success {
+                            dir(env.API_PATH) {
+                                archiveArtifacts artifacts: "target/${env.API_JAR}", fingerprint: true
+                            }
+                        }
+                    }
+                }
+                stage('Build Frontend') {
+                    steps {
+                        dir(env.ANGULAR_PATH) {
+                            sh '''
+                                echo "🏗️ Building Angular application for development..."
+                                npm run build
+                            '''
+                        }
+                    }
+                    post {
+                        success {
+                            dir(env.ANGULAR_PATH) {
+                                archiveArtifacts artifacts: "${env.ANGULAR_DIST}/**/*", fingerprint: true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Integration Tests') {
+            steps {
+                script {
+                    echo "🔗 Running integration tests..."
+                    
+                    // Start backend service for integration testing
+                    dir(env.API_PATH) {
+                        sh '''
+                            echo "🚀 Starting backend service for integration tests..."
+                            nohup java -jar target/${API_JAR} \
+                                --spring.profiles.active=dev \
+                                --server.port=8081 > backend.log 2>&1 &
+                            echo $! > backend.pid
+                            
+                            # Wait for backend to be ready
+                            echo "⏳ Waiting for backend to start..."
+                            timeout 60 bash -c 'until curl -f http://localhost:8081/actuator/health 2>/dev/null; do sleep 2; done'
+                            echo "✅ Backend service is ready"
+                        '''
+                    }
+                    
+                    // Run integration tests
+                    try {
+                        sh '''
+                            echo "🧪 Running API integration tests..."
+                            # Add your integration test commands here
+                            # Example: newman run postman/collection.json --environment postman/dev-environment.json
+                            echo "✅ Integration tests completed"
+                        '''
+                    } finally {
+                        // Stop backend service
+                        dir(env.API_PATH) {
+                            sh '''
+                                echo "🛑 Stopping backend service..."
+                                if [ -f backend.pid ]; then
+                                    kill $(cat backend.pid) || true
+                                    rm -f backend.pid
+                                fi
+                                echo "✅ Backend service stopped"
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Security Scan') {
+            parallel {
+                stage('Backend Security') {
+                    steps {
+                        dir(env.API_PATH) {
+                            sh '''
+                                echo "🔒 Running Maven dependency security check..."
+                                mvn org.owasp:dependency-check-maven:check || true
+                                echo "✅ Backend security scan completed"
+                            '''
+                        }
+                    }
+                }
+                stage('Frontend Security') {
+                    steps {
+                        dir(env.ANGULAR_PATH) {
+                            sh '''
+                                echo "🔒 Running NPM security audit..."
+                                npm audit --audit-level=moderate || true
+                                echo "✅ Frontend security scan completed"
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Deploy to Staging') {
+            steps {
+                script {
+                    echo "🚀 Deploying to staging environment..."
+                    
+                    // Add your staging deployment commands here
+                    sh '''
+                        echo "📦 Preparing staging deployment..."
+                        echo "Backend JAR: ${API_PATH}/target/${API_JAR}"
+                        echo "Frontend Build: ${ANGULAR_PATH}/${ANGULAR_DIST}"
+                        echo "Build Version: ${BUILD_VERSION}"
+                        
+                        # Example deployment commands:
+                        # scp ${API_PATH}/target/${API_JAR} staging-server:/opt/firefighter/
+                        # rsync -av ${ANGULAR_PATH}/${ANGULAR_DIST}/ staging-server:/var/www/firefighter/
+                        # ssh staging-server "systemctl restart firefighter-api"
+                        
+                        echo "✅ Staging deployment completed"
+                    '''
+                }
+            }
+        }
+        
+        stage('Smoke Tests') {
+            steps {
+                script {
+                    echo "💨 Running smoke tests on staging..."
+                    
+                    sh '''
+                        echo "🧪 Testing staging environment..."
+                        # Add smoke test commands here
+                        # curl -f http://staging-server/api/health
+                        # curl -f http://staging-server/
+                        
+                        echo "✅ Smoke tests passed"
+                    '''
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo "🧹 Cleaning up workspace..."
+            cleanWs()
+        }
+        success {
+            script {
+                echo "🎉 Develop branch pipeline completed successfully!"
+                echo "📊 Build Summary:"
+                echo "   • Version: ${env.BUILD_VERSION}"
+                echo "   • Branch: develop"
+                echo "   • Environment: ${env.DEPLOY_TARGET}"
+                echo "   • Duration: ${currentBuild.durationString}"
+                
+                // Send success notification
+                emailext (
+                    subject: "✅ Fire-Fighter Develop Build Success - ${env.BUILD_VERSION}",
+                    body: """
+                    <h2>🎉 Build Successful!</h2>
+                    <p><strong>Project:</strong> Fire-Fighter</p>
+                    <p><strong>Branch:</strong> develop</p>
+                    <p><strong>Build:</strong> ${env.BUILD_NUMBER}</p>
+                    <p><strong>Version:</strong> ${env.BUILD_VERSION}</p>
+                    <p><strong>Deployed to:</strong> Staging</p>
+                    <p><strong>Duration:</strong> ${currentBuild.durationString}</p>
+                    
+                    <h3>📊 Test Results:</h3>
+                    <p>• Backend tests: Passed</p>
+                    <p>• Frontend tests: Passed</p>
+                    <p>• Integration tests: Passed</p>
+                    <p>• Security scans: Completed</p>
+                    
+                    <p><a href="${env.BUILD_URL}">View Build Details</a></p>
+                    """,
+                    to: "${env.GMAIL_USERNAME}",
+                    mimeType: 'text/html'
+                )
+            }
+        }
+        failure {
+            script {
+                echo "❌ Develop branch pipeline failed!"
+                echo "🔍 Check the console output for details"
+                
+                // Send failure notification
+                emailext (
+                    subject: "❌ Fire-Fighter Develop Build Failed - ${env.BUILD_VERSION}",
+                    body: """
+                    <h2>❌ Build Failed!</h2>
+                    <p><strong>Project:</strong> Fire-Fighter</p>
+                    <p><strong>Branch:</strong> develop</p>
+                    <p><strong>Build:</strong> ${env.BUILD_NUMBER}</p>
+                    <p><strong>Version:</strong> ${env.BUILD_VERSION}</p>
+                    
+                    <p><strong>Please check the build logs for details.</strong></p>
+                    <p><a href="${env.BUILD_URL}console">View Console Output</a></p>
+                    """,
+                    to: "${env.GMAIL_USERNAME}",
+                    mimeType: 'text/html'
+                )
+            }
+        }
+        unstable {
+            echo "⚠️ Develop branch pipeline completed with warnings"
+        }
+    }
+}

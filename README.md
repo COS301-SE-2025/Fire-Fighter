@@ -8,8 +8,11 @@
 
 <h2>📃 Documentation</h2>
 
-- [Software Requirements Specification (PDF)](Documentation/FireFighter_Software_Requirements_Specification_v2.pdf)
-
+- [Project Management](https://github.com/orgs/COS301-SE-2025/projects/107)
+- [User Manual (PDF)](Documentation/FireFighter%20-%20User%20Manual%20v2.pdf)
+- [Technical Installation Manual (PDF)](Documentation/FireFighter%20-%20Technical%20Installation%20Manual%20v1.pdf)
+- [Coding Standards (PDF)](Documentation/FireFighter%20-%20Coding%20Standards%20v2.pdf)
+- [Software Requirements Specification (PDF)](Documentation/FireFighter%20-%20Software%20Requirements%20Specification%20v3.pdf)
   
 <h2>🧐 Features</h2>
 
