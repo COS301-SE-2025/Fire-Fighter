@@ -107,7 +107,43 @@ FF-Angular/android/app/src/main/assets/capacitor.plugins.json
 FF-Angular/android/app/src/main/res/xml/config.xml
 
 # ===================================
-# FF-API (Spring Boot Maven)
+# SPRING BOOT MAVEN (Current Project)
+# ===================================
+
+# Maven compiled output
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Maven wrapper
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.properties
+
+# Spring Boot
+HELP.md
+
+# STS (Spring Tool Suite)
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# ===================================
+# FF-API (Spring Boot Maven) - Legacy paths for monorepo
 # ===================================
 
 # Maven
@@ -195,8 +231,32 @@ Desktop.ini
 *.temp
 
 # ===================================
+# JAVA COMPILED FILES
+# ===================================
+
+# Compiled class files
+*.class
+
+# JAR files (unless they are dependencies)
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# WAR files
+*.war
+
+# EAR files
+*.ear
+
+# ZIP files
+*.zip
+
+# ===================================
 # SECURITY AND SENSITIVE FILES
 # ===================================
+
+# Firebase service account (credentials now in environment variables)
+src/main/resources/firebase-service-account.json
+target/classes/firebase-service-account.json
 
 # SSH keys
 *.pem
@@ -232,11 +292,14 @@ id_ed25519*
 # uploads/
 # storage/
 
+# NX (if used)
 .nx/installation
 .nx/cache
 .nx/workspace-data
 
-
+# Cursor IDE
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
+
+# Node modules (if any Node.js tools are used)
 /node_modules

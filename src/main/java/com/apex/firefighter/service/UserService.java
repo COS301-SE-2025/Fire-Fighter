@@ -45,6 +45,13 @@ public class UserService {
     // DELEGATION METHODS FOR BACKWARD COMPATIBILITY
 
     /**
+     * Find user by Firebase UID - Delegates to AuthenticationService
+     */
+    public Optional<User> findByFirebaseUid(String firebaseUid) {
+        return authenticationService.getUserByFirebaseUid(firebaseUid);
+    }
+
+    /**
      * FIREBASE USER VERIFICATION - Delegates to AuthenticationService
      */
     public User verifyOrCreateUser(String firebaseUid, String username, String email, String department) {

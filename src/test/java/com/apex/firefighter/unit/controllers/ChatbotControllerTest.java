@@ -348,6 +348,8 @@ class ChatbotControllerTest {
     @Test
     @WithMockUser
     void healthCheck_ShouldReturnHealthyStatus() throws Exception {
+        // Mock the Gemini service as configured
+        when(chatbotService.isGeminiConfigured()).thenReturn(true);
 
         mockMvc.perform(get(BASE_URL + "/health"))
                 .andExpect(status().isOk())
@@ -356,14 +358,21 @@ class ChatbotControllerTest {
                 .andExpect(jsonPath("$.service").value("AI Chatbot"))
                 .andExpect(jsonPath("$.version").value("1.0.0"))
                 .andExpect(jsonPath("$.timestamp").exists())
-                .andExpect(jsonPath("$.timestamp").isString());
+                .andExpect(jsonPath("$.timestamp").isString())
+                .andExpect(jsonPath("$.services").exists())
+                .andExpect(jsonPath("$.services.geminiAI").value("UP"))
+                .andExpect(jsonPath("$.services.ticketQuery").value("UP"))
+                .andExpect(jsonPath("$.services.database").value("UP"));
 
-        verifyNoInteractions(chatbotService);
+        verify(chatbotService).isGeminiConfigured();
     }
 
     @Test
     @WithMockUser
     void healthCheck_ResponseStructure_ShouldContainAllRequiredFields() throws Exception {
+        // Mock the Gemini service as configured
+        when(chatbotService.isGeminiConfigured()).thenReturn(true);
+
         mockMvc.perform(get(BASE_URL + "/health"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -371,9 +380,31 @@ class ChatbotControllerTest {
                 .andExpect(jsonPath("$.service").exists())
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.version").exists())
-                .andExpect(jsonPath("$.*", hasSize(4)));
+                .andExpect(jsonPath("$.services").exists())
+                .andExpect(jsonPath("$.*", hasSize(5))); // Now we have 5 fields instead of 4
 
-        verifyNoInteractions(chatbotService);
+        verify(chatbotService).isGeminiConfigured();
+    }
+
+    @Test
+    @WithMockUser
+    void healthCheck_WithGeminiNotConfigured_ShouldReturnUnhealthyStatus() throws Exception {
+        // Mock the Gemini service as not configured
+        when(chatbotService.isGeminiConfigured()).thenReturn(false);
+
+        mockMvc.perform(get(BASE_URL + "/health"))
+                .andExpect(status().isServiceUnavailable()) // 503
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value("unhealthy"))
+                .andExpect(jsonPath("$.service").value("AI Chatbot"))
+                .andExpect(jsonPath("$.version").value("1.0.0"))
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.services").exists())
+                .andExpect(jsonPath("$.services.geminiAI").value("DOWN - API key not configured"))
+                .andExpect(jsonPath("$.services.ticketQuery").value("UP"))
+                .andExpect(jsonPath("$.services.database").value("UP"));
+
+        verify(chatbotService).isGeminiConfigured();
     }
 
     @Test
