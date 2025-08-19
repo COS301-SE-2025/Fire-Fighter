@@ -234,7 +234,17 @@ pipeline {
                         dir(env.ANGULAR_PATH) {
                             sh '''
                                 echo "🧪 Running Angular unit tests..."
-                                npm test -- --watch=false --browsers=ChromeHeadless --code-coverage
+                                export CI=true
+                                echo "🔎 Ensuring Chrome is available for headless tests..."
+                                if ! command -v google-chrome >/dev/null 2>&1; then
+                                    echo "📥 Installing Chrome via Puppeteer (no root required)..."
+                                    npx --yes puppeteer browsers install chrome >/dev/null 2>&1 || true
+                                    export CHROME_BIN=$(npx --yes puppeteer browsers path chrome)
+                                else
+                                    export CHROME_BIN=$(command -v google-chrome)
+                                fi
+                                echo "🧭 Using CHROME_BIN=$CHROME_BIN"
+                                npm test -- --watch=false --browsers=ChromeHeadlessNoSandbox --code-coverage
                             '''
                         }
                     }
