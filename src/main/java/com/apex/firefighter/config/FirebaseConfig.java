@@ -12,6 +12,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -27,7 +29,10 @@ public class FirebaseConfig {
 
                 // Try to load from environment variable first (for Docker/Portainer deployment)
                 String firebaseCredentialsJson = System.getenv("FIREBASE_SERVICE_ACCOUNT_JSON");
+                System.out.println("🔍 Checking for FIREBASE_SERVICE_ACCOUNT_JSON environment variable...");
+
                 if (firebaseCredentialsJson != null && !firebaseCredentialsJson.trim().isEmpty()) {
+                    System.out.println("✅ FIREBASE_SERVICE_ACCOUNT_JSON found (length: " + firebaseCredentialsJson.length() + " characters)");
                     try {
                         InputStream serviceAccount = new ByteArrayInputStream(firebaseCredentialsJson.getBytes());
                         credentials = GoogleCredentials.fromStream(serviceAccount);
@@ -35,18 +40,46 @@ public class FirebaseConfig {
                         serviceAccount.close();
                     } catch (Exception e) {
                         System.out.println("⚠️  Failed to parse Firebase credentials from environment variable: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                } else {
+                    if (firebaseCredentialsJson == null) {
+                        System.out.println("❌ FIREBASE_SERVICE_ACCOUNT_JSON environment variable is NULL");
+                    } else {
+                        System.out.println("❌ FIREBASE_SERVICE_ACCOUNT_JSON environment variable is EMPTY");
                     }
                 }
 
-                // Fallback to service account file
+                // Fallback to Docker secret file
                 if (credentials == null) {
                     try {
+                        System.out.println("🔍 Trying to load Firebase credentials from Docker secret...");
+                        File secretFile = new File("/run/secrets/firebase-service-account");
+                        if (secretFile.exists()) {
+                            InputStream serviceAccount = new FileInputStream(secretFile);
+                            credentials = GoogleCredentials.fromStream(serviceAccount);
+                            System.out.println("🔥 Firebase credentials loaded from Docker secret");
+                            serviceAccount.close();
+                        } else {
+                            System.out.println("⚠️  Docker secret file not found at /run/secrets/firebase-service-account");
+                        }
+                    } catch (Exception e) {
+                        System.out.println("⚠️  Failed to load from Docker secret: " + e.getMessage());
+                    }
+                }
+
+                // Fallback to service account file in classpath
+                if (credentials == null) {
+                    try {
+                        System.out.println("🔍 Trying to load Firebase credentials from classpath...");
                         ClassPathResource resource = new ClassPathResource("firebase-service-account.json");
                         if (resource.exists()) {
                             InputStream serviceAccount = resource.getInputStream();
                             credentials = GoogleCredentials.fromStream(serviceAccount);
                             System.out.println("🔥 Firebase credentials loaded from service account file");
                             serviceAccount.close();
+                        } else {
+                            System.out.println("⚠️  firebase-service-account.json not found in classpath");
                         }
                     } catch (Exception e) {
                         System.out.println("⚠️  Service account file not found, trying application default credentials");
