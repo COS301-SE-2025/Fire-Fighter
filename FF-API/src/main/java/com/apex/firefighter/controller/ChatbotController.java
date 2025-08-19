@@ -4,7 +4,6 @@ import com.apex.firefighter.service.ai.ChatbotService;
 import com.apex.firefighter.service.ai.ChatbotService.ChatbotResponse;
 import com.apex.firefighter.service.ai.ChatbotService.ChatbotCapabilities;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -181,7 +179,7 @@ public class ChatbotController {
         }
     }
 
-    @Operation(summary = "Check chatbot health", 
+    @Operation(summary = "Check chatbot health",
                description = "Health check endpoint to verify AI service availability")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Chatbot service is healthy"),
@@ -190,13 +188,31 @@ public class ChatbotController {
     @GetMapping("/health")
     public ResponseEntity<Map<String, Object>> healthCheck() {
         try {
-            // Simple health check - could be expanded to test AI service connectivity
+            // Check if the Gemini AI service is properly configured
+            boolean geminiConfigured = chatbotService.isGeminiConfigured();
+
+            // Determine overall health status
+            String overallStatus = geminiConfigured ? "healthy" : "unhealthy";
+
+            // Build detailed health response
+            Map<String, Object> services = Map.of(
+                "geminiAI", geminiConfigured ? "UP" : "DOWN - API key not configured",
+                "ticketQuery", "UP", // Assume ticket query service is always available
+                "database", "UP"     // Assume database is available if we reach this point
+            );
+
             Map<String, Object> health = Map.of(
-                "status", "healthy",
+                "status", overallStatus,
                 "service", "AI Chatbot",
                 "timestamp", java.time.LocalDateTime.now().toString(),
-                "version", "1.0.0"
+                "version", "1.0.0",
+                "services", services
             );
+
+            // Return 503 if any critical service is down
+            if (!geminiConfigured) {
+                return ResponseEntity.status(503).body(health);
+            }
 
             return ResponseEntity.ok(health);
 

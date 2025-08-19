@@ -3,7 +3,6 @@ package com.apex.firefighter.service.ai;
 import com.apex.firefighter.model.User;
 import com.apex.firefighter.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -291,6 +290,14 @@ public class ChatbotService {
         public String getFormattedTimestamp() {
             return timestamp != null ? timestamp.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : "";
         }
+    }
+
+    /**
+     * Check if Gemini AI service is properly configured
+     * Used by health check endpoint to verify service availability
+     */
+    public boolean isGeminiConfigured() {
+        return geminiAIService.isConfigured();
     }
 
     /**

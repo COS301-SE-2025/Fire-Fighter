@@ -34,6 +34,7 @@ export class ChatPage implements OnInit, AfterViewChecked {
   user: User | null = null;
   apiHealthy: boolean | null = null; // null = checking, true = healthy, false = unhealthy
   apiHealthStatus: string = 'Checking...';
+  healthCheckLoading: boolean = false;
   showQuickActions: boolean = true;
 
   suggestedQuestions: string[] = [
@@ -172,16 +173,45 @@ export class ChatPage implements OnInit, AfterViewChecked {
    * Check if the chatbot API is healthy
    */
   public checkAPIHealth(): void {
+    // Prevent multiple simultaneous health checks
+    if (this.healthCheckLoading) {
+      return;
+    }
+
     console.log('🔍 Checking API health...');
-    
+
+    // Set checking state
+    this.healthCheckLoading = true;
+    this.apiHealthy = null;
+    this.apiHealthStatus = 'Checking...';
+
     this.chatbotService.getHealth().subscribe({
       next: (health: ChatbotHealth) => {
         console.log('Health check successful:', health);
         this.apiHealthy = health.status === 'healthy';
+
+        // Update status text based on result
+        if (health.status === 'healthy') {
+          this.apiHealthStatus = 'Service Online';
+        } else {
+          // Check if we have detailed service information
+          if (health.services?.geminiAI) {
+            if (health.services.geminiAI.includes('DOWN')) {
+              this.apiHealthStatus = 'Service Offline - API Key Required';
+            } else {
+              this.apiHealthStatus = 'Service Issues';
+            }
+          } else {
+            this.apiHealthStatus = 'Service Offline';
+          }
+        }
+        this.healthCheckLoading = false;
       },
       error: (error: any) => {
         console.error('Health check failed:', error);
         this.apiHealthy = false;
+        this.apiHealthStatus = 'Connection Failed';
+        this.healthCheckLoading = false;
       }
     });
   }

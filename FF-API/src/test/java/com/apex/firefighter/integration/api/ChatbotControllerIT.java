@@ -85,12 +85,14 @@ public class ChatbotControllerIT {
         webTestClient.get()
             .uri("/api/chatbot/health")
             .exchange()
-            .expectStatus().isOk()
+            .expectStatus().isEqualTo(503) // Expect 503 because Gemini API key is not configured in test environment
             .expectBody()
-            .jsonPath("$.status").isEqualTo("healthy")
+            .jsonPath("$.status").isEqualTo("unhealthy")
             .jsonPath("$.service").isEqualTo("AI Chatbot")
             .jsonPath("$.version").isEqualTo("1.0.0")
-            .jsonPath("$.timestamp").exists();
+            .jsonPath("$.timestamp").exists()
+            .jsonPath("$.services").exists()
+            .jsonPath("$.services.geminiAI").isEqualTo("DOWN - API key not configured");
     }
 
     @Test
