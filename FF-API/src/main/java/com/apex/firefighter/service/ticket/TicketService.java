@@ -3,6 +3,7 @@ package com.apex.firefighter.service.ticket;
 import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.repository.TicketRepository;
 import com.apex.firefighter.service.NotificationService;
+import com.apex.firefighter.service.DolibarrUserGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,11 +16,13 @@ public class TicketService {
 
     private final TicketRepository ticketRepository;
     private final NotificationService notificationService;
+    private final DolibarrUserGroupService dolibarrUserGroupService;
 
     @Autowired
-    public TicketService(TicketRepository ticketRepository, NotificationService notificationService) {
+    public TicketService(TicketRepository ticketRepository, NotificationService notificationService, DolibarrUserGroupService dolibarrUserGroupService) {
         this.ticketRepository = ticketRepository;
         this.notificationService = notificationService;
+        this.dolibarrUserGroupService = dolibarrUserGroupService;
     }
 
     public Ticket createTicket(String description, String userId, String emergencyType, String emergencyContact, Integer duration) {
@@ -38,6 +41,13 @@ public class TicketService {
             System.out.println("✅ TICKET SERVICE: Created notification for ticket creation: " + ticketId + " (Duration: " + ticket.getDuration() + " minutes)");
         } catch (Exception e) {
             System.err.println("⚠️ TICKET SERVICE: Failed to create notification for ticket: " + ticketId + " - " + e.getMessage());
+        }
+
+        //add user to firefighter group
+        try {
+            dolibarrUserGroupService.addUserToGroup(userId);
+        } catch (Exception e) {
+            System.err.println("⚠️ TICKET SERVICE: Failed to add user to firefighter group for ticket: " + ticketId + " - " + e.getMessage());
         }
 
         return savedTicket;
@@ -85,6 +95,15 @@ public class TicketService {
                 } catch (Exception e) {
                     System.err.println("⚠️ TICKET SERVICE: Failed to create completion notification for ticket: " + ticket.getTicketId() + " - " + e.getMessage());
                 }
+            }
+
+            //remove user from firefighter group if ticket is closed
+            try {
+                if ("Closed".equals(newStatus)) {
+                    dolibarrUserGroupService.removeUserFromGroup(ticket.getUserId());
+                }
+            } catch (Exception e) {
+                System.err.println("⚠️ TICKET SERVICE: Failed to remove user from firefighter group for ticket: " + ticketId + " - " + e.getMessage());
             }
 
             return savedTicket;
@@ -144,6 +163,13 @@ public class TicketService {
                 System.out.println("✅ TICKET SERVICE: Created revocation notification for ticket: " + ticket.getTicketId());
             } catch (Exception e) {
                 System.err.println("⚠️ TICKET SERVICE: Failed to create revocation notification for ticket: " + ticket.getTicketId() + " - " + e.getMessage());
+            }
+
+            // Remove user from firefighter group when ticket is manually revoked
+            try {
+                dolibarrUserGroupService.removeUserFromGroup(ticket.getUserId());
+            } catch (Exception e) {
+                System.err.println("⚠️ TICKET SERVICE: Failed to remove user from firefighter group for ticket: " + ticket.getTicketId() + " - " + e.getMessage());
             }
 
             return savedTicket;
