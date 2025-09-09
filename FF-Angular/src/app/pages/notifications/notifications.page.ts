@@ -58,7 +58,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
     ])
   ]
 })
-export class NotificationsPage implements OnInit {
+export class NotificationsPage{
   user$ = this.authService.user$;
   notifications$: Observable<Notification[]>;
   mobileMenuOpen = false;
@@ -78,9 +78,6 @@ export class NotificationsPage implements OnInit {
     // Register icons
     addIcons({ logOutOutline });
     this.notifications$ = this.notificationService.getNotifications();
-  }
-
-  ngOnInit() {
   }
 
   toggleMobileMenu() {

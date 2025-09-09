@@ -2,9 +2,10 @@
 
 <ion-content [fullscreen]="true" class="ion-padding">
   <div class="min-h-full bg-gray-50 dark:bg-gray-900 pb-4">
-    
-    <!-- Header Section -->
-    <div class="mb-8">
+    <div class="max-w-4xl mx-auto">
+      
+      <!-- Header Section -->
+      <div class="mb-8">
       <div class="flex items-center space-x-3 mb-2">
         <div class="flex-shrink-0 w-12 h-12 bg-gray-600 rounded-lg flex items-center justify-center">
           <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -43,7 +44,7 @@
               id="language-dropdown-button"
               (click)="toggleLanguageDropdown()"
               data-dropdown-toggle="language-dropdown"
-              class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-between w-full dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+              class="text-gray-900 bg-gray-50 border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-between w-full dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:border-gray-500 dark:focus:ring-gray-600"
               type="button"
             >
               <span class="font-medium">{{ selectedLanguage.name }}</span>
@@ -168,74 +169,7 @@
             </div>
           </div>
 
-          <!-- System Notifications -->
-          <div class="space-y-4 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ 'SETTINGS.NOTIFICATIONS.SYSTEM_SECTION' | translate }}</h3>
-            
-            <!-- Request Status Updates -->
-            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
-              <div class="flex items-center space-x-3">
-                <div class="flex-shrink-0">
-                  <div class="w-10 h-10 bg-blue-600 dark:bg-blue-600 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                  </div>
-                </div>
-                <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-white">{{ 'SETTINGS.NOTIFICATIONS.REQUEST_UPDATES' | translate }}</p>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'SETTINGS.NOTIFICATIONS.REQUEST_UPDATES_DESC' | translate }}</p>
-                </div>
-              </div>
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" [(ngModel)]="notificationSettings.requestUpdates" (change)="onRequestUpdatesChange()" class="sr-only peer">
-                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
 
-            <!-- Audit Trail Alerts -->
-            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
-              <div class="flex items-center space-x-3">
-                <div class="flex-shrink-0">
-                  <div class="w-10 h-10 bg-gray-600 dark:bg-gray-600 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                  </div>
-                </div>
-                <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-white">{{ 'SETTINGS.NOTIFICATIONS.AUDIT_ALERTS' | translate }}</p>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'SETTINGS.NOTIFICATIONS.AUDIT_ALERTS_DESC' | translate }}</p>
-                </div>
-              </div>
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" [(ngModel)]="notificationSettings.auditAlerts" class="sr-only peer">
-                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
-
-            <!-- System Maintenance -->
-            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
-              <div class="flex items-center space-x-3">
-                <div class="flex-shrink-0">
-                  <div class="w-10 h-10 bg-emerald-600 dark:bg-emerald-600 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                  </div>
-                </div>
-                <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-white">{{ 'SETTINGS.NOTIFICATIONS.MAINTENANCE' | translate }}</p>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'SETTINGS.NOTIFICATIONS.MAINTENANCE_DESC' | translate }}</p>
-                </div>
-              </div>
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" [(ngModel)]="notificationSettings.maintenance" class="sr-only peer">
-                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
-          </div>
 
           <!-- Notification Delivery Methods -->
           <div class="space-y-4 pt-6 border-t border-gray-200 dark:border-gray-700">
@@ -336,48 +270,11 @@
     </div>
 
     <!-- Additional Settings Sections -->
-    <div class="space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       
-      <!-- Security Settings -->
-      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50">
-        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-          <div class="flex items-center space-x-3">
-            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-            </svg>
-            <div>
-              <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ 'SETTINGS.SECURITY.TITLE' | translate }}</h2>
-              <p class="text-sm text-gray-600 dark:text-gray-400">{{ 'SETTINGS.SECURITY.DESCRIPTION' | translate }}</p>
-            </div>
-          </div>
-        </div>
-        <div class="p-6">
-          <div class="text-center py-8">
-            <p class="text-gray-500 dark:text-gray-400">{{ 'SETTINGS.SECURITY.COMING_SOON' | translate }}</p>
-          </div>
-        </div>
-      </div>
 
-      <!-- Preferences -->
-      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50">
-        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-          <div class="flex items-center space-x-3">
-            <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75"></path>
-            </svg>
-            <div>
-              <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ 'SETTINGS.PREFERENCES.TITLE' | translate }}</h2>
-              <p class="text-sm text-gray-600 dark:text-gray-400">{{ 'SETTINGS.PREFERENCES.DESCRIPTION' | translate }}</p>
-            </div>
-          </div>
-        </div>
-        <div class="p-6">
-          <div class="text-center py-8">
-            <p class="text-gray-500 dark:text-gray-400">{{ 'SETTINGS.PREFERENCES.COMING_SOON' | translate }}</p>
-          </div>
-        </div>
-      </div>
     </div>
 
+    </div>
   </div>
 </ion-content>

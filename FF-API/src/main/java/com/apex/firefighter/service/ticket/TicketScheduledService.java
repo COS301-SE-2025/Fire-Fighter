@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@Transactional
 public class TicketScheduledService {
 
     private final TicketRepository ticketRepository;
@@ -32,12 +31,19 @@ public class TicketScheduledService {
         closeExpiredTickets();
     }
 
-    @Scheduled(cron = "0 */2 * * * *")
+    @Scheduled(cron = "0 */2 * * * *") // Run every 2 minutes
+    @Transactional
     public void scheduledTicketCheck() {
-        sendFiveMinuteWarnings();
-        closeExpiredTickets();
+        try {
+            sendFiveMinuteWarnings();
+            closeExpiredTickets();
+        } catch (Exception e) {
+            System.err.println("❌ Scheduled ticket check failed: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
+    @Transactional
     public void sendFiveMinuteWarnings() {
         System.out.println("Checking for tickets needing 5-minute warnings at " + LocalDateTime.now());
 
@@ -53,7 +59,9 @@ public class TicketScheduledService {
                     continue;
                 }
 
-                LocalDateTime expirationTime = ticket.getDateCreated().plusMinutes(ticket.getDuration());
+                // Use default duration of 60 minutes if duration is null
+                int durationMinutes = ticket.getDuration() != null ? ticket.getDuration() : 60;
+                LocalDateTime expirationTime = ticket.getDateCreated().plusMinutes(durationMinutes);
                 LocalDateTime warningTime = expirationTime.minusMinutes(5);
 
                 // Check if current time is at or past the warning time but before expiration
@@ -84,9 +92,11 @@ public class TicketScheduledService {
 
         } catch (Exception e) {
             System.err.println("Error sending five-minute warnings: " + e.getMessage());
+            throw e; // Re-throw to trigger transaction rollback
         }
     }
 
+    @Transactional
     public void closeExpiredTickets() {
         System.out.println("Checking for expired tickets at " + LocalDateTime.now());
         
@@ -97,7 +107,9 @@ public class TicketScheduledService {
             LocalDateTime currentTime = LocalDateTime.now();
             
             for (Ticket ticket : activeTicketsWithDuration) {
-                LocalDateTime expirationTime = ticket.getDateCreated().plusMinutes(ticket.getDuration());
+                // Use default duration of 60 minutes if duration is null
+                int durationMinutes = ticket.getDuration() != null ? ticket.getDuration() : 60;
+                LocalDateTime expirationTime = ticket.getDateCreated().plusMinutes(durationMinutes);
                 
                 if (currentTime.isAfter(expirationTime)) {
                     ticket.setStatus("Closed");
@@ -127,6 +139,7 @@ public class TicketScheduledService {
             
         } catch (Exception e) {
             System.err.println("Error closing expired tickets: " + e.getMessage());
+            throw e; // Re-throw to trigger transaction rollback
         }
     }
 } 

@@ -54,6 +54,11 @@ export const routes: Routes = [
     canActivate: [adminGuard]
   },
   {
+    path: 'metrics',
+    loadComponent: () => import('./pages/metrics/metrics.page').then( m => m.MetricsPage),
+    canActivate: [adminGuard]
+  },
+  {
     path: 'chat',
     loadComponent: () => import('./pages/chat/chat.page').then( m => m.ChatPage),
     canActivate: [authGuard]
@@ -71,9 +76,4 @@ export const routes: Routes = [
     path: '**',
     redirectTo: 'landing'
   }
-
-
-
-
-
 ];

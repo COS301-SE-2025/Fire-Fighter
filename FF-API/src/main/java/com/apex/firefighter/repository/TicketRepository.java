@@ -36,4 +36,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     // Find tickets within a date range (inclusive)
     @Query("SELECT t FROM Ticket t WHERE t.dateCreated >= :startDate AND t.dateCreated <= :endDate ORDER BY t.dateCreated DESC")
     List<Ticket> findByDateCreatedBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    // Find active tickets older than a specific date
+    @Query("SELECT t FROM Ticket t WHERE t.status = 'Active' AND t.dateCreated < :cutoffDate")
+    List<Ticket> findActiveTicketsOlderThan(@Param("cutoffDate") LocalDateTime cutoffDate);
 }

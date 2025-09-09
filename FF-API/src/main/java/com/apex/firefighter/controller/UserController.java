@@ -166,13 +166,58 @@ public class UserController {
             @PathVariable String firebaseUid,
             @RequestParam String roleName,
             @RequestParam String assignedBy) {
-        
+
         try {
             User updatedUser = userService.assignRole(firebaseUid, roleName, assignedBy);
             return ResponseEntity.ok(updatedUser);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    /**
+     * UPDATE CONTACT NUMBER
+     * PUT /api/users/{firebaseUid}/contact
+     * Update user's contact number
+     */
+    @Operation(summary = "Update user contact number",
+               description = "Updates the contact number for a user")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Contact number updated successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid contact number format"),
+        @ApiResponse(responseCode = "404", description = "User not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PutMapping("/{firebaseUid}/contact")
+    public ResponseEntity<User> updateContactNumber(
+            @Parameter(description = "Firebase UID") @PathVariable String firebaseUid,
+            @Parameter(description = "Contact number") @RequestParam String contactNumber) {
+
+        try {
+            System.out.println("🔵 UPDATE CONTACT REQUEST:");
+            System.out.println("  Firebase UID: " + firebaseUid);
+            System.out.println("  Contact Number: " + contactNumber);
+
+            // Basic validation for contact number
+            if (contactNumber != null && !contactNumber.trim().isEmpty()) {
+                contactNumber = contactNumber.trim();
+                // Optional: Add more validation logic here (e.g., phone number format)
+            }
+
+            User updatedUser = userService.updateContactNumber(firebaseUid, contactNumber);
+
+            System.out.println("CONTACT UPDATE SUCCESS: " + updatedUser.getContactNumber());
+            return ResponseEntity.ok(updatedUser);
+        } catch (RuntimeException e) {
+            System.err.println("CONTACT UPDATE FAILED:");
+            System.err.println("  Error Type: " + e.getClass().getSimpleName());
+            System.err.println("  Error Message: " + e.getMessage());
+
+            if (e.getMessage().contains("not found")) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.status(500).build();
+        } 
     }
 
     /**

@@ -36,3 +36,7 @@ build/
 .env
 .env.local
 .env.*.local
+
+# Firebase service account (contains sensitive credentials)
+firebase-service-account.json
+src/main/resources/firebase-service-account.json

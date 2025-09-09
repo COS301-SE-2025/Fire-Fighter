@@ -45,6 +45,13 @@ public class UserService {
     // DELEGATION METHODS FOR BACKWARD COMPATIBILITY
 
     /**
+     * Find user by Firebase UID - Delegates to AuthenticationService
+     */
+    public Optional<User> findByFirebaseUid(String firebaseUid) {
+        return authenticationService.getUserByFirebaseUid(firebaseUid);
+    }
+
+    /**
      * FIREBASE USER VERIFICATION - Delegates to AuthenticationService
      */
     public User verifyOrCreateUser(String firebaseUid, String username, String email, String department) {
@@ -124,6 +131,13 @@ public class UserService {
      */
     public User updateUserProfile(String firebaseUid, String username, String email, String department) {
         return userProfileService.updateUserProfile(firebaseUid, username, email, department);
+    }
+
+    /**
+     * Update user contact number - Delegates to UserProfileService
+     */
+    public User updateContactNumber(String firebaseUid, String contactNumber) {
+        return userProfileService.updateContactNumber(firebaseUid, contactNumber);
     }
 
     /**

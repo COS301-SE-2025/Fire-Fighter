@@ -4,9 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { IonContent } from '@ionic/angular/standalone';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { AuthService } from '../../services/auth.service';
-import { ChatbotService, ChatbotResponse } from '../../services/chatbot.service';
+import { ChatbotService, ChatbotResponse, ChatbotSuggestions, ChatbotHealth } from '../../services/chatbot.service';
 import { User } from '@angular/fire/auth';
-
+import { HttpClient, HttpResponse } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 export interface ChatMessage {
   id: string;
@@ -33,6 +34,7 @@ export class ChatPage implements OnInit, AfterViewChecked {
   user: User | null = null;
   apiHealthy: boolean | null = null; // null = checking, true = healthy, false = unhealthy
   apiHealthStatus: string = 'Checking...';
+  healthCheckLoading: boolean = false;
   showQuickActions: boolean = true;
 
   suggestedQuestions: string[] = [
@@ -56,10 +58,19 @@ export class ChatPage implements OnInit, AfterViewChecked {
 
   constructor(
     private authService: AuthService,
-    private chatbotService: ChatbotService
+    private chatbotService: ChatbotService,
+    private http: HttpClient
   ) { }
 
   ngOnInit() {
+    console.log('🔍 Environment check:', {
+      apiUrl: environment.apiUrl,
+      production: environment.production
+    });
+    
+    // Test basic connectivity first
+    this.testConnectivity();
+    
     // Check API health immediately when component loads
     this.checkAPIHealth();
 
@@ -67,7 +78,26 @@ export class ChatPage implements OnInit, AfterViewChecked {
     this.authService.user$.subscribe(user => {
       this.user = user;
       if (user?.uid) {
-        this.loadSuggestions(user.uid);
+        this.loadSuggestions();
+      }
+    });
+  }
+
+  private testConnectivity(): void {
+    console.log('🌐 Testing basic connectivity...');
+    
+    this.http.get(`${environment.apiUrl}/health`, { 
+      observe: 'response'
+    }).subscribe({
+      next: (response: HttpResponse<any>) => {
+        console.log('✅ Basic connectivity OK:', response.status);
+      },
+      error: (error) => {
+        console.error('❌ Basic connectivity failed:', {
+          status: error.status,
+          message: error.message,
+          url: error.url
+        });
       }
     });
   }
@@ -75,9 +105,11 @@ export class ChatPage implements OnInit, AfterViewChecked {
   /**
    * Load personalized suggestions from the API
    */
-  private loadSuggestions(userId: string): void {
-    this.chatbotService.getSuggestions(userId).subscribe({
-      next: (response) => {
+  private loadSuggestions(): void {
+    console.log('🤖 CHAT PAGE: Loading suggestions...');
+    this.chatbotService.getSuggestions().subscribe({
+      next: (response: ChatbotSuggestions) => {
+        console.log('🤖 CHAT PAGE: Suggestions loaded:', response);
         if (response.suggestions && response.suggestions.length > 0) {
           this.suggestedQuestions = response.suggestions;
         } else {
@@ -85,8 +117,8 @@ export class ChatPage implements OnInit, AfterViewChecked {
           this.setDefaultSuggestions();
         }
       },
-      error: (error) => {
-        console.warn('Failed to load suggestions, using enhanced defaults:', error);
+      error: (error: any) => {
+        console.warn('🤖 CHAT PAGE: Failed to load suggestions, using enhanced defaults:', error);
         // Use enhanced default suggestions if API fails
         this.setDefaultSuggestions();
       }
@@ -140,37 +172,46 @@ export class ChatPage implements OnInit, AfterViewChecked {
   /**
    * Check if the chatbot API is healthy
    */
-  checkAPIHealth(): void {
-    // Set initial checking state
+  public checkAPIHealth(): void {
+    // Prevent multiple simultaneous health checks
+    if (this.healthCheckLoading) {
+      return;
+    }
+
+    console.log('🔍 Checking API health...');
+
+    // Set checking state
+    this.healthCheckLoading = true;
     this.apiHealthy = null;
     this.apiHealthStatus = 'Checking...';
 
     this.chatbotService.getHealth().subscribe({
-      next: (health) => {
-        console.log('API Health Response:', health);
+      next: (health: ChatbotHealth) => {
+        console.log('Health check successful:', health);
+        this.apiHealthy = health.status === 'healthy';
 
+        // Update status text based on result
         if (health.status === 'healthy') {
-          this.apiHealthy = true;
-          this.apiHealthStatus = `Service Online (v${health.version || '1.0.0'})`;
+          this.apiHealthStatus = 'Service Online';
         } else {
-          this.apiHealthy = false;
-          this.apiHealthStatus = 'Service Degraded';
+          // Check if we have detailed service information
+          if (health.services?.geminiAI) {
+            if (health.services.geminiAI.includes('DOWN')) {
+              this.apiHealthStatus = 'Service Offline - API Key Required';
+            } else {
+              this.apiHealthStatus = 'Service Issues';
+            }
+          } else {
+            this.apiHealthStatus = 'Service Offline';
+          }
         }
+        this.healthCheckLoading = false;
       },
-      error: (error) => {
-        console.warn('API health check failed:', error);
+      error: (error: any) => {
+        console.error('Health check failed:', error);
         this.apiHealthy = false;
-
-        // Provide more specific error messages based on error type
-        if (error.status === 0) {
-          this.apiHealthStatus = 'Service Offline (Connection Failed)';
-        } else if (error.status === 404) {
-          this.apiHealthStatus = 'Service Not Found';
-        } else if (error.status >= 500) {
-          this.apiHealthStatus = 'Service Error';
-        } else {
-          this.apiHealthStatus = 'Service Unavailable';
-        }
+        this.apiHealthStatus = 'Connection Failed';
+        this.healthCheckLoading = false;
       }
     });
   }
@@ -243,13 +284,21 @@ export class ChatPage implements OnInit, AfterViewChecked {
     const isAdmin = this.authService.isCurrentUserAdmin();
     const shouldUseAdminEndpoint = isAdmin && this.chatbotService.isAdminQuery(userMessage);
 
+    console.log('🤖 CHAT PAGE: Sending message to chatbot:', {
+      userMessage,
+      isAdmin,
+      shouldUseAdminEndpoint,
+      userId: this.user?.uid
+    });
+
     // Choose the appropriate API endpoint
     const apiCall = shouldUseAdminEndpoint
-      ? this.chatbotService.sendAdminQuery(userMessage, this.user.uid)
-      : this.chatbotService.sendQuery(userMessage, this.user.uid);
+      ? this.chatbotService.sendAdminQuery(userMessage)
+      : this.chatbotService.sendQuery(userMessage);
 
     apiCall.subscribe({
       next: (response: ChatbotResponse) => {
+        console.log('🤖 CHAT PAGE: Received response:', response);
         // Remove typing indicator
         this.messages = this.messages.filter(msg => !msg.isTyping);
 
@@ -266,6 +315,7 @@ export class ChatPage implements OnInit, AfterViewChecked {
         this.shouldScrollToBottom = true;
       },
       error: (errorResponse: ChatbotResponse) => {
+        console.error('🤖 CHAT PAGE: Received error:', errorResponse);
         // Remove typing indicator
         this.messages = this.messages.filter(msg => !msg.isTyping);
 

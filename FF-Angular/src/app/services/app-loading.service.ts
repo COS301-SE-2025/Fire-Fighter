@@ -16,7 +16,7 @@ export interface AppLoadingState {
 export class AppLoadingService {
   private loadingStateSubject = new BehaviorSubject<AppLoadingState>({
     isLoading: true,
-    message: 'Initializing application...',
+    message: 'Starting FireFighter platform...',
     progress: 0
   });
 
@@ -31,72 +31,56 @@ export class AppLoadingService {
 
   /**
    * Initialize the application with real coordinated loading sequence
+   * Includes timeout protection for enterprise reliability
    */
   async initializeApp(): Promise<void> {
     try {
-      console.log('🚀 Starting app initialization sequence...');
-
-      // Step 1: Check initial connectivity and health
       this.updateLoadingState({
         isLoading: true,
-        message: 'Checking service connectivity...',
+        message: 'Verifying system connectivity...',
         progress: 20
       });
 
-      // Perform initial health check with timeout
-      await firstValueFrom(this.healthService.checkInitialConnectivity(5000));
+      // Use fallback-aware health check for better initial connectivity testing
+      await firstValueFrom(this.healthService.checkHealthWithFallback(5000));
 
-      // Step 2: Initialize authentication state
       this.updateLoadingState({
         isLoading: true,
-        message: 'Initializing authentication...',
+        message: 'Initializing security protocols...',
         progress: 50
       });
 
-      // Wait for auth service to initialize (if it has an initialization method)
-      await this.delay(1000); // Give auth service time to initialize
+      await this.delay(1000);
 
-      // Step 3: Load user preferences and language settings
       this.updateLoadingState({
         isLoading: true,
-        message: 'Loading user preferences...',
+        message: 'Configuring user environment...',
         progress: 75
       });
 
-      // Initialize language service
       this.languageService.getCurrentLanguage();
       await this.delay(500);
 
-      // Step 4: Finalize initialization
       this.updateLoadingState({
         isLoading: true,
-        message: 'Finalizing setup...',
+        message: 'Preparing platform...',
         progress: 90
       });
 
       await this.delay(500);
 
-      // Complete initialization
       this.updateLoadingState({
         isLoading: false,
-        message: 'Ready!',
+        message: 'Platform ready',
         progress: 100
       });
-
-      console.log('✅ App initialization completed successfully');
 
     } catch (error) {
-      console.error('❌ App initialization failed:', error);
-
-      // Even if initialization fails, we should still allow the app to load
-      // The health monitoring will handle service unavailability
       this.updateLoadingState({
         isLoading: false,
-        message: 'Ready (limited connectivity)',
+        message: 'Platform ready - Limited connectivity mode',
         progress: 100
       });
-
-      console.warn('⚠️ App loaded with limited functionality due to initialization error');
     }
   }
 
@@ -106,7 +90,7 @@ export class AppLoadingService {
   showLoading(message?: string, progress?: number): void {
     this.updateLoadingState({
       isLoading: true,
-      message: message || 'Loading...',
+      message: message || 'Processing request...',
       progress
     });
   }
@@ -117,7 +101,7 @@ export class AppLoadingService {
   hideLoading(): void {
     this.updateLoadingState({
       isLoading: false,
-      message: 'Ready',
+      message: 'Platform ready',
       progress: 100
     });
   }
@@ -161,6 +145,21 @@ export class AppLoadingService {
   setLoadingState(state: Partial<AppLoadingState>): void {
     const currentState = this.getCurrentState();
     this.updateLoadingState({ ...currentState, ...state });
+  }
+
+  /**
+   * Set maximum loading timeout for enterprise reliability
+   */
+  setLoadingTimeout(timeoutMs: number = 30000): void {
+    setTimeout(() => {
+      if (this.isLoading()) {
+        this.updateLoadingState({
+          isLoading: false,
+          message: 'Platform ready - Initialization timeout',
+          progress: 100
+        });
+      }
+    }, timeoutMs);
   }
 
   /**

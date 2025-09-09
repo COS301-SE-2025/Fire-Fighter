@@ -3,7 +3,9 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { IonContent } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 import { interval, Subscription, firstValueFrom } from 'rxjs';
+import { timeout } from 'rxjs/operators';
 import { HealthService, ServiceHealth } from '../../services/health.service';
+import { HealthMonitorService } from '../../services/health-monitor.service';
 
 @Component({
   selector: 'app-service-down',
@@ -28,6 +30,7 @@ export class ServiceDownPage implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private healthService: HealthService,
+    private healthMonitorService: HealthMonitorService,
     private datePipe: DatePipe
   ) {}
 
@@ -36,6 +39,8 @@ export class ServiceDownPage implements OnInit, OnDestroy {
     this.startTimeUpdates();
     this.setEstimatedRecovery();
     this.subscribeToHealthUpdates();
+    
+
   }
 
   ngOnDestroy() {
@@ -45,9 +50,15 @@ export class ServiceDownPage implements OnInit, OnDestroy {
     if (this.healthSubscription) {
       this.healthSubscription.unsubscribe();
     }
+    
+    // Update health monitor service status when leaving the service-down page
+    this.healthMonitorService.setServiceDownPageStatus(false);
   }
 
   private initializeServiceDownPage() {
+    // Update health monitor service status to indicate we're on service-down page
+    this.healthMonitorService.setServiceDownPageStatus(true);
+
     // Get last connection time from localStorage if available
     const lastConnection = localStorage.getItem('lastSuccessfulConnection');
     if (lastConnection) {
@@ -65,36 +76,27 @@ export class ServiceDownPage implements OnInit, OnDestroy {
     return this.datePipe.transform(date, 'yyyy/MM/dd, HH:mm:ss') || '';
   }
 
-  private subscribeToHealthUpdates() {
-    // Subscribe to health updates
+  private subscribeToHealthUpdates(): void {
     this.healthSubscription = this.healthService.health$.subscribe(health => {
       this.serviceHealth = health;
 
-      // If service becomes healthy, automatically redirect to dashboard
       if (health.isHealthy) {
-        console.log('🎉 Service is back online! Redirecting to dashboard...');
         localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
-
-        // Reset retry attempts on successful automatic recovery
         this.retryAttempts = 0;
-
-        this.router.navigate(['/dashboard']);
       }
     });
 
-    // Perform an immediate health check when page loads
+    // Perform initial health check
     this.healthService.checkHealth().subscribe();
   }
 
-  private startTimeUpdates() {
-    // Update current time every minute
+  private startTimeUpdates(): void {
     this.timeUpdateSubscription = interval(60000).subscribe(() => {
       this.currentTime = new Date();
     });
   }
 
-  private setEstimatedRecovery() {
-    // Set a realistic estimated recovery time (15-30 minutes from now)
+  private setEstimatedRecovery(): void {
     const estimatedMinutes = Math.floor(Math.random() * 15) + 15;
     const recoveryTime = new Date();
     recoveryTime.setMinutes(recoveryTime.getMinutes() + estimatedMinutes);
@@ -104,7 +106,7 @@ export class ServiceDownPage implements OnInit, OnDestroy {
     });
   }
 
-  async retryConnection() {
+  async retryConnection(): Promise<void> {
     if (this.isRetrying || this.retryAttempts >= this.maxRetryAttempts) {
       return;
     }
@@ -113,31 +115,33 @@ export class ServiceDownPage implements OnInit, OnDestroy {
     this.retryAttempts++;
 
     try {
-      console.log(`🔄 Attempting connection retry ${this.retryAttempts}/${this.maxRetryAttempts}...`);
+      // Temporarily unsubscribe to avoid conflicts
+      if (this.healthSubscription) {
+        this.healthSubscription.unsubscribe();
+      }
 
-      // Perform actual health check using firstValueFrom instead of deprecated toPromise()
-      const health = await firstValueFrom(this.healthService.checkHealth());
+      // Use the new health check method that supports fallback URLs
+      const health = await firstValueFrom(
+        this.healthService.checkHealthWithFallback(10000)
+      );
 
       if (health?.isHealthy) {
-        // If successful, navigate back to dashboard
-        console.log('🎉 Connection restored! Redirecting to dashboard...');
         localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
-
-        // Reset retry attempts on successful connection
         this.retryAttempts = 0;
+        this.serviceHealth = health;
 
-        // Navigate to dashboard
-        this.router.navigate(['/dashboard']);
+        this.healthMonitorService.setServiceDownPageStatus(false);
+        await this.router.navigate(['/dashboard']);
       } else {
-        throw new Error(health?.error || 'Service still unavailable');
+        this.subscribeToHealthUpdates();
+        throw new Error(health?.error || 'Service unavailable');
       }
 
     } catch (error) {
-      console.error(`❌ Connection retry ${this.retryAttempts} failed:`, error);
+      this.subscribeToHealthUpdates();
 
       if (this.retryAttempts >= this.maxRetryAttempts) {
-        // Show message that max retries reached
-        this.showMaxRetriesMessage();
+        this.resetRetriesAfterDelay();
       }
     } finally {
       this.isRetrying = false;
@@ -166,19 +170,13 @@ export class ServiceDownPage implements OnInit, OnDestroy {
     return this.serviceHealth.isHealthy ? 'online' : 'offline';
   }
 
-  private showMaxRetriesMessage() {
-    console.log('⚠️ Maximum retry attempts reached. Please wait before trying again.');
-
-    // Reset retry attempts after 30 seconds to allow user to try again
+  private resetRetriesAfterDelay(): void {
     setTimeout(() => {
-      console.log('🔄 Retry attempts reset. User can try again.');
       this.retryAttempts = 0;
     }, 30000);
   }
 
-  goToOfflineMode() {
-    // Navigate to a limited offline version or cached data view
-    // For now, navigate to dashboard with offline flag
+  goToOfflineMode(): void {
     this.router.navigate(['/dashboard'], { 
       queryParams: { offline: 'true' } 
     });
@@ -204,11 +202,5 @@ export class ServiceDownPage implements OnInit, OnDestroy {
       : 'Retry Connection';
   }
 
-  /**
-   * Reset retry attempts (useful for testing or manual reset)
-   */
-  resetRetryAttempts(): void {
-    this.retryAttempts = 0;
-    console.log('🔄 Retry attempts manually reset');
-  }
+
 }

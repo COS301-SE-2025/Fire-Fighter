@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   apiUrl: 'http://localhost:8080/api', // Primary backend API URL
-    fallbackApiUrl: 'http://100.123.32.43:8080/api', // Fallback API URL
+    fallbackApiUrl: 'https://api.firefighter-eam.co.za/api', // Fallback API URL
   appVersion: '2.2.0',
   appName: 'FireFighter'
 };
