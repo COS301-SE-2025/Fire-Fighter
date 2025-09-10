@@ -150,4 +150,41 @@ public class UserProfileService {
     public long getAuthorizedUserCount() {
         return userRepository.findByIsAuthorizedTrue().size();
     }
+
+    /**
+     * Update user Dolibarr ID
+     */
+    public User updateDolibarrId(String firebaseUid, String dolibarrId) {
+        System.out.println("🔵 UPDATE DOLIBARR ID: Updating Dolibarr ID for UID - " + firebaseUid);
+
+        Optional<User> userOpt = userRepository.findByUserId(firebaseUid);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setDolibarrId(dolibarrId);
+
+            User updatedUser = userRepository.save(user);
+            System.out.println("✅ DOLIBARR ID UPDATED: " + updatedUser.getDolibarrId());
+            return updatedUser;
+        } else {
+            System.out.println("❌ DOLIBARR ID UPDATE FAILED: User not found for UID - " + firebaseUid);
+            throw new RuntimeException("User not found with Firebase UID: " + firebaseUid);
+        }
+    }
+
+    /**
+     * Get user Dolibarr ID
+     */
+    public String getDolibarrId(String firebaseUid) {
+        System.out.println("🔵 GET DOLIBARR ID: Fetching Dolibarr ID for UID - " + firebaseUid);
+
+        Optional<User> userOpt = userRepository.findByUserId(firebaseUid);
+        if (userOpt.isPresent()) {
+            String dolibarrId = userOpt.get().getDolibarrId();
+            System.out.println("✅ DOLIBARR ID FOUND: " + dolibarrId);
+            return dolibarrId;
+        } else {
+            System.out.println("❌ DOLIBARR ID GET FAILED: User not found for UID - " + firebaseUid);
+            throw new RuntimeException("User not found with Firebase UID: " + firebaseUid);
+        }
+    }
 } 
