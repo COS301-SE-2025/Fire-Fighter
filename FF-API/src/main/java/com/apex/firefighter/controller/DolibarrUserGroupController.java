@@ -17,7 +17,7 @@ public class DolibarrUserGroupController {
         this.service = service;
     }
 
-    @PostMapping("/add/{userId}")
+    /* @PostMapping("/add/{userId}")
     public String addToGroup(@PathVariable Long userId) {
         service.addUserToGroup(userId);
         return "User " + userId + " added to group Firefighters";
@@ -31,5 +31,5 @@ public class DolibarrUserGroupController {
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException("Failed to remove user from group: " + e.getMessage(), e);
         }
-    }
+    } */
 }
