@@ -174,4 +174,18 @@ public class UserService {
     public long getAuthorizedUserCount() {
         return userProfileService.getAuthorizedUserCount();
     }
+
+    /**
+     * Update user Dolibarr ID - Delegates to UserProfileService
+     */
+    public User updateDolibarrId(String firebaseUid, String dolibarrId) {
+        return userProfileService.updateDolibarrId(firebaseUid, dolibarrId);
+    }
+
+    /**
+     * Get user Dolibarr ID - Delegates to UserProfileService
+     */
+    public String getDolibarrId(String firebaseUid) {
+        return userProfileService.getDolibarrId(firebaseUid);
+    }
 } 

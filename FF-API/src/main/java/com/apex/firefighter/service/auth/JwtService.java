@@ -32,6 +32,12 @@ public class JwtService {
     }
 
     private SecretKey getSigningKey() {
+        // Ensure the key is at least 256 bits (32 characters) for HS256
+        if (jwtSecret.length() < 32) {
+            // Pad the secret to meet minimum requirements
+            String paddedSecret = jwtSecret + "0".repeat(32 - jwtSecret.length());
+            return Keys.hmacShaKeyFor(paddedSecret.getBytes());
+        }
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 

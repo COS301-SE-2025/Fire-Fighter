@@ -1,5 +1,6 @@
-package com.apex.firefighter.controller;
+package com.apex.firefighter.unit.controllers;
 
+import com.apex.firefighter.controller.UserController;
 import com.apex.firefighter.model.User;
 import com.apex.firefighter.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,9 +17,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -662,6 +661,104 @@ class UserControllerTest {
                 .andExpect(status().isOk());
 
         verify(userService).verifyOrCreateUser(TEST_USER_ID, "", TEST_EMAIL, null);
+    }
+
+    // Dolibarr ID Tests
+
+    @Test
+    @WithMockUser(username = TEST_USER_ID)
+    void updateDolibarrId_WithValidData_ShouldReturnUpdatedUser() throws Exception {
+        String dolibarrId = "DOL123456";
+        testUser.setDolibarrId(dolibarrId);
+        
+        when(userService.updateDolibarrId(TEST_USER_ID, dolibarrId))
+                .thenReturn(testUser);
+
+        mockMvc.perform(put(BASE_URL + "/dolibarr-id")
+                .param("dolibarrId", dolibarrId)
+                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dolibarrId").value(dolibarrId));
+
+        verify(userService).updateDolibarrId(TEST_USER_ID, dolibarrId);
+    }
+
+    @Test
+    @WithMockUser(username = TEST_USER_ID)
+    void updateDolibarrId_WithUserNotFound_ShouldReturnNotFound() throws Exception {
+        String dolibarrId = "DOL123456";
+        
+        when(userService.updateDolibarrId(TEST_USER_ID, dolibarrId))
+                .thenThrow(new RuntimeException("User not found with Firebase UID: " + TEST_USER_ID));
+
+        mockMvc.perform(put(BASE_URL + "/dolibarr-id")
+                .param("dolibarrId", dolibarrId)
+                .with(csrf()))
+                .andExpect(status().isNotFound());
+
+        verify(userService).updateDolibarrId(TEST_USER_ID, dolibarrId);
+    }
+
+    @Test
+    void updateDolibarrId_WithoutAuthentication_ShouldReturnUnauthorized() throws Exception {
+        String dolibarrId = "DOL123456";
+
+        mockMvc.perform(put(BASE_URL + "/dolibarr-id")
+                .param("dolibarrId", dolibarrId)
+                .with(csrf()))
+                .andExpect(status().isUnauthorized());
+
+        verify(userService, never()).updateDolibarrId(any(), any());
+    }
+
+    @Test
+    @WithMockUser(username = TEST_USER_ID)
+    void getDolibarrId_WithValidUser_ShouldReturnDolibarrId() throws Exception {
+        String dolibarrId = "DOL123456";
+        
+        when(userService.getDolibarrId(TEST_USER_ID))
+                .thenReturn(dolibarrId);
+
+        mockMvc.perform(get(BASE_URL + "/dolibarr-id"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dolibarrId").value(dolibarrId))
+                .andExpect(jsonPath("$.firebaseUid").value(TEST_USER_ID));
+
+        verify(userService).getDolibarrId(TEST_USER_ID);
+    }
+
+    @Test
+    @WithMockUser(username = TEST_USER_ID)
+    void getDolibarrId_WithNullDolibarrId_ShouldReturnEmptyString() throws Exception {
+        when(userService.getDolibarrId(TEST_USER_ID))
+                .thenReturn(null);
+
+        mockMvc.perform(get(BASE_URL + "/dolibarr-id"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dolibarrId").value(""))
+                .andExpect(jsonPath("$.firebaseUid").value(TEST_USER_ID));
+
+        verify(userService).getDolibarrId(TEST_USER_ID);
+    }
+
+    @Test
+    @WithMockUser(username = TEST_USER_ID)
+    void getDolibarrId_WithUserNotFound_ShouldReturnNotFound() throws Exception {
+        when(userService.getDolibarrId(TEST_USER_ID))
+                .thenThrow(new RuntimeException("User not found with Firebase UID: " + TEST_USER_ID));
+
+        mockMvc.perform(get(BASE_URL + "/dolibarr-id"))
+                .andExpect(status().isNotFound());
+
+        verify(userService).getDolibarrId(TEST_USER_ID);
+    }
+
+    @Test
+    void getDolibarrId_WithoutAuthentication_ShouldReturnUnauthorized() throws Exception {
+        mockMvc.perform(get(BASE_URL + "/dolibarr-id"))
+                .andExpect(status().isUnauthorized());
+
+        verify(userService, never()).getDolibarrId(any());
     }
 
 }
