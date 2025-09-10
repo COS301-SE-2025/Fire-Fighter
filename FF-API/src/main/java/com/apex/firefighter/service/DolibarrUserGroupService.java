@@ -28,7 +28,7 @@ public class DolibarrUserGroupService {
             /* RestTemplate restTemplate, */
             @Value("${dolibarr.api.base-url}") String dolibarrBaseUrl,
             @Value("${dolibarr.api.key}") String apiKey,
-            @Value("${dolibarr.ff.group.id}") Long firefighterGroupId) {
+            @Value("${dolibarr.ff.hr.id}") Long firefighterGroupId) {
         this.restTemplate = new RestTemplate()/* restTemplate */;
         this.dolibarrBaseUrl = dolibarrBaseUrl;
         this.apiKey = apiKey;
