@@ -154,6 +154,20 @@ public class JwtService {
         }
     }
 
+    
+    /**
+     * Check if token will expire within the specified minutes
+     */
+    public Boolean willExpireSoon(String token, int minutesThreshold) {
+        try {
+            Date expiration = extractExpiration(token);
+            Date threshold = new Date(System.currentTimeMillis() + (minutesThreshold * 60 * 1000));
+            return expiration.before(threshold);
+        } catch (Exception e) {
+            return true; // Treat parsing errors as "will expire soon"
+        }
+    }
+
 
     /**
      * Validate custom JWT token
