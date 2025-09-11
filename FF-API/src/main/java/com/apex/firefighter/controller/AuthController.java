@@ -133,4 +133,33 @@ public class AuthController {
             return ResponseEntity.status(500).body(errorResult);
         }
     }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(@RequestBody FirebaseLoginRequest request) {
+        try {
+            System.out.println("🔄 TOKEN REFRESH REQUEST: Processing token refresh...");
+            String idToken = request.getIdToken();
+            
+            if (idToken == null || idToken.trim().isEmpty()) {
+                System.out.println("❌ TOKEN REFRESH ERROR: Missing or empty idToken");
+                return ResponseEntity.badRequest().body(Map.of(
+                    "error", "MISSING_TOKEN",
+                    "message", "Firebase ID token is required for refresh"
+                ));
+            }
+            
+            // Use the existing AuthenticationService to handle the flow
+            AuthResponse authResponse = authenticationService.verifyFirebaseTokenAndCreateJwt(idToken);
+            
+            System.out.println("✅ TOKEN REFRESH SUCCESS: New JWT created for user " + authResponse.getUser().getUsername());
+            return ResponseEntity.ok(authResponse);
+            
+        } catch (Exception e) {
+            System.out.println("❌ TOKEN REFRESH ERROR: " + e.getMessage());
+            return ResponseEntity.status(401).body(Map.of(
+                "error", "REFRESH_FAILED",
+                "message", "Failed to refresh token: " + e.getMessage()
+            ));
+        }
+    }
 }
