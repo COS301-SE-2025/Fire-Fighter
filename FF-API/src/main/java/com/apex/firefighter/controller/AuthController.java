@@ -162,4 +162,35 @@ public class AuthController {
             ));
         }
     }
+
+        @GetMapping("/token-status")
+    public ResponseEntity<?> getTokenStatus(HttpServletRequest request) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String firebaseUid = (String) request.getAttribute("firebaseUid");
+            Boolean isAdmin = (Boolean) request.getAttribute("isAdmin");
+            
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return ResponseEntity.status(401).body(Map.of(
+                    "error", "NOT_AUTHENTICATED",
+                    "message", "No valid authentication found"
+                ));
+            }
+            
+            Map<String, Object> tokenStatus = Map.of(
+                "authenticated", true,
+                "userId", firebaseUid != null ? firebaseUid : authentication.getName(),
+                "isAdmin", isAdmin != null ? isAdmin : false,
+                "timestamp", java.time.LocalDateTime.now().toString()
+            );
+            
+            return ResponseEntity.ok(tokenStatus);
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of(
+                "error", "SERVER_ERROR",
+                "message", "Error checking token status: " + e.getMessage()
+            ));
+        }
+    }
 }
