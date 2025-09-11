@@ -168,6 +168,17 @@ public class JwtService {
         }
     }
 
+        /**
+     * Get token expiration time
+     */
+    public Date getTokenExpiration(String token) {
+        try {
+            return extractExpiration(token);
+        } catch (Exception e) {
+            return new Date(); // Return current time if token is invalid
+        }
+    }
+
 
     /**
      * Validate custom JWT token
