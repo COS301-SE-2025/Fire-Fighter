@@ -95,13 +95,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         logger.warn("Custom JWT token validation failed: " + ex.getMessage());
 
                         // Check if it's an expired token exception
-                        if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("expired")) {
+                        if(ex.getMessage() != null && ex.getMessage().toLowerCase().contains("expired")){
+
                             sendTokenExpiredResponse(response);
                             return;
-                        } else {
+
+                        } else{
+
                             sendInvalidTokenResponse(response);
                             return;
+
                         }
+
                     }
                 } else {
                     System.out.println("🔒 JWT FILTER: Processing as Firebase ID token");
@@ -141,4 +146,42 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+
+    //Send standardized token expired response
+    private void sendTokenExpiredResponse(HttpServletResponse response) throws IOException {
+        
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        
+        String jsonResponse = "{"
+            + "\"error\": \"TOKEN_EXPIRED\","
+            + "\"message\": \"Your session has expired. Please log in again.\","
+            + "\"timestamp\": \"" + java.time.Instant.now().toString() + "\","
+            + "\"requiresReauth\": true"
+            + "}";
+            
+        response.getWriter().write(jsonResponse);
+        response.getWriter().flush();
+    }
+
+    //Send standardized invalid token response
+    private void sendInvalidTokenResponse(HttpServletResponse response) throws IOException {
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        
+        String jsonResponse = "{"
+            + "\"error\": \"INVALID_TOKEN\","
+            + "\"message\": \"Invalid authentication token. Please log in again.\","
+            + "\"timestamp\": \"" + java.time.Instant.now().toString() + "\","
+            + "\"requiresReauth\": true"
+            + "}";
+            
+        response.getWriter().write(jsonResponse);
+        response.getWriter().flush();
+    }
+
+    
 }
