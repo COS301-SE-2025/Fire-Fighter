@@ -17,25 +17,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
 @Service
-@ConditionalOnProperty(name = "dolibarr.enabled", havingValue = "true", matchIfMissing = false)
 public class DolibarrUserGroupService {
     private final RestTemplate restTemplate;
     private final String dolibarrBaseUrl;
     private final String apiKey;
-    private final Long firefighterGroupId;
+    private final String firefighterGroupId;
 
     public DolibarrUserGroupService(
-            /* RestTemplate restTemplate, */
             @Value("${dolibarr.api.base-url}") String dolibarrBaseUrl,
             @Value("${dolibarr.api.key}") String apiKey,
-            @Value("${dolibarr.ff.hr.id}") Long firefighterGroupId) {
-        this.restTemplate = new RestTemplate()/* restTemplate */;
+            @Value("${dolibarr.ff.hr.id}") String firefighterGroupId) {
+        this.restTemplate = new RestTemplate();
         this.dolibarrBaseUrl = dolibarrBaseUrl;
         this.apiKey = apiKey;
         this.firefighterGroupId = firefighterGroupId;
     }
 
-    public void addUserToGroup(Long userId) {
+    public void addUserToGroup(String userId) {
         String url = dolibarrBaseUrl + "/users/" + userId + "/setGroup/" + firefighterGroupId;
 
         HttpHeaders headers = new HttpHeaders();
@@ -50,7 +48,7 @@ public class DolibarrUserGroupService {
         }
     }
 
-    public void removeUserFromGroup(Long userId) throws IOException, InterruptedException{
+    public void removeUserFromGroup(String userId) throws IOException, InterruptedException{
         ObjectMapper mapper = new ObjectMapper();
         
         String getURL = dolibarrBaseUrl + "/users/" + userId + "/groups";
@@ -74,7 +72,7 @@ public class DolibarrUserGroupService {
         List<Integer> groupIds = new ArrayList<>();
         for (Map<String, Object> group : groups) {
             if (group.get("id").equals(firefighterGroupId)) {
-                continue; // Skip the firefighter group
+                continue;
             }
             Object idValue = group.get("id");
             if (idValue instanceof Number) {
