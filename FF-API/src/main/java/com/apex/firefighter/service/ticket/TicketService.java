@@ -1,7 +1,9 @@
 package com.apex.firefighter.service.ticket;
 
 import com.apex.firefighter.model.Ticket;
+import com.apex.firefighter.model.User;
 import com.apex.firefighter.repository.TicketRepository;
+import com.apex.firefighter.repository.UserRepository;
 import com.apex.firefighter.service.NotificationService;
 import com.apex.firefighter.service.DolibarrUserGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +19,14 @@ public class TicketService {
     private final TicketRepository ticketRepository;
     private final NotificationService notificationService;
     private final DolibarrUserGroupService dolibarrUserGroupService;
+    private final UserRepository userRepository;
 
     @Autowired
-    public TicketService(TicketRepository ticketRepository, NotificationService notificationService, DolibarrUserGroupService dolibarrUserGroupService) {
+    public TicketService(TicketRepository ticketRepository, NotificationService notificationService, DolibarrUserGroupService dolibarrUserGroupService, UserRepository userRepository) {
         this.ticketRepository = ticketRepository;
         this.notificationService = notificationService;
         this.dolibarrUserGroupService = dolibarrUserGroupService;
+        this.userRepository = userRepository;
     }
 
     public Ticket createTicket(String description, String userId, String emergencyType, String emergencyContact, Integer duration) {
@@ -45,7 +49,11 @@ public class TicketService {
 
         //add user to firefighter group
         try {
-            dolibarrUserGroupService.addUserToGroup(userId);
+            User user = userRepository.findById(userId);
+            if (user == null) {
+                throw new RuntimeException("User not found with ID: " + userId);
+            }
+            dolibarrUserGroupService.addUserToGroup(user.getDolibarrId());
         } catch (Exception e) {
             System.err.println("⚠️ TICKET SERVICE: Failed to add user to firefighter group for ticket: " + ticketId + " - " + e.getMessage());
         }
@@ -97,10 +105,15 @@ public class TicketService {
                 }
             }
 
-            //remove user from firefighter group if ticket is closed
+            // Remove user from firefighter group if ticket is closed
             try {
                 if ("Closed".equals(newStatus) || "Completed".equals(newStatus)) {
-                    dolibarrUserGroupService.removeUserFromGroup(ticket.getUserId());
+                    User user = userRepository.findById(ticket.getUserId());
+                    if (user != null) {
+                        dolibarrUserGroupService.removeUserFromGroup(user.getDolibarrId());
+                    } else {
+                        System.err.println("⚠️ TICKET SERVICE: User not found with ID: " + ticket.getUserId());
+                    }
                 }
             } catch (Exception e) {
                 System.err.println("⚠️ TICKET SERVICE: Failed to remove user from firefighter group for ticket: " + ticketId + " - " + e.getMessage());
@@ -167,7 +180,12 @@ public class TicketService {
 
             // Remove user from firefighter group when ticket is manually revoked
             try {
-                dolibarrUserGroupService.removeUserFromGroup(ticket.getUserId());
+                User user = userRepository.findById(ticket.getUserId());
+                if (user != null) {
+                    dolibarrUserGroupService.removeUserFromGroup(user.getDolibarrId());
+                } else {
+                    System.err.println("⚠️ TICKET SERVICE: User not found with ID: " + ticket.getUserId());
+                }
             } catch (Exception e) {
                 System.err.println("⚠️ TICKET SERVICE: Failed to remove user from firefighter group for ticket: " + ticket.getTicketId() + " - " + e.getMessage());
             }
@@ -196,7 +214,12 @@ public class TicketService {
 
             // Remove user from firefighter group when ticket is manually revoked
             try {
-                dolibarrUserGroupService.removeUserFromGroup(ticket.getUserId());
+                User user = userRepository.findById(ticket.getUserId());
+                if (user != null) {
+                    dolibarrUserGroupService.removeUserFromGroup(user.getDolibarrId());
+                } else {
+                    System.err.println("⚠️ TICKET SERVICE: User not found with ID: " + ticket.getUserId());
+                }
             } catch (Exception e) {
                 System.err.println("⚠️ TICKET SERVICE: Failed to remove user from firefighter group for ticket: " + ticket.getTicketId() + " - " + e.getMessage());
             }

@@ -131,12 +131,12 @@ public class TicketScheduledService {
                         System.err.println("⚠️ NOTIFICATION FAILED: Could not create ticket completion notification: " + e.getMessage());
                     }
 
-                    // Remove user from firefighter group when ticket is manually revoked
+                    /* // Remove user from firefighter group when ticket is manually revoked
                     try {
                         dolibarrUserGroupService.removeUserFromGroup(ticket.getUserId());
                     } catch (Exception e) {
                         System.err.println("⚠️ TICKET SERVICE: Failed to remove user from firefighter group for ticket: " + ticket.getTicketId() + " - " + e.getMessage());
-                    }
+                    } */
 
                     closedCount++;
                     System.out.println("Closed expired ticket: " + ticket.getTicketId());
