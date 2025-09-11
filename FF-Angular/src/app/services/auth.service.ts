@@ -39,6 +39,7 @@ interface UserVerificationResponse {
   createdAt: string;
   lastLogin: string;
   contactNumber?: string;
+  dolibarrId?: string;
   userRoles: Array<{
     id: number;
     role: {
@@ -629,6 +630,79 @@ export class AuthService {
         // Check for connection errors
         if (this.isConnectionError(error)) {
           console.error('🔌 Connection error detected in updateContactNumber - redirecting to service down page');
+
+          // Store the last successful connection time
+          localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
+
+          // Redirect to service down page
+          this.router.navigate(['/service-down']);
+
+          // Return a meaningful error
+          return throwError(() => new Error('Service temporarily unavailable'));
+        }
+
+        // Re-throw other errors
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Update user Dolibarr ID
+   * Endpoint: PUT /api/users/dolibarr-id
+   */
+  updateDolibarrId(dolibarrId: string): Observable<any> {
+    const params = new HttpParams().set('dolibarrId', dolibarrId);
+    const headers = {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    };
+
+    return this.http.put(`${environment.apiUrl}/users/dolibarr-id`, params.toString(), { headers }).pipe(
+      tap((response: any) => {
+        console.log('✅ Dolibarr ID updated successfully:', response);
+        // Update the local user profile if we have one
+        const currentProfile = this.userProfileSubject.value;
+        if (currentProfile) {
+          const updatedProfile = { ...currentProfile, dolibarrId };
+          this.userProfileSubject.next(updatedProfile);
+          this.storeUserData(updatedProfile);
+        }
+      }),
+      catchError((error: any) => {
+        console.error('❌ Update Dolibarr ID failed:', error);
+
+        // Check for connection errors
+        if (this.isConnectionError(error)) {
+          console.error('🔌 Connection error detected in updateDolibarrId - redirecting to service down page');
+
+          // Store the last successful connection time
+          localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
+
+          // Redirect to service down page
+          this.router.navigate(['/service-down']);
+
+          // Return a meaningful error
+          return throwError(() => new Error('Service temporarily unavailable'));
+        }
+
+        // Re-throw other errors
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Get user Dolibarr ID
+   * Endpoint: GET /api/users/dolibarr-id
+   */
+  getDolibarrId(): Observable<{ dolibarrId: string; firebaseUid: string }> {
+    return this.http.get<{ dolibarrId: string; firebaseUid: string }>(`${environment.apiUrl}/users/dolibarr-id`).pipe(
+      catchError((error: any) => {
+        console.error('❌ Get Dolibarr ID failed:', error);
+
+        // Check for connection errors
+        if (this.isConnectionError(error)) {
+          console.error('🔌 Connection error detected in getDolibarrId - redirecting to service down page');
 
           // Store the last successful connection time
           localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());

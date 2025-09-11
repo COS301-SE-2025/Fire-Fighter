@@ -246,6 +246,36 @@
             </div>
           </div>
           <div class="p-4">
+            <!-- Dolibarr ID Section -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0 mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
+                  <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-900 dark:text-white">Dolibarr User ID</h4>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                    <span *ngIf="userProfile?.dolibarrId; else noDolibarrId" class="truncate mr-2">{{ userProfile.dolibarrId }}</span>
+                    <ng-template #noDolibarrId>
+                      <span class="text-gray-400 dark:text-gray-500 italic mr-2">No Dolibarr ID set</span>
+                    </ng-template>
+                  </p>
+                </div>
+              </div>
+              <button
+                (click)="toggleDolibarrIdEdit()"
+                class="inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 text-white text-sm font-medium rounded-lg transition-colors duration-200 dark:bg-blue-700 dark:hover:bg-blue-800 dark:focus:ring-blue-800"
+              >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                {{ userProfile?.dolibarrId ? 'Edit' : 'Set' }} Dolibarr ID
+              </button>
+            </div>
+
+            <!-- Sign Out Section -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
               <div>
                 <h4 class="text-sm font-medium text-gray-900 dark:text-white">Sign Out</h4>
@@ -375,6 +405,119 @@
                   <div *ngIf="isUpdatingContact" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                   <span *ngIf="!isUpdatingContact">{{ userProfile?.contactNumber ? 'Update' : 'Add' }} Contact Number</span>
                   <span *ngIf="isUpdatingContact">Saving...</span>
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dolibarr ID Edit Modal -->
+    <div *ngIf="isDolibarrIdEditOpen" class="fixed inset-0 z-[9999] overflow-y-auto" aria-labelledby="dolibarr-modal-title" role="dialog" aria-modal="true" (click)="cancelDolibarrIdEdit()">
+      <!-- Background overlay -->
+      <div [@modalBackdrop]="dolibarrModalAnimationState" class="fixed inset-0 bg-black bg-opacity-50" aria-hidden="true"></div>
+
+      <!-- Modal panel -->
+      <div class="flex min-h-full items-center justify-center p-4">
+        <div [@modalPanel]="dolibarrModalAnimationState" (click)="$event.stopPropagation()" class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
+
+          <!-- Modal Header -->
+          <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center space-x-3">
+                <div class="flex items-center justify-center w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-full">
+                  <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="dolibarr-modal-title">
+                    {{ userProfile?.dolibarrId ? 'Edit Dolibarr ID' : 'Set Dolibarr ID' }}
+                  </h3>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                    Link your account to Dolibarr for integrated access management
+                  </p>
+                </div>
+              </div>
+              <button
+                (click)="cancelDolibarrIdEdit()"
+                [disabled]="isUpdatingDolibarrId"
+                class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white transition-colors duration-200"
+              >
+                <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                </svg>
+                <span class="sr-only">Close modal</span>
+              </button>
+            </div>
+
+            <!-- Modal Body -->
+            <form (ngSubmit)="saveDolibarrId()" class="space-y-4">
+
+              <!-- Dolibarr ID Field -->
+              <div>
+                <label for="dolibarr-id" class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                  Dolibarr User ID
+                </label>
+                <input
+                  id="dolibarr-id"
+                  type="text"
+                  [(ngModel)]="editingDolibarrId"
+                  name="dolibarrId"
+                  placeholder="Enter your Dolibarr user ID (e.g., DOL123456)"
+                  [disabled]="isUpdatingDolibarrId"
+                  (input)="onDolibarrIdInput($event)"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  [class.border-red-500]="!isValidDolibarrId() && editingDolibarrId.length > 0"
+                  [class.focus:border-red-500]="!isValidDolibarrId() && editingDolibarrId.length > 0"
+                />
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" *ngIf="isValidDolibarrId() || editingDolibarrId.length === 0">
+                  Enter your unique Dolibarr user identifier (alphanumeric characters, underscores, and hyphens allowed)
+                </p>
+                <p class="mt-1 text-xs text-red-600 dark:text-red-400" *ngIf="!isValidDolibarrId() && editingDolibarrId.length > 0">
+                  Please enter a valid Dolibarr ID (alphanumeric characters, underscores, and hyphens only)
+                </p>
+              </div>
+
+              <!-- Info Notice -->
+              <div class="flex p-3 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                <svg class="flex-shrink-0 inline w-4 h-4 mr-3 mt-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+                </svg>
+                <div>
+                  <span class="font-medium">Dolibarr Integration:</span>
+                  <ul class="mt-1 space-y-1 list-disc list-inside">
+                    <li>Links your FireFighter account to your Dolibarr user profile</li>
+                    <li>Enables integrated access management and reporting</li>
+                    <li>Contact your administrator if you don't know your Dolibarr ID</li>
+                    <li>Leave empty if you don't have a Dolibarr account</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Form Actions -->
+              <div class="flex items-center justify-end space-x-3 pt-3 mt-4 border-t border-gray-200 dark:border-gray-600">
+                <button
+                  type="button"
+                  (click)="cancelDolibarrIdEdit()"
+                  [disabled]="isUpdatingDolibarrId"
+                  class="py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  [disabled]="isUpdatingDolibarrId || !isValidDolibarrId()"
+                  class="inline-flex items-center py-2.5 px-5 text-sm font-medium text-center text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-700 dark:hover:bg-blue-800 dark:focus:ring-blue-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <svg *ngIf="!isUpdatingDolibarrId" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <div *ngIf="isUpdatingDolibarrId" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  <span *ngIf="!isUpdatingDolibarrId">{{ userProfile?.dolibarrId ? 'Update' : 'Set' }} Dolibarr ID</span>
+                  <span *ngIf="isUpdatingDolibarrId">Saving...</span>
                 </button>
               </div>
 
