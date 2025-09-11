@@ -78,7 +78,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             System.out.println("🔒 JWT FILTER: ✅ User: " + firebaseUid + ", Admin: " + isAdmin);
                         } else {
                             System.out.println("🔒 JWT FILTER: ❌ Custom JWT token validation failed");
-                            
+
                             // Check if token is expired specifically
                             if (firebaseUid != null && jwtService.isTokenExpired(token)) {
                                 System.out.println("🔒 JWT FILTER: ❌ Token expired for user: " + firebaseUid);
@@ -93,6 +93,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     } catch (Exception ex) {
                         System.out.println("🔒 JWT FILTER: Custom JWT token validation error: " + ex.getMessage());
                         logger.warn("Custom JWT token validation failed: " + ex.getMessage());
+
+                        // Check if it's an expired token exception
+                        if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("expired")) {
+                            sendTokenExpiredResponse(response);
+                            return;
+                        } else {
+                            sendInvalidTokenResponse(response);
+                            return;
+                        }
                     }
                 } else {
                     System.out.println("🔒 JWT FILTER: Processing as Firebase ID token");
