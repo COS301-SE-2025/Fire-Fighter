@@ -145,9 +145,15 @@ public class JwtService {
             return extractExpiration(token).before(new Date());
         } catch (ExpiredJwtException e) {
             // Token is expired if ExpiredJwtException is thrown
+            System.out.println("🔒 JWT SERVICE: Token expired - " + e.getMessage());
+            return true;
+        } catch (Exception e) {
+            // Any other parsing error also indicates invalid/expired token
+            System.out.println("🔒 JWT SERVICE: Token parsing error - " + e.getMessage());
             return true;
         }
     }
+
 
     /**
      * Validate custom JWT token
