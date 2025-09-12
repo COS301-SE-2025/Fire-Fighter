@@ -223,10 +223,35 @@ export class AuthService {
       
       this.jwtTokenSubject.next(token);
       console.log('✅ JWT token stored successfully with expiration:', expirationTime);
+
+      // Start token monitoring after successful token storage
+      this.startTokenMonitoring();
+
     } catch (error) {
       console.error('Failed to store JWT token:', error);
     }
   }
+
+    /**
+   * Start token monitoring (lazy load to avoid circular dependencies)
+   */
+  private startTokenMonitoring(): void {
+    try {
+      import('./token-monitoring.service').then(({ TokenMonitoringService }) => {
+        // Create a new instance manually to avoid circular dependencies
+        const monitoring = new (TokenMonitoringService as any)();
+        if (monitoring.startMonitoring) {
+          monitoring.startMonitoring();
+          console.log('📊 Token monitoring started');
+        }
+      }).catch(error => {
+        console.warn('⚠️ Could not start token monitoring:', error);
+      });
+    } catch (error) {
+      console.warn('⚠️ Token monitoring service not available:', error);
+    }
+  }
+
 
   /**
    * Get stored JWT token
