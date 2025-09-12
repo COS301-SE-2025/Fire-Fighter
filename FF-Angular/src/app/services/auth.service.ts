@@ -97,6 +97,9 @@ export class AuthService {
   // Initialization flag to prevent multiple init calls
   private initialized = false;
 
+  // Token monitoring service will be injected when needed
+  private tokenMonitoringService: any = null;
+
   constructor() {
     // Initialize auth state restoration when service is created
     this.initializeAuthState();
