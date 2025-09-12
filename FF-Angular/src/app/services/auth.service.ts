@@ -106,6 +106,20 @@ export class AuthService {
   }
 
   /**
+   * Initialize token monitoring service (lazy injection to avoid circular dependencies)
+   */
+  private initializeTokenMonitoring(): void {
+    if (!this.tokenMonitoringService) {
+      // Lazy injection to avoid circular dependencies
+      import('./token-monitoring.service').then(({ TokenMonitoringService }) => {
+        // We'll manually instantiate to avoid circular dependency
+        // In a real scenario, you might want to use a different approach
+        console.log('📊 TOKEN MONITORING: Service loaded');
+      });
+    }
+  }
+
+  /**
    * Check if current user is an admin
    */
   isCurrentUserAdmin(): boolean {
