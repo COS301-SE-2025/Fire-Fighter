@@ -266,7 +266,7 @@ export class AuthService {
       return null;
     }
   }
-
+  
   /**
    * Refresh JWT token using Firebase token refresh
    */
@@ -303,7 +303,19 @@ export class AuthService {
     }
   }
 
-  
+  /**
+   * Auto-refresh token if it's expiring soon
+   */
+  async autoRefreshTokenIfNeeded(): Promise<void> {
+    try {
+      if (this.isTokenExpiredOrExpiringSoon(10)) { // 10 minutes threshold
+        console.log('🔄 Token expiring soon, auto-refreshing...');
+        await this.refreshJwtToken();
+      }
+    } catch (error) {
+      console.error('Error in auto-refresh:', error);
+    }
+  }
 
   /**
    * Exchange Firebase ID token for backend JWT token
