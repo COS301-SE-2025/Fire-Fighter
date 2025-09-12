@@ -267,6 +267,42 @@ export class AuthService {
     }
   }
 
+  /**
+   * Refresh JWT token using Firebase token refresh
+   */
+  async refreshJwtToken(): Promise<boolean> {
+    try {
+      console.log('🔄 Refreshing JWT token...');
+      
+      const currentUser = this.auth.currentUser;
+      if (!currentUser) {
+        console.log('❌ No current user for token refresh');
+        return false;
+      }
+
+      // Force refresh Firebase ID token
+      const newIdToken = await currentUser.getIdToken(true);
+      
+      // Exchange for new JWT
+      const response = await this.http.post<JwtAuthResponse>(
+        `${this.getCurrentApiUrl()}/auth/refresh-token`,
+        { idToken: newIdToken } as FirebaseLoginRequest
+      ).toPromise();
+
+      if (response) {
+        this.storeJwtToken(response.token);
+        console.log('✅ JWT token refreshed successfully');
+        return true;
+      } else {
+        console.log('❌ No response from token refresh');
+        return false;
+      }
+    } catch (error) {
+      console.error('❌ JWT token refresh failed:', error);
+      return false;
+    }
+  }
+
   
 
   /**
