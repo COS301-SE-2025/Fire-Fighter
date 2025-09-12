@@ -224,12 +224,37 @@ export class AuthService {
   private clearJwtToken(): void {
     try {
       localStorage.removeItem('jwt_token');
+      localStorage.removeItem('jwt_expiration');
+
       this.jwtTokenSubject.next(null);
       console.log('✅ JWT token cleared');
     } catch (error) {
       console.error('Failed to clear JWT token:', error);
     }
   }
+
+    /**
+   * Check if JWT token is expired or will expire soon
+   */
+  isTokenExpiredOrExpiringSoon(minutesThreshold: number = 5): boolean {
+    try {
+      const token = this.getJwtToken();
+      if (!token) return true;
+
+      const expirationTime = localStorage.getItem('jwt_expiration');
+      if (!expirationTime) return true;
+
+      const expiration = new Date(expirationTime);
+      const threshold = new Date(Date.now() + (minutesThreshold * 60 * 1000));
+      
+      return expiration <= threshold;
+    } catch (error) {
+      console.error('Error checking token expiration:', error);
+      return true;
+    }
+  }
+
+
 
   /**
    * Exchange Firebase ID token for backend JWT token
