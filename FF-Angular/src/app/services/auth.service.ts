@@ -199,8 +199,13 @@ export class AuthService {
   private storeJwtToken(token: string): void {
     try {
       localStorage.setItem('jwt_token', token);
+      
+      // Store expiration time (assuming 1 hour expiration as per backend config)
+      const expirationTime = new Date(Date.now() + (60 * 60 * 1000)); // 1 hour
+      localStorage.setItem('jwt_expiration', expirationTime.toISOString());
+      
       this.jwtTokenSubject.next(token);
-      console.log('✅ JWT token stored successfully');
+      console.log('✅ JWT token stored successfully with expiration:', expirationTime);
     } catch (error) {
       console.error('Failed to store JWT token:', error);
     }
