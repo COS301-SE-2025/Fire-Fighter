@@ -1,0 +1,34 @@
+<ion-item *ngIf="tokenStatus.isValid || !tokenStatus.isValid">
+  <ion-icon 
+    [name]="getStatusIcon()" 
+    [color]="getStatusColor()" 
+    slot="start">
+  </ion-icon>
+  
+  <ion-label>
+    <h3>Session Status</h3>
+    <p>
+      Status: 
+      <ion-badge [color]="getStatusColor()">
+        {{ getStatusText() }}
+      </ion-badge>
+    </p>
+    <p *ngIf="tokenStatus.isValid">
+      Time remaining: {{ formattedTimeUntilExpiry }}
+    </p>
+    <p *ngIf="!tokenStatus.isValid" color="danger">
+      Your session has expired. Please log in again.
+    </p>
+  </ion-label>
+  
+  <ion-button 
+    *ngIf="tokenStatus.isValid && tokenStatus.requiresRefresh"
+    fill="outline" 
+    size="small" 
+    [disabled]="isRefreshing"
+    (click)="refreshToken()"
+    slot="end">
+    <ion-icon name="refresh-outline" slot="icon-only" *ngIf="!isRefreshing"></ion-icon>
+    <span *ngIf="isRefreshing">Refreshing...</span>
+  </ion-button>
+</ion-item>
