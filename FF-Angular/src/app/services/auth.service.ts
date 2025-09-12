@@ -254,7 +254,20 @@ export class AuthService {
     }
   }
 
+  /**
+   * Get token expiration time
+   */
+  getTokenExpiration(): Date | null {
+    try {
+      const expirationTime = localStorage.getItem('jwt_expiration');
+      return expirationTime ? new Date(expirationTime) : null;
+    } catch (error) {
+      console.error('Error getting token expiration:', error);
+      return null;
+    }
+  }
 
+  
 
   /**
    * Exchange Firebase ID token for backend JWT token
