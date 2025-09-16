@@ -1,6 +1,10 @@
 <?php
 // customgroupapi/api/index.php
 
+// disable csrf check for API
+
+$dolibarr_nocsrfcheck = 1;
+
 // Load Dolibarr framework
 $res = @include_once('../../../main.inc.php');
 if (! $res) {
