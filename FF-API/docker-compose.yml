@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  firefighter-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: firefighter-api
+    ports:
+      - "8081:8080"
+    environment:
+      # Database Configuration - connects to PostgreSQL on host via Docker bridge
+      - DB_HOST=host.docker.internal
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_NAME=${DB_NAME:-firefighter}
+      - DB_USERNAME=${DB_USERNAME:-ff_admin}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_SSL_MODE=${DB_SSL_MODE:-disable}
+
+      # JWT Configuration
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION=${JWT_EXPIRATION:-3600000}
+
+      # Email Configuration
+      - GMAIL_USERNAME=${GMAIL_USERNAME}
+      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
+      - GMAIL_SENDER_NAME=${GMAIL_SENDER_NAME:-FireFighter System}
+
+      # AI API Configuration
+      - GOOGLE_GEMINI_API_KEY=${GOOGLE_GEMINI_API_KEY}
+
+      # Spring Profile
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-prod}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
