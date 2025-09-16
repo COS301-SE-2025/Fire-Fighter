@@ -1,99 +1,66 @@
 package com.apex.firefighter.service;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.sql.SQLException;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.http.*;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.springframework.stereotype.Service;
 
 @Service
-@ConditionalOnProperty(name = "dolibarr.enabled", havingValue = "true", matchIfMissing = false)
 public class DolibarrUserGroupService {
-    private final RestTemplate restTemplate;
-    private final String dolibarrBaseUrl;
-    private final String apiKey;
-    private final Long firefighterGroupId;
+    private final String firefighterGroupId;
+    private final DolibarrDatabaseService dolibarrDatabaseService;
 
     public DolibarrUserGroupService(
-            /* RestTemplate restTemplate, */
-            @Value("${dolibarr.api.base-url}") String dolibarrBaseUrl,
-            @Value("${dolibarr.api.key}") String apiKey,
-            @Value("${dolibarr.ff.group.id}") Long firefighterGroupId) {
-        this.restTemplate = new RestTemplate()/* restTemplate */;
-        this.dolibarrBaseUrl = dolibarrBaseUrl;
-        this.apiKey = apiKey;
+            @Value("${dolibarr.ff.hr.id}") String firefighterGroupId,
+            DolibarrDatabaseService dolibarrDatabaseService) {
         this.firefighterGroupId = firefighterGroupId;
+        this.dolibarrDatabaseService = dolibarrDatabaseService;
+
+        System.out.println("✅ DolibarrUserGroupService initialized with firefighter group ID: " + firefighterGroupId);
     }
 
-    public void addUserToGroup(Long userId) {
-        String url = dolibarrBaseUrl + "/users/" + userId + "/setGroup/" + firefighterGroupId;
+    /**
+     * Adds a user to the firefighter group using direct database access.
+     * This method uses the DolibarrDatabaseService to directly insert the user-group
+     * association into the llx_usergroup_user table in the Dolibarr database.
+     * The entity ID is set to 1 as requested.
+     *
+     * @param userId The Dolibarr user ID
+     * @throws SQLException if database operation fails
+     */
+    public void addUserToGroup(String userId) throws SQLException {
+        System.out.println("🔵 DOLIBARR SERVICE: Starting to add user " + userId + " to firefighter group " + firefighterGroupId);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("DOLAPIKEY", apiKey);
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-
-        HttpEntity<Void> request = new HttpEntity<>(headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new RuntimeException("Failed to add user to group: " + response.getStatusCode());
+        try {
+            dolibarrDatabaseService.addUserToFirefighterGroup(userId);
+            System.out.println("✅ DOLIBARR SERVICE: Successfully added user " + userId + " to firefighter group using database method");
+        } catch (SQLException e) {
+            System.err.println("❌ DOLIBARR SERVICE: Failed to add user " + userId + " to firefighter group: " + e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            System.err.println("❌ DOLIBARR SERVICE: Unexpected error adding user " + userId + " to firefighter group: " + e.getMessage());
+            throw new RuntimeException("Failed to add user to firefighter group", e);
         }
     }
 
-    public void removeUserFromGroup(Long userId) throws IOException, InterruptedException{
-        ObjectMapper mapper = new ObjectMapper();
-        
-        String getURL = dolibarrBaseUrl + "/users/" + userId + "/groups";
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("DOLAPIKEY", apiKey);
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-
-        HttpEntity<Void> request = new HttpEntity<>(headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(getURL, HttpMethod.GET, request, String.class);
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new RuntimeException("Failed to fetch user groups: " + response.getStatusCode());
-        }
-
-        List<Map<String, Object>> groups = mapper.readValue(
-            response.getBody(),
-            new TypeReference<List<Map<String, Object>>>() {}
-        );
-
-        List<Integer> groupIds = new ArrayList<>();
-        for (Map<String, Object> group : groups) {
-            if (group.get("id").equals(firefighterGroupId)) {
-                continue; // Skip the firefighter group
-            }
-            Object idValue = group.get("id");
-            if (idValue instanceof Number) {
-                groupIds.add(((Number) idValue).intValue());
-            }
-        }
-
-        String groupsExlFF = mapper.writeValueAsString(Map.of("groups", groupIds));
-
-        String putURL = dolibarrBaseUrl + "/users/" + userId + "?fetch_child=groups";
-        HttpHeaders putHeaders = new HttpHeaders();
-        putHeaders.set("DOLAPIKEY", apiKey);
-        putHeaders.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<String> putRequest = new HttpEntity<>(groupsExlFF, putHeaders);
-
-        ResponseEntity<String> putResponse = restTemplate.exchange(putURL, HttpMethod.PUT, putRequest, String.class);
-        if (!putResponse.getStatusCode().is2xxSuccessful()) {
-            throw new RuntimeException("Failed to remove user from group: " + putResponse.getStatusCode());
+    /**
+     * Removes a user from the firefighter group using direct database access.
+     * This method uses the DolibarrDatabaseService to directly delete the user-group
+     * association from the llx_usergroup_user table in the Dolibarr database.
+     *
+     * @param userId The Dolibarr user ID
+     * @throws SQLException if database operation fails
+     */
+    public void removeUserFromGroup(String userId) throws SQLException {
+        try {
+            dolibarrDatabaseService.removeUserFromFirefighterGroup(userId);
+            System.out.println("✅ DOLIBARR SERVICE: Successfully removed user " + userId + " from firefighter group");
+        } catch (SQLException e) {
+            System.err.println("❌ DOLIBARR SERVICE: Failed to remove user " + userId + " from firefighter group: " + e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            System.err.println("❌ DOLIBARR SERVICE: Unexpected error removing user " + userId + " from firefighter group: " + e.getMessage());
+            throw new RuntimeException("Failed to remove user from firefighter group", e);
         }
     }
 

@@ -3,6 +3,7 @@ package com.apex.firefighter.service.ticket;
 import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.repository.TicketRepository;
 import com.apex.firefighter.service.NotificationService;
+import com.apex.firefighter.service.DolibarrUserGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -17,11 +18,13 @@ public class TicketScheduledService {
 
     private final TicketRepository ticketRepository;
     private final NotificationService notificationService;
+    private final DolibarrUserGroupService dolibarrUserGroupService;
 
     @Autowired
-    public TicketScheduledService(TicketRepository ticketRepository, NotificationService notificationService) {
+    public TicketScheduledService(TicketRepository ticketRepository, NotificationService notificationService, DolibarrUserGroupService dolibarrUserGroupService) {
         this.ticketRepository = ticketRepository;
         this.notificationService = notificationService;
+        this.dolibarrUserGroupService = dolibarrUserGroupService;
     }
 
     @PostConstruct
@@ -127,6 +130,13 @@ public class TicketScheduledService {
                     } catch (Exception e) {
                         System.err.println("⚠️ NOTIFICATION FAILED: Could not create ticket completion notification: " + e.getMessage());
                     }
+
+                    /* // Remove user from firefighter group when ticket is manually revoked
+                    try {
+                        dolibarrUserGroupService.removeUserFromGroup(ticket.getUserId());
+                    } catch (Exception e) {
+                        System.err.println("⚠️ TICKET SERVICE: Failed to remove user from firefighter group for ticket: " + ticket.getTicketId() + " - " + e.getMessage());
+                    } */
 
                     closedCount++;
                     System.out.println("Closed expired ticket: " + ticket.getTicketId());
