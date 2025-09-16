@@ -2,7 +2,7 @@
 // customgroupapi/api/index.php
 
 // Load Dolibarr framework
-$res = @include_once('../main.inc.php');
+$res = @include_once('../../../main.inc.php');
 if (! $res) {
     echo "This is not a Dolibarr installation.";
     exit;
