@@ -45,10 +45,10 @@ public class DolibarrGroupAllocater {
     */
     public Integer allocateByListNumber(int listNumber) throws IllegalArgumentException {
         return switch (listNumber) {
-            case 1 -> Integer.valueOf(FFHR);
-            case 2 -> Integer.valueOf(FFFIN);
-            case 3 -> Integer.valueOf(FFMNG);
-            case 4 -> Integer.valueOf(FFLOG);
+            case 1 -> Integer.valueOf(groups.get("hr"));
+            case 2 -> Integer.valueOf(groups.get("financials"));
+            case 3 -> Integer.valueOf(groups.get("fmanager"));
+            case 4 -> Integer.valueOf(groups.get("logistics"));
             default -> throw new IllegalArgumentException("Invalid group list number: " + listNumber);
         };
     }
