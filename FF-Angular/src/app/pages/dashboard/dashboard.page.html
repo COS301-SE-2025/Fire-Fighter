@@ -1,5 +1,8 @@
 <app-navbar></app-navbar>
 
+<!-- Session Status -->
+<app-token-status></app-token-status>
+
 <ion-content [fullscreen]="true" class="ion-padding">
   <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)" pullFactor="0.6" pullMin="80" pullMax="140">
     <ion-refresher-content pullingIcon="none" refreshingSpinner="none">
