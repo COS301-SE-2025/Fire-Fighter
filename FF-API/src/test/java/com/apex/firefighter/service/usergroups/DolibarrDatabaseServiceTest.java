@@ -78,8 +78,7 @@ class DolibarrDatabaseServiceTest {
                 TEST_DOLIBARR_DB_NAME,
                 TEST_DB_USERNAME,
                 "", // Empty password
-                TEST_DB_SSL_MODE,
-                TEST_FIREFIGHTER_GROUP_ID
+                TEST_DB_SSL_MODE
             );
         }).isInstanceOf(IllegalStateException.class)
           .hasMessageContaining("DB_PASSWORD is required");
@@ -95,8 +94,7 @@ class DolibarrDatabaseServiceTest {
                 TEST_DOLIBARR_DB_NAME,
                 TEST_DB_USERNAME,
                 null, // Null password
-                TEST_DB_SSL_MODE,
-                TEST_FIREFIGHTER_GROUP_ID
+                TEST_DB_SSL_MODE
             );
         }).isInstanceOf(IllegalStateException.class)
           .hasMessageContaining("DB_PASSWORD is required");
@@ -106,35 +104,23 @@ class DolibarrDatabaseServiceTest {
     void removeUserFromFirefighterGroup_WithInvalidUserId_ShouldThrowException() {
         // Create service with mocked DataSource to test the method logic
         DolibarrDatabaseService service = createServiceWithMockedDataSource();
-        
+
         // Test with invalid user ID format
         assertThatThrownBy(() -> {
-            service.removeUserFromFirefighterGroup("invalid_user_id");
+            service.removeUserFromFirefighterGroup("invalid_user_id", 5);
         }).isInstanceOf(IllegalArgumentException.class)
           .hasMessageContaining("Invalid ID format");
     }
 
     @Test
     void removeUserFromFirefighterGroup_WithInvalidGroupId_ShouldThrowException() {
-        // Create service with invalid group ID
-        DolibarrDatabaseService service = new DolibarrDatabaseService(
-            TEST_DB_HOST,
-            TEST_DB_PORT,
-            TEST_DOLIBARR_DB_NAME,
-            TEST_DB_USERNAME,
-            TEST_DB_PASSWORD,
-            TEST_DB_SSL_MODE,
-            "invalid_group_id" // Invalid group ID
-        ) {
-            @Override
-            public boolean testConnection() {
-                return true; // Mock successful connection
-            }
-        };
-        
-        // Test with invalid group ID format
+        // Create service to test the method logic
+        DolibarrDatabaseService service = createServiceWithMockedDataSource();
+
+        // Test with invalid group ID format - this would be caught by the Integer parameter type
+        // but we can test with null to simulate invalid group ID
         assertThatThrownBy(() -> {
-            service.removeUserFromFirefighterGroup("123");
+            service.removeUserFromFirefighterGroup("123", null);
         }).isInstanceOf(IllegalArgumentException.class)
           .hasMessageContaining("Invalid ID format");
     }
@@ -149,8 +135,7 @@ class DolibarrDatabaseServiceTest {
             TEST_DOLIBARR_DB_NAME,
             TEST_DB_USERNAME,
             TEST_DB_PASSWORD,
-            TEST_DB_SSL_MODE,
-            TEST_FIREFIGHTER_GROUP_ID
+            TEST_DB_SSL_MODE
         ) {
             @Override
             public boolean testConnection() {

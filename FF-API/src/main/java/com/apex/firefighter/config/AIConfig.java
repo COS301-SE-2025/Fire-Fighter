@@ -10,7 +10,7 @@ import jakarta.annotation.PostConstruct;
 @Configuration
 public class AIConfig {
 
-    @Value("${GOOGLE_GEMINI_API_KEY:}")
+    @Value("${GOOGLE_GEMINI_API_KEY}")
     private String geminiApiKey;
 
     @PostConstruct

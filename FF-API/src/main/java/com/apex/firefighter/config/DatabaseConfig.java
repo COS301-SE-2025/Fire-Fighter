@@ -15,22 +15,22 @@ import jakarta.annotation.PostConstruct;
 @Profile("!test") // Only activate this configuration when NOT in test profile
 public class DatabaseConfig {
 
-    @Value("${DB_HOST:100.83.111.92}")
+    @Value("${DB_HOST}")
     private String dbHost;
 
-    @Value("${DB_PORT:5432}")
+    @Value("${DB_PORT}")
     private String dbPort;
 
-    @Value("${DB_NAME:firefighter}")
+    @Value("${DB_NAME}")
     private String dbName;
 
-    @Value("${DB_USERNAME:ff_admin}")
+    @Value("${DB_USERNAME}")
     private String dbUsername;
 
-    @Value("${DB_PASSWORD:}")
+    @Value("${DB_PASSWORD}")
     private String dbPassword;
 
-    @Value("${DB_SSL_MODE:require}")
+    @Value("${DB_SSL_MODE}")
     private String dbSslMode;
     
     @Value("${FORCE_H2_DB:false}")

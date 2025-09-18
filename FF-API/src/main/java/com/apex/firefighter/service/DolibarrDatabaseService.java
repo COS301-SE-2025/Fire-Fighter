@@ -19,18 +19,17 @@ import java.sql.SQLException;
 public class DolibarrDatabaseService {
     
     private final DataSource dolibarrDataSource;
-    private final String firefighterGroupId;
 
     public DolibarrDatabaseService(
-            @Value("${DB_HOST:100.83.111.92}") String dbHost,
-            @Value("${DB_PORT:5432}") String dbPort,
-            @Value("${DOLIBARR_DB_NAME:dolibarr}") String dolibarrDbName,
-            @Value("${DB_USERNAME:ff_admin}") String dbUsername,
-            @Value("${DB_PASSWORD:}") String dbPassword,
-            @Value("${DB_SSL_MODE:require}") String dbSslMode) {
-        
+            @Value("${DB_HOST}") String dbHost,
+            @Value("${DB_PORT}") String dbPort,
+            @Value("${DOLIBARR_DB_NAME}") String dolibarrDbName,
+            @Value("${DB_USERNAME}") String dbUsername,
+            @Value("${DB_PASSWORD}") String dbPassword,
+            @Value("${DB_SSL_MODE}") String dbSslMode) {
+
         this.dolibarrDataSource = createDolibarrDataSource(dbHost, dbPort, dolibarrDbName, dbUsername, dbPassword, dbSslMode);
-        
+
         System.out.println("✅ DolibarrDatabaseService initialized.");
     }
 

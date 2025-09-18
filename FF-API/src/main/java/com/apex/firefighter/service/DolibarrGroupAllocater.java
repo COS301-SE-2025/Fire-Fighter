@@ -39,11 +39,12 @@ public class DolibarrGroupAllocater {
         }
     }
 
-    /* 
+    /*
         For the case where the frontend provides a list of reasons to choose from and the request contains the list number.
         Add, modify, remove group allocation logic here according to frontend logic.
     */
     public Integer allocateByListNumber(int listNumber) throws IllegalArgumentException {
+        Map<String, Integer> groups = properties.getGroups();
         return switch (listNumber) {
             case 1 -> Integer.valueOf(groups.get("hr"));
             case 2 -> Integer.valueOf(groups.get("financials"));

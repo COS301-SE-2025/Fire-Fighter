@@ -1,7 +1,8 @@
-package com.apex.firefighter.unit.services;
+package com.apex.firefighter.service.usergroups;
 
 import com.apex.firefighter.service.DolibarrDatabaseService;
 import com.apex.firefighter.service.DolibarrUserGroupService;
+import com.apex.firefighter.service.DolibarrGroupAllocater;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,16 +27,20 @@ class DolibarrUserGroupServiceTest {
     @Mock
     private DolibarrDatabaseService mockDolibarrDatabaseService;
 
+    @Mock
+    private DolibarrGroupAllocater mockGroupAllocater;
+
     private DolibarrUserGroupService dolibarrUserGroupService;
-    
-    private static final String TEST_FIREFIGHTER_GROUP_ID = "5";
+
+    private static final Integer TEST_FIREFIGHTER_GROUP_ID = 5;
     private static final String TEST_USER_ID = "123";
+    private static final String TEST_DESCRIPTION = "hr issue";
 
     @BeforeEach
     void setUp() {
         dolibarrUserGroupService = new DolibarrUserGroupService(
-            TEST_FIREFIGHTER_GROUP_ID,
-            mockDolibarrDatabaseService
+            mockDolibarrDatabaseService,
+            mockGroupAllocater
         );
     }
 
@@ -44,28 +49,32 @@ class DolibarrUserGroupServiceTest {
     @Test
     void addUserToGroup_WithValidUser_ShouldCallDatabaseService() throws SQLException {
         // Arrange
-        doNothing().when(mockDolibarrDatabaseService).addUserToFirefighterGroup(TEST_USER_ID);
+        when(mockGroupAllocater.allocateByDescription(TEST_DESCRIPTION)).thenReturn(TEST_FIREFIGHTER_GROUP_ID);
+        doNothing().when(mockDolibarrDatabaseService).addUserToFirefighterGroup(TEST_USER_ID, TEST_FIREFIGHTER_GROUP_ID);
 
         // Act
-        dolibarrUserGroupService.addUserToGroup(TEST_USER_ID);
+        dolibarrUserGroupService.addUserToGroup(TEST_USER_ID, TEST_DESCRIPTION);
 
         // Assert
-        verify(mockDolibarrDatabaseService).addUserToFirefighterGroup(TEST_USER_ID);
+        verify(mockGroupAllocater).allocateByDescription(TEST_DESCRIPTION);
+        verify(mockDolibarrDatabaseService).addUserToFirefighterGroup(TEST_USER_ID, TEST_FIREFIGHTER_GROUP_ID);
     }
 
     @Test
     void addUserToGroup_WithDatabaseError_ShouldPropagateException() throws SQLException {
         // Arrange
+        when(mockGroupAllocater.allocateByDescription(TEST_DESCRIPTION)).thenReturn(TEST_FIREFIGHTER_GROUP_ID);
         SQLException testException = new SQLException("Database connection failed");
-        doThrow(testException).when(mockDolibarrDatabaseService).addUserToFirefighterGroup(TEST_USER_ID);
+        doThrow(testException).when(mockDolibarrDatabaseService).addUserToFirefighterGroup(TEST_USER_ID, TEST_FIREFIGHTER_GROUP_ID);
 
         // Act & Assert
         assertThatThrownBy(() -> {
-            dolibarrUserGroupService.addUserToGroup(TEST_USER_ID);
+            dolibarrUserGroupService.addUserToGroup(TEST_USER_ID, TEST_DESCRIPTION);
         }).isInstanceOf(SQLException.class)
           .hasMessage("Database connection failed");
 
-        verify(mockDolibarrDatabaseService).addUserToFirefighterGroup(TEST_USER_ID);
+        verify(mockGroupAllocater).allocateByDescription(TEST_DESCRIPTION);
+        verify(mockDolibarrDatabaseService).addUserToFirefighterGroup(TEST_USER_ID, TEST_FIREFIGHTER_GROUP_ID);
     }
 
     // ==================== REMOVE USER FROM GROUP TESTS ====================
@@ -73,77 +82,87 @@ class DolibarrUserGroupServiceTest {
     @Test
     void removeUserFromGroup_WithValidUser_ShouldCallDatabaseService() throws SQLException {
         // Arrange
-        doNothing().when(mockDolibarrDatabaseService).removeUserFromFirefighterGroup(TEST_USER_ID);
+        when(mockGroupAllocater.allocateByDescription(TEST_DESCRIPTION)).thenReturn(TEST_FIREFIGHTER_GROUP_ID);
+        doNothing().when(mockDolibarrDatabaseService).removeUserFromFirefighterGroup(TEST_USER_ID, TEST_FIREFIGHTER_GROUP_ID);
 
         // Act
-        dolibarrUserGroupService.removeUserFromGroup(TEST_USER_ID);
+        dolibarrUserGroupService.removeUserFromGroup(TEST_USER_ID, TEST_DESCRIPTION);
 
         // Assert
-        verify(mockDolibarrDatabaseService).removeUserFromFirefighterGroup(TEST_USER_ID);
+        verify(mockGroupAllocater).allocateByDescription(TEST_DESCRIPTION);
+        verify(mockDolibarrDatabaseService).removeUserFromFirefighterGroup(TEST_USER_ID, TEST_FIREFIGHTER_GROUP_ID);
     }
 
     @Test
     void removeUserFromGroup_WithDatabaseError_ShouldPropagateException() throws SQLException {
         // Arrange
+        when(mockGroupAllocater.allocateByDescription(TEST_DESCRIPTION)).thenReturn(TEST_FIREFIGHTER_GROUP_ID);
         SQLException testException = new SQLException("Database connection failed");
-        doThrow(testException).when(mockDolibarrDatabaseService).removeUserFromFirefighterGroup(TEST_USER_ID);
+        doThrow(testException).when(mockDolibarrDatabaseService).removeUserFromFirefighterGroup(TEST_USER_ID, TEST_FIREFIGHTER_GROUP_ID);
 
         // Act & Assert
         assertThatThrownBy(() -> {
-            dolibarrUserGroupService.removeUserFromGroup(TEST_USER_ID);
+            dolibarrUserGroupService.removeUserFromGroup(TEST_USER_ID, TEST_DESCRIPTION);
         }).isInstanceOf(SQLException.class)
           .hasMessage("Database connection failed");
 
-        verify(mockDolibarrDatabaseService).removeUserFromFirefighterGroup(TEST_USER_ID);
+        verify(mockGroupAllocater).allocateByDescription(TEST_DESCRIPTION);
+        verify(mockDolibarrDatabaseService).removeUserFromFirefighterGroup(TEST_USER_ID, TEST_FIREFIGHTER_GROUP_ID);
     }
 
     @Test
     void removeUserFromGroup_WithUnexpectedError_ShouldWrapInRuntimeException() throws SQLException {
         // Arrange
+        when(mockGroupAllocater.allocateByDescription(TEST_DESCRIPTION)).thenReturn(TEST_FIREFIGHTER_GROUP_ID);
         RuntimeException testException = new RuntimeException("Unexpected error");
-        doThrow(testException).when(mockDolibarrDatabaseService).removeUserFromFirefighterGroup(TEST_USER_ID);
+        doThrow(testException).when(mockDolibarrDatabaseService).removeUserFromFirefighterGroup(TEST_USER_ID, TEST_FIREFIGHTER_GROUP_ID);
 
         // Act & Assert
         assertThatThrownBy(() -> {
-            dolibarrUserGroupService.removeUserFromGroup(TEST_USER_ID);
+            dolibarrUserGroupService.removeUserFromGroup(TEST_USER_ID, TEST_DESCRIPTION);
         }).isInstanceOf(RuntimeException.class)
           .hasMessage("Failed to remove user from firefighter group")
           .hasCause(testException);
 
-        verify(mockDolibarrDatabaseService).removeUserFromFirefighterGroup(TEST_USER_ID);
+        verify(mockGroupAllocater).allocateByDescription(TEST_DESCRIPTION);
+        verify(mockDolibarrDatabaseService).removeUserFromFirefighterGroup(TEST_USER_ID, TEST_FIREFIGHTER_GROUP_ID);
     }
 
     @Test
     void removeUserFromGroup_WithNullUserId_ShouldHandleGracefully() throws SQLException {
         // Arrange
+        when(mockGroupAllocater.allocateByDescription(TEST_DESCRIPTION)).thenReturn(TEST_FIREFIGHTER_GROUP_ID);
         IllegalArgumentException testException = new IllegalArgumentException("User ID cannot be null");
-        doThrow(testException).when(mockDolibarrDatabaseService).removeUserFromFirefighterGroup(null);
+        doThrow(testException).when(mockDolibarrDatabaseService).removeUserFromFirefighterGroup(null, TEST_FIREFIGHTER_GROUP_ID);
 
         // Act & Assert
         assertThatThrownBy(() -> {
-            dolibarrUserGroupService.removeUserFromGroup(null);
+            dolibarrUserGroupService.removeUserFromGroup(null, TEST_DESCRIPTION);
         }).isInstanceOf(RuntimeException.class)
           .hasMessage("Failed to remove user from firefighter group")
           .hasCause(testException);
 
-        verify(mockDolibarrDatabaseService).removeUserFromFirefighterGroup(null);
+        verify(mockGroupAllocater).allocateByDescription(TEST_DESCRIPTION);
+        verify(mockDolibarrDatabaseService).removeUserFromFirefighterGroup(null, TEST_FIREFIGHTER_GROUP_ID);
     }
 
     @Test
     void removeUserFromGroup_WithEmptyUserId_ShouldHandleGracefully() throws SQLException {
         // Arrange
         String emptyUserId = "";
+        when(mockGroupAllocater.allocateByDescription(TEST_DESCRIPTION)).thenReturn(TEST_FIREFIGHTER_GROUP_ID);
         IllegalArgumentException testException = new IllegalArgumentException("Invalid ID format");
-        doThrow(testException).when(mockDolibarrDatabaseService).removeUserFromFirefighterGroup(emptyUserId);
+        doThrow(testException).when(mockDolibarrDatabaseService).removeUserFromFirefighterGroup(emptyUserId, TEST_FIREFIGHTER_GROUP_ID);
 
         // Act & Assert
         assertThatThrownBy(() -> {
-            dolibarrUserGroupService.removeUserFromGroup(emptyUserId);
+            dolibarrUserGroupService.removeUserFromGroup(emptyUserId, TEST_DESCRIPTION);
         }).isInstanceOf(RuntimeException.class)
           .hasMessage("Failed to remove user from firefighter group")
           .hasCause(testException);
 
-        verify(mockDolibarrDatabaseService).removeUserFromFirefighterGroup(emptyUserId);
+        verify(mockGroupAllocater).allocateByDescription(TEST_DESCRIPTION);
+        verify(mockDolibarrDatabaseService).removeUserFromFirefighterGroup(emptyUserId, TEST_FIREFIGHTER_GROUP_ID);
     }
 
     // ==================== INTEGRATION TESTS ====================
@@ -154,8 +173,8 @@ class DolibarrUserGroupServiceTest {
         // This test ensures that the service can be instantiated and has the required dependencies
 
         DolibarrUserGroupService service = new DolibarrUserGroupService(
-            TEST_FIREFIGHTER_GROUP_ID,
-            mockDolibarrDatabaseService
+            mockDolibarrDatabaseService,
+            mockGroupAllocater
         );
 
         // The service should be created successfully
