@@ -1,7 +1,9 @@
 package com.apex.firefighter.service.ticket;
 
 import com.apex.firefighter.model.Ticket;
+import com.apex.firefighter.model.User;
 import com.apex.firefighter.repository.TicketRepository;
+import com.apex.firefighter.repository.UserRepository;
 import com.apex.firefighter.service.NotificationService;
 import com.apex.firefighter.service.DolibarrUserGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import jakarta.annotation.PostConstruct;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TicketScheduledService {
@@ -19,12 +22,14 @@ public class TicketScheduledService {
     private final TicketRepository ticketRepository;
     private final NotificationService notificationService;
     private final DolibarrUserGroupService dolibarrUserGroupService;
+    private final UserRepository userRepository;
 
     @Autowired
-    public TicketScheduledService(TicketRepository ticketRepository, NotificationService notificationService, DolibarrUserGroupService dolibarrUserGroupService) {
+    public TicketScheduledService(TicketRepository ticketRepository, NotificationService notificationService, DolibarrUserGroupService dolibarrUserGroupService, UserRepository userRepository) {
         this.ticketRepository = ticketRepository;
         this.notificationService = notificationService;
         this.dolibarrUserGroupService = dolibarrUserGroupService;
+        this.userRepository = userRepository;
     }
 
     @PostConstruct
@@ -131,12 +136,22 @@ public class TicketScheduledService {
                         System.err.println("⚠️ NOTIFICATION FAILED: Could not create ticket completion notification: " + e.getMessage());
                     }
 
-                    /* // Remove user from firefighter group when ticket is manually revoked
+                    // Remove user from firefighter group when ticket is automatically closed
                     try {
-                        dolibarrUserGroupService.removeUserFromGroup(ticket.getUserId());
+                        Optional<User> user = userRepository.findById(ticket.getUserId());
+                        if (user.isPresent()) {
+                            // Use emergency type for group allocation if available, otherwise fall back to description
+                            String allocationText = (ticket.getEmergencyType() != null && !ticket.getEmergencyType().isEmpty())
+                                ? ticket.getEmergencyType() + " " + ticket.getDescription()
+                                : ticket.getDescription();
+                            dolibarrUserGroupService.removeUserFromGroup(user.get().getDolibarrId(), allocationText);
+                            System.out.println("✅ AUTO-CLOSE: Successfully removed user " + ticket.getUserId() + " from firefighter group for ticket: " + ticket.getTicketId());
+                        } else {
+                            System.err.println("⚠️ AUTO-CLOSE: User not found with ID: " + ticket.getUserId());
+                        }
                     } catch (Exception e) {
-                        System.err.println("⚠️ TICKET SERVICE: Failed to remove user from firefighter group for ticket: " + ticket.getTicketId() + " - " + e.getMessage());
-                    } */
+                        System.err.println("⚠️ AUTO-CLOSE: Failed to remove user from firefighter group for ticket: " + ticket.getTicketId() + " - " + e.getMessage());
+                    }
 
                     closedCount++;
                     System.out.println("Closed expired ticket: " + ticket.getTicketId());

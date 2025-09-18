@@ -51,7 +51,11 @@ public class TicketService {
         try {
             Optional<User> userOpt = userRepository.findById(userId);
             if (userOpt.isPresent()) {
-                dolibarrUserGroupService.addUserToGroup(userOpt.get().getDolibarrId(), description);
+                // Use emergency type for group allocation if available, otherwise fall back to description
+                String allocationText = (emergencyType != null && !emergencyType.isEmpty())
+                    ? emergencyType + " " + description
+                    : description;
+                dolibarrUserGroupService.addUserToGroup(userOpt.get().getDolibarrId(), allocationText);
             } else {
                 throw new RuntimeException("User not found with ID: " + userId);
             }
@@ -111,7 +115,11 @@ public class TicketService {
                 if ("Closed".equals(newStatus) || "Completed".equals(newStatus)) {
                     Optional<User> userOpt = userRepository.findById(ticket.getUserId());
                     if (userOpt.isPresent()) {
-                        dolibarrUserGroupService.removeUserFromGroup(userOpt.get().getDolibarrId(), ticket.getDescription());
+                        // Use emergency type for group allocation if available, otherwise fall back to description
+                        String allocationText = (ticket.getEmergencyType() != null && !ticket.getEmergencyType().isEmpty())
+                            ? ticket.getEmergencyType() + " " + ticket.getDescription()
+                            : ticket.getDescription();
+                        dolibarrUserGroupService.removeUserFromGroup(userOpt.get().getDolibarrId(), allocationText);
                     } else {
                         System.err.println("⚠️ TICKET SERVICE: User not found with ID: " + ticket.getUserId());
                     }
@@ -141,10 +149,27 @@ public class TicketService {
     public void closeExpiredTickets() {
         LocalDateTime cutoffDate = LocalDateTime.now().minusHours(24);
         List<Ticket> expiredTickets = getActiveTicketsOlderThan(cutoffDate);
-        
+
         for (Ticket ticket : expiredTickets) {
             ticket.setStatus("Closed");
             ticketRepository.save(ticket);
+
+            // Remove user from firefighter group when ticket is automatically closed
+            try {
+                Optional<User> user = userRepository.findById(ticket.getUserId());
+                if (user.isPresent()) {
+                    // Use emergency type for group allocation if available, otherwise fall back to description
+                    String allocationText = (ticket.getEmergencyType() != null && !ticket.getEmergencyType().isEmpty())
+                        ? ticket.getEmergencyType() + " " + ticket.getDescription()
+                        : ticket.getDescription();
+                    dolibarrUserGroupService.removeUserFromGroup(user.get().getDolibarrId(), allocationText);
+                    System.out.println("✅ AUTO-CLOSE (24h): Successfully removed user " + ticket.getUserId() + " from firefighter group for ticket: " + ticket.getTicketId());
+                } else {
+                    System.err.println("⚠️ AUTO-CLOSE (24h): User not found with ID: " + ticket.getUserId());
+                }
+            } catch (Exception e) {
+                System.err.println("⚠️ AUTO-CLOSE (24h): Failed to remove user from firefighter group for ticket: " + ticket.getTicketId() + " - " + e.getMessage());
+            }
         }
     }
 
@@ -183,7 +208,11 @@ public class TicketService {
             try {
                 Optional<User> user = userRepository.findById(ticket.getUserId());
                 if (user.isPresent()) {
-                    dolibarrUserGroupService.removeUserFromGroup(user.get().getDolibarrId(), ticket.getDescription());
+                    // Use emergency type for group allocation if available, otherwise fall back to description
+                    String allocationText = (ticket.getEmergencyType() != null && !ticket.getEmergencyType().isEmpty())
+                        ? ticket.getEmergencyType() + " " + ticket.getDescription()
+                        : ticket.getDescription();
+                    dolibarrUserGroupService.removeUserFromGroup(user.get().getDolibarrId(), allocationText);
                 } else {
                     System.err.println("⚠️ TICKET SERVICE: User not found with ID: " + ticket.getUserId());
                 }
@@ -217,7 +246,11 @@ public class TicketService {
             try {
                 Optional<User> user = userRepository.findById(ticket.getUserId());
                 if (user.isPresent()) {
-                    dolibarrUserGroupService.removeUserFromGroup(user.get().getDolibarrId(), ticket.getDescription());
+                    // Use emergency type for group allocation if available, otherwise fall back to description
+                    String allocationText = (ticket.getEmergencyType() != null && !ticket.getEmergencyType().isEmpty())
+                        ? ticket.getEmergencyType() + " " + ticket.getDescription()
+                        : ticket.getDescription();
+                    dolibarrUserGroupService.removeUserFromGroup(user.get().getDolibarrId(), allocationText);
                 } else {
                     System.err.println("⚠️ TICKET SERVICE: User not found with ID: " + ticket.getUserId());
                 }

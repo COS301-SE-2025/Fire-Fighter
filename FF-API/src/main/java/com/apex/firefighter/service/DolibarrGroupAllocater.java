@@ -14,7 +14,7 @@ public class DolibarrGroupAllocater {
         this.properties = properties;
     }
 
-    /*  
+    /*
         For the case where the frontend sends the group description along with the ticket.
         Add, modify, remove group allocation logic here as required.
     */
@@ -26,14 +26,34 @@ public class DolibarrGroupAllocater {
         String descLower = description.toLowerCase();
         Map<String, Integer> groups = properties.getGroups();
 
-        if (descLower.contains("hr") || descLower.contains("human resources")) {
-            return groups.get("hr");
-        } else if (descLower.contains("financial") || descLower.contains("payment") || descLower.contains("invoice")) {
-            return groups.get("financials");
-        } else if (descLower.contains("manager") || descLower.contains("management") || descLower.contains("admin")) {
-            return groups.get("fmanager");
-        } else if (descLower.contains("logistics") || descLower.contains("supply") || descLower.contains("inventory")) {
-            return groups.get("logistics");
+        System.out.println("🔍 GROUP ALLOCATOR: Processing description: '" + description + "'");
+        System.out.println("🔍 GROUP ALLOCATOR: Available groups: " + groups);
+
+        // Check for emergency type values first (from dropdown selection)
+        if (descLower.contains("hr-emergency") || descLower.contains("hr") || descLower.contains("human resources")) {
+            Integer groupId = groups.get("hr");
+            if (groupId == null) {
+                throw new IllegalArgumentException("HR group ID not configured in application.properties (dolibarr.ff.hr)");
+            }
+            return groupId;
+        } else if (descLower.contains("financial-emergency") || descLower.contains("financial") || descLower.contains("payment") || descLower.contains("invoice")) {
+            Integer groupId = groups.get("financials");
+            if (groupId == null) {
+                throw new IllegalArgumentException("Financials group ID not configured in application.properties (dolibarr.ff.financials)");
+            }
+            return groupId;
+        } else if (descLower.contains("management-emergency") || descLower.contains("manager") || descLower.contains("management") || descLower.contains("admin")) {
+            Integer groupId = groups.get("fmanager");
+            if (groupId == null) {
+                throw new IllegalArgumentException("Manager group ID not configured in application.properties (dolibarr.ff.fmanager)");
+            }
+            return groupId;
+        } else if (descLower.contains("logistics-emergency") || descLower.contains("logistics") || descLower.contains("supply") || descLower.contains("inventory")) {
+            Integer groupId = groups.get("logistics");
+            if (groupId == null) {
+                throw new IllegalArgumentException("Logistics group ID not configured in application.properties (dolibarr.ff.logistics)");
+            }
+            return groupId;
         } else {
             throw new IllegalArgumentException("No matching group found for description: " + description);
         }
