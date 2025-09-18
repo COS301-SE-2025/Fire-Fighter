@@ -78,9 +78,8 @@ class JwtAuthenticationFilterTest {
         String firebaseUid = "firebase-uid-123";
 
         when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
-        when(jwtService.isCustomJwt(token)).thenReturn(true); // Add this missing mock
-        when(jwtService.verifyFirebaseToken(token))
-            .thenThrow(new RuntimeException("Not a Firebase token"));
+        when(jwtService.isCustomJwt(token)).thenReturn(true); // This is a custom JWT
+        // Remove verifyFirebaseToken mock since it won't be called for custom JWT
         when(jwtService.extractFirebaseUid(token)).thenReturn(firebaseUid);
         when(jwtService.extractIsAdmin(token)).thenReturn(true);
         when(jwtService.validateToken(token, firebaseUid)).thenReturn(true);
@@ -134,13 +133,10 @@ class JwtAuthenticationFilterTest {
     @DisplayName("Should handle invalid tokens gracefully")
     void shouldHandleInvalidTokensGracefully() throws Exception {
         // Given
-        String invalidToken = "invalid.token";
+        String invalidToken = "invalid.token"; // This has only 2 parts, so fails JWT format check
         when(request.getHeader("Authorization")).thenReturn("Bearer " + invalidToken);
-        when(jwtService.isCustomJwt(invalidToken)).thenReturn(false); // Invalid token format
         
-        // Use lenient stubbing to avoid unnecessary stubbing errors
-        lenient().when(jwtService.extractFirebaseUid(invalidToken))
-            .thenThrow(new RuntimeException("Invalid JWT token"));
+        // No need to mock anything else since the token fails format validation
 
         // When
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
