@@ -52,6 +52,7 @@ class JwtAuthenticationFilterTest {
         String email = "user@example.com";
 
         when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
+        when(jwtService.isCustomJwt(token)).thenReturn(false); // This is a Firebase token, not custom JWT
         when(jwtService.verifyFirebaseToken(token)).thenReturn(firebaseToken);
         when(firebaseToken.getUid()).thenReturn(firebaseUid);
         when(firebaseToken.getEmail()).thenReturn(email);
@@ -77,6 +78,7 @@ class JwtAuthenticationFilterTest {
         String firebaseUid = "firebase-uid-123";
 
         when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
+        when(jwtService.isCustomJwt(token)).thenReturn(true); // Add this missing mock
         when(jwtService.verifyFirebaseToken(token))
             .thenThrow(new RuntimeException("Not a Firebase token"));
         when(jwtService.extractFirebaseUid(token)).thenReturn(firebaseUid);
@@ -134,6 +136,7 @@ class JwtAuthenticationFilterTest {
         // Given
         String invalidToken = "invalid.token";
         when(request.getHeader("Authorization")).thenReturn("Bearer " + invalidToken);
+        when(jwtService.isCustomJwt(invalidToken)).thenReturn(false); // Invalid token format
         
         // Use lenient stubbing to avoid unnecessary stubbing errors
         lenient().when(jwtService.extractFirebaseUid(invalidToken))
