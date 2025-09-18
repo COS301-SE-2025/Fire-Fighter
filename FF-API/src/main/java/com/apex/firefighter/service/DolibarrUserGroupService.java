@@ -7,16 +7,13 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class DolibarrUserGroupService {
-    private final String firefighterGroupId;
     private final DolibarrDatabaseService dolibarrDatabaseService;
+    private final DolibarrGroupAllocater groupAllocater;
 
-    public DolibarrUserGroupService(
-            @Value("${dolibarr.ff.hr.id}") String firefighterGroupId,
-            DolibarrDatabaseService dolibarrDatabaseService) {
-        this.firefighterGroupId = firefighterGroupId;
+    public DolibarrUserGroupService(DolibarrDatabaseService dolibarrDatabaseService, DolibarrGroupAllocater groupAllocater) {
         this.dolibarrDatabaseService = dolibarrDatabaseService;
-
-        System.out.println("✅ DolibarrUserGroupService initialized with firefighter group ID: " + firefighterGroupId);
+        this.groupAllocater = groupAllocater;
+        System.out.println("✅ DolibarrUserGroupService initialized");
     }
 
     /**
@@ -28,11 +25,12 @@ public class DolibarrUserGroupService {
      * @param userId The Dolibarr user ID
      * @throws SQLException if database operation fails
      */
-    public void addUserToGroup(String userId) throws SQLException {
-        System.out.println("🔵 DOLIBARR SERVICE: Starting to add user " + userId + " to firefighter group " + firefighterGroupId);
-
+    public void addUserToGroup(String userId, String description) throws SQLException {
         try {
-            dolibarrDatabaseService.addUserToFirefighterGroup(userId);
+            Integer firefighterGroupId = groupAllocater.allocateByDescription(description);
+            System.out.println("🔵 DOLIBARR SERVICE: Starting to add user " + userId + " to firefighter group " + firefighterGroupId);
+
+            dolibarrDatabaseService.addUserToFirefighterGroup(userId, firefighterGroupId);
             System.out.println("✅ DOLIBARR SERVICE: Successfully added user " + userId + " to firefighter group using database method");
         } catch (SQLException e) {
             System.err.println("❌ DOLIBARR SERVICE: Failed to add user " + userId + " to firefighter group: " + e.getMessage());
@@ -51,10 +49,11 @@ public class DolibarrUserGroupService {
      * @param userId The Dolibarr user ID
      * @throws SQLException if database operation fails
      */
-    public void removeUserFromGroup(String userId) throws SQLException {
+    public void removeUserFromGroup(String userId, String description) throws SQLException {
         try {
-            dolibarrDatabaseService.removeUserFromFirefighterGroup(userId);
-            System.out.println("✅ DOLIBARR SERVICE: Successfully removed user " + userId + " from firefighter group");
+            Integer firefighterGroupId = groupAllocater.allocateByDescription(description);
+            dolibarrDatabaseService.removeUserFromFirefighterGroup(userId, firefighterGroupId);
+            System.out.println("✅ DOLIBARR SERVICE: Successfully removed user " + userId + " from firefighter group " + firefighterGroupId);
         } catch (SQLException e) {
             System.err.println("❌ DOLIBARR SERVICE: Failed to remove user " + userId + " from firefighter group: " + e.getMessage());
             throw e;
