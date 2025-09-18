@@ -27,13 +27,11 @@ public class DolibarrDatabaseService {
             @Value("${DOLIBARR_DB_NAME:dolibarr}") String dolibarrDbName,
             @Value("${DB_USERNAME:ff_admin}") String dbUsername,
             @Value("${DB_PASSWORD:}") String dbPassword,
-            @Value("${DB_SSL_MODE:require}") String dbSslMode,
-            @Value("${dolibarr.ff.hr.id}") String firefighterGroupId) {
+            @Value("${DB_SSL_MODE:require}") String dbSslMode) {
         
-        this.firefighterGroupId = firefighterGroupId;
         this.dolibarrDataSource = createDolibarrDataSource(dbHost, dbPort, dolibarrDbName, dbUsername, dbPassword, dbSslMode);
         
-        System.out.println("✅ DolibarrDatabaseService initialized with firefighter group ID: " + firefighterGroupId);
+        System.out.println("✅ DolibarrDatabaseService initialized.");
     }
 
     /**
@@ -84,7 +82,7 @@ public class DolibarrDatabaseService {
      * @param dolibarrUserId The Dolibarr user ID (fk_user in the table)
      * @throws SQLException if database operation fails
      */
-    public void removeUserFromFirefighterGroup(String dolibarrUserId) throws SQLException {
+    public void removeUserFromFirefighterGroup(String dolibarrUserId, Integer firefighterGroupId) throws SQLException {
         String sql = "DELETE FROM llx_usergroup_user WHERE fk_user = ? AND fk_usergroup = ?";
         
         try (Connection connection = dolibarrDataSource.getConnection();
@@ -92,10 +90,11 @@ public class DolibarrDatabaseService {
             
             // Convert string IDs to integers for the database
             int userId = Integer.parseInt(dolibarrUserId);
-            int groupId = Integer.parseInt(firefighterGroupId);
+            //int groupId = Integer.parseInt(firefighterGroupId);
             
             statement.setInt(1, userId);
-            statement.setInt(2, groupId);
+            //statement.setInt(2, groupId);
+            statement.setInt(2, firefighterGroupId);
             
             int rowsAffected = statement.executeUpdate();
             
@@ -133,7 +132,7 @@ public class DolibarrDatabaseService {
      * @param dolibarrUserId The Dolibarr user ID (fk_user in the table)
      * @throws SQLException if database operation fails
      */
-    public void addUserToFirefighterGroup(String dolibarrUserId) throws SQLException {
+    public void addUserToFirefighterGroup(String dolibarrUserId, Integer firefighterGroupId) throws SQLException {
         // First check if the user is already in the group
         String checkSql = "SELECT COUNT(*) FROM llx_usergroup_user WHERE fk_user = ? AND fk_usergroup = ?";
         String insertSql = "INSERT INTO llx_usergroup_user (entity, fk_user, fk_usergroup) VALUES (?, ?, ?)";
@@ -142,12 +141,12 @@ public class DolibarrDatabaseService {
 
             // Convert string IDs to integers for the database
             int userId = Integer.parseInt(dolibarrUserId);
-            int groupId = Integer.parseInt(firefighterGroupId);
+            //int groupId = Integer.parseInt(firefighterGroupId);
 
             // Check if user is already in the group
             try (PreparedStatement checkStatement = connection.prepareStatement(checkSql)) {
                 checkStatement.setInt(1, userId);
-                checkStatement.setInt(2, groupId);
+                checkStatement.setInt(2, firefighterGroupId);
 
                 var resultSet = checkStatement.executeQuery();
                 if (resultSet.next() && resultSet.getInt(1) > 0) {
@@ -162,7 +161,8 @@ public class DolibarrDatabaseService {
             try (PreparedStatement insertStatement = connection.prepareStatement(insertSql)) {
                 insertStatement.setInt(1, 1); // entity = 1 as requested
                 insertStatement.setInt(2, userId);
-                insertStatement.setInt(3, groupId);
+                //insertStatement.setInt(3, groupId);
+                insertStatement.setInt(3, firefighterGroupId);
 
                 int rowsAffected = insertStatement.executeUpdate();
 

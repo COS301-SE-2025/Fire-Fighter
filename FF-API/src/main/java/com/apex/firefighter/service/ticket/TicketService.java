@@ -51,7 +51,7 @@ public class TicketService {
         try {
             Optional<User> userOpt = userRepository.findById(userId);
             if (userOpt.isPresent()) {
-                dolibarrUserGroupService.addUserToGroup(userOpt.get().getDolibarrId());
+                dolibarrUserGroupService.addUserToGroup(userOpt.get().getDolibarrId(), description);
             } else {
                 throw new RuntimeException("User not found with ID: " + userId);
             }
@@ -111,7 +111,7 @@ public class TicketService {
                 if ("Closed".equals(newStatus) || "Completed".equals(newStatus)) {
                     Optional<User> userOpt = userRepository.findById(ticket.getUserId());
                     if (userOpt.isPresent()) {
-                        dolibarrUserGroupService.removeUserFromGroup(userOpt.get().getDolibarrId());
+                        dolibarrUserGroupService.removeUserFromGroup(userOpt.get().getDolibarrId(), ticket.getDescription());
                     } else {
                         System.err.println("⚠️ TICKET SERVICE: User not found with ID: " + ticket.getUserId());
                     }
@@ -183,7 +183,7 @@ public class TicketService {
             try {
                 Optional<User> user = userRepository.findById(ticket.getUserId());
                 if (user.isPresent()) {
-                    dolibarrUserGroupService.removeUserFromGroup(user.get().getDolibarrId());
+                    dolibarrUserGroupService.removeUserFromGroup(user.get().getDolibarrId(), ticket.getDescription());
                 } else {
                     System.err.println("⚠️ TICKET SERVICE: User not found with ID: " + ticket.getUserId());
                 }
@@ -217,7 +217,7 @@ public class TicketService {
             try {
                 Optional<User> user = userRepository.findById(ticket.getUserId());
                 if (user.isPresent()) {
-                    dolibarrUserGroupService.removeUserFromGroup(user.get().getDolibarrId());
+                    dolibarrUserGroupService.removeUserFromGroup(user.get().getDolibarrId(), ticket.getDescription());
                 } else {
                     System.err.println("⚠️ TICKET SERVICE: User not found with ID: " + ticket.getUserId());
                 }
