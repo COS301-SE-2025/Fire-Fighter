@@ -826,8 +826,7 @@ export class AdminPage implements OnInit {
 
   navigateToManageUsers() {
     console.log('Navigate to manage users page');
-    // TODO: Navigate to manage users page when route is created
-    alert('Manage Users functionality coming soon!');
+    this.router.navigate(['/user-management']);
   }
 
   ngOnInit() {

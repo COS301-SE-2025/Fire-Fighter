@@ -68,6 +68,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/service-down/service-down.page').then( m => m.ServiceDownPage)
   },
   {
+    path: 'user-management',
+    loadComponent: () => import('./pages/user-management/user-management.page').then( m => m.UserManagementPage),
+    canActivate: [adminGuard]
+  },
+  {
     path: '',
     redirectTo: 'landing',
     pathMatch: 'full'
@@ -75,9 +80,6 @@ export const routes: Routes = [
   {
     path: '**',
     redirectTo: 'landing'
-  },  {
-    path: 'user-management',
-    loadComponent: () => import('./pages/user-management/user-management.page').then( m => m.UserManagementPage)
   }
 
 ];
