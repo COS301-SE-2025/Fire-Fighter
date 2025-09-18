@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -195,5 +196,12 @@ public class UserService {
      */
     public String getUserDolibarrIdAsAdmin(String adminFirebaseUid, String targetFirebaseUid) {
         return userProfileService.getUserDolibarrIdAsAdmin(adminFirebaseUid, targetFirebaseUid);
+    }
+
+    /**
+     * Get all users as admin - Delegates to UserProfileService with admin check
+     */
+    public Map<String, Object> getAllUsersAsAdmin(String adminFirebaseUid) {
+        return userProfileService.getAllUsersAsAdmin(adminFirebaseUid);
     }
 } 

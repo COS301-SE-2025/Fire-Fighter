@@ -10,6 +10,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -172,5 +175,49 @@ class AdminDolibarrManagementTest {
         assertNull(result);
         verify(userRepository).findByUserId(ADMIN_UID);
         verify(userRepository).findByUserId(TARGET_USER_UID);
+    }
+
+    @Test
+    void getAllUsersAsAdmin_WithValidAdmin_ShouldReturnUsersAndStatistics() {
+        // Arrange
+        List<User> allUsers = Arrays.asList(adminUser, regularUser, targetUser);
+        when(userRepository.findByUserId(ADMIN_UID)).thenReturn(Optional.of(adminUser));
+        when(userRepository.findAll()).thenReturn(allUsers);
+
+        // Act
+        Map<String, Object> result = userProfileService.getAllUsersAsAdmin(ADMIN_UID);
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.containsKey("users"));
+        assertTrue(result.containsKey("statistics"));
+
+        @SuppressWarnings("unchecked")
+        List<User> returnedUsers = (List<User>) result.get("users");
+        assertEquals(3, returnedUsers.size());
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> statistics = (Map<String, Object>) result.get("statistics");
+        assertEquals(2L, statistics.get("normalUsers")); // regularUser and targetUser
+        assertEquals(1L, statistics.get("adminUsers"));  // adminUser
+        assertEquals(3, statistics.get("totalUsers"));
+
+        verify(userRepository).findByUserId(ADMIN_UID);
+        verify(userRepository).findAll();
+    }
+
+    @Test
+    void getAllUsersAsAdmin_WithNonAdminUser_ShouldThrowSecurityException() {
+        // Arrange
+        when(userRepository.findByUserId(REGULAR_USER_UID)).thenReturn(Optional.of(regularUser));
+
+        // Act & Assert
+        SecurityException exception = assertThrows(SecurityException.class, () -> {
+            userProfileService.getAllUsersAsAdmin(REGULAR_USER_UID);
+        });
+
+        assertEquals("Administrator privileges required to access all users", exception.getMessage());
+        verify(userRepository).findByUserId(REGULAR_USER_UID);
+        verify(userRepository, never()).findAll();
     }
 }

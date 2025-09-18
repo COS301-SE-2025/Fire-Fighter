@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -236,4 +238,49 @@ public class UserProfileService {
 
         return dolibarrId;
     }
-} 
+
+    /**
+     * Get all users as admin with statistics
+     * Only administrators can access this endpoint
+     */
+    public Map<String, Object> getAllUsersAsAdmin(String adminFirebaseUid) {
+        System.out.println("🔵 ADMIN GET ALL USERS: Admin " + adminFirebaseUid + " requesting all users");
+
+        // Verify admin user exists and has admin privileges
+        Optional<User> adminUserOpt = userRepository.findByUserId(adminFirebaseUid);
+        if (adminUserOpt.isEmpty()) {
+            System.err.println("❌ ADMIN GET ALL USERS: Admin user not found - " + adminFirebaseUid);
+            throw new RuntimeException("Admin user not found with Firebase UID: " + adminFirebaseUid);
+        }
+
+        User adminUser = adminUserOpt.get();
+        if (!adminUser.isAdmin()) {
+            System.err.println("❌ ADMIN GET ALL USERS: User is not an admin - " + adminFirebaseUid);
+            throw new SecurityException("Administrator privileges required to access all users");
+        }
+
+        // Get all users
+        List<User> allUsers = userRepository.findAll();
+
+        // Calculate statistics
+        long normalUsers = allUsers.stream().filter(user -> !user.isAdmin()).count();
+        long adminUsers = allUsers.stream().filter(User::isAdmin).count();
+
+        // Create response with users and statistics
+        Map<String, Object> response = new HashMap<>();
+        response.put("users", allUsers);
+        response.put("statistics", Map.of(
+            "normalUsers", normalUsers,
+            "adminUsers", adminUsers,
+            "totalUsers", allUsers.size()
+        ));
+
+        System.out.println("✅ ADMIN ALL USERS RETRIEVED:");
+        System.out.println("  Admin: " + adminUser.getUsername() + " (" + adminFirebaseUid + ")");
+        System.out.println("  Total Users: " + allUsers.size());
+        System.out.println("  Normal Users: " + normalUsers);
+        System.out.println("  Admin Users: " + adminUsers);
+
+        return response;
+    }
+}

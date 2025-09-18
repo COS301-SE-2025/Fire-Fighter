@@ -101,48 +101,44 @@ export class UserManagementPage implements OnInit {
   async loadUsers() {
     this.loading = true;
     try {
-      // TODO: Replace with actual API call
-      // Placeholder data for now
-      this.users = [
-        {
-          userId: '1',
-          username: 'john.doe',
-          email: 'john.doe@bmw.com',
-          department: 'IT',
-          isAdmin: true,
-          isAuthorized: true,
-          lastLogin: '2024-01-15T10:30:00Z',
-          createdAt: '2024-01-01T00:00:00Z',
-          dolibarrId: 'DOL001'
-        },
-        {
-          userId: '2',
-          username: 'jane.smith',
-          email: 'jane.smith@bmw.com',
-          department: 'Operations',
-          isAdmin: false,
-          isAuthorized: true,
-          lastLogin: '2024-01-14T15:45:00Z',
-          createdAt: '2024-01-02T00:00:00Z',
-          dolibarrId: 'DOL002'
-        },
-        {
-          userId: '3',
-          username: 'mike.wilson',
-          email: 'mike.wilson@bmw.com',
-          department: 'Security',
-          isAdmin: false,
-          isAuthorized: false,
-          lastLogin: '2024-01-10T09:15:00Z',
-          createdAt: '2024-01-03T00:00:00Z'
-          // No Dolibarr ID set for this user
-        }
-      ];
+      // Call the real API to get all users
+      const response = await this.authService.getAllUsersAsAdmin().toPromise();
 
+      if (response && response.users) {
+        this.users = response.users;
+
+        // Update statistics from API response if available, otherwise calculate locally
+        if (response.statistics) {
+          this.normalUsers = response.statistics.normalUsers;
+          this.adminUsers = response.statistics.adminUsers;
+        } else {
+          this.updateStatistics();
+        }
+
+        this.filterUsers();
+        console.log('✅ Users loaded successfully:', this.users.length, 'users');
+      } else {
+        console.error('❌ Invalid response format from getAllUsersAsAdmin');
+        this.users = [];
+        this.updateStatistics();
+        this.filterUsers();
+      }
+    } catch (error: any) {
+      console.error('❌ Error loading users:', error);
+
+      // Handle specific error cases
+      if (error.message === 'Service temporarily unavailable') {
+        // Service down error is already handled by the auth service
+        console.log('🔌 Service is down, user will be redirected');
+      } else {
+        // Show user-friendly error message
+        alert('Failed to load users. Please try again or contact support if the problem persists.');
+      }
+
+      // Reset to empty state
+      this.users = [];
       this.updateStatistics();
       this.filterUsers();
-    } catch (error) {
-      console.error('Error loading users:', error);
     } finally {
       this.loading = false;
     }
@@ -166,14 +162,8 @@ export class UserManagementPage implements OnInit {
       );
     }
 
-    // Apply status filter
+    // Apply role filter
     switch (this.selectedFilter) {
-      case 'active':
-        filtered = filtered.filter(user => user.isAuthorized);
-        break;
-      case 'inactive':
-        filtered = filtered.filter(user => !user.isAuthorized);
-        break;
       case 'admin':
         filtered = filtered.filter(user => user.isAdmin);
         break;
@@ -333,9 +323,11 @@ export class UserManagementPage implements OnInit {
     this.isUpdatingDolibarrId = true;
 
     try {
-      // TODO: Replace with actual API call to update user's Dolibarr ID
-      // For now, we'll use the existing auth service method but we'll need to create a new one for admin updates
-      const response = await this.authService.updateDolibarrId(this.editingDolibarrId.trim()).toPromise();
+      // Use the new admin API to update user's Dolibarr ID
+      const response = await this.authService.updateUserDolibarrIdAsAdmin(
+        this.selectedUser.userId,
+        this.editingDolibarrId.trim()
+      ).toPromise();
 
       if (response) {
         // Update local user data
@@ -368,6 +360,10 @@ export class UserManagementPage implements OnInit {
       let errorMessage = 'Failed to update Dolibarr ID. Please try again.';
       if (error.message === 'Service temporarily unavailable') {
         errorMessage = 'Service is temporarily unavailable. Please try again later.';
+      } else if (error.status === 403) {
+        errorMessage = 'You do not have permission to update Dolibarr IDs. Administrator privileges required.';
+      } else if (error.status === 404) {
+        errorMessage = 'User not found. Please refresh the page and try again.';
       }
 
       alert(errorMessage);

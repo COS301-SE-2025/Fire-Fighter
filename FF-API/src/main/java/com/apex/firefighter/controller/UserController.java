@@ -298,6 +298,50 @@ public class UserController {
     }
 
     /**
+     * GET ALL USERS (ADMIN ONLY)
+     * GET /api/users/admin/all
+     * Admin endpoint to get all users with full details
+     */
+    @Operation(summary = "Get all users (Admin Only)",
+               description = "Retrieves all users with full details including statistics. Requires admin privileges.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Users retrieved successfully"),
+        @ApiResponse(responseCode = "401", description = "User not authenticated"),
+        @ApiResponse(responseCode = "403", description = "Admin privileges required"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @GetMapping("/admin/all")
+    public ResponseEntity<Map<String, Object>> getAllUsersAsAdmin() {
+
+        try {
+            // Get current user from JWT authentication
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                System.err.println("❌ ADMIN GET ALL USERS: User not authenticated");
+                return ResponseEntity.status(401).build();
+            }
+
+            String adminFirebaseUid = authentication.getName();
+            System.out.println("🔵 ADMIN GET ALL USERS REQUEST:");
+            System.out.println("  Admin Firebase UID: " + adminFirebaseUid);
+
+            Map<String, Object> response = userService.getAllUsersAsAdmin(adminFirebaseUid);
+
+            System.out.println("✅ ADMIN GET ALL USERS SUCCESS: " + ((List<?>) response.get("users")).size() + " users retrieved");
+            return ResponseEntity.ok(response);
+        } catch (SecurityException e) {
+            System.err.println("❌ ADMIN GET ALL USERS FAILED: " + e.getMessage());
+            return ResponseEntity.status(403).build();
+        } catch (RuntimeException e) {
+            System.err.println("❌ ADMIN GET ALL USERS FAILED:");
+            System.err.println("  Error Type: " + e.getClass().getSimpleName());
+            System.err.println("  Error Message: " + e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    /**
      * UPDATE CONTACT NUMBER
      * PUT /api/users/{firebaseUid}/contact
      * Update user's contact number

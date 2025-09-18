@@ -648,7 +648,82 @@ export class AuthService {
   }
 
   /**
-   * Update user Dolibarr ID
+   * Get all users (Admin Only)
+   * Endpoint: GET /api/users/admin/all
+   */
+  getAllUsersAsAdmin(): Observable<any> {
+    console.log('🔵 GET ALL USERS AS ADMIN REQUEST');
+
+    return this.http.get(`${environment.apiUrl}/users/admin/all`).pipe(
+      tap((response: any) => {
+        console.log('✅ Get all users as admin successful:', response);
+      }),
+      catchError((error: any) => {
+        console.error('❌ Get all users as admin failed:', error);
+
+        // Check for connection errors
+        if (this.isConnectionError(error)) {
+          console.error('🔌 Connection error detected in getAllUsersAsAdmin - redirecting to service down page');
+
+          // Store the last successful connection time
+          localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
+
+          // Redirect to service down page
+          this.router.navigate(['/service-down']);
+
+          // Return a specific error for connection issues
+          return throwError(() => new Error('Service temporarily unavailable'));
+        }
+
+        // For other errors, return the original error
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Update user Dolibarr ID as Admin
+   * Endpoint: PUT /api/users/{firebaseUid}/admin/dolibarr-id
+   */
+  updateUserDolibarrIdAsAdmin(targetFirebaseUid: string, dolibarrId: string): Observable<any> {
+    const params = new HttpParams().set('dolibarrId', dolibarrId);
+    const headers = {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    };
+
+    console.log('🔵 UPDATE USER DOLIBARR ID AS ADMIN REQUEST:');
+    console.log('  Target Firebase UID:', targetFirebaseUid);
+    console.log('  Dolibarr ID:', dolibarrId);
+
+    return this.http.put(`${environment.apiUrl}/users/${targetFirebaseUid}/admin/dolibarr-id`, params.toString(), { headers }).pipe(
+      tap((response: any) => {
+        console.log('✅ Update user Dolibarr ID as admin successful:', response);
+      }),
+      catchError((error: any) => {
+        console.error('❌ Update user Dolibarr ID as admin failed:', error);
+
+        // Check for connection errors
+        if (this.isConnectionError(error)) {
+          console.error('🔌 Connection error detected in updateUserDolibarrIdAsAdmin - redirecting to service down page');
+
+          // Store the last successful connection time
+          localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
+
+          // Redirect to service down page
+          this.router.navigate(['/service-down']);
+
+          // Return a specific error for connection issues
+          return throwError(() => new Error('Service temporarily unavailable'));
+        }
+
+        // For other errors, return the original error
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Update user Dolibarr ID (DEPRECATED - Use updateUserDolibarrIdAsAdmin instead)
    * Endpoint: PUT /api/users/dolibarr-id
    */
   updateDolibarrId(dolibarrId: string): Observable<any> {

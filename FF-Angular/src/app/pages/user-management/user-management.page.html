@@ -104,8 +104,6 @@
             <!-- Filter Dropdown -->
             <select [(ngModel)]="selectedFilter" (change)="filterUsers()" class="block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
               <option value="all">All Users</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
               <option value="admin">Admins</option>
             </select>
           </div>
@@ -119,7 +117,6 @@
             <tr>
               <th scope="col" class="px-6 py-3">User</th>
               <th scope="col" class="px-6 py-3">Role</th>
-              <th scope="col" class="px-6 py-3">Status</th>
               <th scope="col" class="px-6 py-3">Dolibarr ID</th>
               <th scope="col" class="px-6 py-3">Last Login</th>
               <th scope="col" class="px-6 py-3">Actions</th>
@@ -141,18 +138,10 @@
                 </td>
                 <td class="px-6 py-4">
                   <span [ngClass]="{
-                    'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300': user.isAdmin,
+                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300': user.isAdmin,
                     'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300': !user.isAdmin
                   }" class="px-2 py-1 text-xs font-medium rounded-full">
                     {{ user.isAdmin ? 'Admin' : 'User' }}
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <span [ngClass]="{
-                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300': user.isAuthorized,
-                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300': !user.isAuthorized
-                  }" class="px-2 py-1 text-xs font-medium rounded-full">
-                    {{ user.isAuthorized ? 'Active' : 'Inactive' }}
                   </span>
                 </td>
                 <td class="px-6 py-4">
@@ -175,7 +164,7 @@
                 </td>
               </tr>
               <tr *ngIf="expandedUserId === user.userId">
-                <td colspan="6" class="bg-gray-50 dark:bg-gray-800 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+                <td colspan="5" class="bg-gray-50 dark:bg-gray-800 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
                   <div class="user-details" [ngClass]="getUserAnimationClass(user.userId)">
                     <div class="bg-white dark:bg-gray-900 rounded-lg p-6 shadow-sm">
                       <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
@@ -234,16 +223,10 @@
                 </div>
                 <div class="flex flex-col items-end space-y-2">
                   <span [ngClass]="{
-                    'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300': user.isAdmin,
+                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300': user.isAdmin,
                     'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300': !user.isAdmin
                   }" class="px-2 py-1 text-xs font-medium rounded-full">
                     {{ user.isAdmin ? 'Admin' : 'User' }}
-                  </span>
-                  <span [ngClass]="{
-                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300': user.isAuthorized,
-                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300': !user.isAuthorized
-                  }" class="px-2 py-1 text-xs font-medium rounded-full">
-                    {{ user.isAuthorized ? 'Active' : 'Inactive' }}
                   </span>
                 </div>
               </div>
