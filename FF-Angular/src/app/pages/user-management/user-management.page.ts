@@ -71,6 +71,11 @@ export class UserManagementPage implements OnInit {
   searchTerm = '';
   selectedFilter = 'all';
 
+  // Expandable user details
+  expandedUserId: string | null = null;
+  animatingUsers = new Set<string>();
+  closingUsers = new Set<string>();
+
   // Loading state
   loading = false;
 
@@ -191,6 +196,64 @@ export class UserManagementPage implements OnInit {
       month: 'short',
       day: 'numeric'
     });
+  }
+
+  // Toggle expandable user details
+  toggleExpandUser(userId: string) {
+    if (this.expandedUserId === userId) {
+      // Collapsing - start closing animation
+      this.closingUsers.add(userId);
+      this.animatingUsers.add(userId);
+
+      setTimeout(() => {
+        this.expandedUserId = null;
+        this.animatingUsers.delete(userId);
+        this.closingUsers.delete(userId);
+      }, 300); // Match animation duration
+    } else {
+      // Expanding - close any other expanded user first
+      if (this.expandedUserId) {
+        const previousId = this.expandedUserId;
+        this.closingUsers.add(previousId);
+        this.animatingUsers.add(previousId);
+
+        setTimeout(() => {
+          this.animatingUsers.delete(previousId);
+          this.closingUsers.delete(previousId);
+        }, 300);
+      }
+
+      // Start expanding the new user
+      this.expandedUserId = userId;
+      this.animatingUsers.add(userId);
+      // Make sure it's not in the closing set
+      this.closingUsers.delete(userId);
+
+      setTimeout(() => {
+        this.animatingUsers.delete(userId);
+      }, 300);
+    }
+  }
+
+  // Helper methods for user animation states
+  isUserExpanded(id: string): boolean {
+    return this.expandedUserId === id;
+  }
+
+  isUserAnimating(id: string): boolean {
+    return this.animatingUsers.has(id);
+  }
+
+  getUserAnimationClass(id: string): string {
+    if (this.isUserAnimating(id)) {
+      // If the user is in the closing set, it should use the collapsed animation
+      if (this.closingUsers.has(id)) {
+        return 'collapsed';
+      }
+      // Otherwise, if it's expanded, use the expanded animation
+      return this.isUserExpanded(id) ? 'expanded' : 'collapsed';
+    }
+    return '';
   }
 
   editUser(user: User) {
