@@ -175,17 +175,25 @@ public class UserService {
         return userProfileService.getAuthorizedUserCount();
     }
 
+    // REMOVED: User self-management Dolibarr UID methods
+    // These methods have been removed for security reasons.
+    // Only administrators can now manage Dolibarr UIDs through admin-only service methods.
+
     /**
-     * Update user Dolibarr ID - Delegates to UserProfileService
+     * ADMIN-ONLY DOLIBARR UID MANAGEMENT
      */
-    public User updateDolibarrId(String firebaseUid, String dolibarrId) {
-        return userProfileService.updateDolibarrId(firebaseUid, dolibarrId);
+
+    /**
+     * Update user Dolibarr ID as admin - Delegates to UserProfileService with admin check
+     */
+    public User updateUserDolibarrIdAsAdmin(String adminFirebaseUid, String targetFirebaseUid, String dolibarrId) {
+        return userProfileService.updateUserDolibarrIdAsAdmin(adminFirebaseUid, targetFirebaseUid, dolibarrId);
     }
 
     /**
-     * Get user Dolibarr ID - Delegates to UserProfileService
+     * Get user Dolibarr ID as admin - Delegates to UserProfileService with admin check
      */
-    public String getDolibarrId(String firebaseUid) {
-        return userProfileService.getDolibarrId(firebaseUid);
+    public String getUserDolibarrIdAsAdmin(String adminFirebaseUid, String targetFirebaseUid) {
+        return userProfileService.getUserDolibarrIdAsAdmin(adminFirebaseUid, targetFirebaseUid);
     }
 } 

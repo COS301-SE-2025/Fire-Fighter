@@ -663,102 +663,99 @@ class UserControllerTest {
         verify(userService).verifyOrCreateUser(TEST_USER_ID, "", TEST_EMAIL, null);
     }
 
-    // Dolibarr ID Tests
+    // REMOVED: Old Dolibarr ID self-management tests
+    // These tests have been removed as the functionality is now admin-only
+
+    // Admin-Only Dolibarr ID Management Tests
 
     @Test
     @WithMockUser(username = TEST_USER_ID)
-    void updateDolibarrId_WithValidData_ShouldReturnUpdatedUser() throws Exception {
+    void updateUserDolibarrIdAsAdmin_WithValidData_ShouldReturnUpdatedUser() throws Exception {
+        String targetUserId = "target-user-123";
         String dolibarrId = "DOL123456";
         testUser.setDolibarrId(dolibarrId);
-        
-        when(userService.updateDolibarrId(TEST_USER_ID, dolibarrId))
+
+        when(userService.updateUserDolibarrIdAsAdmin(TEST_USER_ID, targetUserId, dolibarrId))
                 .thenReturn(testUser);
 
-        mockMvc.perform(put(BASE_URL + "/dolibarr-id")
+        mockMvc.perform(put(BASE_URL + "/" + targetUserId + "/admin/dolibarr-id")
                 .param("dolibarrId", dolibarrId)
                 .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.dolibarrId").value(dolibarrId));
 
-        verify(userService).updateDolibarrId(TEST_USER_ID, dolibarrId);
+        verify(userService).updateUserDolibarrIdAsAdmin(TEST_USER_ID, targetUserId, dolibarrId);
     }
 
     @Test
     @WithMockUser(username = TEST_USER_ID)
-    void updateDolibarrId_WithUserNotFound_ShouldReturnNotFound() throws Exception {
-        String dolibarrId = "DOL123456";
-        
-        when(userService.updateDolibarrId(TEST_USER_ID, dolibarrId))
-                .thenThrow(new RuntimeException("User not found with Firebase UID: " + TEST_USER_ID));
-
-        mockMvc.perform(put(BASE_URL + "/dolibarr-id")
-                .param("dolibarrId", dolibarrId)
-                .with(csrf()))
-                .andExpect(status().isNotFound());
-
-        verify(userService).updateDolibarrId(TEST_USER_ID, dolibarrId);
-    }
-
-    @Test
-    void updateDolibarrId_WithoutAuthentication_ShouldReturnUnauthorized() throws Exception {
+    void updateUserDolibarrIdAsAdmin_WithoutAdminPrivileges_ShouldReturnForbidden() throws Exception {
+        String targetUserId = "target-user-123";
         String dolibarrId = "DOL123456";
 
-        mockMvc.perform(put(BASE_URL + "/dolibarr-id")
+        when(userService.updateUserDolibarrIdAsAdmin(TEST_USER_ID, targetUserId, dolibarrId))
+                .thenThrow(new SecurityException("Administrator privileges required to manage Dolibarr UIDs"));
+
+        mockMvc.perform(put(BASE_URL + "/" + targetUserId + "/admin/dolibarr-id")
                 .param("dolibarrId", dolibarrId)
                 .with(csrf()))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
 
-        verify(userService, never()).updateDolibarrId(any(), any());
+        verify(userService).updateUserDolibarrIdAsAdmin(TEST_USER_ID, targetUserId, dolibarrId);
     }
 
     @Test
     @WithMockUser(username = TEST_USER_ID)
-    void getDolibarrId_WithValidUser_ShouldReturnDolibarrId() throws Exception {
+    void getUserDolibarrIdAsAdmin_WithValidData_ShouldReturnDolibarrId() throws Exception {
+        String targetUserId = "target-user-123";
         String dolibarrId = "DOL123456";
-        
-        when(userService.getDolibarrId(TEST_USER_ID))
+
+        when(userService.getUserDolibarrIdAsAdmin(TEST_USER_ID, targetUserId))
                 .thenReturn(dolibarrId);
 
-        mockMvc.perform(get(BASE_URL + "/dolibarr-id"))
+        mockMvc.perform(get(BASE_URL + "/" + targetUserId + "/admin/dolibarr-id"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.dolibarrId").value(dolibarrId))
-                .andExpect(jsonPath("$.firebaseUid").value(TEST_USER_ID));
+                .andExpect(jsonPath("$.firebaseUid").value(targetUserId));
 
-        verify(userService).getDolibarrId(TEST_USER_ID);
+        verify(userService).getUserDolibarrIdAsAdmin(TEST_USER_ID, targetUserId);
     }
 
     @Test
     @WithMockUser(username = TEST_USER_ID)
-    void getDolibarrId_WithNullDolibarrId_ShouldReturnEmptyString() throws Exception {
-        when(userService.getDolibarrId(TEST_USER_ID))
-                .thenReturn(null);
+    void getUserDolibarrIdAsAdmin_WithoutAdminPrivileges_ShouldReturnForbidden() throws Exception {
+        String targetUserId = "target-user-123";
 
-        mockMvc.perform(get(BASE_URL + "/dolibarr-id"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.dolibarrId").value(""))
-                .andExpect(jsonPath("$.firebaseUid").value(TEST_USER_ID));
+        when(userService.getUserDolibarrIdAsAdmin(TEST_USER_ID, targetUserId))
+                .thenThrow(new SecurityException("Administrator privileges required to access Dolibarr UIDs"));
 
-        verify(userService).getDolibarrId(TEST_USER_ID);
+        mockMvc.perform(get(BASE_URL + "/" + targetUserId + "/admin/dolibarr-id"))
+                .andExpect(status().isForbidden());
+
+        verify(userService).getUserDolibarrIdAsAdmin(TEST_USER_ID, targetUserId);
     }
 
     @Test
-    @WithMockUser(username = TEST_USER_ID)
-    void getDolibarrId_WithUserNotFound_ShouldReturnNotFound() throws Exception {
-        when(userService.getDolibarrId(TEST_USER_ID))
-                .thenThrow(new RuntimeException("User not found with Firebase UID: " + TEST_USER_ID));
+    void updateUserDolibarrIdAsAdmin_WithoutAuthentication_ShouldReturnUnauthorized() throws Exception {
+        String targetUserId = "target-user-123";
+        String dolibarrId = "DOL123456";
 
-        mockMvc.perform(get(BASE_URL + "/dolibarr-id"))
-                .andExpect(status().isNotFound());
-
-        verify(userService).getDolibarrId(TEST_USER_ID);
-    }
-
-    @Test
-    void getDolibarrId_WithoutAuthentication_ShouldReturnUnauthorized() throws Exception {
-        mockMvc.perform(get(BASE_URL + "/dolibarr-id"))
+        mockMvc.perform(put(BASE_URL + "/" + targetUserId + "/admin/dolibarr-id")
+                .param("dolibarrId", dolibarrId)
+                .with(csrf()))
                 .andExpect(status().isUnauthorized());
 
-        verify(userService, never()).getDolibarrId(any());
+        verify(userService, never()).updateUserDolibarrIdAsAdmin(any(), any(), any());
+    }
+
+    @Test
+    void getUserDolibarrIdAsAdmin_WithoutAuthentication_ShouldReturnUnauthorized() throws Exception {
+        String targetUserId = "target-user-123";
+
+        mockMvc.perform(get(BASE_URL + "/" + targetUserId + "/admin/dolibarr-id"))
+                .andExpect(status().isUnauthorized());
+
+        verify(userService, never()).getUserDolibarrIdAsAdmin(any(), any());
     }
 
 }

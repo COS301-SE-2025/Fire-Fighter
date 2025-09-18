@@ -8,7 +8,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -180,6 +179,125 @@ public class UserController {
     }
 
     /**
+     * ADMIN-ONLY DOLIBARR UID MANAGEMENT
+     */
+
+    /**
+     * UPDATE USER DOLIBARR ID (ADMIN ONLY)
+     * PUT /api/users/{firebaseUid}/admin/dolibarr-id
+     * Admin endpoint to update another user's Dolibarr ID
+     */
+    @Operation(summary = "Update user Dolibarr ID (Admin Only)",
+               description = "Updates the Dolibarr ID for a specified user. Requires admin privileges.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Dolibarr ID updated successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid Dolibarr ID format"),
+        @ApiResponse(responseCode = "401", description = "User not authenticated"),
+        @ApiResponse(responseCode = "403", description = "Admin privileges required"),
+        @ApiResponse(responseCode = "404", description = "User not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PutMapping("/{firebaseUid}/admin/dolibarr-id")
+    public ResponseEntity<User> updateUserDolibarrId(
+            @Parameter(description = "Firebase UID of the user to update") @PathVariable String firebaseUid,
+            @Parameter(description = "Dolibarr ID") @RequestParam String dolibarrId) {
+
+        try {
+            // Get current user from JWT authentication
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                System.err.println("❌ ADMIN DOLIBARR ID UPDATE: User not authenticated");
+                return ResponseEntity.status(401).build();
+            }
+
+            String adminFirebaseUid = authentication.getName();
+            System.out.println("🔵 ADMIN UPDATE DOLIBARR ID REQUEST:");
+            System.out.println("  Admin Firebase UID: " + adminFirebaseUid);
+            System.out.println("  Target Firebase UID: " + firebaseUid);
+            System.out.println("  Dolibarr ID: " + dolibarrId);
+
+            // Basic validation for Dolibarr ID
+            if (dolibarrId != null && !dolibarrId.trim().isEmpty()) {
+                dolibarrId = dolibarrId.trim();
+            }
+
+            User updatedUser = userService.updateUserDolibarrIdAsAdmin(adminFirebaseUid, firebaseUid, dolibarrId);
+
+            System.out.println("✅ ADMIN DOLIBARR ID UPDATE SUCCESS: " + updatedUser.getDolibarrId());
+            return ResponseEntity.ok(updatedUser);
+        } catch (SecurityException e) {
+            System.err.println("❌ ADMIN DOLIBARR ID UPDATE FAILED: " + e.getMessage());
+            return ResponseEntity.status(403).build();
+        } catch (RuntimeException e) {
+            System.err.println("❌ ADMIN DOLIBARR ID UPDATE FAILED:");
+            System.err.println("  Error Type: " + e.getClass().getSimpleName());
+            System.err.println("  Error Message: " + e.getMessage());
+
+            if (e.getMessage().contains("not found")) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    /**
+     * GET USER DOLIBARR ID (ADMIN ONLY)
+     * GET /api/users/{firebaseUid}/admin/dolibarr-id
+     * Admin endpoint to get another user's Dolibarr ID
+     */
+    @Operation(summary = "Get user Dolibarr ID (Admin Only)",
+               description = "Retrieves the Dolibarr ID for a specified user. Requires admin privileges.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Dolibarr ID retrieved successfully"),
+        @ApiResponse(responseCode = "401", description = "User not authenticated"),
+        @ApiResponse(responseCode = "403", description = "Admin privileges required"),
+        @ApiResponse(responseCode = "404", description = "User not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @GetMapping("/{firebaseUid}/admin/dolibarr-id")
+    public ResponseEntity<Map<String, String>> getUserDolibarrId(
+            @Parameter(description = "Firebase UID of the user") @PathVariable String firebaseUid) {
+
+        try {
+            // Get current user from JWT authentication
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                System.err.println("❌ ADMIN DOLIBARR ID GET: User not authenticated");
+                return ResponseEntity.status(401).build();
+            }
+
+            String adminFirebaseUid = authentication.getName();
+            System.out.println("🔵 ADMIN GET DOLIBARR ID REQUEST:");
+            System.out.println("  Admin Firebase UID: " + adminFirebaseUid);
+            System.out.println("  Target Firebase UID: " + firebaseUid);
+
+            String dolibarrId = userService.getUserDolibarrIdAsAdmin(adminFirebaseUid, firebaseUid);
+
+            Map<String, String> response = Map.of(
+                "dolibarrId", dolibarrId != null ? dolibarrId : "",
+                "firebaseUid", firebaseUid
+            );
+
+            System.out.println("✅ ADMIN DOLIBARR ID GET SUCCESS: " + dolibarrId);
+            return ResponseEntity.ok(response);
+        } catch (SecurityException e) {
+            System.err.println("❌ ADMIN DOLIBARR ID GET FAILED: " + e.getMessage());
+            return ResponseEntity.status(403).build();
+        } catch (RuntimeException e) {
+            System.err.println("❌ ADMIN DOLIBARR ID GET FAILED:");
+            System.err.println("  Error Type: " + e.getClass().getSimpleName());
+            System.err.println("  Error Message: " + e.getMessage());
+
+            if (e.getMessage().contains("not found")) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    /**
      * UPDATE CONTACT NUMBER
      * PUT /api/users/{firebaseUid}/contact
      * Update user's contact number
@@ -224,110 +342,9 @@ public class UserController {
         } 
     }
 
-    /**
-     * UPDATE DOLIBARR ID
-     * PUT /api/users/dolibarr-id
-     * Update current user's Dolibarr ID (authenticated endpoint)
-     */
-    @Operation(summary = "Update user Dolibarr ID",
-               description = "Updates the Dolibarr ID for the authenticated user")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Dolibarr ID updated successfully"),
-        @ApiResponse(responseCode = "400", description = "Invalid Dolibarr ID format"),
-        @ApiResponse(responseCode = "401", description = "User not authenticated"),
-        @ApiResponse(responseCode = "404", description = "User not found"),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    @SecurityRequirement(name = "bearerAuth")
-    @PutMapping("/dolibarr-id")
-    public ResponseEntity<User> updateDolibarrId(
-            @Parameter(description = "Dolibarr ID") @RequestParam String dolibarrId,
-            HttpServletRequest request) {
-
-        try {
-            // Get current user from JWT authentication
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated()) {
-                System.err.println("❌ DOLIBARR ID UPDATE: User not authenticated");
-                return ResponseEntity.status(401).build();
-            }
-
-            String firebaseUid = authentication.getName();
-            System.out.println("🔵 UPDATE DOLIBARR ID REQUEST:");
-            System.out.println("  Firebase UID: " + firebaseUid);
-            System.out.println("  Dolibarr ID: " + dolibarrId);
-
-            // Basic validation for Dolibarr ID
-            if (dolibarrId != null && !dolibarrId.trim().isEmpty()) {
-                dolibarrId = dolibarrId.trim();
-                // Optional: Add more validation logic here (e.g., numeric check, length validation)
-            }
-
-            User updatedUser = userService.updateDolibarrId(firebaseUid, dolibarrId);
-
-            System.out.println("✅ DOLIBARR ID UPDATE SUCCESS: " + updatedUser.getDolibarrId());
-            return ResponseEntity.ok(updatedUser);
-        } catch (RuntimeException e) {
-            System.err.println("❌ DOLIBARR ID UPDATE FAILED:");
-            System.err.println("  Error Type: " + e.getClass().getSimpleName());
-            System.err.println("  Error Message: " + e.getMessage());
-
-            if (e.getMessage().contains("not found")) {
-                return ResponseEntity.notFound().build();
-            }
-            return ResponseEntity.status(500).build();
-        } 
-    }
-
-    /**
-     * GET DOLIBARR ID
-     * GET /api/users/dolibarr-id
-     * Get current user's Dolibarr ID (authenticated endpoint)
-     */
-    @Operation(summary = "Get user Dolibarr ID",
-               description = "Retrieves the Dolibarr ID for the authenticated user")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Dolibarr ID retrieved successfully"),
-        @ApiResponse(responseCode = "401", description = "User not authenticated"),
-        @ApiResponse(responseCode = "404", description = "User not found"),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    @SecurityRequirement(name = "bearerAuth")
-    @GetMapping("/dolibarr-id")
-    public ResponseEntity<Map<String, String>> getDolibarrId(HttpServletRequest request) {
-
-        try {
-            // Get current user from JWT authentication
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated()) {
-                System.err.println("❌ DOLIBARR ID GET: User not authenticated");
-                return ResponseEntity.status(401).build();
-            }
-
-            String firebaseUid = authentication.getName();
-            System.out.println("🔵 GET DOLIBARR ID REQUEST:");
-            System.out.println("  Firebase UID: " + firebaseUid);
-
-            String dolibarrId = userService.getDolibarrId(firebaseUid);
-
-            Map<String, String> response = Map.of(
-                "dolibarrId", dolibarrId != null ? dolibarrId : "",
-                "firebaseUid", firebaseUid
-            );
-
-            System.out.println("✅ DOLIBARR ID GET SUCCESS: " + dolibarrId);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            System.err.println("❌ DOLIBARR ID GET FAILED:");
-            System.err.println("  Error Type: " + e.getClass().getSimpleName());
-            System.err.println("  Error Message: " + e.getMessage());
-
-            if (e.getMessage().contains("not found")) {
-                return ResponseEntity.notFound().build();
-            }
-            return ResponseEntity.status(500).build();
-        } 
-    }
+    // REMOVED: User self-management Dolibarr UID endpoints
+    // These endpoints have been removed for security reasons.
+    // Only administrators can now manage Dolibarr UIDs through admin endpoints.
 
     /**
      * QUERY ENDPOINTS
