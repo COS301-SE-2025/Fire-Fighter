@@ -75,5 +75,9 @@ export const routes: Routes = [
   {
     path: '**',
     redirectTo: 'landing'
+  },  {
+    path: 'user-management',
+    loadComponent: () => import('./pages/user-management/user-management.page').then( m => m.UserManagementPage)
   }
+
 ];
