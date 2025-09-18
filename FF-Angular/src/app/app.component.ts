@@ -5,6 +5,7 @@ import { HealthService } from './services/health.service';
 import { HealthMonitorService } from './services/health-monitor.service';
 import { AppLoadingService } from './services/app-loading.service';
 import { LanguageService } from './services/language.service';
+import { TokenMonitoringService } from './services/token-monitoring.service';
 import { AppLoadingScreenComponent } from './components/app-loading-screen/app-loading-screen.component';
 import { Capacitor } from '@capacitor/core';
 import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
@@ -24,7 +25,8 @@ export class AppComponent implements OnInit {
     private healthService: HealthService,
     private healthMonitorService: HealthMonitorService,
     private appLoadingService: AppLoadingService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private tokenMonitoringService: TokenMonitoringService
   ) {}
 
   ngOnInit() {
@@ -40,9 +42,17 @@ export class AppComponent implements OnInit {
     this.appLoadingService.initializeApp().then(() => {
       this.healthService.startMonitoring();
       this.healthMonitorService.startMonitoring();
+      
+      // Start token monitoring after app initialization
+      console.log('🚀 APP: Starting token monitoring service');
+      this.tokenMonitoringService.startMonitoring();
     }).catch(() => {
       this.healthService.startMonitoring();
       this.healthMonitorService.startMonitoring();
+      
+      // Start token monitoring even if app initialization fails
+      console.log('🚀 APP: Starting token monitoring service (fallback)');
+      this.tokenMonitoringService.startMonitoring();
     });
   }
 
