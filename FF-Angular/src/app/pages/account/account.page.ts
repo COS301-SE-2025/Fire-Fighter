@@ -62,11 +62,7 @@ export class AccountPage implements OnInit, OnDestroy {
   isUpdatingContact = false;
   contactModalAnimationState = 'hidden';
 
-  // Dolibarr ID management
-  isDolibarrIdEditOpen = false;
-  editingDolibarrId = '';
-  isUpdatingDolibarrId = false;
-  dolibarrModalAnimationState = 'hidden';
+
 
   constructor(
     private authService: AuthService,
@@ -290,83 +286,5 @@ export class AccountPage implements OnInit, OnDestroy {
     await toast.present();
   }
 
-  // Dolibarr ID management methods
-  toggleDolibarrIdEdit() {
-    this.isDolibarrIdEditOpen = true;
-    this.editingDolibarrId = this.userProfile?.dolibarrId || '';
-    // Trigger animation
-    setTimeout(() => {
-      this.dolibarrModalAnimationState = 'visible';
-    }, 10);
-  }
 
-  cancelDolibarrIdEdit() {
-    this.dolibarrModalAnimationState = 'hidden';
-    // Wait for animation to complete before hiding modal
-    setTimeout(() => {
-      this.isDolibarrIdEditOpen = false;
-      this.editingDolibarrId = '';
-    }, 150);
-  }
-
-  // Dolibarr ID validation
-  isValidDolibarrId(): boolean {
-    const dolibarrId = this.editingDolibarrId.trim();
-    // Allow empty string or any alphanumeric string (adjust validation as needed)
-    return dolibarrId === '' || /^[a-zA-Z0-9_-]+$/.test(dolibarrId);
-  }
-
-  // Handle input to allow alphanumeric characters
-  onDolibarrIdInput(event: any) {
-    const input = event.target;
-    const value = input.value;
-
-    // Allow alphanumeric, underscores, and hyphens
-    const cleanValue = value.replace(/[^a-zA-Z0-9_-]/g, '');
-
-    // Update the model and input value
-    this.editingDolibarrId = cleanValue;
-    input.value = cleanValue;
-  }
-
-  async saveDolibarrId() {
-    // Validate Dolibarr ID
-    if (!this.isValidDolibarrId()) {
-      await this.presentToast('Please enter a valid Dolibarr ID (alphanumeric characters only).', 'warning');
-      return;
-    }
-
-    this.isUpdatingDolibarrId = true;
-
-    try {
-      const response = await this.authService.updateDolibarrId(this.editingDolibarrId.trim()).toPromise();
-
-      if (response) {
-        // Update local profile
-        if (this.userProfile) {
-          this.userProfile.dolibarrId = this.editingDolibarrId.trim();
-        }
-
-        // Close the modal with animation
-        this.dolibarrModalAnimationState = 'hidden';
-        setTimeout(() => {
-          this.isDolibarrIdEditOpen = false;
-          this.editingDolibarrId = '';
-        }, 150);
-
-        await this.presentToast('Dolibarr ID updated successfully!', 'success');
-      }
-    } catch (error: any) {
-      console.error('Failed to update Dolibarr ID:', error);
-
-      let errorMessage = 'Failed to update Dolibarr ID. Please try again.';
-      if (error.message === 'Service temporarily unavailable') {
-        errorMessage = 'Service is temporarily unavailable. Please try again later.';
-      }
-
-      await this.presentToast(errorMessage, 'danger');
-    } finally {
-      this.isUpdatingDolibarrId = false;
-    }
-  }
 }

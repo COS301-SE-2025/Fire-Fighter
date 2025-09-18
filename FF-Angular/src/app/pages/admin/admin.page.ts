@@ -824,6 +824,11 @@ export class AdminPage implements OnInit {
     this.router.navigate(['/metrics']);
   }
 
+  navigateToManageUsers() {
+    console.log('Navigate to manage users page');
+    this.router.navigate(['/user-management']);
+  }
+
   ngOnInit() {
     console.log('AdminPage initialized');
     
