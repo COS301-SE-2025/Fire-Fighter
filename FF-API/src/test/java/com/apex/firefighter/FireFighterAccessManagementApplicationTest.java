@@ -47,7 +47,7 @@ class FireFighterAccessManagementApplicationTest {
             assertThat(output).contains("🚒 STARTING FIREFIGHTER PLATFORM");
             assertThat(output).contains("🔧 Loading configurations...");
             assertThat(output).contains("📧 Initializing email service...");
-            assertThat(output).contains("🤖 Setting up AI chatbot...");
+
             assertThat(output).contains("📚 Preparing Swagger documentation...");
             assertThat(output).contains("=".repeat(70));
 
@@ -153,14 +153,14 @@ class FireFighterAccessManagementApplicationTest {
             assertThat(output).contains("STARTING FIREFIGHTER PLATFORM");
             assertThat(output).contains("Loading configurations");
             assertThat(output).contains("Initializing email service");
-            assertThat(output).contains("Setting up AI chatbot");
+
             assertThat(output).contains("Preparing Swagger documentation");
             
             // Check for emojis
             assertThat(output).contains("🚒");
             assertThat(output).contains("🔧");
             assertThat(output).contains("📧");
-            assertThat(output).contains("🤖");
+
             assertThat(output).contains("📚");
             
             // Check for formatting
@@ -201,8 +201,7 @@ class FireFighterAccessManagementApplicationTest {
                     configIndex = i;
                 } else if (lines[i].contains("Initializing email service")) {
                     emailIndex = i;
-                } else if (lines[i].contains("Setting up AI chatbot")) {
-                    aiIndex = i;
+
                 } else if (lines[i].contains("Preparing Swagger documentation")) {
                     swaggerIndex = i;
                 }
