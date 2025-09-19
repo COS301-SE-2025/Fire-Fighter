@@ -1,0 +1,218 @@
+package com.apex.firefighter.service.nlp;
+
+import com.apex.firefighter.model.Ticket;
+import com.apex.firefighter.service.ticket.TicketService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Service responsible for processing natural language queries and converting them
+ * into database operations and business logic execution.
+ */
+@Service
+public class QueryProcessingService {
+
+    @Autowired
+    private TicketService ticketService;
+
+    /**
+     * Process a query based on recognized intent and extracted entities
+     * 
+     * @param intent The recognized intent from the query
+     * @param entities The extracted entities from the query
+     * @param userId The user making the query
+     * @param isAdmin Whether the user has admin privileges
+     * @return QueryResult containing the processed data and metadata
+     */
+    public QueryResult processQuery(IntentRecognitionService.Intent intent, 
+                                   EntityExtractionService.ExtractedEntities entities, 
+                                   String userId, 
+                                   boolean isAdmin) {
+        // TODO: Implement query processing logic
+        return null;
+    }
+
+    /**
+     * Execute a ticket query operation
+     * 
+     * @param queryType The type of ticket query to execute
+     * @param filters The filters to apply to the query
+     * @param userId The user making the query
+     * @param isAdmin Whether the user has admin privileges
+     * @return QueryResult containing the ticket data
+     */
+    public QueryResult executeTicketQuery(TicketQueryType queryType, 
+                                         Map<String, Object> filters, 
+                                         String userId, 
+                                         boolean isAdmin) {
+        // TODO: Implement ticket query execution logic
+        return null;
+    }
+
+    /**
+     * Execute a ticket management operation
+     * 
+     * @param operation The management operation to execute
+     * @param parameters The parameters for the operation
+     * @param userId The user performing the operation
+     * @param isAdmin Whether the user has admin privileges
+     * @return QueryResult containing the operation result
+     */
+    public QueryResult executeTicketOperation(TicketOperation operation, 
+                                             Map<String, Object> parameters, 
+                                             String userId, 
+                                             boolean isAdmin) {
+        // TODO: Implement ticket operation execution logic
+        return null;
+    }
+
+    /**
+     * Build query filters from extracted entities
+     * 
+     * @param entities The extracted entities
+     * @return Map of filter criteria
+     */
+    public Map<String, Object> buildQueryFilters(EntityExtractionService.ExtractedEntities entities) {
+        // TODO: Implement filter building logic
+        return null;
+    }
+
+    /**
+     * Validate if a user can perform a specific operation
+     * 
+     * @param operation The operation to validate
+     * @param userId The user attempting the operation
+     * @param isAdmin Whether the user has admin privileges
+     * @return true if operation is allowed, false otherwise
+     */
+    public boolean validateUserOperation(TicketOperation operation, String userId, boolean isAdmin) {
+        // TODO: Implement operation validation logic
+        return false;
+    }
+
+    /**
+     * Result of query processing
+     */
+    public static class QueryResult {
+        private boolean success;
+        private String message;
+        private Object data;
+        private QueryResultType resultType;
+        private int recordCount;
+        private Map<String, Object> metadata;
+        private List<String> errors;
+        private List<String> warnings;
+
+        public QueryResult() {}
+
+        public QueryResult(boolean success, String message) {
+            this.success = success;
+            this.message = message;
+        }
+
+        public QueryResult(boolean success, String message, Object data, QueryResultType resultType) {
+            this.success = success;
+            this.message = message;
+            this.data = data;
+            this.resultType = resultType;
+        }
+
+        // Getters and setters
+        public boolean isSuccess() { return success; }
+        public void setSuccess(boolean success) { this.success = success; }
+        
+        public String getMessage() { return message; }
+        public void setMessage(String message) { this.message = message; }
+        
+        public Object getData() { return data; }
+        public void setData(Object data) { this.data = data; }
+        
+        public QueryResultType getResultType() { return resultType; }
+        public void setResultType(QueryResultType resultType) { this.resultType = resultType; }
+        
+        public int getRecordCount() { return recordCount; }
+        public void setRecordCount(int recordCount) { this.recordCount = recordCount; }
+        
+        public Map<String, Object> getMetadata() { return metadata; }
+        public void setMetadata(Map<String, Object> metadata) { this.metadata = metadata; }
+        
+        public List<String> getErrors() { return errors; }
+        public void setErrors(List<String> errors) { this.errors = errors; }
+        
+        public List<String> getWarnings() { return warnings; }
+        public void setWarnings(List<String> warnings) { this.warnings = warnings; }
+    }
+
+    /**
+     * Types of ticket queries that can be executed
+     */
+    public enum TicketQueryType {
+        USER_TICKETS("user_tickets", "Get tickets for a specific user"),
+        ACTIVE_TICKETS("active_tickets", "Get all active tickets"),
+        COMPLETED_TICKETS("completed_tickets", "Get completed tickets"),
+        SEARCH_TICKETS("search_tickets", "Search tickets by criteria"),
+        TICKET_DETAILS("ticket_details", "Get details of specific ticket"),
+        SYSTEM_STATS("system_stats", "Get system statistics"),
+        EXPORT_DATA("export_data", "Export ticket data");
+
+        private final String code;
+        private final String description;
+
+        TicketQueryType(String code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        public String getCode() { return code; }
+        public String getDescription() { return description; }
+    }
+
+    /**
+     * Types of ticket operations that can be executed
+     */
+    public enum TicketOperation {
+        UPDATE_STATUS("update_status", "Update ticket status"),
+        ASSIGN_TICKET("assign_ticket", "Assign ticket to user"),
+        CREATE_TICKET("create_ticket", "Create new ticket"),
+        CLOSE_TICKET("close_ticket", "Close existing ticket"),
+        ADD_COMMENT("add_comment", "Add comment to ticket"),
+        UPDATE_PRIORITY("update_priority", "Update ticket priority");
+
+        private final String code;
+        private final String description;
+
+        TicketOperation(String code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        public String getCode() { return code; }
+        public String getDescription() { return description; }
+    }
+
+    /**
+     * Types of query results
+     */
+    public enum QueryResultType {
+        TICKET_LIST("ticket_list", "List of tickets"),
+        TICKET_DETAILS("ticket_details", "Single ticket details"),
+        OPERATION_RESULT("operation_result", "Result of an operation"),
+        STATISTICS("statistics", "Statistical data"),
+        ERROR("error", "Error result"),
+        HELP("help", "Help information");
+
+        private final String code;
+        private final String description;
+
+        QueryResultType(String code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        public String getCode() { return code; }
+        public String getDescription() { return description; }
+    }
+}
