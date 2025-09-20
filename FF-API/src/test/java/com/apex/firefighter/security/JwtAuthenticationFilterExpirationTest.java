@@ -56,9 +56,6 @@ class JwtAuthenticationFilterExpirationTest {
         when(request.getRequestURI()).thenReturn("/api/test");
         
         when(jwtService.isCustomJwt(expiredToken)).thenReturn(true);
-        when(jwtService.extractFirebaseUid(expiredToken)).thenReturn("user123");
-        when(jwtService.extractIsAdmin(expiredToken)).thenReturn(false);
-        when(jwtService.validateToken(expiredToken, "user123")).thenReturn(false);
         when(jwtService.isTokenExpired(expiredToken)).thenReturn(true);
 
         StringWriter stringWriter = new StringWriter();
@@ -122,8 +119,7 @@ class JwtAuthenticationFilterExpirationTest {
         when(request.getRequestURI()).thenReturn("/api/test");
         
         when(jwtService.isCustomJwt(expiredToken)).thenReturn(true);
-        when(jwtService.extractFirebaseUid(expiredToken))
-            .thenThrow(new RuntimeException("Token expired"));
+        when(jwtService.isTokenExpired(expiredToken)).thenReturn(true);
 
         StringWriter stringWriter = new StringWriter();
         when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
