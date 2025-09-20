@@ -308,9 +308,51 @@
   },
   "NOTIFICATIONS": {
     "TITLE": "Benachrichtigungen",
-    "MARK_ALL_READ": "Alle als gelesen markieren",
-    "NO_NOTIFICATIONS": "Keine Benachrichtigungen",
-    "CLEAR_ALL": "Alle löschen"
+    "SUBTITLE": "Bleiben Sie über die Aktivitäten des FireFighter-Notfallsystems informiert",
+    "LOADING": "Laden...",
+    "PULL_TO_REFRESH": "Laden...",
+    "STATS": {
+      "TOTAL": "Gesamt",
+      "UNREAD": "Ungelesen",
+      "EMERGENCY": "Notfall"
+    },
+    "ACTIONS": {
+      "MARK_ALL_READ": "Als gelesen markieren",
+      "CLEAR_READ": "Gelesene löschen"
+    },
+    "LIST": {
+      "HEADER": "Letzte Aktivitäten",
+      "COUNT_SINGLE": "Benachrichtigung",
+      "COUNT_PLURAL": "Benachrichtigungen"
+    },
+    "EMPTY_STATE": {
+      "TITLE": "Keine Benachrichtigungen",
+      "MESSAGE": "Sie sind auf dem neuesten Stand! Neue Benachrichtigungen werden hier angezeigt."
+    },
+    "ITEM": {
+      "VIEW_DETAILS": "Details anzeigen →",
+      "MARK_AS_READ": "Als gelesen markieren",
+      "DELETE_TOOLTIP": "Benachrichtigung löschen"
+    },
+    "TIME_AGO": {
+      "JUST_NOW": "gerade eben",
+      "MINUTE_SINGULAR": "vor einer Minute",
+      "MINUTE_PLURAL": "vor {{count}} Minuten",
+      "HOUR_SINGULAR": "vor einer Stunde",
+      "HOUR_PLURAL": "vor {{count}} Stunden",
+      "DAY_SINGULAR": "vor einem Tag",
+      "DAY_PLURAL": "vor {{count}} Tagen"
+    },
+    "DELETE_MODAL": {
+      "TITLE_SINGLE": "Benachrichtigung löschen",
+      "TITLE_MULTIPLE": "Gelesene Benachrichtigungen löschen",
+      "MESSAGE_SINGLE": "Sind Sie sicher, dass Sie diese Benachrichtigung löschen möchten?",
+      "MESSAGE_MULTIPLE": "Sind Sie sicher, dass Sie alle gelesenen Benachrichtigungen löschen möchten?",
+      "WARNING": "Diese Aktion kann nicht rückgängig gemacht werden.",
+      "CANCEL": "Abbrechen",
+      "CONFIRM": "Bestätigen",
+      "DELETING": "Wird gelöscht..."
+    }
   },
   "ACCOUNT": {
     "TITLE": "Konto",
