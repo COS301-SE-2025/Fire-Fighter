@@ -60,4 +60,28 @@ public class AnomalyDetectionService {
 
     }
 
+    public String getRequestFrequencyDetails(String userID){
+
+        LocalDateTime oneHourAgo = LocalDateTime.now().minusHours(1);
+        LocalDateTime oneDayAgo = LocalDateTime.nmow().minusDays(1);
+
+        long requestsLastHour = ticketRepository.countTicketsByUserSince(userID, oneHourAgo);
+        long requestsLastDay = ticketRepository.countTicketsByUserSince(userID, oneDayAgo);
+
+        if(requestsLastHour >= MAX_REQUESTS_PER_HOUR){
+
+            return String.format("User has made %d requests in the last hour (threshold: %d)", requestsLastHour, MAX_REQUESTS_PER_HOUR);
+
+        }
+
+        if(requestsLastDay >= MAX_REQUESTS_PER_DAY){
+
+            return String.format("User has made %d requests in the last 24 hours (threshold: %d)", requestsLastDay, MAX_REQUESTS_PER_DAY);
+
+        }
+
+        return null;
+
+    }
+
 }
