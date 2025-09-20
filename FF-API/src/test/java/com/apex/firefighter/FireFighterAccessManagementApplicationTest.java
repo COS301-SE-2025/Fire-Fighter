@@ -47,7 +47,6 @@ class FireFighterAccessManagementApplicationTest {
             assertThat(output).contains("🚒 STARTING FIREFIGHTER PLATFORM");
             assertThat(output).contains("🔧 Loading configurations...");
             assertThat(output).contains("📧 Initializing email service...");
-            assertThat(output).contains("🤖 Setting up AI chatbot...");
             assertThat(output).contains("📚 Preparing Swagger documentation...");
             assertThat(output).contains("=".repeat(70));
 
@@ -153,14 +152,12 @@ class FireFighterAccessManagementApplicationTest {
             assertThat(output).contains("STARTING FIREFIGHTER PLATFORM");
             assertThat(output).contains("Loading configurations");
             assertThat(output).contains("Initializing email service");
-            assertThat(output).contains("Setting up AI chatbot");
             assertThat(output).contains("Preparing Swagger documentation");
             
             // Check for emojis
             assertThat(output).contains("🚒");
             assertThat(output).contains("🔧");
             assertThat(output).contains("📧");
-            assertThat(output).contains("🤖");
             assertThat(output).contains("📚");
             
             // Check for formatting
@@ -191,7 +188,6 @@ class FireFighterAccessManagementApplicationTest {
             int platformIndex = -1;
             int configIndex = -1;
             int emailIndex = -1;
-            int aiIndex = -1;
             int swaggerIndex = -1;
             
             for (int i = 0; i < lines.length; i++) {
@@ -201,8 +197,6 @@ class FireFighterAccessManagementApplicationTest {
                     configIndex = i;
                 } else if (lines[i].contains("Initializing email service")) {
                     emailIndex = i;
-                } else if (lines[i].contains("Setting up AI chatbot")) {
-                    aiIndex = i;
                 } else if (lines[i].contains("Preparing Swagger documentation")) {
                     swaggerIndex = i;
                 }
@@ -212,8 +206,7 @@ class FireFighterAccessManagementApplicationTest {
             assertThat(platformIndex).isGreaterThan(-1);
             assertThat(configIndex).isGreaterThan(platformIndex);
             assertThat(emailIndex).isGreaterThan(configIndex);
-            assertThat(aiIndex).isGreaterThan(emailIndex);
-            assertThat(swaggerIndex).isGreaterThan(aiIndex);
+            assertThat(swaggerIndex).isGreaterThan(emailIndex);
         } finally {
             // Restore original System.out
             System.setOut(originalOut);
