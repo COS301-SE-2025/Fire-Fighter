@@ -7,8 +7,8 @@
         
         <!-- Page Header -->
         <div class="mb-8">
-          <h1 class="text-3xl font-sans font-bold text-gray-900 dark:text-white">Account Settings</h1>
-          <p class="mt-2 text-gray-600 dark:text-gray-400">Manage your FireFighter emergency access profile and preferences</p>
+          <h1 class="text-3xl font-sans font-bold text-gray-900 dark:text-white">{{ 'ACCOUNT.TITLE' | translate }}</h1>
+          <p class="mt-2 text-gray-600 dark:text-gray-400">{{ 'ACCOUNT.SUBTITLE' | translate }}</p>
         </div>
 
         <!-- Profile Overview Card -->
@@ -51,7 +51,7 @@
                       <path *ngIf="getUserRole() === 'Administrator'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
                       <path *ngIf="getUserRole() === 'User'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
-                    {{ getUserRole() }}
+                    {{ getTranslatedRole() }}
                   </span>
                 </div>
                 
@@ -64,7 +64,7 @@
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    Verified
+                    {{ 'ACCOUNT.PROFILE.VERIFIED' | translate }}
                   </span>
                 </div>
 
@@ -75,13 +75,13 @@
                   </svg>
                   <span class="truncate" *ngIf="userProfile?.contactNumber; else noContactNumber">{{ userProfile.contactNumber }}</span>
                   <ng-template #noContactNumber>
-                    <span class="text-gray-400 dark:text-gray-500 italic">No contact number added</span>
+                    <span class="text-gray-400 dark:text-gray-500 italic">{{ 'ACCOUNT.CONTACT.NO_CONTACT_NUMBER' | translate }}</span>
                   </ng-template>
                   <button
                     (click)="toggleContactNumberEdit()"
                     class="ml-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-xs font-medium"
                   >
-                    {{ userProfile?.contactNumber ? 'Edit' : 'Add' }}
+                    {{ userProfile?.contactNumber ? ('ACCOUNT.CONTACT.EDIT' | translate) : ('ACCOUNT.CONTACT.ADD' | translate) }}
                   </button>
                 </div>
 
@@ -90,13 +90,13 @@
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 0h6a2 2 0 012 2v10a2 2 0 01-2 2H8a2 2 0 01-2-2V9a2 2 0 012-2z"></path>
                     </svg>
-                    Member since {{ getJoinDate(user) }}
+                    {{ 'ACCOUNT.PROFILE.MEMBER_SINCE' | translate }} {{ getJoinDate(user) }}
                   </div>
                   <div class="flex items-center">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    Last active {{ getLastSignIn(user) }}
+                    {{ 'ACCOUNT.PROFILE.LAST_ACTIVE' | translate }} {{ getLastSignIn(user) }}
                   </div>
                 </div>
               </div>
@@ -114,7 +114,7 @@
                 <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                 </svg>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Security Information</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ 'ACCOUNT.SECURITY.TITLE' | translate }}</h3>
               </div>
             </div>
             <div class="p-4 space-y-4">
@@ -126,12 +126,12 @@
                     </svg>
                   </div>
                   <div>
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">Email Verification</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Your email address is verified</p>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ 'ACCOUNT.SECURITY.EMAIL_VERIFICATION.TITLE' | translate }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ 'ACCOUNT.SECURITY.EMAIL_VERIFICATION.DESCRIPTION' | translate }}</p>
                   </div>
                 </div>
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
-                  Verified
+                  {{ 'ACCOUNT.SECURITY.EMAIL_VERIFICATION.STATUS' | translate }}
                 </span>
               </div>
               
@@ -143,12 +143,12 @@
                     </svg>
                   </div>
                   <div>
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">Account Security</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Strong password protection</p>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ 'ACCOUNT.SECURITY.ACCOUNT_SECURITY.TITLE' | translate }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ 'ACCOUNT.SECURITY.ACCOUNT_SECURITY.DESCRIPTION' | translate }}</p>
                   </div>
                 </div>
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
-                  Secure
+                  {{ 'ACCOUNT.SECURITY.ACCOUNT_SECURITY.STATUS' | translate }}
                 </span>
               </div>
 
@@ -160,12 +160,12 @@
                     </svg>
                   </div>
                   <div>
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">Emergency Access</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">FireFighter privileges enabled</p>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ 'ACCOUNT.SECURITY.EMERGENCY_ACCESS.TITLE' | translate }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ 'ACCOUNT.SECURITY.EMERGENCY_ACCESS.DESCRIPTION' | translate }}</p>
                   </div>
                 </div>
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300">
-                  Active
+                  {{ 'ACCOUNT.SECURITY.EMERGENCY_ACCESS.STATUS' | translate }}
                 </span>
               </div>
             </div>
@@ -178,7 +178,7 @@
                 <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                 </svg>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Quick Actions</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ 'ACCOUNT.QUICK_ACTIONS.TITLE' | translate }}</h3>
               </div>
             </div>
             <div class="p-4 space-y-3">
@@ -193,8 +193,8 @@
                     </svg>
                   </div>
                   <div>
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">Go to Dashboard</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">View emergency requests and system status</p>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ 'ACCOUNT.QUICK_ACTIONS.DASHBOARD.TITLE' | translate }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ 'ACCOUNT.QUICK_ACTIONS.DASHBOARD.DESCRIPTION' | translate }}</p>
                   </div>
                 </div>
               </button>
@@ -208,8 +208,8 @@
                       </svg>
                   </div>
                   <div>
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">Emergency Requests</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Submit or manage access requests</p>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ 'ACCOUNT.QUICK_ACTIONS.REQUESTS.TITLE' | translate }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ 'ACCOUNT.QUICK_ACTIONS.REQUESTS.DESCRIPTION' | translate }}</p>
                   </div>
                 </div>
               </button>
@@ -223,8 +223,8 @@
                     </svg>
                   </div>
                   <div>
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">Notifications</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">View alerts and system messages</p>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ 'ACCOUNT.QUICK_ACTIONS.NOTIFICATIONS.TITLE' | translate }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ 'ACCOUNT.QUICK_ACTIONS.NOTIFICATIONS.DESCRIPTION' | translate }}</p>
                   </div>
                 </div>
               </button>
@@ -242,7 +242,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
               </svg>
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Account Management</h3>
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ 'ACCOUNT.MANAGEMENT.TITLE' | translate }}</h3>
             </div>
           </div>
           <div class="p-4">
@@ -251,14 +251,14 @@
             <!-- Sign Out Section -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
               <div>
-                <h4 class="text-sm font-medium text-gray-900 dark:text-white">Sign Out</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Securely sign out of your FireFighter account</p>
+                <h4 class="text-sm font-medium text-gray-900 dark:text-white">{{ 'ACCOUNT.MANAGEMENT.SIGN_OUT.TITLE' | translate }}</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ 'ACCOUNT.MANAGEMENT.SIGN_OUT.DESCRIPTION' | translate }}</p>
               </div>
               <button (click)="logout()" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 text-white text-sm font-medium rounded-lg transition-colors duration-200 dark:bg-red-700 dark:hover:bg-red-800 dark:focus:ring-red-800">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                 </svg>
-                Sign Out
+                {{ 'ACCOUNT.MANAGEMENT.SIGN_OUT.BUTTON' | translate }}
               </button>
             </div>
           </div>
@@ -292,10 +292,12 @@
                 </div>
                 <div>
                   <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="contact-modal-title">
-                    {{ userProfile?.contactNumber ? 'Edit Contact Number' : 'Add Contact Number' }}
+                    {{ userProfile?.contactNumber ?
+                       ('ACCOUNT.CONTACT_MODAL.EDIT_TITLE' | translate) :
+                       ('ACCOUNT.CONTACT_MODAL.ADD_TITLE' | translate) }}
                   </h3>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
-                    This will be used for emergency ticket notifications
+                    {{ 'ACCOUNT.CONTACT_MODAL.DESCRIPTION' | translate }}
                   </p>
                 </div>
               </div>
@@ -307,7 +309,7 @@
                 <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                   <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                 </svg>
-                <span class="sr-only">Close modal</span>
+                <span class="sr-only">{{ 'ACCOUNT.CONTACT_MODAL.CLOSE_MODAL' | translate }}</span>
               </button>
             </div>
 
@@ -317,14 +319,14 @@
               <!-- Contact Number Field -->
               <div>
                 <label for="contact-number" class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                  Contact Number
+                  {{ 'ACCOUNT.CONTACT_MODAL.LABEL' | translate }}
                 </label>
                 <input
                   id="contact-number"
                   type="tel"
                   [(ngModel)]="editingContactNumber"
                   name="contactNumber"
-                  placeholder="Enter 10-digit phone number (e.g., 0123456789)"
+                  [placeholder]="'ACCOUNT.CONTACT_MODAL.PLACEHOLDER' | translate"
                   maxlength="10"
                   pattern="[0-9]{10}"
                   [disabled]="isUpdatingContact"
@@ -334,10 +336,10 @@
                   [class.focus:border-red-500]="!isValidContactNumber() && editingContactNumber.length > 0"
                 />
                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" *ngIf="isValidContactNumber() || editingContactNumber.length === 0">
-                  Enter a 10-digit phone number (numbers only, no spaces or special characters)
+                  {{ 'ACCOUNT.CONTACT_MODAL.HELP_TEXT' | translate }}
                 </p>
                 <p class="mt-1 text-xs text-red-600 dark:text-red-400" *ngIf="!isValidContactNumber() && editingContactNumber.length > 0">
-                  Please enter exactly 10 digits (0-9 only)
+                  {{ 'ACCOUNT.CONTACT_MODAL.ERROR_TEXT' | translate }}
                 </p>
               </div>
 
@@ -347,12 +349,12 @@
                   <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
                 </svg>
                 <div>
-                  <span class="font-medium">Contact Number Usage:</span>
+                  <span class="font-medium">{{ 'ACCOUNT.CONTACT_MODAL.INFO.TITLE' | translate }}</span>
                   <ul class="mt-1 space-y-1 list-disc list-inside">
-                    <li>Will be auto-filled when creating emergency tickets</li>
-                    <li>Used for urgent notifications and contact purposes</li>
-                    <li>Must be exactly 10 digits (local format)</li>
-                    <li>You can update this anytime from your account settings</li>
+                    <li>{{ 'ACCOUNT.CONTACT_MODAL.INFO.ITEM_1' | translate }}</li>
+                    <li>{{ 'ACCOUNT.CONTACT_MODAL.INFO.ITEM_2' | translate }}</li>
+                    <li>{{ 'ACCOUNT.CONTACT_MODAL.INFO.ITEM_3' | translate }}</li>
+                    <li>{{ 'ACCOUNT.CONTACT_MODAL.INFO.ITEM_4' | translate }}</li>
                   </ul>
                 </div>
               </div>
@@ -365,7 +367,7 @@
                   [disabled]="isUpdatingContact"
                   class="py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Cancel
+                  {{ 'ACCOUNT.CONTACT_MODAL.CANCEL' | translate }}
                 </button>
                 <button
                   type="submit"
@@ -376,8 +378,10 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                   <div *ngIf="isUpdatingContact" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  <span *ngIf="!isUpdatingContact">{{ userProfile?.contactNumber ? 'Update' : 'Add' }} Contact Number</span>
-                  <span *ngIf="isUpdatingContact">Saving...</span>
+                  <span *ngIf="!isUpdatingContact">{{ userProfile?.contactNumber ?
+                    ('ACCOUNT.CONTACT_MODAL.UPDATE' | translate) :
+                    ('ACCOUNT.CONTACT_MODAL.ADD' | translate) }} {{ 'ACCOUNT.CONTACT_MODAL.CONTACT_NUMBER' | translate }}</span>
+                  <span *ngIf="isUpdatingContact">{{ 'ACCOUNT.CONTACT_MODAL.SAVING' | translate }}</span>
                 </button>
               </div>
 

@@ -449,5 +449,101 @@
     "NOT_FOUND": "Resource not found",
     "SERVER_ERROR": "Internal server error",
     "UNKNOWN_ERROR": "An unknown error occurred"
+  },
+  "ACCOUNT": {
+    "TITLE": "Account Settings",
+    "SUBTITLE": "Manage your FireFighter emergency access profile and preferences",
+    "LOADING": "Loading...",
+    "PROFILE": {
+      "VERIFIED": "Verified",
+      "MEMBER_SINCE": "Member since",
+      "LAST_ACTIVE": "Last active",
+      "JUST_NOW": "Just now",
+      "HOURS_AGO": "hour ago",
+      "HOURS_AGO_PLURAL": "hours ago",
+      "DAYS_AGO": "day ago",
+      "DAYS_AGO_PLURAL": "days ago",
+      "UNKNOWN": "Unknown",
+      "FIREFIGHTER_USER": "FireFighter User"
+    },
+    "ROLES": {
+      "ADMINISTRATOR": "Administrator",
+      "USER": "User"
+    },
+    "CONTACT": {
+      "NO_CONTACT_NUMBER": "No contact number added",
+      "EDIT": "Edit",
+      "ADD": "Add"
+    },
+    "SECURITY": {
+      "TITLE": "Security Information",
+      "EMAIL_VERIFICATION": {
+        "TITLE": "Email Verification",
+        "DESCRIPTION": "Your email address is verified",
+        "STATUS": "Verified"
+      },
+      "ACCOUNT_SECURITY": {
+        "TITLE": "Account Security",
+        "DESCRIPTION": "Strong password protection",
+        "STATUS": "Secure"
+      },
+      "EMERGENCY_ACCESS": {
+        "TITLE": "Emergency Access",
+        "DESCRIPTION": "FireFighter privileges enabled",
+        "STATUS": "Active"
+      }
+    },
+    "QUICK_ACTIONS": {
+      "TITLE": "Quick Actions",
+      "DASHBOARD": {
+        "TITLE": "Go to Dashboard",
+        "DESCRIPTION": "View emergency requests and system status"
+      },
+      "REQUESTS": {
+        "TITLE": "Emergency Requests",
+        "DESCRIPTION": "Submit or manage access requests"
+      },
+      "NOTIFICATIONS": {
+        "TITLE": "Notifications",
+        "DESCRIPTION": "View alerts and system messages"
+      }
+    },
+    "MANAGEMENT": {
+      "TITLE": "Account Management",
+      "SIGN_OUT": {
+        "TITLE": "Sign Out",
+        "DESCRIPTION": "Securely sign out of your FireFighter account",
+        "BUTTON": "Sign Out"
+      }
+    },
+    "CONTACT_MODAL": {
+      "EDIT_TITLE": "Edit Contact Number",
+      "ADD_TITLE": "Add Contact Number",
+      "DESCRIPTION": "This will be used for emergency ticket notifications",
+      "CLOSE_MODAL": "Close modal",
+      "LABEL": "Contact Number",
+      "PLACEHOLDER": "Enter 10-digit phone number (e.g., 0123456789)",
+      "HELP_TEXT": "Enter a 10-digit phone number (numbers only, no spaces or special characters)",
+      "ERROR_TEXT": "Please enter exactly 10 digits (0-9 only)",
+      "INFO": {
+        "TITLE": "Contact Number Usage:",
+        "ITEM_1": "Will be auto-filled when creating emergency tickets",
+        "ITEM_2": "Used for urgent notifications and contact purposes",
+        "ITEM_3": "Must be exactly 10 digits (local format)",
+        "ITEM_4": "You can update this anytime from your account settings"
+      },
+      "CANCEL": "Cancel",
+      "UPDATE": "Update",
+      "ADD": "Add",
+      "CONTACT_NUMBER": "Contact Number",
+      "SAVING": "Saving..."
+    },
+    "TOAST": {
+      "USER_NOT_FOUND": "User not found. Please try logging in again.",
+      "INVALID_PHONE": "Please enter a valid 10-digit phone number.",
+      "UPDATE_SUCCESS": "Contact number updated successfully!",
+      "UPDATE_FAILED": "Failed to update contact number. Please try again.",
+      "SERVICE_UNAVAILABLE": "Service is temporarily unavailable. Please try again later."
+    }
   }
 }
