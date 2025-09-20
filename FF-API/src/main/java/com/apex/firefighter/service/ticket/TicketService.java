@@ -44,6 +44,29 @@ public class TicketService {
 
         Ticket savedTicket = ticketRepository.save(ticket);
 
+        
+        // Check for anomalous behavior after ticket creation
+        try {
+
+            boolean isAnomalous = anomalyDetectionService.checkForAnomalousTicketCreation(userId);
+
+            if(isAnomalous){
+
+                String anomalyDetails = anomalyDetectionService.getAnomalyDetails(userId);
+                System.out.println("🚨 ANOMALY DETECTED for user: " + userId + " - " + anomalyDetails);
+                
+                // TODO: Implement notification/alert logic here
+                // This is where the reaction to anomaly detection would go
+                // For now, we're only detecting and logging
+                
+            }
+
+        } catch(Exception e){
+
+            System.err.println("⚠️ TICKET SERVICE: Failed to check for anomalies for user: " + userId + " - " + e.getMessage());
+
+        }
+
         // Create notification with email support
         try {
             notificationService.createTicketCreationNotification(userId, ticketId, savedTicket);
