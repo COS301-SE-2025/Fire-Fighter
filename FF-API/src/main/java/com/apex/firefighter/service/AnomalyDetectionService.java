@@ -20,6 +20,13 @@ public class AnomalyDetectionService {
 
     }
 
+
+    /**
+     * Checks if a user's ticket creation shows anomalous behavior
+     * 
+     * @param userId The user ID to check
+     * @return true if anomalous behavior is detected, false otherwise
+     */
     public boolean checkForAnomalousTicketCreation(String userId){
 
         //currently only checking for frequent requests
@@ -29,6 +36,12 @@ public class AnomalyDetectionService {
 
     }
 
+    /**
+     * Checks if a user has made too many requests in a short time period
+     * 
+     * @param userId The user ID to check
+     * @return true if the user has made suspicious number of requests
+     */
     private boolean isFrequentRequestAnomaly(String userId){
 
         LocalDateTime oneHourAgo = LocalDateTime.now().minusHours(1);
@@ -60,6 +73,12 @@ public class AnomalyDetectionService {
 
     }
 
+    /**
+     * Gets details about the detected anomaly for logging/notification purposes
+     * 
+     * @param userID
+     * @return A string describing the anomaly, or null if no anomaly is deteceted
+     */
     public String getRequestFrequencyDetails(String userID){
 
         LocalDateTime oneHourAgo = LocalDateTime.now().minusHours(1);
