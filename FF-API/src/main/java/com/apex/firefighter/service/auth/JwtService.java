@@ -145,9 +145,40 @@ public class JwtService {
             return extractExpiration(token).before(new Date());
         } catch (ExpiredJwtException e) {
             // Token is expired if ExpiredJwtException is thrown
+            System.out.println("🔒 JWT SERVICE: Token expired - " + e.getMessage());
+            return true;
+        } catch (Exception e) {
+            // Any other parsing error also indicates invalid/expired token
+            System.out.println("🔒 JWT SERVICE: Token parsing error - " + e.getMessage());
             return true;
         }
     }
+
+    
+    /**
+     * Check if token will expire within the specified minutes
+     */
+    public Boolean willExpireSoon(String token, int minutesThreshold) {
+        try {
+            Date expiration = extractExpiration(token);
+            Date threshold = new Date(System.currentTimeMillis() + (minutesThreshold * 60 * 1000));
+            return expiration.before(threshold);
+        } catch (Exception e) {
+            return true; // Treat parsing errors as "will expire soon"
+        }
+    }
+
+        /**
+     * Get token expiration time
+     */
+    public Date getTokenExpiration(String token) {
+        try {
+            return extractExpiration(token);
+        } catch (Exception e) {
+            return new Date(); // Return current time if token is invalid
+        }
+    }
+
 
     /**
      * Validate custom JWT token
