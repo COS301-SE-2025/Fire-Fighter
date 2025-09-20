@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
-import { TokenStatusComponent } from '../../components/token-status.component';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { AdminService, AdminTicket } from '../../services/admin.service';
@@ -53,7 +52,7 @@ interface AuditLogEntry {
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, IonContent, IonRefresher, IonRefresherContent, NavbarComponent, TokenStatusComponent, FormsModule],
+  imports: [CommonModule, IonContent, IonRefresher, IonRefresherContent, NavbarComponent, FormsModule],
   templateUrl: './admin.page.html',
   styleUrls: ['./admin.page.scss'],
   animations: [

@@ -1,8 +1,5 @@
 <app-navbar></app-navbar>
 
-<!-- Session Status -->
-<app-token-status></app-token-status>
-
 <!-- Notification Banner -->
 <div *ngIf="showNotification" class="fixed top-20 right-4 z-50" [ngClass]="notificationAnimatingOut ? 'animate-slideOutRight' : 'animate-slideInRight'">
   <div class="flex items-center w-full max-w-xs p-4 space-x-4 rtl:space-x-reverse text-gray-500 bg-white divide-x rtl:divide-x-reverse divide-gray-200 rounded-lg shadow-lg dark:text-gray-400 dark:divide-gray-700 dark:bg-gray-800" role="alert">
