@@ -354,6 +354,69 @@
       "DELETING": "Wird gelöscht..."
     }
   },
+  "USER_MANAGEMENT": {
+    "TITLE": "Benutzerverwaltung",
+    "SUBTITLE": "Benutzerkonten, Rollen und Berechtigungen verwalten",
+    "LOADING": "Laden...",
+    "STATS": {
+      "NORMAL_USERS": "Normale Benutzer",
+      "NORMAL_USERS_DESC": "Standard-Benutzerkonten",
+      "ADMIN_USERS": "Admin-Benutzer",
+      "ADMIN_USERS_DESC": "Mit Admin-Berechtigungen"
+    },
+    "TABLE": {
+      "TITLE": "Alle Benutzer",
+      "SUBTITLE": "Benutzerkonten und Berechtigungen verwalten",
+      "SEARCH_PLACEHOLDER": "Benutzer suchen...",
+      "FILTER_ALL": "Alle Benutzer",
+      "FILTER_ADMIN": "Admins",
+      "HEADERS": {
+        "USER": "Benutzer",
+        "ROLE": "Rolle",
+        "DOLIBARR_ID": "Dolibarr-ID",
+        "LAST_LOGIN": "Letzte Anmeldung",
+        "ACTIONS": "Aktionen"
+      }
+    },
+    "ROLES": {
+      "ADMIN": "Admin",
+      "USER": "Benutzer"
+    },
+    "DOLIBARR": {
+      "NOT_SET": "Nicht gesetzt",
+      "LABEL": "Dolibarr-ID"
+    },
+    "ACTIONS": {
+      "ACTIONS": "Aktionen",
+      "VIEW_ACTIONS": "Aktionen anzeigen",
+      "MANAGE_USER": "Benutzer verwalten",
+      "USER_MANAGEMENT_ACTIONS": "Benutzerverwaltungsaktionen",
+      "MANAGE_DOLIBARR_ID": "Dolibarr-ID verwalten",
+      "UPDATE_INTEGRATION_SETTINGS": "Integrationseinstellungen aktualisieren",
+      "MANAGE_ACTIONS_FOR": "Aktionen verwalten für"
+    },
+    "MOBILE": {
+      "USER_COUNT": "Benutzer"
+    },
+    "EMPTY_STATE": {
+      "TITLE": "Keine Benutzer gefunden",
+      "MESSAGE": "Versuchen Sie, Ihre Such- oder Filterkriterien anzupassen."
+    },
+    "MODAL": {
+      "EDIT_DOLIBARR_ID": "Dolibarr-ID bearbeiten",
+      "SET_DOLIBARR_ID": "Dolibarr-ID festlegen",
+      "MANAGING_FOR": "Dolibarr-ID verwalten für",
+      "CLOSE_MODAL": "Modal schließen",
+      "DOLIBARR_USER_ID": "Dolibarr-Benutzer-ID",
+      "PLACEHOLDER": "Dolibarr-Benutzer-ID eingeben (z.B. DOL123456)",
+      "HELP_TEXT": "Geben Sie die eindeutige Dolibarr-Benutzerkennung ein (alphanumerische Zeichen, Unterstriche und Bindestriche erlaubt)",
+      "ERROR_TEXT": "Bitte geben Sie eine gültige Dolibarr-ID ein (nur alphanumerische Zeichen, Unterstriche und Bindestriche)",
+      "CANCEL": "Abbrechen",
+      "UPDATE": "Aktualisieren",
+      "SET": "Festlegen",
+      "SAVING": "Wird gespeichert..."
+    }
+  },
   "ACCOUNT": {
     "TITLE": "Konto",
     "PROFILE": "Profil",

@@ -5,6 +5,8 @@ import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/st
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { AuthService } from '../../services/auth.service';
 import { trigger, state, style, transition, animate } from '@angular/animations';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../services/language.service';
 
 interface User {
   userId: string;
@@ -23,7 +25,7 @@ interface User {
   templateUrl: './user-management.page.html',
   styleUrls: ['./user-management.page.scss'],
   standalone: true,
-  imports: [IonContent, IonRefresher, IonRefresherContent, CommonModule, FormsModule, NavbarComponent],
+  imports: [IonContent, IonRefresher, IonRefresherContent, CommonModule, FormsModule, NavbarComponent, TranslateModule],
   animations: [
     trigger('modalBackdrop', [
       state('hidden', style({
@@ -86,7 +88,10 @@ export class UserManagementPage implements OnInit {
   dolibarrModalAnimationState = 'hidden';
   selectedUser: User | null = null;
 
-  constructor(private authService: AuthService) { }
+  constructor(
+    private authService: AuthService,
+    private languageService: LanguageService
+  ) { }
 
   ngOnInit() {
     this.loadUsers();
@@ -181,11 +186,27 @@ export class UserManagementPage implements OnInit {
 
   formatDate(dateString: string): string {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    const currentLang = this.languageService.getCurrentLanguage();
+    const locale = currentLang === 'de' ? 'de-DE' : 'en-US';
+    return date.toLocaleDateString(locale, {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
     });
+  }
+
+  getTranslatedRole(isAdmin: boolean): string {
+    return isAdmin ?
+      this.languageService.getInstantTranslation('USER_MANAGEMENT.ROLES.ADMIN') :
+      this.languageService.getInstantTranslation('USER_MANAGEMENT.ROLES.USER');
+  }
+
+  getUserCountText(count: number): string {
+    return `${count} ${this.languageService.getInstantTranslation('USER_MANAGEMENT.MOBILE.USER_COUNT')}`;
+  }
+
+  getManageActionsTitle(username: string): string {
+    return `${this.languageService.getInstantTranslation('USER_MANAGEMENT.ACTIONS.MANAGE_ACTIONS_FOR')} ${username}`;
   }
 
   // Toggle expandable user details

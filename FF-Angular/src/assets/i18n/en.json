@@ -354,6 +354,69 @@
       "DELETING": "Deleting..."
     }
   },
+  "USER_MANAGEMENT": {
+    "TITLE": "User Management",
+    "SUBTITLE": "Manage user accounts, roles, and permissions",
+    "LOADING": "Loading...",
+    "STATS": {
+      "NORMAL_USERS": "Normal Users",
+      "NORMAL_USERS_DESC": "Standard user accounts",
+      "ADMIN_USERS": "Admin Users",
+      "ADMIN_USERS_DESC": "With admin privileges"
+    },
+    "TABLE": {
+      "TITLE": "All Users",
+      "SUBTITLE": "Manage user accounts and permissions",
+      "SEARCH_PLACEHOLDER": "Search users...",
+      "FILTER_ALL": "All Users",
+      "FILTER_ADMIN": "Admins",
+      "HEADERS": {
+        "USER": "User",
+        "ROLE": "Role",
+        "DOLIBARR_ID": "Dolibarr ID",
+        "LAST_LOGIN": "Last Login",
+        "ACTIONS": "Actions"
+      }
+    },
+    "ROLES": {
+      "ADMIN": "Admin",
+      "USER": "User"
+    },
+    "DOLIBARR": {
+      "NOT_SET": "Not set",
+      "LABEL": "Dolibarr ID"
+    },
+    "ACTIONS": {
+      "ACTIONS": "Actions",
+      "VIEW_ACTIONS": "View Actions",
+      "MANAGE_USER": "Manage User",
+      "USER_MANAGEMENT_ACTIONS": "User Management Actions",
+      "MANAGE_DOLIBARR_ID": "Manage Dolibarr ID",
+      "UPDATE_INTEGRATION_SETTINGS": "Update integration settings",
+      "MANAGE_ACTIONS_FOR": "Manage actions for"
+    },
+    "MOBILE": {
+      "USER_COUNT": "users"
+    },
+    "EMPTY_STATE": {
+      "TITLE": "No users found",
+      "MESSAGE": "Try adjusting your search or filter criteria."
+    },
+    "MODAL": {
+      "EDIT_DOLIBARR_ID": "Edit Dolibarr ID",
+      "SET_DOLIBARR_ID": "Set Dolibarr ID",
+      "MANAGING_FOR": "Managing Dolibarr ID for",
+      "CLOSE_MODAL": "Close modal",
+      "DOLIBARR_USER_ID": "Dolibarr User ID",
+      "PLACEHOLDER": "Enter Dolibarr user ID (e.g., DOL123456)",
+      "HELP_TEXT": "Enter the unique Dolibarr user identifier (alphanumeric characters, underscores, and hyphens allowed)",
+      "ERROR_TEXT": "Please enter a valid Dolibarr ID (alphanumeric characters, underscores, and hyphens only)",
+      "CANCEL": "Cancel",
+      "UPDATE": "Update",
+      "SET": "Set",
+      "SAVING": "Saving..."
+    }
+  },
   "ACCOUNT": {
     "TITLE": "Account",
     "PROFILE": "Profile",
