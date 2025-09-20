@@ -19,5 +19,12 @@ public class AnomalyDetectionService {
         this.ticketRepository = ticketRepository;
 
     }
-    
+
+    public boolean checkForAnomalousTicketCreation(String userId){
+
+        return isFrequentRequestAnomaly(userId);
+        
+    }
+
+
 }
