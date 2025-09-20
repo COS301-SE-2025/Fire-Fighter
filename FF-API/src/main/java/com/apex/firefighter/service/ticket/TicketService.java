@@ -6,6 +6,7 @@ import com.apex.firefighter.repository.TicketRepository;
 import com.apex.firefighter.repository.UserRepository;
 import com.apex.firefighter.service.NotificationService;
 import com.apex.firefighter.service.DolibarrUserGroupService;
+import com.apex.firefighter.service.AnomalyDetectionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,13 +21,17 @@ public class TicketService {
     private final NotificationService notificationService;
     private final DolibarrUserGroupService dolibarrUserGroupService;
     private final UserRepository userRepository;
+    private final AnomalyDetectionService anomalyDetectionService;
 
     @Autowired
-    public TicketService(TicketRepository ticketRepository, NotificationService notificationService, DolibarrUserGroupService dolibarrUserGroupService, UserRepository userRepository) {
+    public TicketService(TicketRepository ticketRepository, NotificationService notificationService, 
+                        DolibarrUserGroupService dolibarrUserGroupService, UserRepository userRepository,
+                        AnomalyDetectionService anomalyDetectionService) {
         this.ticketRepository = ticketRepository;
         this.notificationService = notificationService;
         this.dolibarrUserGroupService = dolibarrUserGroupService;
         this.userRepository = userRepository;
+        this.anomalyDetectionService = anomalyDetectionService;
     }
 
     public Ticket createTicket(String description, String userId, String emergencyType, String emergencyContact, Integer duration) {
