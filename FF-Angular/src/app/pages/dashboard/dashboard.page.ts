@@ -7,7 +7,6 @@ import { TicketService, Ticket } from '../../services/ticket.service';
 import { AdminService, AdminTicket } from '../../services/admin.service';
 import { NotificationService } from '../../services/notification.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
-import { TokenStatusComponent } from '../../components/token-status.component';
 import { calculateTimeAgo } from '../../services/mock-ticket-database';
 import { catchError, finalize } from 'rxjs/operators';
 import { of, Subscription } from 'rxjs';
@@ -35,7 +34,6 @@ export interface Activity {
     IonRefresher,
     IonRefresherContent,
     NavbarComponent,
-    TokenStatusComponent,
     TranslateModule
   ]
 })
