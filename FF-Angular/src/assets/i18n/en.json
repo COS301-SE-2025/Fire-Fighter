@@ -203,16 +203,107 @@
     }
   },
   "REQUESTS": {
-    "TITLE": "Requests",
+    "TITLE": "Emergency Requests",
+    "SUBTITLE": "Manage your FireFighter emergency access requests and sessions",
     "NEW_REQUEST": "New Request",
     "MY_REQUESTS": "My Requests",
     "ALL_REQUESTS": "All Requests",
+    "STATS": {
+      "TOTAL": "Total",
+      "ACTIVE": "Active",
+      "COMPLETED": "Completed",
+      "REJECTED": "Rejected"
+    },
+    "SEARCH": {
+      "PLACEHOLDER": "Search by ticket ID or reason...",
+      "LABEL": "Search requests",
+      "NO_RESULTS": "Try adjusting your search criteria",
+      "FIRST_REQUEST": "Create your first emergency access request to get started"
+    },
+    "FILTERS": {
+      "ALL": "All",
+      "ACTIVE": "Active",
+      "COMPLETED": "Completed",
+      "REJECTED": "Rejected"
+    },
     "STATUS": {
       "PENDING": "Pending",
       "APPROVED": "Approved",
       "REJECTED": "Rejected",
       "IN_PROGRESS": "In Progress",
-      "COMPLETED": "Completed"
+      "COMPLETED": "Completed",
+      "ACTIVE": "Active",
+      "CLOSED": "Closed"
+    },
+    "LOADING": "Loading requests...",
+    "ERROR": "Error!",
+    "NO_REQUESTS": {
+      "TITLE": "No requests found",
+      "CREATE_BUTTON": "Create New Request"
+    },
+    "CARD": {
+      "REQUESTED": "Requested",
+      "REASON": "Reason",
+      "REQUEST_DATE": "Request Date",
+      "REVOKE_ACCESS": "Revoke Access",
+      "VIEW_DETAILS": "View Details"
+    },
+    "MODAL": {
+      "TITLE": "Create Emergency Request",
+      "SUBTITLE": "Submit a new FireFighter emergency access request",
+      "CLOSE": "Close modal",
+      "REQUEST_DATE": {
+        "LABEL": "Request Date",
+        "REQUIRED": "*"
+      },
+      "EMERGENCY_TYPE": {
+        "LABEL": "Emergency Type",
+        "PLACEHOLDER": "Select emergency type",
+        "HR": "HR / Human Resources Emergency",
+        "FINANCIAL": "Financial / Payment Emergency",
+        "MANAGEMENT": "Management / Admin Emergency",
+        "LOGISTICS": "Logistics / Supply Emergency"
+      },
+      "REASON": {
+        "LABEL": "Reason for Emergency Access",
+        "PLACEHOLDER": "Please provide a detailed explanation of the emergency situation and why immediate access is required. Include specific systems, users, or data affected...",
+        "HELP": "Be specific about the nature of the emergency and systems requiring access.",
+        "REQUIRED": "*"
+      },
+      "CONTACT": {
+        "LABEL": "Emergency Contact",
+        "PLACEHOLDER": "Phone number or email for urgent contact",
+        "AUTO_FILLED": "(Auto-filled from profile)",
+        "USE_SAVED": "Use Saved",
+        "HELP_NO_SAVED": "You can add a contact number in your account settings to auto-fill this field.",
+        "HELP_AUTO_FILLED": "Contact number auto-filled from your profile. You can edit it if needed.",
+        "HELP_SAVED_AVAILABLE": "Your saved contact number ({{contactNumber}}) is available. Click \"Use Saved\" to fill it."
+      },
+      "DURATION": {
+        "LABEL": "Access Duration (minutes)",
+        "REQUIRED": "*",
+        "HELP": "Use the +/- buttons to adjust duration. Range: 15-120 minutes in 15-minute increments.",
+        "MIN_SUFFIX": "min",
+        "ERROR_MIN": "Duration must be at least 15 minutes",
+        "ERROR_MAX": "Duration cannot exceed 2 hours"
+      },
+      "WARNING": {
+        "TITLE": "Emergency Access Notice:",
+        "DURATION": "Emergency access duration can be selected from 15 minutes to 2 hours",
+        "LOGGED": "All activities are logged and audited",
+        "MISUSE": "Misuse may result in disciplinary action"
+      },
+      "BUTTONS": {
+        "CANCEL": "Cancel",
+        "SUBMIT": "Submit Emergency Request",
+        "SUBMITTING": "Submitting..."
+      }
+    },
+    "FOOTER": {
+      "NEW_EMERGENCY_REQUEST": "New Emergency Request"
+    },
+    "TOAST": {
+      "ACCESS_REVOKED": "Access for ticket {{ticketId}} has been revoked"
     }
   },
   "NOTIFICATIONS": {

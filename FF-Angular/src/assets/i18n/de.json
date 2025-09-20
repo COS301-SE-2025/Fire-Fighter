@@ -203,16 +203,107 @@
     }
   },
   "REQUESTS": {
-    "TITLE": "Anfragen",
+    "TITLE": "Notfall-Anfragen",
+    "SUBTITLE": "Verwalten Sie Ihre FireFighter-Notfall-Zugriffsanfragen und -sitzungen",
     "NEW_REQUEST": "Neue Anfrage",
     "MY_REQUESTS": "Meine Anfragen",
     "ALL_REQUESTS": "Alle Anfragen",
+    "STATS": {
+      "TOTAL": "Gesamt",
+      "ACTIVE": "Aktiv",
+      "COMPLETED": "Abgeschlossen",
+      "REJECTED": "Abgelehnt"
+    },
+    "SEARCH": {
+      "PLACEHOLDER": "Nach Ticket-ID oder Grund suchen...",
+      "LABEL": "Anfragen durchsuchen",
+      "NO_RESULTS": "Versuchen Sie, Ihre Suchkriterien anzupassen",
+      "FIRST_REQUEST": "Erstellen Sie Ihre erste Notfall-Zugriffsanfrage, um zu beginnen"
+    },
+    "FILTERS": {
+      "ALL": "Alle",
+      "ACTIVE": "Aktiv",
+      "COMPLETED": "Abgeschlossen",
+      "REJECTED": "Abgelehnt"
+    },
     "STATUS": {
       "PENDING": "Ausstehend",
       "APPROVED": "Genehmigt",
       "REJECTED": "Abgelehnt",
       "IN_PROGRESS": "In Bearbeitung",
-      "COMPLETED": "Abgeschlossen"
+      "COMPLETED": "Abgeschlossen",
+      "ACTIVE": "Aktiv",
+      "CLOSED": "Geschlossen"
+    },
+    "LOADING": "Anfragen werden geladen...",
+    "ERROR": "Fehler!",
+    "NO_REQUESTS": {
+      "TITLE": "Keine Anfragen gefunden",
+      "CREATE_BUTTON": "Neue Anfrage erstellen"
+    },
+    "CARD": {
+      "REQUESTED": "Angefordert",
+      "REASON": "Grund",
+      "REQUEST_DATE": "Anfragedatum",
+      "REVOKE_ACCESS": "Zugriff widerrufen",
+      "VIEW_DETAILS": "Details anzeigen"
+    },
+    "MODAL": {
+      "TITLE": "Notfall-Anfrage erstellen",
+      "SUBTITLE": "Eine neue FireFighter-Notfall-Zugriffsanfrage einreichen",
+      "CLOSE": "Modal schließen",
+      "REQUEST_DATE": {
+        "LABEL": "Anfragedatum",
+        "REQUIRED": "*"
+      },
+      "EMERGENCY_TYPE": {
+        "LABEL": "Notfall-Typ",
+        "PLACEHOLDER": "Notfall-Typ auswählen",
+        "HR": "HR / Personalwesen-Notfall",
+        "FINANCIAL": "Finanz- / Zahlungsnotfall",
+        "MANAGEMENT": "Management- / Admin-Notfall",
+        "LOGISTICS": "Logistik- / Liefernotfall"
+      },
+      "REASON": {
+        "LABEL": "Grund für Notfall-Zugriff",
+        "PLACEHOLDER": "Bitte geben Sie eine detaillierte Erklärung der Notfallsituation und warum sofortiger Zugriff erforderlich ist. Geben Sie spezifische Systeme, Benutzer oder betroffene Daten an...",
+        "HELP": "Seien Sie spezifisch über die Art des Notfalls und die Systeme, die Zugriff benötigen.",
+        "REQUIRED": "*"
+      },
+      "CONTACT": {
+        "LABEL": "Notfall-Kontakt",
+        "PLACEHOLDER": "Telefonnummer oder E-Mail für dringenden Kontakt",
+        "AUTO_FILLED": "(Automatisch aus Profil ausgefüllt)",
+        "USE_SAVED": "Gespeicherte verwenden",
+        "HELP_NO_SAVED": "Sie können eine Kontaktnummer in Ihren Kontoeinstellungen hinzufügen, um dieses Feld automatisch auszufüllen.",
+        "HELP_AUTO_FILLED": "Kontaktnummer automatisch aus Ihrem Profil ausgefüllt. Sie können sie bei Bedarf bearbeiten.",
+        "HELP_SAVED_AVAILABLE": "Ihre gespeicherte Kontaktnummer ({{contactNumber}}) ist verfügbar. Klicken Sie auf \"Gespeicherte verwenden\", um sie auszufüllen."
+      },
+      "DURATION": {
+        "LABEL": "Zugriffsdauer (Minuten)",
+        "REQUIRED": "*",
+        "HELP": "Verwenden Sie die +/- Tasten, um die Dauer anzupassen. Bereich: 15-120 Minuten in 15-Minuten-Schritten.",
+        "MIN_SUFFIX": "Min",
+        "ERROR_MIN": "Die Dauer muss mindestens 15 Minuten betragen",
+        "ERROR_MAX": "Die Dauer darf 2 Stunden nicht überschreiten"
+      },
+      "WARNING": {
+        "TITLE": "Notfall-Zugriff Hinweis:",
+        "DURATION": "Die Notfall-Zugriffsdauer kann von 15 Minuten bis 2 Stunden gewählt werden",
+        "LOGGED": "Alle Aktivitäten werden protokolliert und auditiert",
+        "MISUSE": "Missbrauch kann zu disziplinarischen Maßnahmen führen"
+      },
+      "BUTTONS": {
+        "CANCEL": "Abbrechen",
+        "SUBMIT": "Notfall-Anfrage einreichen",
+        "SUBMITTING": "Wird eingereicht..."
+      }
+    },
+    "FOOTER": {
+      "NEW_EMERGENCY_REQUEST": "Neue Notfall-Anfrage"
+    },
+    "TOAST": {
+      "ACCESS_REVOKED": "Zugriff für Ticket {{ticketId}} wurde widerrufen"
     }
   },
   "NOTIFICATIONS": {
