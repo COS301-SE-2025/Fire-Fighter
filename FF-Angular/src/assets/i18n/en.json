@@ -23,7 +23,7 @@
     "HELP": "Help",
     "SETTINGS": "Settings",
     "ADMIN": "Admin Console",
-    "CHAT": "Gemini",
+    "CHAT": "Ada",
     "LOGIN": "Login",
     "REGISTER": "Register",
     "LOGOUT": "Logout"
@@ -42,7 +42,7 @@
     "NAVIGATION": {
       "DASHBOARD": "Dashboard",
       "MY_REQUESTS": "My Requests",
-      "GEMINI": "Gemini",
+      "GEMINI": "Ada",
       "ADMIN_CONSOLE": "Admin Console",
       "NOTIFICATIONS": "Notifications"
     },
@@ -174,8 +174,8 @@
       "NOTIFICATIONS_DESC": "View pending alerts",
       "AUDIT_LOGS": "Audit Logs",
       "AUDIT_LOGS_DESC": "Review activity logs",
-      "GEMINI": "Gemini",
-      "GEMINI_DESC": "Ask AI assistant"
+      "ADA": "Ada",
+      "ADA_DESC": "Query and manage tickets"
     },
     "RECENT_ACTIVITY": {
       "TITLE": "Recent Activity",
