@@ -1,22 +1,37 @@
 package com.apex.firefighter.service;
 
 import com.apex.firefighter.repository.TicketRepository;
+import com.apex.firefighter.repository.AccessLogRepository;
+import com.apex.firefighter.repository.AccessSessionRepository;
+import com.apex.firefighter.model.AccessLog;
+import com.apex.firefighter.model.AccessSession;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class AnomalyDetectionService {
 
     private final TicketRepository ticketRepository;
+    private final AccessLogRepository accessLogRepository;
+    private final AccessSessionRepository accessSessionRepository;
 
     //configuration for frequent request detection
     private static final int MAX_REQUESTS_PER_HOUR = 5;
     private static final int MAX_REQUESTS_PER_DAY = 20;
+    
+    //configuration for dormant user detection
+    private static final int DORMANT_THRESHOLD_DAYS = 5;
+    private static final int QUICK_ACTION_THRESHOLD_MINUTES = 15;
 
-    public AnomalyDetectionService(TicketRepository ticketRepository){
+    public AnomalyDetectionService(TicketRepository ticketRepository, 
+                                 AccessLogRepository accessLogRepository,
+                                 AccessSessionRepository accessSessionRepository){
 
         this.ticketRepository = ticketRepository;
+        this.accessLogRepository = accessLogRepository;
+        this.accessSessionRepository = accessSessionRepository;
 
     }
 
@@ -30,10 +45,13 @@ public class AnomalyDetectionService {
      */
     public boolean checkForAnomalousTicketCreation(String userId){
 
-        //currently only checking for frequent requests
-        //add other anomaly checks here as needed
+        //check for frequent requests
+        boolean frequentRequestAnomaly = isFrequentRequestAnomaly(userId);
+        
+        //check for dormant user login anomaly
+        boolean dormantUserAnomaly = isDormantUserLoginAnomaly(userId);
 
-        return isFrequentRequestAnomaly(userId);
+        return frequentRequestAnomaly || dormantUserAnomaly;
 
     }
 
@@ -83,7 +101,7 @@ public class AnomalyDetectionService {
     public String getRequestFrequencyDetails(String userID){
 
         LocalDateTime oneHourAgo = LocalDateTime.now().minusHours(1);
-        LocalDateTime oneDayAgo = LocalDateTime.nmow().minusDays(1);
+        LocalDateTime oneDayAgo = LocalDateTime.now().minusDays(1);
 
         long requestsLastHour = ticketRepository.countTicketsByUserSince(userID, oneHourAgo);
         long requestsLastDay = ticketRepository.countTicketsByUserSince(userID, oneDayAgo);
@@ -102,6 +120,126 @@ public class AnomalyDetectionService {
 
         return null;
 
+    }
+
+    /**
+     * Checks if a user shows dormant user login anomaly behavior
+     * Detects when a user has been inactive for 30+ days and suddenly logs in and makes actions within 15 minutes
+     * 
+     * @param userId The user ID to check
+     * @return true if dormant user anomaly is detected, false otherwise
+     */
+    private boolean isDormantUserLoginAnomaly(String userId) {
+        
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime quickActionThreshold = now.minusMinutes(QUICK_ACTION_THRESHOLD_MINUTES);
+        LocalDateTime dormantThreshold = now.minusDays(DORMANT_THRESHOLD_DAYS);
+        
+        // 1. Find most recent login within the quick action threshold
+        List<AccessLog> recentLogins = accessLogRepository.findLoginEventsByUserSince(userId, quickActionThreshold);
+        
+        if (recentLogins.isEmpty()) {
+            return false; // No recent login, so no anomaly
+        }
+        
+        AccessLog mostRecentLogin = recentLogins.get(0);
+        
+        // 2. Check for previous activity before the dormant threshold period
+        List<AccessSession> previousSessions = accessSessionRepository.findByUserIdBeforeDate(userId, dormantThreshold);
+        List<AccessLog> previousLogins = accessLogRepository.findLoginEventsByUserSince(userId, dormantThreshold);
+        
+        // Remove any logins that are after the dormant threshold (we only want truly old activity)
+        previousLogins.removeIf(log -> log.getTimestamp().isAfter(dormantThreshold));
+        
+        // 3. Determine if user was truly dormant (no sessions/logins for 30+ days)
+        boolean wasDormant = previousSessions.isEmpty() && previousLogins.isEmpty();
+        
+        if (!wasDormant) {
+            return false; // User was not dormant, so no anomaly
+        }
+        
+        // 4. Check if user made any actions/tickets after the recent login
+        long actionsAfterLogin = accessLogRepository.countActionsByUserSince(userId, mostRecentLogin.getTimestamp());
+        
+        // 5. Flag as anomaly if dormant user made quick actions after login
+        if (actionsAfterLogin > 0) {
+            System.out.println("🚨 DORMANT USER ANOMALY DETECTED: User " + userId + 
+                " was dormant for " + DORMANT_THRESHOLD_DAYS + "+ days, " +
+                "logged in at " + mostRecentLogin.getTimestamp() + 
+                " and made " + actionsAfterLogin + " actions within " + 
+                QUICK_ACTION_THRESHOLD_MINUTES + " minutes");
+            
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Gets details about the detected dormant user anomaly for logging/notification purposes
+     * 
+     * @param userId The user ID to check
+     * @return A string describing the dormant user anomaly, or null if no anomaly is detected
+     */
+    public String getDormantUserAnomalyDetails(String userId) {
+        
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime quickActionThreshold = now.minusMinutes(QUICK_ACTION_THRESHOLD_MINUTES);
+        LocalDateTime dormantThreshold = now.minusDays(DORMANT_THRESHOLD_DAYS);
+        
+        // Find most recent login within the quick action threshold
+        List<AccessLog> recentLogins = accessLogRepository.findLoginEventsByUserSince(userId, quickActionThreshold);
+        
+        if (recentLogins.isEmpty()) {
+            return null; // No recent login
+        }
+        
+        AccessLog mostRecentLogin = recentLogins.get(0);
+        
+        // Check for previous activity before the dormant threshold period
+        List<AccessSession> previousSessions = accessSessionRepository.findByUserIdBeforeDate(userId, dormantThreshold);
+        List<AccessLog> previousLogins = accessLogRepository.findLoginEventsByUserSince(userId, dormantThreshold);
+        previousLogins.removeIf(log -> log.getTimestamp().isAfter(dormantThreshold));
+        
+        boolean wasDormant = previousSessions.isEmpty() && previousLogins.isEmpty();
+        
+        if (!wasDormant) {
+            return null; // User was not dormant
+        }
+        
+        // Count actions after the recent login
+        long actionsAfterLogin = accessLogRepository.countActionsByUserSince(userId, mostRecentLogin.getTimestamp());
+        
+        if (actionsAfterLogin > 0) {
+            return String.format("User was dormant for %d+ days, logged in at %s and made %d actions within %d minutes", 
+                DORMANT_THRESHOLD_DAYS, mostRecentLogin.getTimestamp(), actionsAfterLogin, QUICK_ACTION_THRESHOLD_MINUTES);
+        }
+        
+        return null;
+    }
+
+    /**
+     * Gets details about any detected anomaly for logging/notification purposes
+     * This method combines both frequent request and dormant user anomaly details
+     * 
+     * @param userId The user ID to check
+     * @return A string describing the anomaly, or null if no anomaly is detected
+     */
+    public String getAnomalyDetails(String userId) {
+        
+        // Check for frequent request anomaly details
+        String frequencyDetails = getRequestFrequencyDetails(userId);
+        if (frequencyDetails != null) {
+            return "Frequent Request Anomaly: " + frequencyDetails;
+        }
+        
+        // Check for dormant user anomaly details
+        String dormantDetails = getDormantUserAnomalyDetails(userId);
+        if (dormantDetails != null) {
+            return "Dormant User Anomaly: " + dormantDetails;
+        }
+        
+        return null;
     }
 
 }
