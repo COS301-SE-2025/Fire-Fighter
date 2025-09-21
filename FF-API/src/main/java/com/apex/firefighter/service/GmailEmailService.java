@@ -688,4 +688,99 @@ public class GmailEmailService {
         return html.toString();
     }
 
+    /**
+     * Send group change notification email to all admins
+     */
+    public void sendGroupChangeNotificationEmail(String recipientEmail, User user, String ticketId, String oldGroup, String newGroup, String reason) throws MessagingException {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(recipientEmail);
+            helper.setSubject("FireFighter Platform - User Group Change Alert: " + user.getUsername());
+
+            String htmlContent = createGroupChangeEmailContent(user, ticketId, oldGroup, newGroup, reason);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+            System.out.println("Group change notification email sent successfully to " + recipientEmail + " for user " + user.getUsername());
+
+        } catch (Exception e) {
+            System.err.println("Group change notification email failed: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * Creates professional HTML email content for group change notification
+     */
+    private String createGroupChangeEmailContent(User user, String ticketId, String oldGroup, String newGroup, String reason) {
+        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm"));
+
+        StringBuilder html = new StringBuilder();
+        html.append(getEmailHeader("User Group Change Alert"));
+        html.append("<div class=\"email-container\">");
+        html.append("<div class=\"header\">");
+        html.append("<h1>FireFighter Platform</h1>");
+        html.append("<p class=\"subtitle\">Emergency Response Management System</p>");
+        html.append("</div>");
+        html.append("<div class=\"content\">");
+
+        html.append("<div class=\"greeting\">Administrator Alert,</div>");
+        html.append("<p><strong>IMPORTANT:</strong> A user's group assignment has been changed in the Dolibarr ERP system following ticket creation.</p>");
+        
+        html.append("<div class=\"info-box\">");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">User: </span>");
+        html.append("<span class=\"info-value\">").append(user.getUsername()).append(" (").append(user.getEmail()).append(")</span>");
+        html.append("</div>");
+        if (user.getDolibarrId() != null) {
+            html.append("<div class=\"info-item\">");
+            html.append("<span class=\"info-label\">Dolibarr ID: </span>");
+            html.append("<span class=\"info-value\">").append(user.getDolibarrId()).append("</span>");
+            html.append("</div>");
+        }
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Department: </span>");
+        html.append("<span class=\"info-value\">").append(user.getDepartment() != null ? user.getDepartment() : "N/A").append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Related Ticket: </span>");
+        html.append("<span class=\"info-value\">").append(ticketId).append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Previous Group: </span>");
+        html.append("<span class=\"info-value\">").append(oldGroup != null ? oldGroup : "None").append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">New Group: </span>");
+        html.append("<span class=\"info-value\">").append(newGroup).append("</span>");
+        html.append("</div>");
+        if (reason != null && !reason.trim().isEmpty()) {
+            html.append("<div class=\"info-item\">");
+            html.append("<span class=\"info-label\">Reason: </span>");
+            html.append("<span class=\"info-value\">").append(reason).append("</span>");
+            html.append("</div>");
+        }
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Change Time: </span>");
+        html.append("<span class=\"info-value\">").append(currentDateTime).append("</span>");
+        html.append("</div>");
+        html.append("</div>");
+        
+        html.append("<div class=\"security-notice\">");
+        html.append("<strong>Security Notice:</strong> This group change was automatically triggered by the emergency ticket system. ");
+        html.append("Please verify that this change is appropriate and authorized. If you have concerns about this change, ");
+        html.append("please review the associated ticket and contact the user or system administrator immediately.");
+        html.append("</div>");
+        
+        html.append("</div>");
+        html.append(getEmailFooter(currentDateTime));
+        html.append("</div>");
+        html.append("</body>");
+        html.append("</html>");
+
+        return html.toString();
+    }
+
 }

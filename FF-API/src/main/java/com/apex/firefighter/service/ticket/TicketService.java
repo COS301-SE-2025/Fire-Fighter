@@ -75,7 +75,7 @@ public class TicketService {
             System.err.println("⚠️ TICKET SERVICE: Failed to create notification for ticket: " + ticketId + " - " + e.getMessage());
         }
 
-        //add user to firefighter group
+        //add user to firefighter group and notify admins
         try {
             Optional<User> userOpt = userRepository.findById(userId);
             if (userOpt.isPresent()) {
@@ -83,7 +83,9 @@ public class TicketService {
                 String allocationText = (emergencyType != null && !emergencyType.isEmpty())
                     ? emergencyType + " " + description
                     : description;
-                dolibarrUserGroupService.addUserToGroup(userOpt.get().getDolibarrId(), allocationText);
+                // Pass the ticket ID to enable admin notifications
+                dolibarrUserGroupService.addUserToGroup(userOpt.get().getDolibarrId(), allocationText, ticketId);
+                System.out.println("✅ TICKET SERVICE: Added user to firefighter group and notified admins for ticket: " + ticketId);
             } else {
                 throw new RuntimeException("User not found with ID: " + userId);
             }
@@ -138,7 +140,7 @@ public class TicketService {
                 }
             }
 
-            // Remove user from firefighter group if ticket is closed
+            // Remove user from firefighter group if ticket is closed and notify admins
             try {
                 if ("Closed".equals(newStatus) || "Completed".equals(newStatus)) {
                     Optional<User> userOpt = userRepository.findById(ticket.getUserId());
@@ -147,7 +149,9 @@ public class TicketService {
                         String allocationText = (ticket.getEmergencyType() != null && !ticket.getEmergencyType().isEmpty())
                             ? ticket.getEmergencyType() + " " + ticket.getDescription()
                             : ticket.getDescription();
-                        dolibarrUserGroupService.removeUserFromGroup(userOpt.get().getDolibarrId(), allocationText);
+                        // Pass the ticket ID to enable admin notifications
+                        dolibarrUserGroupService.removeUserFromGroup(userOpt.get().getDolibarrId(), allocationText, ticketId);
+                        System.out.println("✅ TICKET SERVICE: Removed user from firefighter group and notified admins for ticket: " + ticketId);
                     } else {
                         System.err.println("⚠️ TICKET SERVICE: User not found with ID: " + ticket.getUserId());
                     }
@@ -182,7 +186,7 @@ public class TicketService {
             ticket.setStatus("Closed");
             ticketRepository.save(ticket);
 
-            // Remove user from firefighter group when ticket is automatically closed
+            // Remove user from firefighter group when ticket is automatically closed and notify admins
             try {
                 Optional<User> user = userRepository.findById(ticket.getUserId());
                 if (user.isPresent()) {
@@ -190,8 +194,9 @@ public class TicketService {
                     String allocationText = (ticket.getEmergencyType() != null && !ticket.getEmergencyType().isEmpty())
                         ? ticket.getEmergencyType() + " " + ticket.getDescription()
                         : ticket.getDescription();
-                    dolibarrUserGroupService.removeUserFromGroup(user.get().getDolibarrId(), allocationText);
-                    System.out.println("✅ AUTO-CLOSE (24h): Successfully removed user " + ticket.getUserId() + " from firefighter group for ticket: " + ticket.getTicketId());
+                    // Pass the ticket ID to enable admin notifications
+                    dolibarrUserGroupService.removeUserFromGroup(user.get().getDolibarrId(), allocationText, ticket.getTicketId());
+                    System.out.println("✅ AUTO-CLOSE (24h): Successfully removed user " + ticket.getUserId() + " from firefighter group and notified admins for ticket: " + ticket.getTicketId());
                 } else {
                     System.err.println("⚠️ AUTO-CLOSE (24h): User not found with ID: " + ticket.getUserId());
                 }
