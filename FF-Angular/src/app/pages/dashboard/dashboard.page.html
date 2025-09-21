@@ -279,10 +279,12 @@
                <!-- Gemini Button -->
                <button [routerLink]="['/chat']" class="flex items-center p-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:ring-4 focus:ring-blue-300 text-white rounded-lg transition-all duration-200 dark:from-blue-700 dark:to-purple-700 dark:hover:from-blue-800 dark:hover:to-purple-800 dark:focus:ring-blue-800">
                  <div class="flex items-center space-x-3">
-                   <svg fill="currentColor" fill-rule="evenodd" height="24px" style="flex:none;line-height:1" viewBox="0 0 24 24" width="24px" xmlns="http://www.w3.org/2000/svg"><title>Gemini</title><path d="M20.616 10.835a14.147 14.147 0 01-4.45-3.001 14.111 14.111 0 01-3.678-6.452.503.503 0 00-.975 0 14.134 14.134 0 01-3.679 6.452 14.155 14.155 0 01-4.45 3.001c-.65.28-1.318.505-2.002.678a.502.502 0 000 .975c.684.172 1.35.397 2.002.677a14.147 14.147 0 014.45 3.001 14.112 14.112 0 013.679 6.453.502.502 0 00.975 0c.172-.685.397-1.351.677-2.003a14.145 14.145 0 013.001-4.45 14.113 14.113 0 016.453-3.678.503.503 0 000-.975 13.245 13.245 0 01-2.003-.678z"></path></svg>
+                   <svg data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" height="24px" width="24px" style="flex:none;line-height:1">
+                     <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"></path>
+                   </svg>
                    <div class="text-left">
-                     <div class="font-semibold">{{ 'DASHBOARD.QUICK_ACTIONS.GEMINI' | translate }}</div>
-                     <div class="text-sm opacity-90">{{ 'DASHBOARD.QUICK_ACTIONS.GEMINI_DESC' | translate }}</div>
+                     <div class="font-semibold">{{ 'DASHBOARD.QUICK_ACTIONS.ADA' | translate }}</div>
+                     <div class="text-sm opacity-90">{{ 'DASHBOARD.QUICK_ACTIONS.ADA_DESC' | translate }}</div>
                    </div>
                  </div>
                </button>
