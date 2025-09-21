@@ -2,7 +2,6 @@ package com.apex.firefighter.service;
 
 import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.model.User;
-import com.apex.firefighter.service.changelog.dto.AnomalyReport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -689,57 +688,4 @@ public class GmailEmailService {
         return html.toString();
     }
 
-    public void sendAnomalyAlertEmail(String recipientEmail, AnomalyReport anomalyReport) throws MessagingException {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setTo(recipientEmail);
-            helper.setSubject("FireFighter Platform - Anomaly Detected");
-
-            String htmlContent = createAnomalyAlertEmailContent(anomalyReport);
-            helper.setText(htmlContent, true);
-
-            mailSender.send(message);
-            System.out.println("Anomaly alert email sent successfully to " + recipientEmail);
-
-        } catch (Exception e) {
-            System.err.println("Anomaly alert email failed: " + e.getMessage());
-            throw e;
-        }
-    }
-
-    private String createAnomalyAlertEmailContent(AnomalyReport anomalyReport) {
-        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm"));
-
-        StringBuilder html = new StringBuilder();
-        html.append(getEmailHeader("Anomaly Detected"));
-        html.append("<div class=\"email-container\">");
-        html.append("<div class=\"header\">");
-        html.append("<h1>FireFighter Platform</h1>");
-        html.append("<p class=\"subtitle\">Anomaly Detection System</p>");
-        html.append("</div>");
-        html.append("<div class=\"content\">");
-        html.append("<div class=\"greeting\">Hello Admin,</div>");
-        html.append("<p>An anomalous change has been detected in the ERP system data.</p>");
-        html.append("<div class=\"info-box\">");
-        html.append("<div class=\"info-item\"><span class=\"info-label\">Entity:</span><span class=\"info-value\">" + anomalyReport.getEntityName() + "</span></div>");
-        html.append("<div class=\"info-item\"><span class=\"info-label\">Field:</span><span class=\"info-value\">" + anomalyReport.getFieldName() + "</span></div>");
-        html.append("<div class=\"info-item\"><span class=\"info-label\">Old Value:</span><span class=\"info-value\">" + anomalyReport.getOldValue() + "</span></div>");
-        html.append("<div class=\"info-item\"><span class=\"info-label\">New Value:</span><span class=\"info-value\">" + anomalyReport.getNewValue() + "</span></div>");
-        html.append("<div class=\"info-item\"><span class=\"info-label\">Changed By:</span><span class=\"info-value\">" + anomalyReport.getChangedBy() + "</span></div>");
-        html.append("<div class=\"info-item\"><span class=\"info-label\">Timestamp:</span><span class=\"info-value\">" + anomalyReport.getTimestamp().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm")) + "</span></div>");
-        html.append("</div>");
-        html.append("<div class=\"security-notice\">");
-        html.append("<strong>Reason for Anomaly:</strong> " + anomalyReport.getReason());
-        html.append("</div>");
-        html.append("</div>");
-        html.append(getEmailFooter(currentDateTime));
-        html.append("</div>");
-        html.append("</body>");
-        html.append("</html>");
-
-        return html.toString();
-    }
 }
-
