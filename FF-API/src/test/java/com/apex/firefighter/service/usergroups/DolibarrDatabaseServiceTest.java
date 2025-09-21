@@ -1,6 +1,4 @@
-package com.apex.firefighter.service.usergroups;
-
-import com.apex.firefighter.service.changelog.ChangelogService;
+package com.apex.firefighter.unit.services;
 
 import com.apex.firefighter.service.DolibarrDatabaseService;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,9 +35,6 @@ class DolibarrDatabaseServiceTest {
     
     @Mock
     private PreparedStatement mockStatement;
-
-    @Mock
-    private ChangelogService mockChangelogService;
 
     private DolibarrDatabaseService dolibarrDatabaseService;
     
@@ -83,8 +78,7 @@ class DolibarrDatabaseServiceTest {
                 TEST_DOLIBARR_DB_NAME,
                 TEST_DB_USERNAME,
                 "", // Empty password
-                TEST_DB_SSL_MODE,
-                mockChangelogService
+                TEST_DB_SSL_MODE
             );
         }).isInstanceOf(IllegalStateException.class)
           .hasMessageContaining("DB_PASSWORD is required");
@@ -100,8 +94,7 @@ class DolibarrDatabaseServiceTest {
                 TEST_DOLIBARR_DB_NAME,
                 TEST_DB_USERNAME,
                 null, // Null password
-                TEST_DB_SSL_MODE,
-                mockChangelogService
+                TEST_DB_SSL_MODE
             );
         }).isInstanceOf(IllegalStateException.class)
           .hasMessageContaining("DB_PASSWORD is required");
@@ -142,8 +135,7 @@ class DolibarrDatabaseServiceTest {
             TEST_DOLIBARR_DB_NAME,
             TEST_DB_USERNAME,
             TEST_DB_PASSWORD,
-            TEST_DB_SSL_MODE,
-            mockChangelogService
+            TEST_DB_SSL_MODE
         ) {
             @Override
             public boolean testConnection() {
