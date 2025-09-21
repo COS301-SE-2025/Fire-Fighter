@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-import com.apex.firefighter.service.changelog.ChangelogService;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,7 +19,6 @@ import java.sql.SQLException;
 public class DolibarrDatabaseService {
     
     private final DataSource dolibarrDataSource;
-    private final ChangelogService changelogService;
 
     public DolibarrDatabaseService(
             @Value("${DB_HOST}") String dbHost,
@@ -28,11 +26,9 @@ public class DolibarrDatabaseService {
             @Value("${DOLIBARR_DB_NAME}") String dolibarrDbName,
             @Value("${DB_USERNAME}") String dbUsername,
             @Value("${DB_PASSWORD}") String dbPassword,
-            @Value("${DB_SSL_MODE}") String dbSslMode,
-            ChangelogService changelogService) {
+            @Value("${DB_SSL_MODE}") String dbSslMode) {
 
         this.dolibarrDataSource = createDolibarrDataSource(dbHost, dbPort, dolibarrDbName, dbUsername, dbPassword, dbSslMode);
-        this.changelogService = changelogService;
 
         System.out.println("✅ DolibarrDatabaseService initialized.");
     }
@@ -105,7 +101,6 @@ public class DolibarrDatabaseService {
                 System.out.println("✅ DOLIBARR DB: Successfully removed user " + dolibarrUserId + 
                                  " from firefighter group " + firefighterGroupId + 
                                  " (" + rowsAffected + " row(s) deleted)");
-                changelogService.logChange("llx_usergroup_user", "fk_user", dolibarrUserId, null, "DolibarrDatabaseService");
             } else {
                 System.out.println("ℹ️ DOLIBARR DB: No rows affected - user " + dolibarrUserId + 
                                  " was not in firefighter group " + firefighterGroupId + 
@@ -174,7 +169,6 @@ public class DolibarrDatabaseService {
                     System.out.println("✅ DOLIBARR DB: Successfully added user " + dolibarrUserId +
                                      " to firefighter group " + firefighterGroupId +
                                      " with entity=1 (" + rowsAffected + " row(s) inserted)");
-                    changelogService.logChange("llx_usergroup_user", "fk_user", null, dolibarrUserId, "DolibarrDatabaseService");
                 } else {
                     System.out.println("⚠️ DOLIBARR DB: No rows affected when adding user " + dolibarrUserId +
                                      " to firefighter group " + firefighterGroupId);
