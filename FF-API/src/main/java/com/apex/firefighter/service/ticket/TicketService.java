@@ -6,7 +6,8 @@ import com.apex.firefighter.repository.TicketRepository;
 import com.apex.firefighter.repository.UserRepository;
 import com.apex.firefighter.service.NotificationService;
 import com.apex.firefighter.service.DolibarrUserGroupService;
-import com.apex.firefighter.service.AnomalyDetectionService;
+import com.apex.firefighter.service.AnomalyNotificationService;
+import com.apex.firefighter.service.anomaly.AnomalyDetectionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,16 +23,18 @@ public class TicketService {
     private final DolibarrUserGroupService dolibarrUserGroupService;
     private final UserRepository userRepository;
     private final AnomalyDetectionService anomalyDetectionService;
+    private final AnomalyNotificationService anomalyNotificationService;
 
     @Autowired
     public TicketService(TicketRepository ticketRepository, NotificationService notificationService, 
                         DolibarrUserGroupService dolibarrUserGroupService, UserRepository userRepository,
-                        AnomalyDetectionService anomalyDetectionService) {
+                        AnomalyDetectionService anomalyDetectionService, AnomalyNotificationService anomalyNotificationService) {
         this.ticketRepository = ticketRepository;
         this.notificationService = notificationService;
         this.dolibarrUserGroupService = dolibarrUserGroupService;
         this.userRepository = userRepository;
         this.anomalyDetectionService = anomalyDetectionService;
+        this.anomalyNotificationService = anomalyNotificationService;
     }
 
     public Ticket createTicket(String description, String userId, String emergencyType, String emergencyContact, Integer duration) {
@@ -45,26 +48,23 @@ public class TicketService {
         Ticket savedTicket = ticketRepository.save(ticket);
 
         
-        // Check for anomalous behavior after ticket creation
+        // Check for anomalous behavior after ticket creation and notify admins
         try {
-
-            boolean isAnomalous = anomalyDetectionService.checkForAnomalousTicketCreation(userId);
-
-            if(isAnomalous){
-
-                String anomalyDetails = anomalyDetectionService.getAnomalyDetails(userId);
-                System.out.println("🚨 ANOMALY DETECTED for user: " + userId + " - " + anomalyDetails);
+            // Find the user object for notification purposes
+            Optional<User> userOpt = userRepository.findById(userId);
+            if (userOpt.isPresent()) {
+                User user = userOpt.get();
                 
-                // TODO: Implement notification/alert logic here
-                // This is where the reaction to anomaly detection would go
-                // For now, we're only detecting and logging
+                // Use the comprehensive anomaly check and notification method
+                anomalyNotificationService.checkAndNotifyAnomalies(user, savedTicket);
                 
+                System.out.println("✅ TICKET SERVICE: Completed anomaly detection and notification for user: " + userId);
+            } else {
+                System.err.println("⚠️ TICKET SERVICE: Could not find user " + userId + " for anomaly notification");
             }
 
         } catch(Exception e){
-
             System.err.println("⚠️ TICKET SERVICE: Failed to check for anomalies for user: " + userId + " - " + e.getMessage());
-
         }
 
         // Create notification with email support
