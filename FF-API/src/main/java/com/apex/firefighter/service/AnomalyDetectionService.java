@@ -223,6 +223,13 @@ public class AnomalyDetectionService {
         return null;
     }
 
+
+    /**
+     * Checks if a user makes a request outside of the usual working hours.
+     * 
+     * @param userID
+     * @return true if a user made a request outside of working hours, false otherwise
+     */
     public boolean isOffHoursAnomaly(String userID){
 
         LocalDateTime now = LocalDateTime.now();
