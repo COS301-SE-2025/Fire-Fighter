@@ -1,4 +1,4 @@
-package com.apex.firefighter.service;
+package com.apex.firefighter.service.anomaly;
 
 import com.apex.firefighter.repository.TicketRepository;
 import com.apex.firefighter.repository.AccessLogRepository;
