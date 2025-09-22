@@ -265,6 +265,12 @@ public class AnomalyDetectionService {
 
     }
 
+    /**
+     * get details for off-hours anomaly for logging/notification purposes
+     * 
+     * @param userID
+     * @return A String describing the off-hours anomaly, or null if no anomaly is detected 
+     */
     public String getOffHoursAnomalyDetails(String userID){
 
         LocalDateTime now = LocalDateTime.now();
