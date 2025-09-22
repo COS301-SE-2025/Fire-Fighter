@@ -225,9 +225,11 @@ public class AnomalyDetectionService {
 
 
     /**
-     * Checks if a user makes a request outside of the usual working hours.
+     * Checks if a user makes a request outside of regular working hours.
+     * Working hours are defined as 7 AM to 5 PM (17:00) on weekdays only.
+     * Requests made outside these hours or on weekends are considered anomalous.
      * 
-     * @param userID
+     * @param userID The user ID to check
      * @return true if a user made a request outside of working hours, false otherwise
      */
     public boolean isOffHoursAnomaly(String userID){
@@ -266,9 +268,12 @@ public class AnomalyDetectionService {
     }
 
     /**
-     * get details for off-hours anomaly for logging/notification purposes
+     * Gets details about detected off-hours anomaly for logging/notification purposes.
+     * Returns specific information about why the request was flagged as off-hours:
+     * - Time-based: Request made outside 7 AM - 5 PM window
+     * - Day-based: Request made on weekend (Saturday/Sunday)
      * 
-     * @param userID
+     * @param userID The user ID to get anomaly details for
      * @return A String describing the off-hours anomaly, or null if no anomaly is detected 
      */
     public String getOffHoursAnomalyDetails(String userID){
