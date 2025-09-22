@@ -884,6 +884,10 @@ public class GmailEmailService {
      * Get human-readable description for anomaly types
      */
     private String getAnomalyTypeDescription(String anomalyType) {
+        if (anomalyType == null) {
+            return "Unknown Anomaly Type";
+        }
+        
         return switch (anomalyType) {
             case "FREQUENT_REQUESTS" -> "Excessive Request Frequency";
             case "DORMANT_USER_ACTIVITY" -> "Dormant Account Sudden Activity";
@@ -897,6 +901,10 @@ public class GmailEmailService {
      */
     private String getSecurityNoticeForAnomalyType(String anomalyType, String riskLevel) {
         String baseNotice = "<strong>⚠️ IMMEDIATE ACTION REQUIRED:</strong> ";
+        
+        if (anomalyType == null) {
+            anomalyType = "UNKNOWN";
+        }
         
         String specificNotice = switch (anomalyType) {
             case "DORMANT_USER_ACTIVITY" -> 
