@@ -28,7 +28,7 @@ public class AnomalyDetectionService {
 
     //configuration for off-hours request detection
     private static final int EARLIEST_WORKING_HOURS = 7;
-    private static final int LATEST_WORKING_HOURS = 5;
+    private static final int LATEST_WORKING_HOURS = 17;
 
     public AnomalyDetectionService(TicketRepository ticketRepository, 
                                  AccessLogRepository accessLogRepository,
@@ -255,6 +255,34 @@ public class AnomalyDetectionService {
         }
 
         return false;
+
+    }
+
+    public String getOffHoursAnomalyDetails(String userID){
+
+        LocalDateTime now = LocalDateTime.now();
+        int hourOfDay = now.getHour();
+
+        //hourOfDay (0-23) 
+        //valid hours (7am to 5pm - 7th hour to 17th hour)
+        if(hourOfDay < EARLIEST_WORKING_HOURS || hourOfDay > LATEST_WORKING_HOURS){
+
+            return String.format("User made a request at %d:00 which is outside of regular work hours! (allowed: %d:00 AM - %d:00 PM)", 
+                hourOfDay, EARLIEST_WORKING_HOURS, LATEST_WORKING_HOURS);
+
+        }
+
+        DayOfWeek day = now.getDayOfWeek();
+
+        //request made on a weekend (which is also an off-time anomaly)
+        if(day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY){
+
+            return String.format("User made a request on a %s which is outside of regular work hours! (allowed: weekdays only)", 
+                day.toString());
+
+        }
+
+        return null;
 
     }
 
