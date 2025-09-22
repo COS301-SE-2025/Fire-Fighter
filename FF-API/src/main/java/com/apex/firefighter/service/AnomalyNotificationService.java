@@ -78,6 +78,11 @@ public class AnomalyNotificationService {
      */
     public void checkAndNotifyAnomalies(User user, Ticket ticket) {
         try {
+            if (user == null) {
+                System.err.println("❌ ANOMALY NOTIFICATION: Cannot check anomalies for null user");
+                return;
+            }
+            
             String userId = user.getUserId();
             
             // Check for frequent request anomaly
@@ -99,7 +104,8 @@ public class AnomalyNotificationService {
             }
             
         } catch (Exception e) {
-            System.err.println("❌ ANOMALY NOTIFICATION: Failed to check and notify anomalies for user " + user.getUsername() + ": " + e.getMessage());
+            String username = (user != null) ? user.getUsername() : "unknown";
+            System.err.println("❌ ANOMALY NOTIFICATION: Failed to check and notify anomalies for user " + username + ": " + e.getMessage());
         }
     }
 
@@ -125,6 +131,10 @@ public class AnomalyNotificationService {
      * @return Human-readable description
      */
     public String getAnomalyTypeDescription(String anomalyType) {
+        if (anomalyType == null) {
+            return "Unknown Anomaly Type";
+        }
+        
         return switch (anomalyType) {
             case "FREQUENT_REQUESTS" -> "Excessive Request Frequency";
             case "DORMANT_USER_ACTIVITY" -> "Dormant Account Sudden Activity";
