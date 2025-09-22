@@ -7,6 +7,7 @@ import com.apex.firefighter.model.AccessLog;
 import com.apex.firefighter.model.AccessSession;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,6 +25,10 @@ public class AnomalyDetectionService {
     //configuration for dormant user detection
     private static final int DORMANT_THRESHOLD_DAYS = 5;
     private static final int QUICK_ACTION_THRESHOLD_MINUTES = 15;
+
+    //configuration for off-hours request detection
+    private static final int EARLIEST_WORKING_HOURS = 7;
+    private static final int LATEST_WORKING_HOURS = 17;
 
     public AnomalyDetectionService(TicketRepository ticketRepository, 
                                  AccessLogRepository accessLogRepository,
@@ -218,6 +223,87 @@ public class AnomalyDetectionService {
         return null;
     }
 
+
+    /**
+     * Checks if a user makes a request outside of regular working hours.
+     * Working hours are defined as 7 AM to 5 PM (17:00) on weekdays only.
+     * Requests made outside these hours or on weekends are considered anomalous.
+     * 
+     * @param userID The user ID to check
+     * @return true if a user made a request outside of working hours, false otherwise
+     */
+    public boolean isOffHoursAnomaly(String userID){
+
+        LocalDateTime now = LocalDateTime.now();
+        int hourOfDay = now.getHour();
+
+        //hourOfDay (0-23) 
+        //valid hours (7am to 5pm - 7th hour to 17th hour)
+        if(hourOfDay < EARLIEST_WORKING_HOURS || hourOfDay > LATEST_WORKING_HOURS){
+
+            System.out.println("🚨 ANOMALY DETECTED: Request made outside of regular working hours!"
+            + " User "+ userID 
+            + " made a request at " + now.toString());
+
+            return true;
+
+        }
+
+        DayOfWeek day = now.getDayOfWeek();
+
+        //request made on a weekend (which is also an off-time anomaly)
+        if(day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY){
+
+            System.out.println("🚨 ANOMALY DETECTED: Request made outside of regular working hours!"
+            + " User "+ userID 
+            + " made a request at " + now.toString()
+            + ", which is a " + day.toString());
+
+            return true;
+
+        }
+
+        return false;
+
+    }
+
+    /**
+     * Gets details about detected off-hours anomaly for logging/notification purposes.
+     * Returns specific information about why the request was flagged as off-hours:
+     * - Time-based: Request made outside 7 AM - 5 PM window
+     * - Day-based: Request made on weekend (Saturday/Sunday)
+     * 
+     * @param userID The user ID to get anomaly details for
+     * @return A String describing the off-hours anomaly, or null if no anomaly is detected 
+     */
+    public String getOffHoursAnomalyDetails(String userID){
+
+        LocalDateTime now = LocalDateTime.now();
+        int hourOfDay = now.getHour();
+
+        //hourOfDay (0-23) 
+        //valid hours (7am to 5pm - 7th hour to 17th hour)
+        if(hourOfDay < EARLIEST_WORKING_HOURS || hourOfDay > LATEST_WORKING_HOURS){
+
+            return String.format("User made a request at %d:00 which is outside of regular work hours! (allowed: %d:00 AM - %d:00 PM)", 
+                hourOfDay, EARLIEST_WORKING_HOURS, LATEST_WORKING_HOURS);
+
+        }
+
+        DayOfWeek day = now.getDayOfWeek();
+
+        //request made on a weekend (which is also an off-time anomaly)
+        if(day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY){
+
+            return String.format("User made a request on a %s which is outside of regular work hours! (allowed: weekdays only)", 
+                day.toString());
+
+        }
+
+        return null;
+
+    }
+
     /**
      * Gets details about any detected anomaly for logging/notification purposes
      * This method combines both frequent request and dormant user anomaly details
@@ -225,7 +311,7 @@ public class AnomalyDetectionService {
      * @param userId The user ID to check
      * @return A string describing the anomaly, or null if no anomaly is detected
      */
-    public String getAnomalyDetails(String userId) {
+    public String getFrequencyAnomalyDetails(String userId) {
         
         // Check for frequent request anomaly details
         String frequencyDetails = getRequestFrequencyDetails(userId);
