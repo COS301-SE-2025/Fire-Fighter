@@ -50,4 +50,15 @@ class QueryProcessingServiceTest {
         assertEquals("open", filters.get("status")); // normalized to lowercase
     }
 
+    @Test   // ----- Validate User Operation Tests -----
+    void testValidateUserOperation_CreateTicket_UserAllowed() {
+        EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
+        boolean allowed = queryProcessingService.validateUserOperation(
+                QueryProcessingService.TicketOperation.CREATE_TICKET, entities, "user1", false);
+        assertTrue(allowed);
+    }
+
+    
+
+
 }
