@@ -63,6 +63,11 @@ public class QueryProcessingService {
             case HELP:
                 return executeTicketQuery(TicketQueryType.HELP,
                         buildQueryFilters(entities), userId, isAdmin);
+            
+            // ----------- Ticket Operations -----------
+            case CREATE_TICKET:
+                return executeTicketOperation(TicketOperation.CREATE_TICKET,
+                        entities, userId, isAdmin);
 
             // ----------- Fallback -----------
             default:
