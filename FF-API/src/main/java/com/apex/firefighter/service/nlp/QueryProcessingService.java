@@ -172,7 +172,11 @@ public class QueryProcessingService {
 
             case DURATION:
                 filters.put("duration", entity.getNormalizedValue());
-                break;    
+                break; 
+            
+            case EMERGENCY_TYPE:
+                filters.put("emergencyType", entity.getNormalizedValue());
+                break;
 
             default:
                 // skip unknown or unneeded entity types
