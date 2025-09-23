@@ -158,6 +158,10 @@ public class QueryProcessingService {
                 filters.put("assigned", entity.getNormalizedValue());
                 break;
 
+            case PRIORITY:
+                filters.put("priority", entity.getNormalizedValue().toLowerCase());
+                break;
+
 
             default:
                 // skip unknown or unneeded entity types
