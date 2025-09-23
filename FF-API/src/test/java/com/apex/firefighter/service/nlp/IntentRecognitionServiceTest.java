@@ -297,7 +297,19 @@ class IntentRecognitionServiceTest {
 
     // ==================== Test recognizeMultipleIntents ====================
     @Test testRecognizeMultipleIntents_validQuery() {
-        
+        // Act 
+        String query = "show my tickets and create a new ticket";
+        List<IntentRecognitionService.Intent> intents = intentRecognitionService.recognizeMultipleIntents(query);
+
+        // Assert
+        assertThat(intents).isNotNull();
+        assertThat(intents).isNotEmpty();
+        assertThat(intents.stream().map(IntentRecognitionService.Intent::getType))
+            .containsAnyOf(
+                IntentRecognitionService.IntentType.SHOW_TICKETS,
+                IntentRecognitionService.IntentType.CREATE_TICKET
+            );
+        assertThat(intents.get(0).getConfidence()).isGreaterThanOrEqualTo(0.7);
     }
 
 
