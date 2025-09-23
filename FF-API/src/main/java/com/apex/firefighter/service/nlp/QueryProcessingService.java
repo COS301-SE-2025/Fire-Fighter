@@ -144,7 +144,18 @@ public class QueryProcessingService {
             return filters;
         }
 
-        return null;
+        for (EntityExtractionService.Entity entity : entities.getEntities()) {
+        switch (entity.getType()) {
+            case :
+                break;
+
+            default:
+                // skip unknown or unneeded entity types
+                break;
+        }
+    }
+
+        return filters;
     }
 
     /**
