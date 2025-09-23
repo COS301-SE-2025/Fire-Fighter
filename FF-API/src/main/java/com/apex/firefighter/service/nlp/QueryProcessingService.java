@@ -73,6 +73,10 @@ public class QueryProcessingService {
                 return executeTicketOperation(TicketOperation.CLOSE_TICKET,
                         entities, userId, isAdmin);
 
+            case UPDATE_STATUS:
+                return executeTicketOperation(TicketOperation.UPDATE_STATUS,
+                        entities, userId, isAdmin);
+
             // ----------- Fallback -----------
             default:
                 return new QueryResult(QueryResultType.ERROR, 
