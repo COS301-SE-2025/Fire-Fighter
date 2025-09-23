@@ -185,6 +185,13 @@ public class QueryProcessingService {
                     return new QueryResult(QueryResultType.OPERATION_RESULT, newTicket, 1);
                 }
 
+                case UPDATE_STATUS: {
+                    String ticketId = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.TICKET_ID);
+                    String status = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.STATUS);
+                    Ticket updated = ticketService.updateTicketStatus(ticketId, status, userId, isAdmin);
+                    return new QueryResult(QueryResultType.OPERATION_RESULT, updated, 1);
+                }
+
                 default:
                     return new QueryResult(QueryResultType.ERROR, "Unsupported operation: " + operation);
             }
