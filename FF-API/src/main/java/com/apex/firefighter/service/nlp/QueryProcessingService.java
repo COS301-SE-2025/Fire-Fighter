@@ -173,8 +173,24 @@ public class QueryProcessingService {
                                              Map<String, Object> parameters, 
                                              String userId, 
                                              boolean isAdmin) {
-        // TODO: Implement ticket operation execution logic
-        return null;
+        try {
+            // First validate user permissions
+            if (!validateUserOperation(operation, entities, userId, isAdmin)) {
+                return new QueryResult(QueryResultType.ERROR, "You are not allowed to perform this operation.");
+            }
+
+            switch (operation) {
+                case : {
+                    return
+                }
+
+                default:
+                    return new QueryResult(QueryResultType.ERROR, "Unsupported operation: " + operation);
+            }
+
+        } catch (Exception e) {
+            return new QueryResult(QueryResultType.ERROR, "Error while executing operation: " + e.getMessage());
+        }
     }
 
     /**
