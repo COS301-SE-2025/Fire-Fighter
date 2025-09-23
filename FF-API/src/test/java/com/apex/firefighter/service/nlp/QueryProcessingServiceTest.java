@@ -94,4 +94,18 @@ class QueryProcessingServiceTest {
         assertTrue(allowed);
     }    
 
+    @Test   // ----- Execute Ticket Query Tests -----
+    void testExecuteTicketQuery_SystemStats() {
+        Map<String, Object> stats = Map.of("totalTickets", 5, "openTickets", 2);
+        when(ticketService.getSystemStatistics()).thenReturn(stats);
+
+        QueryProcessingService.QueryResult result =
+                queryProcessingService.executeTicketQuery(QueryProcessingService.TicketQueryType.SYSTEM_STATS,
+                        Collections.emptyMap(), "admin", true);
+
+        assertEquals(QueryProcessingService.QueryResultType.STATISTICS, result.getResultType());
+        assertEquals(stats, result.getData());
+    }
+
+
 }
