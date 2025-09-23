@@ -178,6 +178,10 @@ public class QueryProcessingService {
                 filters.put("emergencyType", entity.getNormalizedValue());
                 break;
 
+            case NUMBER:
+                filters.put("number", entity.getNormalizedValue());
+                break;
+
             case LOCATION:
                 filters.put("location", entity.getNormalizedValue());
                 break;
