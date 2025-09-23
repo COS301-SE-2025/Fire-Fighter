@@ -138,6 +138,14 @@ public class QueryProcessingService {
                     return new QueryResult(QueryResultType.STATISTICS, stats, stats.size());
                 }
 
+                case EXPORT_DATA: {
+                    byte[] export = ticketService.exportTickets(filters, userId, isAdmin);
+                    Map<String, Object> metadata = new HashMap<>();
+                    metadata.put("exportFormat", "csv");
+                    metadata.put("size", export.length);
+                    return new QueryResult(QueryResultType.OPERATION_RESULT, export, 1, metadata);
+                }
+
                 default:
                     return new QueryResult(QueryResultType.ERROR, "Unsupported query type: " + queryType);
             }
