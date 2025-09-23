@@ -209,7 +209,14 @@ public class QueryProcessingService {
             return true;
         }
 
+        switch (operation) {
+            case :
+                return true;
 
+            default:
+                // Unknown/unsupported operation → reject
+                return false;
+        }
         return false;
     }
 
