@@ -9,6 +9,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
+
 import static org.mockito.Mockito.lenient;
 
 /**
@@ -297,8 +300,30 @@ class IntentRecognitionServiceTest {
 
     // ==================== Test recognizeMultipleIntents ====================
     @Test testRecognizeMultipleIntents_validQuery() {
-        
+        // Act 
+        String query = "show my tickets and create a new ticket";
+        List<IntentRecognitionService.Intent> intents = intentRecognitionService.recognizeMultipleIntents(query);
+
+        // Assert
+        assertThat(intents).isNotNull();
+        assertThat(intents).isNotEmpty();
+        assertThat(intents.stream().map(IntentRecognitionService.Intent::getType))
+            .containsAnyOf(
+                IntentRecognitionService.IntentType.SHOW_TICKETS,
+                IntentRecognitionService.IntentType.CREATE_TICKET
+            );
+        assertThat(intents.get(0).getConfidence()).isGreaterThanOrEqualTo(0.7);
     }
 
+    @Test
+    void testRecognizeMultipleIntents_emptyQuery() {
+        List<IntentRecognitionService.Intent> intents = intentRecognitionService.recognizeMultipleIntents("");
+
+        assertThat(intents).hasSize(1);
+        assertThat(intents.get(0).getType()).isEqualTo(IntentRecognitionService.IntentType.UNKNOWN);
+        assertThat(intents.get(0).getConfidence()).isEqualTo(0.0);
+    }
+
+    
 
 }
