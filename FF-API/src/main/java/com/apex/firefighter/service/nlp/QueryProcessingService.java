@@ -212,6 +212,13 @@ public class QueryProcessingService {
                     return new QueryResult(QueryResultType.OPERATION_RESULT, commented, 1);
                 }
 
+                case UPDATE_PRIORITY: {
+                    String ticketId = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.TICKET_ID);
+                    String priority = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.PRIORITY);
+                    Ticket updated = ticketService.updateTicketPriority(ticketId, priority, userId);
+                    return new QueryResult(QueryResultType.OPERATION_RESULT, updated, 1);
+                }
+
                 default:
                     return new QueryResult(QueryResultType.ERROR, "Unsupported operation: " + operation);
             }
