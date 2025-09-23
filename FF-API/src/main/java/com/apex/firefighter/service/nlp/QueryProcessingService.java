@@ -205,6 +205,13 @@ public class QueryProcessingService {
                     return new QueryResult(QueryResultType.OPERATION_RESULT, assigned, 1);
                 }
 
+                case ADD_COMMENT: {
+                    String ticketId = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.TICKET_ID);
+                    String comment = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.TEXT);
+                    Ticket commented = ticketService.addComment(ticketId, comment, userId);
+                    return new QueryResult(QueryResultType.OPERATION_RESULT, commented, 1);
+                }
+
                 default:
                     return new QueryResult(QueryResultType.ERROR, "Unsupported operation: " + operation);
             }
