@@ -214,6 +214,10 @@ public class QueryProcessingService {
             // Any user can create a ticket
             return true;
 
+            case ASSIGN_TICKET:
+            // Only admins can reassign tickets
+            return false;
+
             default:
                 // Unknown/unsupported operation → reject
                 return false;
