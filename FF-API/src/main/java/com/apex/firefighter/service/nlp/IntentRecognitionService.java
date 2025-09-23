@@ -203,10 +203,23 @@ public class IntentRecognitionService {
      * Normalize query text for better pattern matching
      */
     private String normalizeQuery(String query) {
-        return query.toLowerCase()
+        String normalizedQuery = query.toLowerCase()
                    .replaceAll("[^a-zA-Z0-9\\s-]", " ") // Remove special chars except hyphens
                    .replaceAll("\\s+", " ") // Normalize whitespace
                    .trim();
+
+        // Implement further thesaurus normalizations (there are libraries for this, but keeping simple here)
+        // a few common verb synonyms
+        normalizedQuery = normalizedQuery.replaceAll("\\bdisplay\\b", "show")
+                                       .replaceAll("\\bfind\\b", "search")
+                                       .replaceAll("\\blookup\\b", "search")
+                                       .replaceAll("\\bcreate new\\b", "create")
+                                       .replaceAll("\\bmake new\\b", "create")
+                                       .replaceAll("\\bremove\\b", "delete")
+                                       .replaceAll("\\bfinish\\b", "close")
+                                       .replaceAll("\\bend\\b", "close");
+        return normalizedQuery;
+
     }
 
     /**
