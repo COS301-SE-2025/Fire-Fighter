@@ -110,8 +110,54 @@ public class QueryProcessingService {
                                          Map<String, Object> filters, 
                                          String userId, 
                                          boolean isAdmin) {
-        // TODO: Implement ticket query execution logic
-        return null;
+        try {
+            switch (queryType) {
+                case ACTIVE_TICKETS: {
+                    List<Ticket> tickets = ticketService.getActiveTicketsForUser(userId, isAdmin);
+                    return new QueryResult(QueryResultType.TICKET_LIST, tickets, tickets.size());
+                }
+
+                case COMPLETED_TICKETS: {
+                    List<Ticket> tickets = ticketService.getCompletedTicketsForUser(userId, isAdmin);
+                    return new QueryResult(QueryResultType.TICKET_LIST, tickets, tickets.size());
+                }
+
+                case USER_TICKETS: {
+                    List<Ticket> tickets = ticketService.getTicketsForUser(userId, isAdmin);
+                    return new QueryResult(QueryResultType.TICKET_LIST, tickets, tickets.size());
+                }
+
+                case SEARCH_TICKETS: {
+                    // Use filters (status, priority, etc.)
+                    List<Ticket> tickets = ticketService.searchTickets(filters, userId, isAdmin);
+                    return new QueryResult(QueryResultType.TICKET_LIST, tickets, tickets.size());
+                }
+
+                case SYSTEM_STATS: {
+                    Map<String, Object> stats = ticketService.getSystemStatistics();
+                    return new QueryResult(QueryResultType.STATISTICS, stats, stats.size());
+                }
+
+                case EXPORT_DATA: {
+                    byte[] export = ticketService.exportTickets(filters, userId, isAdmin);
+                    Map<String, Object> metadata = new HashMap<>();
+                    metadata.put("exportFormat", "csv");
+                    metadata.put("size", export.length);
+                    return new QueryResult(QueryResultType.OPERATION_RESULT, export, 1, metadata);
+                }
+
+                case HELP: {
+                    String helpText = "Supported commands: show tickets, create ticket, update status, close ticket, assign ticket, add comment, update priority, export tickets, system stats.";
+                    return new QueryResult(QueryResultType.HELP, helpText, 1);
+                }
+
+                default:
+                    return new QueryResult(QueryResultType.ERROR, "Unsupported query type: " + queryType);
+            }
+
+        } catch (Exception e) {
+            return new QueryResult(QueryResultType.ERROR, "Error while executing query: " + e.getMessage());
+        }
     }
 
     /**
@@ -127,8 +173,59 @@ public class QueryProcessingService {
                                              Map<String, Object> parameters, 
                                              String userId, 
                                              boolean isAdmin) {
-        // TODO: Implement ticket operation execution logic
-        return null;
+        try {
+            // First validate user permissions
+            if (!validateUserOperation(operation, entities, userId, isAdmin)) {
+                return new QueryResult(QueryResultType.ERROR, "You are not allowed to perform this operation.");
+            }
+
+            switch (operation) {
+                case CREATE_TICKET: {
+                    Ticket newTicket = ticketService.createTicket(entities, userId);
+                    return new QueryResult(QueryResultType.OPERATION_RESULT, newTicket, 1);
+                }
+
+                case UPDATE_STATUS: {
+                    String ticketId = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.TICKET_ID);
+                    String status = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.STATUS);
+                    Ticket updated = ticketService.updateTicketStatus(ticketId, status, userId, isAdmin);
+                    return new QueryResult(QueryResultType.OPERATION_RESULT, updated, 1);
+                }
+
+                case CLOSE_TICKET: {
+                    String ticketId = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.TICKET_ID);
+                    Ticket closed = ticketService.closeTicket(ticketId, userId, isAdmin);
+                    return new QueryResult(QueryResultType.OPERATION_RESULT, closed, 1);
+                }
+
+                case ASSIGN_TICKET: {
+                    String ticketId = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.TICKET_ID);
+                    String assignee = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.USER_NAME);
+                    Ticket assigned = ticketService.assignTicket(ticketId, assignee, userId, isAdmin);
+                    return new QueryResult(QueryResultType.OPERATION_RESULT, assigned, 1);
+                }
+
+                case ADD_COMMENT: {
+                    String ticketId = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.TICKET_ID);
+                    String comment = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.TEXT);
+                    Ticket commented = ticketService.addComment(ticketId, comment, userId);
+                    return new QueryResult(QueryResultType.OPERATION_RESULT, commented, 1);
+                }
+
+                case UPDATE_PRIORITY: {
+                    String ticketId = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.TICKET_ID);
+                    String priority = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.PRIORITY);
+                    Ticket updated = ticketService.updateTicketPriority(ticketId, priority, userId);
+                    return new QueryResult(QueryResultType.OPERATION_RESULT, updated, 1);
+                }
+
+                default:
+                    return new QueryResult(QueryResultType.ERROR, "Unsupported operation: " + operation);
+            }
+
+        } catch (Exception e) {
+            return new QueryResult(QueryResultType.ERROR, "Error while executing operation: " + e.getMessage());
+        }
     }
 
     /**
@@ -204,7 +301,50 @@ public class QueryProcessingService {
      * @return true if operation is allowed, false otherwise
      */
     public boolean validateUserOperation(TicketOperation operation, String userId, boolean isAdmin) {
-        // TODO: Implement operation validation logic
+        // Admin can do everything
+        if (isAdmin) {
+            return true;
+        }
+
+        switch (operation) {
+            case CREATE_TICKET:
+            // Any user can create a ticket
+            return true;
+
+            case ADD_COMMENT:
+            case UPDATE_STATUS:
+            case CLOSE_TICKET:
+            case UPDATE_PRIORITY:
+                if (entities != null && entities.getEntities() != null) {
+                    for (EntityExtractionService.Entity entity : entities.getEntities()) {
+                        if (entity.getType() == EntityExtractionService.EntityType.TICKET_ID) {
+                            String ticketId = entity.getNormalizedValue();
+                            if (ticketId != null) {
+                                Optional<Ticket> ticketOpt = ticketService.getTicketByTicketId(ticketId);
+                                if (ticketOpt.isPresent()) {
+                                    Ticket ticket = ticketOpt.get();
+                                    // Only allow if the ticket belongs to the current user
+                                    if (ticket.getUserId().equals(userId)) {
+                                        return true;
+                                    } else {
+                                        return false; // ticket belongs to someone else
+                                    }
+                                } else {
+                                    return false; // no such ticket
+                                }
+                            }
+                        }
+                    }
+                }
+
+            case ASSIGN_TICKET:
+            // Only admins can reassign tickets
+            return false;
+
+            default:
+                // Unknown/unsupported operation → reject
+                return false;
+        }
         return false;
     }
 
