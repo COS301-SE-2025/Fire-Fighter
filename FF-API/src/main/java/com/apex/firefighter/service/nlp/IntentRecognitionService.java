@@ -341,17 +341,39 @@ public class IntentRecognitionService {
      */
     public List<IntentType> getSupportedIntents(String userRole) {
         if (userRole == null || userRole.trim().isEmpty()) {
+            if (nlpConfig.isDebugEnabled()) {
+                System.out.println("DEBUG: Null or empty user role provided");
+            }
             return Collections.emptyList();
         }
 
-        // For simplicity, assume all intents are supported for admin
-        if ("ADMIN".equalsIgnoreCase(userRole)) {
-            return Arrays.stream(IntentType.values())
-                         .filter(intent -> intent != IntentType.UNKNOWN)
-                         .collect(Collectors.toList());
-        }
+        // Define role-based intent access
+        Map<String, List<IntentType>> roleIntents = new HashMap<>();
+        roleIntents.put("USER", Arrays.asList(
+            IntentType.SHOW_TICKETS,
+            IntentType.SHOW_ACTIVE_TICKETS,
+            IntentType.SHOW_COMPLETED_TICKETS,
+            IntentType.SEARCH_TICKETS,
+            IntentType.GET_TICKET_DETAILS,
+            IntentType.CREATE_TICKET,
+            IntentType.UPDATE_TICKET_STATUS,
+            IntentType.CLOSE_TICKET,
+            IntentType.GET_HELP,
+            IntentType.SHOW_CAPABILITIES
+        ));
+        // For simplicity, admins can access all intents
+        roleIntents.put("ADMIN", Arrays.asList(
+            IntentType.values()
+        ));
 
-        
+        String normalizedRole = userRole.trim().toUpperCase();
+        List<IntentType> supportedIntents = roleIntents.getOrDefault(normalizedRole, Collections.emptyList());
+    
+        if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
+            System.out.println("Debug: Supported intents for role " + normalizedRole + ": " +
+                supportedIntents.stream().map(IntentType::getCode).collect(Collectors.joining(", ")));
+        }
+        return supportedIntents;
     }
 
     /**
