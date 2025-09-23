@@ -162,6 +162,10 @@ public class QueryProcessingService {
                 filters.put("priority", entity.getNormalizedValue().toLowerCase());
                 break;
 
+            case DATE:
+                filters.put("date", entity.getNormalizedValue());
+                break;
+
 
             default:
                 // skip unknown or unneeded entity types
