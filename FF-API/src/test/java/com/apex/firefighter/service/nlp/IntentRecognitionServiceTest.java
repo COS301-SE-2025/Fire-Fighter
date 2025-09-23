@@ -269,4 +269,36 @@ class IntentRecognitionServiceTest {
         assertThat(result.getType()).isEqualTo(IntentRecognitionService.IntentType.CREATE_TICKET);
         assertThat(result.getConfidence()).isGreaterThan(0.7);
     }
+
+
+    // ==================== Test recognizeIntents ====================
+    @ParameterizedTest
+    @CsvSource({
+        "show my tickets, SHOW_TICKETS, true",
+        "create ticket, CREATE_TICKET, true",
+        "invalid query, UNKNOWN, false",
+        ", UNKNOWN, false"
+    })
+    void testRecognizeIntent(String query, IntentRecognitionService.IntentType expectedType, boolean expectedSuccess)
+    {
+        // Act
+        IntentRecognitionService.Intent result = intentRecognitionService.recognizeIntent(query);
+        
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.getType()).isEqualTo(expectedType);
+        assertThat(result.isSuccess()).isEqualTo(expectedSuccess);
+        if (expectedSuccess) {
+            assertThat(result.getConfidence()).isGreaterThanOrEqual(0.7);
+        } else {
+            assertThat(result.getConfidence()).isLessThan(0.7);
+        }
+    }
+
+    // ==================== Test recognizeMultipleIntents ====================
+    @Test testRecognizeMultipleIntents_validQuery() {
+        
+    }
+
+
 }
