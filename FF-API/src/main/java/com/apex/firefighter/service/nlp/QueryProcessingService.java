@@ -127,6 +127,12 @@ public class QueryProcessingService {
                     return new QueryResult(QueryResultType.TICKET_LIST, tickets, tickets.size());
                 }
 
+                case SEARCH_TICKETS: {
+                    // Use filters (status, priority, etc.)
+                    List<Ticket> tickets = ticketService.searchTickets(filters, userId, isAdmin);
+                    return new QueryResult(QueryResultType.TICKET_LIST, tickets, tickets.size());
+                }
+
                 default:
                     return new QueryResult(QueryResultType.ERROR, "Unsupported query type: " + queryType);
             }
