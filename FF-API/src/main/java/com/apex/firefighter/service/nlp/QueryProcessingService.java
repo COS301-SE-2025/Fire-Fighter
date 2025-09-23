@@ -69,6 +69,10 @@ public class QueryProcessingService {
                 return executeTicketOperation(TicketOperation.CREATE_TICKET,
                         entities, userId, isAdmin);
 
+            case CLOSE_TICKET:
+                return executeTicketOperation(TicketOperation.CLOSE_TICKET,
+                        entities, userId, isAdmin);
+
             // ----------- Fallback -----------
             default:
                 return new QueryResult(QueryResultType.ERROR, 
