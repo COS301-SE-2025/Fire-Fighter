@@ -198,6 +198,13 @@ public class QueryProcessingService {
                     return new QueryResult(QueryResultType.OPERATION_RESULT, closed, 1);
                 }
 
+                case ASSIGN_TICKET: {
+                    String ticketId = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.TICKET_ID);
+                    String assignee = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.USER_NAME);
+                    Ticket assigned = ticketService.assignTicket(ticketId, assignee, userId, isAdmin);
+                    return new QueryResult(QueryResultType.OPERATION_RESULT, assigned, 1);
+                }
+
                 default:
                     return new QueryResult(QueryResultType.ERROR, "Unsupported operation: " + operation);
             }
