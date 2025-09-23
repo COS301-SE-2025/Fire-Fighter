@@ -210,8 +210,9 @@ public class QueryProcessingService {
         }
 
         switch (operation) {
-            case :
-                return true;
+            case CREATE_TICKET:
+            // Any user can create a ticket
+            return true;
 
             default:
                 // Unknown/unsupported operation → reject
