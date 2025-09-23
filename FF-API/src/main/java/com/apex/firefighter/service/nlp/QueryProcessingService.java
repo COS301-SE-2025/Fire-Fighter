@@ -180,8 +180,9 @@ public class QueryProcessingService {
             }
 
             switch (operation) {
-                case : {
-                    return
+                case CREATE_TICKET: {
+                    Ticket newTicket = ticketService.createTicket(entities, userId);
+                    return new QueryResult(QueryResultType.OPERATION_RESULT, newTicket, 1);
                 }
 
                 default:
