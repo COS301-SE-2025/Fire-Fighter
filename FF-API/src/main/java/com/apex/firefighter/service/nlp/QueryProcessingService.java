@@ -219,11 +219,13 @@ public class QueryProcessingService {
             case CLOSE_TICKET:
             case UPDATE_PRIORITY:
                 // User can only operate on their own tickets
-                for (EntityExtractionService.Entity entity : entities.getEntities()) {
-                    if (entity.getType() == EntityExtractionService.EntityType.TICKET_ID) {
-                        // TODO: Ideally check TicketService to verify ownership
-                        // For now assume allowed if a ticketId is provided
-                        return true;
+                if (entities != null && entities.getEntities() != null) {
+                    for (EntityExtractionService.Entity entity : entities.getEntities()) {
+                        if (entity.getType() == EntityExtractionService.EntityType.TICKET_ID) {
+                            // TODO: Ideally check TicketService to verify ownership
+                            // For now assume allowed if a ticketId is provided
+                            return true;
+                        }
                     }
                 }
 
