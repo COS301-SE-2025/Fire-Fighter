@@ -55,6 +55,10 @@ public class QueryProcessingService {
                 return executeTicketQuery(TicketQueryType.SYSTEM_STATS,
                         buildQueryFilters(entities), userId, isAdmin);
 
+            case EXPORT_TICKETS:
+                return executeTicketQuery(TicketQueryType.EXPORT_DATA,
+                        buildQueryFilters(entities), userId, isAdmin);
+
             // ----------- Fallback -----------
             default:
                 return new QueryResult(QueryResultType.ERROR, 
