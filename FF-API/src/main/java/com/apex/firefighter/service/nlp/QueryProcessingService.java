@@ -150,6 +150,10 @@ public class QueryProcessingService {
                 filters.put("ticketId", entity.getNormalizedValue());
                 break;
 
+            case STATUS:
+                filters.put("status", entity.getNormalizedValue().toLowerCase());
+                break;
+
             default:
                 // skip unknown or unneeded entity types
                 break;
