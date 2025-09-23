@@ -203,10 +203,23 @@ public class IntentRecognitionService {
      * Normalize query text for better pattern matching
      */
     private String normalizeQuery(String query) {
-        return query.toLowerCase()
+        String normalizedQuery = query.toLowerCase()
                    .replaceAll("[^a-zA-Z0-9\\s-]", " ") // Remove special chars except hyphens
                    .replaceAll("\\s+", " ") // Normalize whitespace
                    .trim();
+
+        // Implement further thesaurus normalizations (there are libraries for this, but keeping simple here)
+        // a few common verb synonyms
+        normalizedQuery = normalizedQuery.replaceAll("\\bdisplay\\b", "show")
+                                       .replaceAll("\\bfind\\b", "search")
+                                       .replaceAll("\\blookup\\b", "search")
+                                       .replaceAll("\\bcreate new\\b", "create")
+                                       .replaceAll("\\bmake new\\b", "create")
+                                       .replaceAll("\\bremove\\b", "delete")
+                                       .replaceAll("\\bfinish\\b", "close")
+                                       .replaceAll("\\bend\\b", "close");
+        return normalizedQuery;
+
     }
 
     /**
@@ -340,8 +353,40 @@ public class IntentRecognitionService {
      * @return List of supported intent types
      */
     public List<IntentType> getSupportedIntents(String userRole) {
-        // TODO: Implement supported intents logic
-        return null;
+        if (userRole == null || userRole.trim().isEmpty()) {
+            if (nlpConfig.isDebugEnabled()) {
+                System.out.println("DEBUG: Null or empty user role provided");
+            }
+            return Collections.emptyList();
+        }
+
+        // Define role-based intent access
+        Map<String, List<IntentType>> roleIntents = new HashMap<>();
+        roleIntents.put("USER", Arrays.asList(
+            IntentType.SHOW_TICKETS,
+            IntentType.SHOW_ACTIVE_TICKETS,
+            IntentType.SHOW_COMPLETED_TICKETS,
+            IntentType.SEARCH_TICKETS,
+            IntentType.GET_TICKET_DETAILS,
+            IntentType.CREATE_TICKET,
+            IntentType.UPDATE_TICKET_STATUS,
+            IntentType.CLOSE_TICKET,
+            IntentType.GET_HELP,
+            IntentType.SHOW_CAPABILITIES
+        ));
+        // For simplicity, admins can access all intents
+        roleIntents.put("ADMIN", Arrays.asList(
+            IntentType.values()
+        ));
+
+        String normalizedRole = userRole.trim().toUpperCase();
+        List<IntentType> supportedIntents = roleIntents.getOrDefault(normalizedRole, Collections.emptyList());
+    
+        if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
+            System.out.println("Debug: Supported intents for role " + normalizedRole + ": " +
+                supportedIntents.stream().map(IntentType::getCode).collect(Collectors.joining(", ")));
+        }
+        return supportedIntents;
     }
 
     /**
@@ -352,8 +397,21 @@ public class IntentRecognitionService {
      * @return true if intent is allowed, false otherwise
      */
     public boolean isIntentAllowed(IntentType intent, String userRole) {
-        // TODO: Implement intent validation logic
-        return false;
+        if (intent == null || userRole == null || userRole.trim().isEmpty()) {
+            if (nlpConfig.isDebugEnabled()) {
+                System.out.println("DEBUG: Invalid intent or user role provided");
+            }
+            return false;
+        }
+
+        List<IntentType> supportedIntents = getSupportedIntents(userRole);
+        boolean allowed = supportedIntents.contains(intent);
+
+        if (nlpConfig.isDebugEnabled()) {
+            System.out.println("DEBUG: Intent " + intent.getCode() + " allowed for role " + userRole + ": " + allowed);
+        }
+
+        return allowed;
     }
 
     /**
