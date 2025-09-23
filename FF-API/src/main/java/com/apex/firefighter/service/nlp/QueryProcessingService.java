@@ -31,7 +31,11 @@ public class QueryProcessingService {
                                    EntityExtractionService.ExtractedEntities entities, 
                                    String userId, 
                                    boolean isAdmin) {
-        // TODO: Implement query processing logic
+        
+        if (intent == null || intent.getType() == IntentRecognitionService.IntentType.UNKNOWN) {
+            return new QueryResult(QueryResultType.ERROR, 
+                "Sorry, I couldn’t understand your request.");
+        }
         return null;
     }
 
