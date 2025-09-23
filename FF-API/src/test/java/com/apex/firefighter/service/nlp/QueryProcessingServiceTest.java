@@ -80,8 +80,18 @@ class QueryProcessingServiceTest {
         assertTrue(allowed);
     }
 
-    
+    @Test
+    void testValidateUserOperation_UpdatePriority_UserOwnsTicket() {
+        Ticket ticket = new Ticket("123", "user1", "open");
+        when(ticketService.getTicketByTicketId("123")).thenReturn(Optional.of(ticket));
 
-    
+        EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
+        entities.addEntity(makeEntity(EntityExtractionService.EntityType.TICKET_ID, "123"));
+
+        boolean allowed = queryProcessingService.validateUserOperation(
+                QueryProcessingService.TicketOperation.UPDATE_PRIORITY, entities, "user1", false);
+
+        assertTrue(allowed);
+    }    
 
 }
