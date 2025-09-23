@@ -218,13 +218,24 @@ public class QueryProcessingService {
             case UPDATE_STATUS:
             case CLOSE_TICKET:
             case UPDATE_PRIORITY:
-                // User can only operate on their own tickets
                 if (entities != null && entities.getEntities() != null) {
                     for (EntityExtractionService.Entity entity : entities.getEntities()) {
                         if (entity.getType() == EntityExtractionService.EntityType.TICKET_ID) {
-                            // TODO: Ideally check TicketService to verify ownership
-                            // For now assume allowed if a ticketId is provided
-                            return true;
+                            String ticketId = entity.getNormalizedValue();
+                            if (ticketId != null) {
+                                Optional<Ticket> ticketOpt = ticketService.getTicketByTicketId(ticketId);
+                                if (ticketOpt.isPresent()) {
+                                    Ticket ticket = ticketOpt.get();
+                                    // Only allow if the ticket belongs to the current user
+                                    if (ticket.getUserId().equals(userId)) {
+                                        return true;
+                                    } else {
+                                        return false; // ticket belongs to someone else
+                                    }
+                                } else {
+                                    return false; // no such ticket
+                                }
+                            }
                         }
                     }
                 }
