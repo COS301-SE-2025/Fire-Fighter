@@ -48,6 +48,7 @@ public class QueryProcessingService {
                         buildQueryFilters(entities), userId, isAdmin);
 
             case SHOW_ALL_TICKETS:
+            case SHOW_TICKETS:
                 return executeTicketQuery(TicketQueryType.USER_TICKETS,
                         buildQueryFilters(entities), userId, isAdmin);
             
@@ -57,6 +58,10 @@ public class QueryProcessingService {
 
             case EXPORT_TICKETS:
                 return executeTicketQuery(TicketQueryType.EXPORT_DATA,
+                        buildQueryFilters(entities), userId, isAdmin);
+
+            case HELP:
+                return executeTicketQuery(TicketQueryType.HELP,
                         buildQueryFilters(entities), userId, isAdmin);
 
             // ----------- Fallback -----------
