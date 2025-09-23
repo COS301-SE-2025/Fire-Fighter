@@ -43,6 +43,10 @@ public class QueryProcessingService {
                 return executeTicketQuery(TicketQueryType.ACTIVE_TICKETS,
                         buildQueryFilters(entities), userId, isAdmin);
 
+            case SHOW_COMPLETED_TICKETS:
+                return executeTicketQuery(TicketQueryType.COMPLETED_TICKETS,
+                        buildQueryFilters(entities), userId, isAdmin);
+
             // ----------- Fallback -----------
             default:
                 return new QueryResult(QueryResultType.ERROR, 
