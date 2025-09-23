@@ -384,8 +384,21 @@ public class IntentRecognitionService {
      * @return true if intent is allowed, false otherwise
      */
     public boolean isIntentAllowed(IntentType intent, String userRole) {
-        // TODO: Implement intent validation logic
-        return false;
+        if (intent == null || userRole == null || userRole.trim().isEmpty()) {
+            if (nlpConfig.isDebugEnabled()) {
+                System.out.println("DEBUG: Invalid intent or user role provided");
+            }
+            return false;
+        }
+
+        List<IntentType> supportedIntents = getSupportedIntents(userRole);
+        boolean allowed = supportedIntents.contains(intent);
+
+        if (nlpConfig.isDebugEnabled()) {
+            System.out.println("DEBUG: Intent " + intent.getCode() + " allowed for role " + userRole + ": " + allowed);
+        }
+
+        return allowed;
     }
 
     /**
