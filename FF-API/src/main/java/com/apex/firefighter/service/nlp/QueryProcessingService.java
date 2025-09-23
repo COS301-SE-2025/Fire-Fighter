@@ -146,7 +146,8 @@ public class QueryProcessingService {
 
         for (EntityExtractionService.Entity entity : entities.getEntities()) {
         switch (entity.getType()) {
-            case :
+            case TICKET_ID:
+                filters.put("ticketId", entity.getNormalizedValue());
                 break;
 
             default:
