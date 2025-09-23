@@ -291,8 +291,33 @@ public class IntentRecognitionService {
      * @return List of Intent objects ranked by confidence
      */
     public List<Intent> recognizeMultipleIntents(String query) {
-        // TODO: Implement multi-intent recognition logic
-        return null;
+        if (query == null || query.trim().isEmpty()) {
+            if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
+                System.out.println("Debug: Empty query received for multiple intent recognition");
+            }
+            return Collections.singletonList(new Intent(IntentType.UNKNOWN, 0, "Empty query"));
+        }
+
+        // Normalize the query
+        String normalizedQuery = normalizeQuery(query);
+        if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
+            System.out.println("Debug: Normalized query for multiple intent recognition: " + normalizedQuery);
+        }
+
+        // Calculate scores for each intent type
+        Map<IntentType, Double> intentScores = calculateIntentScores(normalizedQuery);
+        double threshold = nlpConfig != null ? nlpConfig.getIntentConfidenceThreshold() : 0.7;
+
+        // Create Intent objects for all intents above threshold
+        List<Intent> intents = intentScores.entrySet().stream()
+            .filter(entry -> entry.getValue() >= threshold)
+            .map(entry -> new Intent(entry.getKey(), entry.getValue(), "Intent recognized"))
+            .sorted((i1, i2) -> Double.compare(i2.getConfidence(), i1.getConfidence())) // Sort by confidence desc
+            .collect(Collectors.toList());
+        if (intents.isEmpty()) {
+            intents.add(new Intent(IntentType.UNKNOWN, 0.0, "No intents above confidence threshold"));
+        }
+        return intents;
     }
 
     /**
