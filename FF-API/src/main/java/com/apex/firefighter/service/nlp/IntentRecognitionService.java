@@ -308,14 +308,27 @@ public class IntentRecognitionService {
         Map<IntentType, Double> intentScores = calculateIntentScores(normalizedQuery);
         double threshold = nlpConfig != null ? nlpConfig.getIntentConfidenceThreshold() : 0.7;
 
-        // Create Intent objects for all intents above threshold
+
+        // Filter intents above threshold and sort by confidence
         List<Intent> intents = intentScores.entrySet().stream()
             .filter(entry -> entry.getValue() >= threshold)
-            .map(entry -> new Intent(entry.getKey(), entry.getValue(), "Intent recognized"))
-            .sorted((i1, i2) -> Double.compare(i2.getConfidence(), i1.getConfidence())) // Sort by confidence desc
+            .map(entry -> {
+                Intent intent = new Intent(entry.getKey(), entry.getValue(), query);
+                if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
+                    System.out.println("Debug: Recognized intent " + intent.getType().getCode() + " with confidence " + entry.getValue()); 
+                }
+                return intent;
+            })
+            .sorted((i1, i2) -> Double.compare(i2.getConfidence(), i1.getConfidence()))
             .collect(Collectors.toList());
+
+        // If no intents above threshold, return UNKNOWN
         if (intents.isEmpty()) {
-            intents.add(new Intent(IntentType.UNKNOWN, 0.0, "No intents above confidence threshold"));
+            if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
+                System.out.println("Debug: No intents recognized above threshold (" + threshold + ")");
+            }
+            return Collections.singletonList(new Intent(IntentType.UNKNOWN, 0, 
+                "No intents recognized above threshold (" + threshold + ")"));
         }
         return intents;
     }
