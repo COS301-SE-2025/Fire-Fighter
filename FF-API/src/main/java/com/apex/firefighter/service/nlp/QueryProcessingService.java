@@ -154,6 +154,11 @@ public class QueryProcessingService {
                 filters.put("status", entity.getNormalizedValue().toLowerCase());
                 break;
 
+            case USER_NAME:
+                filters.put("assigned", entity.getNormalizedValue());
+                break;
+
+
             default:
                 // skip unknown or unneeded entity types
                 break;
