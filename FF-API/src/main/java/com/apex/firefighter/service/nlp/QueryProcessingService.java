@@ -110,8 +110,19 @@ public class QueryProcessingService {
                                          Map<String, Object> filters, 
                                          String userId, 
                                          boolean isAdmin) {
-        // TODO: Implement ticket query execution logic
-        return null;
+        try {
+            switch (queryType) {
+                case : {
+                    return 
+                }
+
+                default:
+                    return new QueryResult(QueryResultType.ERROR, "Unsupported query type: " + queryType);
+            }
+
+        } catch (Exception e) {
+            return new QueryResult(QueryResultType.ERROR, "Error while executing query: " + e.getMessage());
+        }
     }
 
     /**
