@@ -133,6 +133,11 @@ public class QueryProcessingService {
                     return new QueryResult(QueryResultType.TICKET_LIST, tickets, tickets.size());
                 }
 
+                case SYSTEM_STATS: {
+                    Map<String, Object> stats = ticketService.getSystemStatistics();
+                    return new QueryResult(QueryResultType.STATISTICS, stats, stats.size());
+                }
+
                 default:
                     return new QueryResult(QueryResultType.ERROR, "Unsupported query type: " + queryType);
             }
