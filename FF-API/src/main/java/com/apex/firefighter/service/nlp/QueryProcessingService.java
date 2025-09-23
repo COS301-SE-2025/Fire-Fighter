@@ -138,7 +138,12 @@ public class QueryProcessingService {
      * @return Map of filter criteria
      */
     public Map<String, Object> buildQueryFilters(EntityExtractionService.ExtractedEntities entities) {
-        // TODO: Implement filter building logic
+        Map<String, Object> filters = new HashMap<>();
+
+        if (entities == null || entities.getEntities() == null) {
+            return filters;
+        }
+
         return null;
     }
 
