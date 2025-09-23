@@ -170,6 +170,9 @@ public class QueryProcessingService {
                 filters.put("time", entity.getNormalizedValue());
                 break;
 
+            case DURATION:
+                filters.put("duration", entity.getNormalizedValue());
+                break;    
 
             default:
                 // skip unknown or unneeded entity types
