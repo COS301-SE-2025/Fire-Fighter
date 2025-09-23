@@ -204,7 +204,12 @@ public class QueryProcessingService {
      * @return true if operation is allowed, false otherwise
      */
     public boolean validateUserOperation(TicketOperation operation, String userId, boolean isAdmin) {
-        // TODO: Implement operation validation logic
+        // Admin can do everything
+        if (isAdmin) {
+            return true;
+        }
+
+
         return false;
     }
 
