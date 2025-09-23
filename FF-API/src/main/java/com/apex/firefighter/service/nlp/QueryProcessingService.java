@@ -166,6 +166,10 @@ public class QueryProcessingService {
                 filters.put("date", entity.getNormalizedValue());
                 break;
 
+            case TIME:
+                filters.put("time", entity.getNormalizedValue());
+                break;
+
 
             default:
                 // skip unknown or unneeded entity types
