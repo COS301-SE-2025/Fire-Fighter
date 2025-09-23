@@ -72,5 +72,16 @@ class QueryProcessingServiceTest {
         assertFalse(allowed);
     }
 
+    @Test
+    void testValidateUserOperation_CreateTicket_Admin() {
+        EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
+        boolean allowed = queryProcessingService.validateUserOperation(
+                QueryProcessingService.TicketOperation.CREATE_TICKET, entities, "user1", true);
+        assertTrue(allowed);
+    }
+
+    
+
+    
 
 }
