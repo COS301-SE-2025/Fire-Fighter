@@ -85,6 +85,10 @@ public class QueryProcessingService {
                 return executeTicketOperation(TicketOperation.ADD_COMMENT,
                         entities, userId, isAdmin);
 
+            case UPDATE_PRIORITY:
+                return executeTicketOperation(TicketOperation.UPDATE_PRIORITY,
+                        entities, userId, isAdmin);
+
             // ----------- Fallback -----------
             default:
                 return new QueryResult(QueryResultType.ERROR, 
