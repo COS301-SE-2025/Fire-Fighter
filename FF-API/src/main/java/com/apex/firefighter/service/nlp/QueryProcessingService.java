@@ -34,7 +34,18 @@ public class QueryProcessingService {
         
         if (intent == null || intent.getType() == IntentRecognitionService.IntentType.UNKNOWN) {
             return new QueryResult(QueryResultType.ERROR, 
-                "Sorry, I couldn’t understand your request.");
+                "Sorry, I couldn't understand your request.");
+        }
+
+        switch (intent.getType()) {
+            // ----------- Ticket Queries -----------
+            case :
+                return ;
+
+            // ----------- Fallback -----------
+            default:
+                return new QueryResult(QueryResultType.ERROR, 
+                    "Intent recognized but not yet supported.");
         }
         return null;
     }
