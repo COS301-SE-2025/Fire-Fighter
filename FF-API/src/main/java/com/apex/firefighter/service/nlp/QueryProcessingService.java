@@ -112,8 +112,9 @@ public class QueryProcessingService {
                                          boolean isAdmin) {
         try {
             switch (queryType) {
-                case : {
-                    return 
+                case ACTIVE_TICKETS: {
+                    List<Ticket> tickets = ticketService.getActiveTicketsForUser(userId, isAdmin);
+                    return new QueryResult(QueryResultType.TICKET_LIST, tickets, tickets.size());
                 }
 
                 default:
