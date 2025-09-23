@@ -293,6 +293,12 @@ public class IntentRecognitionService {
             }
         }
 
+        // Debug logging
+        if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
+            System.out.println("Debug: Pattern score for intent " + pattern.getExactPhrases() +
+                ": " + score);
+        }
+
         // Normalize score to 0-1 range
         return Math.min(score, 1.0);
     }
