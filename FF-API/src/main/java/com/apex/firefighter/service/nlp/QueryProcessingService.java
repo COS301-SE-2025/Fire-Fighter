@@ -50,6 +50,10 @@ public class QueryProcessingService {
             case SHOW_ALL_TICKETS:
                 return executeTicketQuery(TicketQueryType.USER_TICKETS,
                         buildQueryFilters(entities), userId, isAdmin);
+            
+            case GET_SYSTEM_STATS:
+                return executeTicketQuery(TicketQueryType.SYSTEM_STATS,
+                        buildQueryFilters(entities), userId, isAdmin);
 
             // ----------- Fallback -----------
             default:
