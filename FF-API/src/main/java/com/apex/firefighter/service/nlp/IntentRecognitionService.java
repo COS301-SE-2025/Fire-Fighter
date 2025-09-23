@@ -291,8 +291,46 @@ public class IntentRecognitionService {
      * @return List of Intent objects ranked by confidence
      */
     public List<Intent> recognizeMultipleIntents(String query) {
-        // TODO: Implement multi-intent recognition logic
-        return null;
+        if (query == null || query.trim().isEmpty()) {
+            if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
+                System.out.println("Debug: Empty query received for multiple intent recognition");
+            }
+            return Collections.singletonList(new Intent(IntentType.UNKNOWN, 0, "Empty query"));
+        }
+
+        // Normalize the query
+        String normalizedQuery = normalizeQuery(query);
+        if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
+            System.out.println("Debug: Normalized query for multiple intent recognition: " + normalizedQuery);
+        }
+
+        // Calculate scores for each intent type
+        Map<IntentType, Double> intentScores = calculateIntentScores(normalizedQuery);
+        double threshold = nlpConfig != null ? nlpConfig.getIntentConfidenceThreshold() : 0.7;
+
+
+        // Filter intents above threshold and sort by confidence
+        List<Intent> intents = intentScores.entrySet().stream()
+            .filter(entry -> entry.getValue() >= threshold)
+            .map(entry -> {
+                Intent intent = new Intent(entry.getKey(), entry.getValue(), query);
+                if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
+                    System.out.println("Debug: Recognized intent " + intent.getType().getCode() + " with confidence " + entry.getValue()); 
+                }
+                return intent;
+            })
+            .sorted((i1, i2) -> Double.compare(i2.getConfidence(), i1.getConfidence()))
+            .collect(Collectors.toList());
+
+        // If no intents above threshold, return UNKNOWN
+        if (intents.isEmpty()) {
+            if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
+                System.out.println("Debug: No intents recognized above threshold (" + threshold + ")");
+            }
+            return Collections.singletonList(new Intent(IntentType.UNKNOWN, 0, 
+                "No intents recognized above threshold (" + threshold + ")"));
+        }
+        return intents;
     }
 
     /**
