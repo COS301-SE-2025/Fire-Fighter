@@ -38,4 +38,16 @@ class QueryProcessingServiceTest {
         assertEquals(mockTickets, result.getData());
     }
 
+    @Test   // ----- Build Query Filters Tests -----
+    void testBuildQueryFilters_WithEntities() {
+        EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
+        entities.addEntity(makeEntity(EntityExtractionService.EntityType.TICKET_ID, "123"));
+        entities.addEntity(makeEntity(EntityExtractionService.EntityType.STATUS, "Open"));
+
+        Map<String, Object> filters = queryProcessingService.buildQueryFilters(entities);
+
+        assertEquals("123", filters.get("ticketId"));
+        assertEquals("open", filters.get("status")); // normalized to lowercase
+    }
+
 }
