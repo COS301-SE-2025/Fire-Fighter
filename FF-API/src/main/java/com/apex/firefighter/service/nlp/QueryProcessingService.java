@@ -192,6 +192,12 @@ public class QueryProcessingService {
                     return new QueryResult(QueryResultType.OPERATION_RESULT, updated, 1);
                 }
 
+                case CLOSE_TICKET: {
+                    String ticketId = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.TICKET_ID);
+                    Ticket closed = ticketService.closeTicket(ticketId, userId, isAdmin);
+                    return new QueryResult(QueryResultType.OPERATION_RESULT, closed, 1);
+                }
+
                 default:
                     return new QueryResult(QueryResultType.ERROR, "Unsupported operation: " + operation);
             }
