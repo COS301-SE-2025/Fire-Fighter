@@ -39,8 +39,9 @@ public class QueryProcessingService {
 
         switch (intent.getType()) {
             // ----------- Ticket Queries -----------
-            case :
-                return ;
+            case SHOW_ACTIVE_TICKETS:
+                return executeTicketQuery(TicketQueryType.ACTIVE_TICKETS,
+                        buildQueryFilters(entities), userId, isAdmin);
 
             // ----------- Fallback -----------
             default:
