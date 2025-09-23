@@ -146,6 +146,11 @@ public class QueryProcessingService {
                     return new QueryResult(QueryResultType.OPERATION_RESULT, export, 1, metadata);
                 }
 
+                case HELP: {
+                    String helpText = "Supported commands: show tickets, create ticket, update status, close ticket, assign ticket, add comment, update priority, export tickets, system stats.";
+                    return new QueryResult(QueryResultType.HELP, helpText, 1);
+                }
+
                 default:
                     return new QueryResult(QueryResultType.ERROR, "Unsupported query type: " + queryType);
             }
