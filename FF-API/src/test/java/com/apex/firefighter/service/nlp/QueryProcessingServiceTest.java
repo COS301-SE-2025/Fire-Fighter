@@ -107,5 +107,21 @@ class QueryProcessingServiceTest {
         assertEquals(stats, result.getData());
     }
 
+    @Test   // ----- Execute Ticket Operation Tests -----
+    void testExecuteTicketOperation_UpdateStatus() {
+        Ticket updated = new Ticket("123", "user1", "closed");
+        when(ticketService.updateTicketStatus("123", "closed", "user1", false)).thenReturn(updated);
+
+        EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
+        entities.addEntity(makeEntity(EntityExtractionService.EntityType.TICKET_ID, "123"));
+        entities.addEntity(makeEntity(EntityExtractionService.EntityType.STATUS, "closed"));
+
+        QueryProcessingService.QueryResult result =
+                queryProcessingService.executeTicketOperation(QueryProcessingService.TicketOperation.UPDATE_STATUS,
+                        entities, "user1", false);
+
+        assertEquals(QueryProcessingService.QueryResultType.OPERATION_RESULT, result.getResultType());
+        assertEquals(updated, result.getData());
+    }
 
 }
