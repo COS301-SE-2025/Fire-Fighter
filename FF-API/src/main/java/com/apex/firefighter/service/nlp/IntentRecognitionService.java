@@ -340,8 +340,18 @@ public class IntentRecognitionService {
      * @return List of supported intent types
      */
     public List<IntentType> getSupportedIntents(String userRole) {
-        // TODO: Implement supported intents logic
-        return null;
+        if (userRole == null || userRole.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // For simplicity, assume all intents are supported for admin
+        if ("ADMIN".equalsIgnoreCase(userRole)) {
+            return Arrays.stream(IntentType.values())
+                         .filter(intent -> intent != IntentType.UNKNOWN)
+                         .collect(Collectors.toList());
+        }
+
+        
     }
 
     /**
