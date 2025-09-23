@@ -81,6 +81,10 @@ public class QueryProcessingService {
                 return executeTicketOperation(TicketOperation.ASSIGN_TICKET,
                         entities, userId, isAdmin);
 
+            case ADD_COMMENT:
+                return executeTicketOperation(TicketOperation.ADD_COMMENT,
+                        entities, userId, isAdmin);
+
             // ----------- Fallback -----------
             default:
                 return new QueryResult(QueryResultType.ERROR, 
