@@ -238,8 +238,18 @@ public class EntityExtractionService {
      * @return Map of entity type to list of found entities
      */
     public Map<EntityType, List<Entity>> extractSpecificEntities(String query, List<EntityType> entityTypes) {
-        // TODO: Implement specific entity extraction logic
-        return null;
+        if (query == null || query.trim().isEmpty() || entityTypes == null || entityTypes.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        ExtractedEntities allEntities = extractEntities(query);
+        Map<EntityType, List<Entity>> result = new HashMap<>();
+        for (EntityType type : entityTypes) {
+            List<Entity> entities = allEntities.getAllEntities().getOrDefault(type, Collections.emptyList());
+            result.put(type, entities);
+        }
+
+        return result;
     }
 
     /**
