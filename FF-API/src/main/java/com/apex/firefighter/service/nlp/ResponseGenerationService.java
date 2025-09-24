@@ -275,6 +275,13 @@ public class ResponseGenerationService {
         String response = baseResponse == null ? "" : baseResponse.trim();
         if (preferences == null) preferences = new ResponsePreferences();
 
+        if (preferences.isIncludeEmojis()) {
+            String emoji = pickEmojiForIntent(context != null ? context.getIntent() : null);
+            if (emoji != null && !response.startsWith(emoji)) {
+                response = emoji + " " + response;
+            }
+        }
+
         if (preferences.isVerboseMode() && context != null) {
             StringBuilder meta = new StringBuilder();
 
@@ -318,6 +325,35 @@ public class ResponseGenerationService {
     }
 
     /* ----------Helpers---------- */
+    private String pickEmojiForIntent(IntentRecognitionService.IntentType intent) {
+        if (intent == null) return null;
+        switch (intent) {
+            case SHOW_TICKETS:
+            case SHOW_ACTIVE_TICKETS:
+            case SHOW_COMPLETED_TICKETS:
+            case SEARCH_TICKETS:
+                return "📋";
+            case GET_TICKET_DETAILS:
+                return "🔎";
+            case CREATE_TICKET:
+                return "🆕";
+            case UPDATE_TICKET_STATUS:
+            case CLOSE_TICKET:
+            case ASSIGN_TICKET:
+                return "✅";
+            case SHOW_ALL_TICKETS:
+            case GET_SYSTEM_STATS:
+                return "📊";
+            case EXPORT_TICKETS:
+                return "⬇️";
+            case GET_HELP:
+            case SHOW_CAPABILITIES:
+                return "💡";
+            default:
+                return null;
+        }
+    }
+    
     private String humanizeFilters(Map<String, Object> filters) {
         StringBuilder sb = new StringBuilder("{");
         boolean first = true;
