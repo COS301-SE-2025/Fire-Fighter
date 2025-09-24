@@ -178,6 +178,8 @@ public class ResponseGenerationService {
             return "🤔 I didn’t understand that request. Try rephrasing.";
         case INTERNAL_ERROR:
             return "⚠️ Something went wrong on our side. Please try again later.";
+        case INVALID_INPUT:
+            return "⚠️ The input provided was invalid. Please check and try again.";
         default:
             return "⚠️ An unknown error occurred.";
     }
