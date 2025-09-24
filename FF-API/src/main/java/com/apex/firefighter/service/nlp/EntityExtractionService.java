@@ -161,16 +161,28 @@ public class EntityExtractionService {
             }
         }
 
+        for (String phrase : pattern.getExactPhrases()) {
+            if (query.contains(phrase.toLowerCase())) {
+                int start = query.indexOf(phrase.toLowerCase());
+                Entity entity = new Entity(type, phrase, start, start + phrase.length());
+                entity.setConfidence(pattern.getWeight());
+                if (entity.getConfidence() >= threshold) {
+                    entity.setNormalizedValue(normalizeEntityValue(type, phrase));
+                    entities.add(entity);
+                    matched = true;
+                }
+            }
+        }
+
         if (!matched && !pattern.getKeywords().isEmpty()) {
             String[] words = query.split("\\s+");
             for (String word : pattern.getKeywords()) {
                 for (int i = 0; i < words.length; i++) {
                     if (!STOP_WORDS.contains(words[i]) && words[i].equals(word.toLowerCase())){
                         Entity entity = new Entity(type, word, query.indexOf(word), query.indexOf(word) + word.length());
-                        entity.setNormalizedValue(normalizedEntityValue(type, word));
                         entity.setConfidence(pattern.getWeight() * 0.6);
                         if (entity.getConfidence() >= threshold) {
-                            entity.setNormalizedValue(normalizedEnitityValue(type, word));
+                            entity.setNormalizedValue(normalizeEntityValue(type, word));
                             entities.add(entity);
                         }
                     }
@@ -336,7 +348,8 @@ public class EntityExtractionService {
         
         // temporary USER_NAME validation - replace with real user lookup
         for (Entity user : entities.getUserNames()) {
-            boolean valid = ticketService.existsUser(user.getValue()); // Assume TicketService method
+            Optional<Ticket> ticketOpt = ticketService.getTicketByTicketId(user.getValue());
+            boolean valid = ticketOpt.isPresent();
             result.getEntityValidation().put(EntityType.USER_NAME, valid);
             if (!valid) {
                 result.getWarnings().add("Unknown user name: " + user.getValue());
