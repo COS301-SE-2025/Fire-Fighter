@@ -103,4 +103,15 @@ class ResponseGenerationServiceTest {
         assertTrue(out.contains("[T-3]"), "Should mention ticket id");
     }
 
+    @Test
+    void generateResponse_routesToOperationResult_failureReason() {
+        var result = mockedResult(
+                QueryProcessingService.QueryResultType.OPERATION_RESULT,
+                null,
+                new HashMap<>(Map.of("success", false, "reason", "Permission denied")));
+
+        String out = service.generateResponse(result, context, prefs);
+        assertTrue(out.startsWith("❌ Operation failed: Permission denied"));
+    }
+
 }
