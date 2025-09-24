@@ -91,8 +91,14 @@ public class EntityExtractionService {
     }
 
     private String normalizeQuery(String query) {
-        // TODO: Implement normalization logic (lowercasing, removing special chars, etc.)
-        return query;
+        String normalized = query.toLowerCase()
+                .replaceAll("[^a-zA-Z0-9\\s-#]"," ") // Remove special chars except hyphens and #
+                .replaceAll("\\s+", " ") // Normalize whitespace
+                .trim();
+        if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
+            System.out.println("Debug: Normalized query: " + normalized);
+        }
+        return normalized;
     }
 
     public ExtractedEntities extractEntities(String query) {
