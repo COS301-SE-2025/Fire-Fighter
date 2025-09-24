@@ -7,6 +7,7 @@ import com.apex.firefighter.config.NLPConfig;
 import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.model.User;
 import com.apex.firefighter.service.ticket.TicketService;
+import com.apex.firefighter.service.UserService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

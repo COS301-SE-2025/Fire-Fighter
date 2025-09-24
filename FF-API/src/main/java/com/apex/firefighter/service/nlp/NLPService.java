@@ -30,6 +30,9 @@ public class NLPService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private IntentRecognitionService intentService;
+
     /**
      * Process a natural language query from a user
      * 
@@ -38,7 +41,7 @@ public class NLPService {
      * @return NLPResponse containing the processed result
      */
     public NLPResponse processQuery(String query, String userId) {
-        IntentRecognitionService.Intent intent = intentRecognitionService.recognizeIntent(query);
+        /* IntentRecognitionService.Intent intent = intentRecognitionService.recognizeIntent(query);
         if (!intent.isSuccess()) {
             return new NLPResponse("Could not understand query", false);
         }
@@ -54,7 +57,9 @@ public class NLPService {
         }
 
         // TODO: query processing logic
-        return new NLPResponse("Processing query: " + query, true);
+        return new NLPResponse("Processing query: " + query, true); */
+
+        return null; // Placeholder until implementation is complete
     }
 
     /**
