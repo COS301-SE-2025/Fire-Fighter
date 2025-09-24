@@ -16,6 +16,8 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 
 import static org.mockito.Mockito.lenient;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /**
  * Unit tests for IntentRecognitionService
