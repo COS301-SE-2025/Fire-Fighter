@@ -114,4 +114,15 @@ class ResponseGenerationServiceTest {
         assertTrue(out.startsWith("❌ Operation failed: Permission denied"));
     }
 
+    @Test
+    void generateResponse_routesToStatistics() {
+        Map<String,Object> stats = Map.of("totalTickets", 10, "open", 4);
+        var result = mockedResult(QueryProcessingService.QueryResultType.STATISTICS, stats, Map.of());
+
+        String out = service.generateResponse(result, context, prefs);
+        assertTrue(out.contains("System Statistics"));
+        assertTrue(out.contains("- totalTickets: 10"));
+        assertTrue(out.contains("- open: 4"));
+    }
+
 }
