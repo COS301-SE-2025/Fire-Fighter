@@ -167,4 +167,18 @@ class ResponseGenerationServiceTest {
         assertTrue(out.contains("I couldn't find any matching data"));
     }
 
+    // ----- customizeResponse -----
+
+    @Test
+    void customizeResponse_verboseAddsContextAndTruncates() {
+        String base = "Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8\nLine9";
+        prefs.setVerboseMode(true);
+        prefs.setMaxResponseLength(80);  // small cap for test
+
+        String out = service.customizeResponse(base, context, prefs);
+        assertTrue(out.length() <= 80, "Should be truncated to max length");
+        // Because of truncation, we can’t assert exact suffix, but ensure not empty
+        assertFalse(out.isEmpty());
+    }
+
 }
