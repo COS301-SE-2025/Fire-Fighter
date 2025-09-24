@@ -51,6 +51,20 @@ class ResponseGenerationServiceTest {
         return t;
     }
 
+    private QueryProcessingService.QueryResult mockedResult(
+            QueryProcessingService.QueryResultType type,
+            Object data,
+            Map<String, Object> metadata) {
+
+        QueryProcessingService.QueryResult r = mock(QueryProcessingService.QueryResult.class);
+        when(r.getResultType()).thenReturn(type);
+        when(r.getData()).thenReturn(data);
+        when(r.getMetadata()).thenReturn(metadata);
+        when(r.getRecordCount()).thenReturn(
+                data instanceof Collection ? ((Collection<?>) data).size() : (data == null ? 0 : 1));
+        return r;
+    }
+
     // ----- generateResponse dispatcher -----
 
     @Test
