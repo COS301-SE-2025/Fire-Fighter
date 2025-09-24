@@ -151,7 +151,7 @@ public class EntityExtractionService {
             while (matcher.find()) {
                 String value = matcher.group();
                 Entity entity = new Entity(type, value, matcher.start(), matcher.end());
-                entity.setConfidence(pattern.getConfidence()*0.9); // Slightly lower confidence for regex matches
+                entity.setConfidence(pattern.getWeight()*0.9); // Slightly lower confidence for regex matches
                 if (entity.getConfidence() >= threshold) {
                     entity.setNormalizedValue(normalizeEntityValue(type, value));
                     entities.add(entity);
