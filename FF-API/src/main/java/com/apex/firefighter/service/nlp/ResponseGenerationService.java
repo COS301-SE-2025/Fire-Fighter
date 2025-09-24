@@ -119,16 +119,43 @@ public class ResponseGenerationService {
     /**
      * Generate a response for operation results
      * 
-     * @param operation The operation that was performed
-     * @param result The result of the operation
-     * @param userRole The user's role
+     * @param queryResult The query result containing operation outcome
+     * @param context Context about the original query
+     * @param preferences User preferences for response style
      * @return Natural language description of the operation result
      */
-    public String generateOperationResponse(QueryProcessingService.TicketOperation operation, 
-                                          Object result, 
-                                          String userRole) {
-        // TODO: Implement operation response generation
-        return null;
+    public String generateOperationResponse(QueryProcessingService.QueryResult queryResult,
+                                            QueryContext context,
+                                            ResponsePreferences preferences) {
+        // Check metadata first for operation status
+        if (queryResult.getMetadata() != null) {
+            Object successFlag = queryResult.getMetadata().get("success");
+            if (successFlag instanceof Boolean && !(Boolean) successFlag) {
+                String reason = (String) queryResult.getMetadata().getOrDefault("reason", "Unknown error");
+                return "❌ Operation failed: " + reason;
+            }
+        }
+
+        // Handle success cases                                       
+    
+        Object data = queryResult.getData();
+
+        if (data instanceof Ticket) {
+            Ticket ticket = (Ticket) data;
+            return "Operation successful. Ticket [" + ticket.getTicketId() + "] is now "
+                    + ticket.getStatus() + ".";
+        }
+
+        if (data instanceof List<?>) {
+            List<Ticket> tickets = (List<Ticket>) data;
+            return "Operation successful on " + tickets.size() + " ticket(s).";
+        }
+
+        if (data == null) {
+        return "⚠️ Operation completed, but no result was returned.";
+        }
+
+        return "✅ The operation was completed successfully.";
     }
 
     /**
