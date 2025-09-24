@@ -86,7 +86,7 @@ public class EntityExtractionService {
                 Arrays.asList(Pattern.compile("\\b(hr|financial|management|logistics)\\s+emergency\\b")))
         ));
 
-        // USER_NAME: Matches simple names (simplified for now)
+        // USER_NAME: Matches simple names (simplified for now. Remember to also change validateEnities method)
         ENTITY_PATTERNS.put(EntityType.USER_NAME, Arrays.asList(
             new EntityPattern(0.8, Collections.emptyList(),
                 Arrays.asList("john", "jane", "admin"), // Populate with names from user database
@@ -318,6 +318,16 @@ public class EntityExtractionService {
             if (!valid) {
                 result.setValid(false);
                 result.getErrors().add("Invalid emergency type: " + emergency.getValue());
+            }
+        }
+
+        
+        // temporary USER_NAME validation - replace with real user lookup
+        for (Entity user : entities.getUserNames()) {
+            boolean valid = ticketService.existsUser(user.getValue()); // Assume TicketService method
+            result.getEntityValidation().put(EntityType.USER_NAME, valid);
+            if (!valid) {
+                result.getWarnings().add("Unknown user name: " + user.getValue());
             }
         }
 
