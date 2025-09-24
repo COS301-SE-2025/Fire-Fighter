@@ -30,7 +30,7 @@ class QueryProcessingServiceTest {
 
     @Test   // ----- Process Query Tests -----
     void testProcessQuery_ShowActiveTickets() {
-        List<Ticket> mockTickets = Arrays.asList(new Ticket("1", "user1", "open"));
+        List<Ticket> mockTickets = Arrays.asList(new Ticket t = new Ticket("1", "Show Active Tickets test", "open", "user1", "high", "2025-09-24"));
         when(ticketService.getActiveTicketsForUser("user1", false)).thenReturn(mockTickets);
 
         IntentRecognitionService.Intent intent =
@@ -66,7 +66,7 @@ class QueryProcessingServiceTest {
 
     @Test
     void testValidateUserOperation_UpdatePriority_UserNotOwner() {
-        Ticket ticket = new Ticket("123", "otherUser", "open");
+        Ticket ticket = new Ticket("123", "Update priority test (not owned)", "open", "otherUser", "high", "2025-09-24");
         when(ticketService.getTicketByTicketId("123")).thenReturn(Optional.of(ticket));
 
         EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
@@ -88,7 +88,7 @@ class QueryProcessingServiceTest {
 
     @Test
     void testValidateUserOperation_UpdatePriority_UserOwnsTicket() {
-        Ticket ticket = new Ticket("123", "user1", "open");
+        Ticket ticket = new Ticket("123", "Update priority test", "open", "user1", "high", "2025-09-24");
         when(ticketService.getTicketByTicketId("123")).thenReturn(Optional.of(ticket));
 
         EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
@@ -115,7 +115,7 @@ class QueryProcessingServiceTest {
 
     @Test   // ----- Execute Ticket Operation Tests -----
     void testExecuteTicketOperation_UpdateStatus() {
-        Ticket updated = new Ticket("123", "user1", "closed");
+        Ticket updated = new Ticket("123", "Update status test", "closed", "otherUser", "high", "2025-09-24");
         when(ticketService.updateTicketStatus("123", "closed", "user1", false)).thenReturn(updated);
 
         EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
