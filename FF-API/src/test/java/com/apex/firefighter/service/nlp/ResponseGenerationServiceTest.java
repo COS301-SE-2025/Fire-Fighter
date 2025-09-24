@@ -1,6 +1,7 @@
 import com.apex.firefighter.service.nlp.EntityExtractionService;
 import com.apex.firefighter.service.nlp.IntentRecognitionService;
 import com.apex.firefighter.service.nlp.QueryProcessingService;
+import com.apex.firefighter.service.nlp.ResponseGenerationService;
 
 import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.service.ticket.TicketService;

@@ -6,6 +6,7 @@ import com.apex.firefighter.service.nlp.EntityExtractionService;
 import com.apex.firefighter.service.nlp.IntentRecognitionService;
 import com.apex.firefighter.service.nlp.QueryProcessingService;
 
+
 import com.apex.firefighter.service.ticket.TicketService;
 
 import java.util.*;
@@ -21,17 +22,17 @@ class QueryProcessingServiceTest {
     @BeforeEach
     void setUp() {
         ticketService = Mockito.mock(TicketService.class);
-        queryProcessingService = new QueryProcessingService(ticketService);
+        queryProcessingService = new QueryProcessingService();
     }
 
     private EntityExtractionService.Entity makeEntity(EntityExtractionService.EntityType type, String value) {
-        return new EntityExtractionService.Entity(type, value, value, 0, 1.0);
+        return new EntityExtractionService.Entity(type, value, 0, 1.0);
     }
 
     @Test   // ----- Process Query Tests -----
     void testProcessQuery_ShowActiveTickets() {
         List<Ticket> mockTickets = Arrays.asList(new Ticket("1", "Show Active Tickets test", "open", "user1", "high", "0123456789"));
-        when(ticketService.getActiveTicketsForUser("user1", false)).thenReturn(mockTickets);
+        when(ticketService.getTicketsByUserId("user1",)).thenReturn(mockTickets);
 
         IntentRecognitionService.Intent intent =
                 new IntentRecognitionService.Intent(IntentRecognitionService.IntentType.SHOW_ACTIVE_TICKETS, 0.95);
