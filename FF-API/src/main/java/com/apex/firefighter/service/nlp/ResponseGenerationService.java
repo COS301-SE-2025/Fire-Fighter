@@ -317,6 +317,19 @@ public class ResponseGenerationService {
         return response;
     }
 
+    /* ----------Helpers---------- */
+    private String humanizeFilters(Map<String, Object> filters) {
+        StringBuilder sb = new StringBuilder("{");
+        boolean first = true;
+        for (Map.Entry<String, Object> e : filters.entrySet()) {
+            if (!first) sb.append(", ");
+            sb.append(e.getKey()).append(": ").append(String.valueOf(e.getValue()));
+            first = false;
+        }
+        sb.append("}");
+        return sb.toString();
+    }
+
     /**
      * Context information for query processing
      */
