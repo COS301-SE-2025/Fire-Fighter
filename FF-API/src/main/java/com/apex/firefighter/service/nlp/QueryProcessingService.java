@@ -1,4 +1,4 @@
-package com.apex.firefighter.service;
+package com.apex.firefighter.service.nlp;
 
 import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.service.ticket.TicketService;
@@ -96,19 +96,6 @@ public class QueryProcessingService {
         }
         return null;
     }
-
-    public QueryResult processQuery(String input) {
-            EntityExtractionService.ExtractedEntities entities = entityExtractor.extractEntities(input);
-            if (input.toLowerCase().contains("help")) {
-                return new QueryResult(true, "Help requested", null, QueryResultType.HELP);
-            }
-            if (input.toLowerCase().contains("stats")) {
-                Map<String, Object> stats = new HashMap<>();
-                stats.put("totalTickets", 0); // placeholder
-                return new QueryResult(true, "Statistics", stats, QueryResultType.STATISTICS);
-            }
-            return new QueryResult(false, "Query not understood", null, QueryResultType.ERROR);
-        }
 
     /**
      * Execute a ticket query operation
@@ -264,21 +251,21 @@ public class QueryProcessingService {
 
             switch (operation) {
                 case CREATE_TICKET: {
-                    String description      = firstNormalized(entities, EntityExtractionService.EntityType.NUMBER); // fallback if description is captured differently
+                    String description      = firstNormalized(entities, NUMBER); // fallback if description is captured differently
                     // Prefer pulling description from a more suitable entity if you have one; placeholder kept simple:
                     if (description == null || description.isEmpty()) description = "Emergency assistance request";
 
-                    String emergencyType    = firstNormalized(entities, EntityExtractionService.EntityType.EMERGENCY_TYPE);
-                    String emergencyContact = firstNormalized(entities, EntityExtractionService.EntityType.PHONE);
-                    Integer duration        = parseIntegerSafe(firstNormalized(entities, EntityExtractionService.EntityType.DURATION));
+                    String emergencyType    = firstNormalized(entities, EMERGENCY_TYPE);
+                    String emergencyContact = firstNormalized(entities, PHONE);
+                    Integer duration        = parseIntegerSafe(firstNormalized(entities, DURATION));
 
                     Ticket created = ticketService.createTicket(description, userId, emergencyType, emergencyContact, duration);
                     return new QueryResult(QueryResultType.OPERATION_RESULT, created, 1);
                 }
 
                 case UPDATE_STATUS: {
-                    String ticketId = firstNormalized(entities, EntityExtractionService.EntityType.TICKET_ID);
-                    String status   = firstNormalized(entities, EntityExtractionService.EntityType.STATUS);
+                    String ticketId = firstNormalized(entities, TICKET_ID);
+                    String status   = firstNormalized(entities, STATUS);
                     if (ticketId == null || status == null) {
                         return new QueryResult(false, "Missing ticketId or status.");
                     }
@@ -296,7 +283,7 @@ public class QueryProcessingService {
                 }
 
                 case CLOSE_TICKET: {
-                    String ticketId = firstNormalized(entities, EntityExtractionService.EntityType.TICKET_ID);
+                    String ticketId = firstNormalized(entities, TICKET_ID);
                     if (ticketId == null) {
                         return new QueryResult(false, "Missing ticketId.");
                     }
@@ -385,22 +372,7 @@ public class QueryProcessingService {
                 return (v == null || v.isEmpty()) ? list.get(0).getValue() : v;
             }
         }
-        // Fallbacks for common lists if allEntities map isn't populated
-        switch (type) {
-            case TICKET_ID:
-                return listFirstNormOrVal(entities.getTicketIds());
-            case STATUS:
-                return listFirstNormOrVal(entities.getStatuses());
-            case EMERGENCY_TYPE:
-                return listFirstNormOrVal(entities.getEmergencyTypes());
-            case PHONE:
-                // if you have a dedicated getPhones(), use it; otherwise rely on allEntities above
-                return null;
-            case DURATION:
-                return null;
-            default:
-                return null;
-        }
+        return null;
     }
 
     private String listFirstNormOrVal(List<EntityExtractionService.Entity> list) {
@@ -499,7 +471,7 @@ public class QueryProcessingService {
             case UPDATE_PRIORITY:
                 if (entities != null && entities.getEntities() != null) {
                     for (EntityExtractionService.EntityType entity : entities.getEntities()) {
-                        if (entity.getType() == EntityExtractionService.EntityType.TICKET_ID) {
+                        if (entity.getType() == TICKET_ID) {
                             String ticketId = entity.getNormalizedValue();
                             if (ticketId != null) {
                                 Optional<Ticket> ticketOpt = ticketService.getTicketByTicketId(ticketId);
