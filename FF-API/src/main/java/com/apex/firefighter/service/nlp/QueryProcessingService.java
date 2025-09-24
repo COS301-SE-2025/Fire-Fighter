@@ -443,11 +443,12 @@ public class QueryProcessingService {
      * Validate if a user can perform a specific operation
      * 
      * @param operation The operation to validate
+     * @param entities The extracted entities relevant to the operation
      * @param userId The user attempting the operation
      * @param isAdmin Whether the user has admin privileges
      * @return true if operation is allowed, false otherwise
      */
-    public boolean validateUserOperation(TicketOperation operation, String userId, boolean isAdmin) {
+    public boolean validateUserOperation(TicketOperation operation, EntityExtractionService.ExtractedEntities entities, String userId, boolean isAdmin) {
         // Admin can do everything
         if (isAdmin) {
             return true;
@@ -462,9 +463,9 @@ public class QueryProcessingService {
             case UPDATE_STATUS:
             case CLOSE_TICKET:
             case UPDATE_PRIORITY:
-                if (entities != null && entities.getEntities() != null) {
-                    for (EntityExtractionService.EntityType entity : entities.getEntities()) {
-                        if (entity.getType() == TICKET_ID) {
+                if (entities != null && entities.getAllEntities() != null) {
+                    for (EntityExtractionService.Entity entity : entities.getAllEntities().values().stream().flatMap(List::stream).toList()) {
+                        if (entity.getType() == EntityExtractionService.EntityType.TICKET_ID) {
                             String ticketId = entity.getNormalizedValue();
                             if (ticketId != null) {
                                 Optional<Ticket> ticketOpt = ticketService.getTicketByTicketId(ticketId);
