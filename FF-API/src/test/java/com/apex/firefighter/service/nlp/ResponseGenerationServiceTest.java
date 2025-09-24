@@ -35,6 +35,22 @@ class ResponseGenerationServiceTest {
         prefs.setMaxResponseLength(500);
     }
 
+    // ----- Helpers -----
+
+    @SuppressWarnings("unchecked")
+    private Ticket mockedTicket(String id, String status, String desc, String user, String priority) {
+        Ticket t = mock(Ticket.class);
+        when(t.getTicketId()).thenReturn(id);
+        when(t.getStatus()).thenReturn(status);
+        when(t.getDescription()).thenReturn(desc);
+        when(t.getUserId()).thenReturn(user);
+        when(t.getPriority()).thenReturn(priority);
+        // optional fields:
+        when(t.getEmergencyType()).thenReturn(null);
+        when(t.getDuration()).thenReturn(null);
+        return t;
+    }
+
     // ----- generateResponse dispatcher -----
 
     @Test
