@@ -1,9 +1,8 @@
 import com.apex.firefighter.service.nlp.EntityExtractionService;
 import com.apex.firefighter.service.nlp.IntentRecognitionService;
 import com.apex.firefighter.service.nlp.QueryProcessingService;
-
-
 import com.apex.firefighter.config.NLPConfig;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +17,7 @@ import java.util.List;
 import static org.mockito.Mockito.lenient;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * Unit tests for IntentRecognitionService
@@ -34,8 +34,10 @@ class IntentRecognitionServiceTest {
     @BeforeEach
     void setUp() {
         intentRecognitionService = new IntentRecognitionService();
-        intentRecognitionService.nlpConfig = mockNlpConfig;
         
+        // Use ReflectionTestUtils to set the package-private field
+        ReflectionTestUtils.setField(intentRecognitionService, "nlpConfig", mockNlpConfig);
+
         // Set up default configuration with lenient stubbing
         lenient().when(mockNlpConfig.getIntentConfidenceThreshold()).thenReturn(0.7);
     }
@@ -297,7 +299,7 @@ class IntentRecognitionServiceTest {
         assertThat(result.getType()).isEqualTo(expectedType);
         assertThat(result.isSuccess()).isEqualTo(expectedSuccess);
         if (expectedSuccess) {
-            assertThat(result.getConfidence()).isGreaterThanOrEqual(0.7);
+            assertThat(result.getConfidence()).isGreaterThanOrEqualTo(0.7);
         } else {
             assertThat(result.getConfidence()).isLessThan(0.7);
         }

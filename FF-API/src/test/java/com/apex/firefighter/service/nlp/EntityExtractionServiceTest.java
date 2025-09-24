@@ -45,8 +45,8 @@ public class EntityExtractionServiceTest {
 
         // Mock TicketService
         when(ticketService.getTicketById(123L)).thenReturn(Optional.of(mock(Ticket.class)));
-        when(ticketService.getTicketsByUserId("15")).thenReturn(Optional.of(Arrays.asList(mock(Ticket.class))));
-        when(ticketService.getTicketsByUserId("16")).thenReturn(Optional.empty());
+        when(ticketService.getTicketsByUserId("15")).thenReturn(Arrays.asList(mock(Ticket.class)));
+        when(ticketService.getTicketsByUserId("16")).thenReturn(Arrays.asList());
 
         // Reset ENTITY_PATTERNS
         ReflectionTestUtils.invokeMethod(entityExtractionService, "initializeEntityPatterns");
