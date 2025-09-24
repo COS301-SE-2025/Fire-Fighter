@@ -1,6 +1,12 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import com.apex.firefighter.model.Ticket;
+import com.apex.firefighter.service.nlp.EntityExtractionService;
+import com.apex.firefighter.service.nlp.IntentRecognitionService;
+import com.apex.firefighter.service.nlp.QueryProcessingService;
+
+import com.apex.firefighter.service.ticket.TicketService;
 
 import java.util.*;
 

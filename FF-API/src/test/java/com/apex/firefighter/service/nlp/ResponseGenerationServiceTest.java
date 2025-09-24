@@ -1,4 +1,9 @@
-package com.apex.firefighter.service.nlp;
+import com.apex.firefighter.service.nlp.EntityExtractionService;
+import com.apex.firefighter.service.nlp.IntentRecognitionService;
+import com.apex.firefighter.service.nlp.QueryProcessingService;
+
+import com.apex.firefighter.model.Ticket;
+import com.apex.firefighter.service.ticket.TicketService;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
