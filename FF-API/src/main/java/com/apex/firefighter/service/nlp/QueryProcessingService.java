@@ -253,63 +253,80 @@ public class QueryProcessingService {
      * @return QueryResult containing the operation result
      */
     public QueryResult executeTicketOperation(TicketOperation operation,
-                                                EntityExtractionService.ExtractedEntities entities,
-                                                String userId,
-                                                boolean isAdmin) {
-        try {
-            // First validate user permissions
-            if (!validateUserOperation(operation, entities, userId, isAdmin)) {
-                return new QueryResult(false, "You are not allowed to perform this operation.");
-            }
-
-            switch (operation) {
-                case CREATE_TICKET: {
-                    Ticket newTicket = ticketService.createTicket(entities, userId);
-                    return new QueryResult(QueryResultType.OPERATION_RESULT, newTicket, 1);
-                }
-
-                case UPDATE_STATUS: {
-                    String ticketId = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.TICKET_ID);
-                    String status = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.STATUS);
-                    Ticket updated = ticketService.updateTicketStatus(ticketId, status, userId, isAdmin);
-                    return new QueryResult(QueryResultType.OPERATION_RESULT, updated, 1);
-                }
-
-                case CLOSE_TICKET: {
-                    String ticketId = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.TICKET_ID);
-                    Ticket closed = ticketService.closeTicket(ticketId, userId, isAdmin);
-                    return new QueryResult(QueryResultType.OPERATION_RESULT, closed, 1);
-                }
-
-                case ASSIGN_TICKET: {
-                    String ticketId = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.TICKET_ID);
-                    String assignee = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.USER_NAME);
-                    Ticket assigned = ticketService.assignTicket(ticketId, assignee, userId, isAdmin);
-                    return new QueryResult(QueryResultType.OPERATION_RESULT, assigned, 1);
-                }
-
-                case ADD_COMMENT: {
-                    String ticketId = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.TICKET_ID);
-                    String comment = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.TEXT);
-                    Ticket commented = ticketService.addComment(ticketId, comment, userId);
-                    return new QueryResult(QueryResultType.OPERATION_RESULT, commented, 1);
-                }
-
-                case UPDATE_PRIORITY: {
-                    String ticketId = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.TICKET_ID);
-                    String priority = entities.getFirstNormalizedValue(EntityExtractionService.EntityType.PRIORITY);
-                    Ticket updated = ticketService.updateTicketPriority(ticketId, priority, userId);
-                    return new QueryResult(QueryResultType.OPERATION_RESULT, updated, 1);
-                }
-
-                default:
-                    return new QueryResult(false, "Unsupported operation: " + operation);
-            }
-
-        } catch (Exception e) {
-            return new QueryResult(false, "Error while executing operation: " + e.getMessage());
+                                          EntityExtractionService.ExtractedEntities entities,
+                                          String userId,
+                                          boolean isAdmin) {
+    try {
+        // Permission gate (assumes you implemented this to check ownership for non-admins)
+        if (!validateUserOperation(operation, entities, userId, isAdmin)) {
+            return new QueryResult(false, "You are not allowed to perform this operation.");
         }
+
+        switch (operation) {
+            case CREATE_TICKET: {
+                String description      = firstNormalized(entities, EntityExtractionService.EntityType.NUMBER); // fallback if description is captured differently
+                // Prefer pulling description from a more suitable entity if you have one; placeholder kept simple:
+                if (description == null || description.isEmpty()) description = "Emergency assistance request";
+
+                String emergencyType    = firstNormalized(entities, EntityExtractionService.EntityType.EMERGENCY_TYPE);
+                String emergencyContact = firstNormalized(entities, EntityExtractionService.EntityType.PHONE);
+                Integer duration        = parseIntegerSafe(firstNormalized(entities, EntityExtractionService.EntityType.DURATION));
+
+                Ticket created = ticketService.createTicket(description, userId, emergencyType, emergencyContact, duration);
+                return new QueryResult(QueryResultType.OPERATION_RESULT, created, 1);
+            }
+
+            case UPDATE_STATUS: {
+                String ticketId = firstNormalized(entities, EntityExtractionService.EntityType.TICKET_ID);
+                String status   = firstNormalized(entities, EntityExtractionService.EntityType.STATUS);
+                if (ticketId == null || status == null) {
+                    return new QueryResult(false, "Missing ticketId or status.");
+                }
+
+                // If non-admin, double-check ownership before mutation
+                if (!isAdmin) {
+                    Optional<Ticket> t = ticketService.getTicketByTicketId(ticketId);
+                    if (t.isEmpty() || !userId.equals(t.get().getUserId())) {
+                        return new QueryResult(false, "You can only update your own tickets.");
+                    }
+                }
+
+                Ticket updated = ticketService.updateTicketStatus(ticketId, normalizeStatusForWrite(status));
+                return new QueryResult(QueryResultType.OPERATION_RESULT, updated, 1);
+            }
+
+            case CLOSE_TICKET: {
+                String ticketId = firstNormalized(entities, EntityExtractionService.EntityType.TICKET_ID);
+                if (ticketId == null) {
+                    return new QueryResult(false, "Missing ticketId.");
+                }
+
+                // If non-admin, double-check ownership before mutation
+                if (!isAdmin) {
+                    Optional<Ticket> t = ticketService.getTicketByTicketId(ticketId);
+                    if (t.isEmpty() || !userId.equals(t.get().getUserId())) {
+                        return new QueryResult(false, "You can only close your own tickets.");
+                    }
+                }
+
+                // Use updateTicketStatus to mark as Completed (or Closed if you prefer)
+                Ticket updated = ticketService.updateTicketStatus(ticketId, "Completed");
+                return new QueryResult(QueryResultType.OPERATION_RESULT, updated, 1);
+            }
+
+            case ASSIGN_TICKET:
+            case ADD_COMMENT:
+            case UPDATE_PRIORITY:
+                // Not supported by TicketService right now
+                return new QueryResult(false, "Operation not supported: " + operation);
+
+            default:
+                return new QueryResult(false, "Unsupported operation: " + operation);
+        }
+    } catch (Exception e) {
+        return new QueryResult(false, "Error while executing operation: " + e.getMessage());
     }
+}
 
     /**
      * Build query filters from extracted entities
