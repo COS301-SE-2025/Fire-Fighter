@@ -272,7 +272,27 @@ public class ResponseGenerationService {
     public String customizeResponse(String baseResponse, 
                                 QueryContext context, 
                                 ResponsePreferences preferences) {
-        // TODO: Implement response customization logic
+        String response = baseResponse == null ? "" : baseResponse.trim();
+        if (preferences == null) preferences = new ResponsePreferences();
+
+        if (preferences.isVerboseMode() && context != null) {
+            StringBuilder meta = new StringBuilder();
+
+            if (context.getOriginalQuery() != null && !context.getOriginalQuery().isBlank()) {
+                meta.append("\n\nQuery: ").append(context.getOriginalQuery());
+            }
+
+            if (context.getFilters() != null && !context.getFilters().isEmpty()) {
+                meta.append("\nFilters: ").append(humanizeFilters(context.getFilters()));
+            }
+
+            if (context.getTimeframe() != null && !context.getTimeframe().isBlank()) {
+                meta.append("\nTimeframe: ").append(context.getTimeframe());
+            }
+
+            response += meta.toString();
+        }
+
         return null;
     }
 
