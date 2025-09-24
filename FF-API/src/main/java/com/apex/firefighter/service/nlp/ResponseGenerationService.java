@@ -356,6 +356,16 @@ public class ResponseGenerationService {
         return lead + s;
     }
 
+    private String toTechnical(String s) {
+        // Keep as-is; future spot for adding keys/values or code blocks
+        return s;
+    }
+
+    private String toProfessional(String s) {
+        // Ensure no leading whitespace; keep punctuation clean
+        return s.strip();
+    }
+
     /**
      * Context information for query processing
      */
