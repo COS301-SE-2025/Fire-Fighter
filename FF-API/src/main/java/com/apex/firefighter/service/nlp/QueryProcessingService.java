@@ -40,8 +40,7 @@ public class QueryProcessingService {
                                    boolean isAdmin) {
         
         if (intent == null || intent.getType() == IntentRecognitionService.IntentType.UNKNOWN) {
-            return new QueryResult(QueryResultType.ERROR, 
-                "Sorry, I couldn't understand your request.");
+            return new QueryResult(false, "Sorry, I couldn't understand your request.");
         }
 
         switch (intent.getType()) {
@@ -98,8 +97,7 @@ public class QueryProcessingService {
 
             // ----------- Fallback -----------
             default:
-                return new QueryResult(QueryResultType.ERROR, 
-                    "Intent recognized but not yet supported.");
+                return new QueryResult(false, "Intent recognized but not yet supported.");
         }
         return null;
     }
@@ -159,11 +157,11 @@ public class QueryProcessingService {
                 }
 
                 default:
-                    return new QueryResult(QueryResultType.ERROR, "Unsupported query type: " + queryType);
+                    return new QueryResult(false, "Unsupported query type: " + queryType);
             }
 
         } catch (Exception e) {
-            return new QueryResult(QueryResultType.ERROR, "Error while executing query: " + e.getMessage());
+            return new QueryResult(false, "Error while executing query: " + e.getMessage());
         }
     }
 
@@ -183,7 +181,7 @@ public class QueryProcessingService {
         try {
             // First validate user permissions
             if (!validateUserOperation(operation, entities, userId, isAdmin)) {
-                return new QueryResult(QueryResultType.ERROR, "You are not allowed to perform this operation.");
+                return new QueryResult(false, "You are not allowed to perform this operation.");
             }
 
             switch (operation) {
@@ -227,11 +225,11 @@ public class QueryProcessingService {
                 }
 
                 default:
-                    return new QueryResult(QueryResultType.ERROR, "Unsupported operation: " + operation);
+                    return new QueryResult(false, "Unsupported operation: " + operation);
             }
 
         } catch (Exception e) {
-            return new QueryResult(QueryResultType.ERROR, "Error while executing operation: " + e.getMessage());
+            return new QueryResult(false, "Error while executing operation: " + e.getMessage());
         }
     }
 
