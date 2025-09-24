@@ -16,8 +16,8 @@ public class ResponseGenerationService {
      * Generate a natural language response from query results
      * 
      * @param queryResult The result of query processing
-     * @param originalQuery The original user query
-     * @param userRole The role of the user (for response customization)
+     * @param context Context about the original query
+     * @param preferences User preferences for response style
      * @return Generated natural language response
      */
     public String generateResponse(QueryProcessingService.QueryResult queryResult, 
@@ -58,8 +58,8 @@ public class ResponseGenerationService {
      * Generate a response for ticket list results
      * 
      * @param tickets The list of tickets to describe
-     * @param queryContext Context about the original query
-     * @param userRole The user's role
+     * @param context Context about the original query
+     * @param preferences User preferences for response style
      * @return Natural language description of the tickets
      */
     public String generateTicketListResponse(QueryProcessingService.QueryResult result,
@@ -77,7 +77,7 @@ public class ResponseGenerationService {
             .append(t.getStatus()).append(" - ")
             .append(t.getDescription()).append("\n");
         }
-        
+
         return sb.toString();
     }
 
