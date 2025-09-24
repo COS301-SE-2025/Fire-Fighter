@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -189,13 +190,13 @@ public class EntityExtractionService {
         String normalizedQuery = normalizeQuery(query);
         ExtractedEntities entities = new ExtractedEntities();
 
-        entities.setTicketIds(new Arraylist<>());
-        entities.setStatuses(new Arraylist<>());
-        entities.setDates(new Arraylist<>());
-        entities.setUserNames(new Arraylist<>());
-        entities.setEmergencyTypes(new Arraylist<>());
-        entities.setNumbers(new Arraylist<>());
-        entities.setTimeExpressions(new Arraylist<>());
+        entities.setTicketIds(new ArrayList<>());
+        entities.setStatuses(new ArrayList<>());
+        entities.setDates(new ArrayList<>());
+        entities.setUserNames(new ArrayList<>());
+        entities.setEmergencyTypes(new ArrayList<>());
+        entities.setNumbers(new ArrayList<>());
+        entities.setTimeExpressions(new ArrayList<>());
         entities.setAllEntities(new HashMap<>());
 
         for (EntityType type : ENTITY_PATTERNS.keySet()) {
@@ -288,7 +289,8 @@ public class EntityExtractionService {
         // Validate TICKET_ID
         for (Entity ticket : entities.getTicketIds()) {
             String ticketId = ticket.getNormalizedValue();
-            boolean valid = ticketService.existsTicket(ticketId); // Assume TicketService method
+            Optional<Ticket> ticketOpt = ticketService.getTicketByTicketId(ticketId);
+            boolean valid = ticketOpt.isPresent();
             result.getEntityValidation().put(EntityType.TICKET_ID, valid);
             if (!valid) {
                 result.setValid(false);
