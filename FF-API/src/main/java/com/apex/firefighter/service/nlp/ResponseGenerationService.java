@@ -30,7 +30,7 @@ public class ResponseGenerationService {
 
         String response;
 
-        switch (result.getResultType()) {
+        switch (queryResult.getResultType()) {
             case TICKET_LIST:
                 response = generateTicketListResponse(queryResult, context, preferences);
                 break;
@@ -52,7 +52,7 @@ public class ResponseGenerationService {
                 break;
         }
 
-        return customizeResponse(response, preferences);
+        return customizeResponse(response, context, preferences);
     }
 
     /**
@@ -265,13 +265,13 @@ public class ResponseGenerationService {
      * Customize response based on user preferences and role
      * 
      * @param baseResponse The base response text
-     * @param userRole The user's role
+     * @param context Context about the original query
      * @param preferences User preferences for response style
      * @return Customized response
      */
     public String customizeResponse(String baseResponse, 
-                                   String userRole, 
-                                   ResponsePreferences preferences) {
+                                QueryContext context, 
+                                ResponsePreferences preferences) {
         // TODO: Implement response customization logic
         return null;
     }
