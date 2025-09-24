@@ -378,6 +378,26 @@ public class QueryProcessingService {
             this.resultType = resultType;
         }
 
+        public QueryResult(QueryResultType resultType, Object data, int recordCount) {
+            this.success = true;
+            this.resultType = resultType;
+            this.data = data;
+            this.recordCount = recordCount;
+        }
+
+        public QueryResult processQuery(String input) {
+            EntityExtractionService.ExtractedEntities entities = entityExtractor.extractEntities(input);
+            if (input.toLowerCase().contains("help")) {
+                return new QueryResult(true, "Help requested", null, QueryResultType.HELP);
+            }
+            if (input.toLowerCase().contains("stats")) {
+                Map<String, Object> stats = new HashMap<>();
+                stats.put("totalTickets", 0); // placeholder
+                return new QueryResult(true, "Statistics", stats, QueryResultType.STATISTICS);
+            }
+            return new QueryResult(false, "Query not understood", null, QueryResultType.ERROR);
+        }
+
         // Getters and setters
         public boolean isSuccess() { return success; }
         public void setSuccess(boolean success) { this.success = success; }
@@ -403,18 +423,6 @@ public class QueryProcessingService {
         public List<String> getWarnings() { return warnings; }
         public void setWarnings(List<String> warnings) { this.warnings = warnings; }
 
-        public QueryResult processQuery(String input) {
-            EntityExtractionService.ExtractedEntities entities = entityExtractor.extractEntities(input);
-            if (input.toLowerCase().contains("help")) {
-                return new QueryResult(true, "Help requested", null, QueryResultType.HELP);
-            }
-            if (input.toLowerCase().contains("stats")) {
-                Map<String, Object> stats = new HashMap<>();
-                stats.put("totalTickets", 0); // placeholder
-                return new QueryResult(true, "Statistics", stats, QueryResultType.STATISTICS);
-            }
-                return new QueryResult(false, "Query not understood", null, QueryResultType.ERROR);
-            }
     }
 
     /**
