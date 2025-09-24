@@ -345,8 +345,8 @@ public class EntityExtractionService {
      * @return List of supported entity types
      */
     public List<EntityType> getSupportedEntityTypes() {
-        // TODO: Implement supported entity types logic
-        return null;
+        List<EntityType> types = Arrays.asList(EntityType.values());
+        return types;
     }
 
     /**
