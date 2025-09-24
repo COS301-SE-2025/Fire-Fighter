@@ -181,4 +181,13 @@ class ResponseGenerationServiceTest {
         assertFalse(out.isEmpty());
     }
 
+    @Test
+    void customizeResponse_conciseShortensOutput() {
+        String base = String.join("\n", Collections.nCopies(20, "row"));
+        prefs.setStyle(ResponseGenerationService.ResponseStyle.CONCISE);
+
+        String out = service.customizeResponse(base, context, prefs);
+        assertTrue(out.split("\\R").length <= 8, "Concise should cap lines ~8");
+    }
+
 }
