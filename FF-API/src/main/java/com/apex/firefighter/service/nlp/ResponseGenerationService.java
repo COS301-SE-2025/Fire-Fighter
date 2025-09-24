@@ -171,15 +171,17 @@ public class ResponseGenerationService {
                                         ResponsePreferences preference) {
         switch (errorType) {
         case PERMISSION_DENIED:
-            return "❌ You don’t have permission to perform this action.";
+            return "❌ You don't have permission to perform this action.";
         case DATA_NOT_FOUND:
-            return "⚠️ I couldn’t find any matching data.";
+            return "⚠️ I couldn't find any matching data.";
         case QUERY_NOT_UNDERSTOOD:
-            return "🤔 I didn’t understand that request. Try rephrasing.";
+            return "🤔 I didn't understand that request. Try rephrasing.";
         case INTERNAL_ERROR:
             return "⚠️ Something went wrong on our side. Please try again later.";
         case INVALID_INPUT:
             return "⚠️ The input provided was invalid. Please check and try again.";
+        case RATE_LIMITED:
+            return "⏳ Too many requests. Please slow down and try again.";
         default:
             return "⚠️ An unknown error occurred.";
     }
