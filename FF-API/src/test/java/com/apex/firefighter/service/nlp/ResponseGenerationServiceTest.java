@@ -125,4 +125,16 @@ class ResponseGenerationServiceTest {
         assertTrue(out.contains("- open: 4"));
     }
 
+    @Test
+    void generateResponse_routesToHelpCommands() {
+        var result = mockedResult(
+                QueryProcessingService.QueryResultType.HELP,
+                null,
+                Map.of("helpType", ResponseGenerationService.HelpType.COMMANDS));
+
+        String out = service.generateResponse(result, context, prefs);
+        assertTrue(out.contains("Available commands"), "Should show commands section");
+        assertTrue(out.contains("show my tickets"));
+    }
+    
 }
