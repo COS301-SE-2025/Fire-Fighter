@@ -92,7 +92,11 @@ public class ResponseGenerationService {
     public String generateTicketDetailsResponse(QueryProcessingService.QueryResult queryResult,
                                                 QueryContext context,
                                                 ResponsePreferences preferences) {
-        // TODO: Implement ticket details response generation
+        List<Ticket> tickets = (List<Ticket>) queryResult.getData();
+        if (tickets == null || tickets.isEmpty()) {
+            return "No ticket details available.";
+        }
+
         return null;
     }
 
