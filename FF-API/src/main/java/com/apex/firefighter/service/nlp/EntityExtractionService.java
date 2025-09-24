@@ -6,7 +6,10 @@ import com.apex.firefighter.config.NLPConfig;
 import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.service.ticket.TicketService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -102,6 +105,31 @@ public class EntityExtractionService {
             System.out.println("Debug: Normalized query: " + normalized);
         }
         return normalized;
+    }
+
+    //Normalization logic goes here. Add more later as needed.
+    private String normalizeEntityValue(EntityType type, String value) {
+        if (type == EntityType.DATE) {
+            switch (value.toLowerCase()) {
+                case "today":
+                    return LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
+                case "yesterday":
+                    return LocalDate.now().minusDays(1).format(DateTimeFormatter.ISO_LOCAL_DATE);
+                case "tomorrow":
+                    return LocalDate.now().plusDays(1).format(DateTimeFormatter.ISO_LOCAL_DATE);
+                default:
+                    try {
+                        // Try parsing MM/DD/YYYY or YYYY-MM-DD
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("[MM/dd/yyyy][yyyy-MM-dd]");
+                        return LocalDate.parse(value, formatter).format(DateTimeFormatter.ISO_LOCAL_DATE);
+                    } catch (DateTimeParseException e) {
+                        return value; // Fallback to raw value
+                    }
+            }
+        } else if (type == EntityType.TICKET_ID) {
+            return value.replaceAll("[^\\d]", ""); // Extract digits (e.g., "#123" -> "123")
+        }
+        return value; // Default: return as-is
     }
 
     private void extractPatternEntities(String query, EntityPattern pattern, EntityType type, List<Entity> entities) {
