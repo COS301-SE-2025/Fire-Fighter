@@ -270,7 +270,22 @@ public class EntityExtractionService {
      * @return ValidationResult containing validation status and errors
      */
     public ValidationResult validateEntities(ExtractedEntities entities) {
-        // TODO: Implement entity validation logic
+        ValidationResult result = new ValidationResult(true);
+        result.setErrors(new ArrayList<>());
+        result.setWarnings(new ArrayList<>());
+        result.setEntityValidation(new HashMap<>());
+
+        // Validate TICKET_ID
+        for (Entity ticket : entities.getTicketIds()) {
+            String ticketId = ticket.getNormalizedValue();
+            boolean valid = ticketService.existsTicket(ticketId); // Assume TicketService method
+            result.getEntityValidation().put(EntityType.TICKET_ID, valid);
+            if (!valid) {
+                result.setValid(false);
+                result.getErrors().add("Invalid ticket ID: " + ticketId);
+            }
+        }
+        
         return null;
     }
 
