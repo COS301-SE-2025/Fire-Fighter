@@ -35,4 +35,20 @@ class ResponseGenerationServiceTest {
         prefs.setMaxResponseLength(500);
     }
 
+    // ----- generateResponse dispatcher -----
+
+    @Test
+    void generateResponse_routesToTicketList() {
+        Ticket t = mockedTicket("T-1", "open", "Printer jam", "user1", "high");
+        List<Ticket> tickets = List.of(t);
+
+        var result = mockedResult(QueryProcessingService.QueryResultType.TICKET_LIST, tickets, Map.of());
+        String out = service.generateResponse(result, context, prefs);
+
+        assertTrue(out.contains("Here are your tickets:"), "Should include header");
+        assertTrue(out.contains("[T-1] open - Printer jam"), "Should list ticket line");
+        // implementations: list formatting per file lines L66-L83
+        // Ref: generateTicketListResponse
+    }
+
 }
