@@ -1,5 +1,4 @@
 package com.apex.firefighter.service.ticket;
-package com.apex.firefighter.service.nlp;
 
 import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.model.User;
