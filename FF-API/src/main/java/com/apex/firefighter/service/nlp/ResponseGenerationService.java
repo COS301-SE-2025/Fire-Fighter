@@ -127,8 +127,20 @@ public class ResponseGenerationService {
     public String generateOperationResponse(QueryProcessingService.QueryResult queryResult,
                                             QueryContext context,
                                             ResponsePreferences preferences) {
-        // TODO: Implement operation response generation
-        return null;
+        Object data = queryResult.getData();
+
+        if (data instanceof Ticket) {
+            Ticket ticket = (Ticket) data;
+            return "Operation successful. Ticket [" + ticket.getTicketId() + "] is now "
+                    + ticket.getStatus() + ".";
+        }
+
+        if (data instanceof List<?>) {
+            List<Ticket> tickets = (List<Ticket>) data;
+            return "Operation successful on " + tickets.size() + " ticket(s).";
+        }
+
+        return "The operation was completed successfully.";
     }
 
     /**
