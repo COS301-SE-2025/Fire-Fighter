@@ -1,10 +1,10 @@
+import com.apex.firefighter.config.NLPConfig;
 import com.apex.firefighter.service.nlp.EntityExtractionService;
 import com.apex.firefighter.service.nlp.IntentRecognitionService;
 import com.apex.firefighter.service.nlp.QueryProcessingService;
-
-
-import com.apex.firefighter.config.NLPConfig;
+import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.service.ticket.TicketService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,9 +17,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 public class EntityExtractionServiceTest {
@@ -40,10 +44,9 @@ public class EntityExtractionServiceTest {
         when(nlpConfig.isDebugEnabled()).thenReturn(true);
 
         // Mock TicketService
-        when(ticketService.existsTicket("123")).thenReturn(true);
-        when(ticketService.existsTicket("999")).thenReturn(false);
-        when(ticketService.existsUser("john")).thenReturn(true);
-        when(ticketService.existsUser("unknown")).thenReturn(false);
+        when(ticketService.getTicketById(123L)).thenReturn(Optional.of(mock(Ticket.class)));
+        when(ticketService.getTicketsByUserId("15")).thenReturn(Optional.of(Arrays.asList(mock(Ticket.class))));
+        when(ticketService.getTicketsByUserId("16")).thenReturn(Optional.empty());
 
         // Reset ENTITY_PATTERNS
         ReflectionTestUtils.invokeMethod(entityExtractionService, "initializeEntityPatterns");

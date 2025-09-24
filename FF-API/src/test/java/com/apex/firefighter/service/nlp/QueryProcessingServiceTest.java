@@ -32,7 +32,7 @@ class QueryProcessingServiceTest {
     @Test   // ----- Process Query Tests -----
     void testProcessQuery_ShowActiveTickets() {
         List<Ticket> mockTickets = Arrays.asList(new Ticket("1", "Show Active Tickets test", "open", "user1", "high", "0123456789"));
-        when(ticketService.getTicketsByUserId("user1",)).thenReturn(mockTickets);
+        when(ticketService.getTicketsByUserId("user1")).thenReturn(mockTickets);
 
         IntentRecognitionService.Intent intent =
                 new IntentRecognitionService.Intent(IntentRecognitionService.IntentType.SHOW_ACTIVE_TICKETS, 0.95);
