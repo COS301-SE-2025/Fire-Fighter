@@ -97,7 +97,16 @@ public class ResponseGenerationService {
             return "No ticket details available.";
         }
 
-        return null;
+        Ticket ticket = tickets.get(0); // assume single ticket for details
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("Ticket [").append(ticket.getTicketId()).append("]\n");
+        sb.append("Status: ").append(ticket.getStatus()).append("\n");
+        sb.append("Priority: ").append(ticket.getPriority()).append("\n");
+        sb.append("Owner: ").append(ticket.getUserId()).append("\n");
+        sb.append("Description: ").append(ticket.getDescription()).append("\n");
+
+        return sb.toString();
     }
 
     /**
