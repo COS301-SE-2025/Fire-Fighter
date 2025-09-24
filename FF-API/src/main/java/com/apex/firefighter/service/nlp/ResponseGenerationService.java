@@ -3,12 +3,7 @@ package com.apex.firefighter.service.nlp;
 import org.springframework.stereotype.Service;
 import com.apex.firefighter.model.Ticket;
 
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.ArrayList;
-
+import java.util.*;
 
 /**
  * Service responsible for generating natural language responses from query results.
@@ -53,7 +48,7 @@ public class ResponseGenerationService {
                 break;
             case ERROR:
             default:
-                response = generateErrorResponse(ErrorType.INTERNAL_ERROR, context, preferences);
+                response = generateErrorResponse(ErrorType.ERROR, context, preferences);
                 break;
         }
 
@@ -67,20 +62,55 @@ public class ResponseGenerationService {
 
         switch (result.getType()) {
             case TICKET_LIST:
-                return "Tickets: " + result.getData();
+                List<Ticket> tickets = (List<Ticket>) result.getData();
+                if (tickets == null || tickets.isEmpty()) {
+                    return "No tickets found.";
+                }
+                StringBuilder listResponse = new StringBuilder("Here are your tickets:\n");
+                for (Ticket t : tickets) {
+                    listResponse.append("• [").append(t.getTicketId()).append("] ")
+                                .append(t.getStatus()).append(" - ")
+                                .append(t.getDescription()).append("\n");
+                }
+                return listResponse.toString();
+
             case TICKET_DETAILS:
-                return "Ticket details: " + result.getData();
+                Ticket ticket = (Ticket) result.getData();
+                if (ticket == null) {
+                    return "No details found for that ticket.";
+                }
+                return "Ticket [" + ticket.getTicketId() + "]\n"
+                    + "Status: " + ticket.getStatus() + "\n"
+                    + "Owner: " + ticket.getUserId() + "\n"
+                    + "Description: " + ticket.getDescription() + "\n"
+                    + (ticket.getEmergencyType() != null ? "Emergency Type: " + ticket.getEmergencyType() + "\n" : "")
+                    + (ticket.getDuration() != null ? "Duration: " + ticket.getDuration() + " minutes\n" : "");
+
             case OPERATION_RESULT:
-                return "Operation result: " + result.getMessage();
+                if (!result.isSuccess()) {
+                    return "❌ Operation failed: " + (result.getMessage() != null ? result.getMessage() : "Unknown error");
+                }
+                if (result.getData() instanceof Ticket) {
+                    Ticket updated = (Ticket) result.getData();
+                    return "✅ Operation successful. Ticket [" + updated.getTicketId() + "] is now " + updated.getStatus() + ".";
+                }
+                if (result.getData() instanceof List<?>) {
+                    return "✅ Operation successful on " + ((List<?>) result.getData()).size() + " ticket(s).";
+                }
+                return "✅ Operation completed successfully.";
+
             case STATISTICS:
                 return "Statistics: " + result.getData();
+
             case HELP:
-                return "Help instructions...";
+                return "You can ask me to show, create, update, or close tickets, get system stats, or export data.";
+
             case ERROR:
             default:
                 return generateErrorResponse(ErrorType.INTERNAL_ERROR);
         }
     }
+
 
     /**
      * Generate a response for ticket list results
@@ -130,7 +160,6 @@ public class ResponseGenerationService {
 
         sb.append("Ticket [").append(ticket.getTicketId()).append("]\n");
         sb.append("Status: ").append(ticket.getStatus()).append("\n");
-        sb.append("Priority: ").append(ticket.getPriority()).append("\n");
         sb.append("Owner: ").append(ticket.getUserId()).append("\n");
         sb.append("Description: ").append(ticket.getDescription()).append("\n");
 
