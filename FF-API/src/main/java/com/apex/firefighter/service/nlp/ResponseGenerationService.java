@@ -176,6 +176,8 @@ public class ResponseGenerationService {
             return "⚠️ I couldn’t find any matching data.";
         case QUERY_NOT_UNDERSTOOD:
             return "🤔 I didn’t understand that request. Try rephrasing.";
+        case INTERNAL_ERROR:
+            return "⚠️ Something went wrong on our side. Please try again later.";
         default:
             return "⚠️ An unknown error occurred.";
     }
