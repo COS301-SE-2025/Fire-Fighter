@@ -162,13 +162,13 @@ public class ResponseGenerationService {
      * Generate error responses in natural language
      * 
      * @param errorType The type of error that occurred
-     * @param errorDetails Additional error details
-     * @param originalQuery The original query that caused the error
+     * @param context Context about the original query
+     * @param preference User preferences for response style
      * @return User-friendly error message
      */
-    public String generateErrorResponse(ErrorType errorType, 
-                                       String errorDetails, 
-                                       String originalQuery) {
+    public String generateErrorResponse(ErrorType errorType,
+                                        QueryContext context,
+                                        ResponsePreferences preference) {
         // TODO: Implement error response generation
         return null;
     }
