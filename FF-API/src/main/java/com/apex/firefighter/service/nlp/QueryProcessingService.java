@@ -374,6 +374,35 @@ public class QueryProcessingService {
         catch (NumberFormatException nfe) { return null; }
     }
 
+    private String firstNormalized(EntityExtractionService.ExtractedEntities entities,
+                                EntityExtractionService.EntityType type) {
+        if (entities == null) return null;
+        Map<EntityExtractionService.EntityType, List<EntityExtractionService.Entity>> all = entities.getAllEntities();
+        if (all != null) {
+            List<EntityExtractionService.Entity> list = all.get(type);
+            if (list != null && !list.isEmpty()) {
+                String v = list.get(0).getNormalizedValue();
+                return (v == null || v.isEmpty()) ? list.get(0).getValue() : v;
+            }
+        }
+        // Fallbacks for common lists if allEntities map isn't populated
+        switch (type) {
+            case TICKET_ID:
+                return listFirstNormOrVal(entities.getTicketIds());
+            case STATUS:
+                return listFirstNormOrVal(entities.getStatuses());
+            case EMERGENCY_TYPE:
+                return listFirstNormOrVal(entities.getEmergencyTypes());
+            case PHONE:
+                // if you have a dedicated getPhones(), use it; otherwise rely on allEntities above
+                return null;
+            case DURATION:
+                return null;
+            default:
+                return null;
+        }
+    }
+
 
     /**
      * Build query filters from extracted entities
