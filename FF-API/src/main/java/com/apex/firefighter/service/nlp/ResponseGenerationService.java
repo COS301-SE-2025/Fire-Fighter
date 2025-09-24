@@ -151,7 +151,11 @@ public class ResponseGenerationService {
             return "Operation successful on " + tickets.size() + " ticket(s).";
         }
 
-        return "The operation was completed successfully.";
+        if (data == null) {
+        return "⚠️ Operation completed, but no result was returned.";
+        }
+
+        return "✅ The operation was completed successfully.";
     }
 
     /**
