@@ -136,5 +136,14 @@ class ResponseGenerationServiceTest {
         assertTrue(out.contains("Available commands"), "Should show commands section");
         assertTrue(out.contains("show my tickets"));
     }
-    
+
+    // ----- Direct generator tests -----
+
+    @Test
+    void generateTicketListResponse_empty() {
+        var result = mockedResult(QueryProcessingService.QueryResultType.TICKET_LIST, List.of(), Map.of());
+        String out = service.generateTicketListResponse(result, context, prefs);
+        assertEquals("No tickets found matching your query.", out);
+    }
+
 }
