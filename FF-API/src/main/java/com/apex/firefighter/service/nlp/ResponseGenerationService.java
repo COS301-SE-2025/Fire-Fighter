@@ -84,14 +84,14 @@ public class ResponseGenerationService {
     /**
      * Generate a response for single ticket details
      * 
-     * @param ticket The ticket to describe
-     * @param requestedDetails What specific details were requested
-     * @param userRole The user's role
+     * @param queryResult The query result containing ticket details
+     * @param context Context about the original query
+     * @param preferences User preferences for response style
      * @return Natural language description of the ticket
      */
-    public String generateTicketDetailsResponse(Object ticket, 
-                                              List<String> requestedDetails, 
-                                              String userRole) {
+    public String generateTicketDetailsResponse(QueryProcessingService.QueryResult queryResult,
+                                                QueryContext context,
+                                                ResponsePreferences preferences) {
         // TODO: Implement ticket details response generation
         return null;
     }
