@@ -344,6 +344,17 @@ public class QueryProcessingService {
         return c;
     }
 
+    private String normalizeStatus(String status) {
+        if (status == null) return null;
+        String s = status.trim().toLowerCase();
+        if (s.equals("open") || s.equals("active")) return "Active";
+        if (s.equals("done") || s.equals("completed")) return "CompletedOrClosed"; // query mode: treat both
+        if (s.equals("closed")) return "CompletedOrClosed";
+        if (s.equals("rejected") || s.equals("revoked")) return "Rejected";
+        // fall back to capitalized as-is for exact match attempts
+        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
+    }
+
 
     /**
      * Build query filters from extracted entities
