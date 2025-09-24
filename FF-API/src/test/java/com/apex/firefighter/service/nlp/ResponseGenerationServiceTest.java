@@ -93,4 +93,14 @@ class ResponseGenerationServiceTest {
         assertTrue(out.contains("Owner: user2"));
     }
 
+    @Test
+    void generateResponse_routesToOperationResult_successTicket() {
+        Ticket t = mockedTicket("T-3", "closed", "Door fixed", "user3", "low");
+        var result = mockedResult(QueryProcessingService.QueryResultType.OPERATION_RESULT, t, Map.of("success", true));
+
+        String out = service.generateResponse(result, context, prefs);
+        assertTrue(out.toLowerCase().contains("operation successful"), "Should indicate success");
+        assertTrue(out.contains("[T-3]"), "Should mention ticket id");
+    }
+
 }
