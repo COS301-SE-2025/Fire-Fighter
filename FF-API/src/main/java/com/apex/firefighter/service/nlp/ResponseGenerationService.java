@@ -9,6 +9,7 @@ import java.util.Map;
  * Service responsible for generating natural language responses from query results.
  * Converts structured data back into human-readable text.
  */
+@SuppressWarnings("unchecked")
 @Service
 public class ResponseGenerationService {
 
@@ -242,11 +243,14 @@ public class ResponseGenerationService {
     /**
      * Generate statistical summary responses
      * 
-     * @param statistics The statistical data to summarize
-     * @param userRole The user's role
+     * @param queryResult The query result containing statistics
+     * @param context Context about the original query
+     * @param preferences User preferences for response style
      * @return Natural language summary of statistics
      */
-    public String generateStatisticsResponse(Map<String, Object> statistics, String userRole) {
+    public String generateStatisticsResponse(QueryProcessingService.QueryResult queryResult,
+                                            QueryContext context,
+                                            ResponsePreferences preferences) {
         // TODO: Implement statistics response generation
         return null;
     }
