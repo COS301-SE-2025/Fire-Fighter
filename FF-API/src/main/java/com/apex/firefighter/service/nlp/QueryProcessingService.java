@@ -365,6 +365,15 @@ public class QueryProcessingService {
         return Character.toUpperCase(s.charAt(0)) + s.substring(1);
     }
 
+    private boolean equalsIgnoreCaseSafe(String a, String b) {
+        return a == null ? b == null : a.equalsIgnoreCase(b);
+    }
+
+    private Integer parseIntegerSafe(String s) {
+        try { return (s == null) ? null : Integer.parseInt(s); }
+        catch (NumberFormatException nfe) { return null; }
+    }
+
 
     /**
      * Build query filters from extracted entities
