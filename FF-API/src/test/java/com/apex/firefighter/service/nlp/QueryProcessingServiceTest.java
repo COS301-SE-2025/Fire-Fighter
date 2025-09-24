@@ -26,7 +26,7 @@ class QueryProcessingServiceTest {
     }
 
     private EntityExtractionService.Entity makeEntity(EntityExtractionService.EntityType type, String value) {
-        return new EntityExtractionService.Entity(type, value, 0, 1.0);
+        return new EntityExtractionService.Entity(type, value, 0, 1);
     }
 
     @Test   // ----- Process Query Tests -----
@@ -48,8 +48,20 @@ class QueryProcessingServiceTest {
     @Test   // ----- Build Query Filters Tests -----
     void testBuildQueryFilters_WithEntities() {
         EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
-        entities.addEntity(makeEntity(EntityExtractionService.EntityType.TICKET_ID, "123"));
-        entities.addEntity(makeEntity(EntityExtractionService.EntityType.STATUS, "Open"));
+
+        // Build the entities explicitly
+        EntityExtractionService.Entity ticket =
+                new EntityExtractionService.Entity(
+                        EntityExtractionService.EntityType.TICKET_ID, "123", 0, 3);
+
+        EntityExtractionService.Entity status =
+                new EntityExtractionService.Entity(
+                        EntityExtractionService.EntityType.STATUS, "Open", 0, 4);
+        // If your filter builder prefers normalized values, set it explicitly:
+        status.setNormalizedValue("open");
+
+        entities.setTicketIds(Arrays.asList(ticket));
+        entities.setStatuses(Arrays.asList(status));
 
         Map<String, Object> filters = queryProcessingService.buildQueryFilters(entities);
 
@@ -71,11 +83,10 @@ class QueryProcessingServiceTest {
         when(ticketService.getTicketByTicketId("123")).thenReturn(Optional.of(ticket));
 
         EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
-        entities.addEntity(makeEntity(EntityExtractionService.EntityType.TICKET_ID, "123"));
-
-        boolean allowed = queryProcessingService.validateUserOperation(
-                QueryProcessingService.TicketOperation.UPDATE_PRIORITY, entities, "user1", false);
-
+        EntityExtractionService.Entity ticketEntity = new EntityExtractionService.Entity(EntityExtractionService.EntityType.TICKET_ID, "123", 0, 3);
+        entities.setTicketIds(Arrays.asList(ticketEntity));
+        boolean allowed = queryProcessingService.validateUserOperation(QueryProcessingService.TicketOperation.UPDATE_PRIORITY, entities, "user1", false);
+        
         assertFalse(allowed);
     }
 
@@ -93,11 +104,10 @@ class QueryProcessingServiceTest {
         when(ticketService.getTicketByTicketId("123")).thenReturn(Optional.of(ticket));
 
         EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
-        entities.addEntity(makeEntity(EntityExtractionService.EntityType.TICKET_ID, "123"));
-
-        boolean allowed = queryProcessingService.validateUserOperation(
-                QueryProcessingService.TicketOperation.UPDATE_PRIORITY, entities, "user1", false);
-
+        EntityExtractionService.Entity ticketEntity = new EntityExtractionService.Entity(EntityExtractionService.EntityType.TICKET_ID, "123", 0, 3);
+        entities.setTicketIds(Arrays.asList(ticketEntity));
+        boolean allowed = queryProcessingService.validateUserOperation(QueryProcessingService.TicketOperation.UPDATE_PRIORITY, entities, "user1", false);
+        
         assertTrue(allowed);
     }    
 
@@ -120,12 +130,12 @@ class QueryProcessingServiceTest {
         when(ticketService.updateTicketStatus("123", "closed", "user1", false)).thenReturn(updated);
 
         EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
-        entities.addEntity(makeEntity(EntityExtractionService.EntityType.TICKET_ID, "123"));
-        entities.addEntity(makeEntity(EntityExtractionService.EntityType.STATUS, "closed"));
-
-        QueryProcessingService.QueryResult result =
-                queryProcessingService.executeTicketOperation(QueryProcessingService.TicketOperation.UPDATE_STATUS,
-                        entities, "user1", false);
+        EntityExtractionService.Entity ticketEntity = new EntityExtractionService.Entity(EntityExtractionService.EntityType.TICKET_ID, "123", 0, 3);
+        EntityExtractionService.Entity statusEntity = new EntityExtractionService.Entity(EntityExtractionService.EntityType.STATUS, "closed", 0, 6);
+        statusEntity.setNormalizedValue("closed"); // ensure lowercase normalization if needed
+        entities.setTicketIds(Arrays.asList(ticketEntity));
+        entities.setStatuses(Arrays.asList(statusEntity));
+        QueryProcessingService.QueryResult result = queryProcessingService.executeTicketOperation(QueryProcessingService.TicketOperation.UPDATE_STATUS, entities, "user1", false);
 
         assertEquals(QueryProcessingService.QueryResultType.OPERATION_RESULT, result.getResultType());
         assertEquals(updated, result.getData());
