@@ -330,6 +330,19 @@ public class ResponseGenerationService {
         return sb.toString();
     }
 
+    private String toConcise(String s) {
+        // Keep first ~8 lines or 300 chars, whichever is shorter
+        String[] lines = s.split("\\R");
+        StringBuilder out = new StringBuilder();
+        int limitLines = Math.min(lines.length, 8);
+        for (int i = 0; i < limitLines; i++) {
+            if (out.length() + lines[i].length() + 1 > 300) break;
+            if (i > 0) out.append("\n");
+            out.append(lines[i]);
+        }
+        return out.toString();
+    }
+
     /**
      * Context information for query processing
      */
