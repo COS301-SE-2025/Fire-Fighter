@@ -119,59 +119,129 @@ public class QueryProcessingService {
      * @param isAdmin Whether the user has admin privileges
      * @return QueryResult containing the ticket data
      */
-    public QueryResult executeTicketQuery(TicketQueryType queryType, 
-                                         Map<String, Object> filters, 
-                                         String userId, 
-                                         boolean isAdmin) {
-        try {
-            switch (queryType) {
-                case ACTIVE_TICKETS: {
-                    List<Ticket> tickets = ticketService.getActiveTicketsForUser(userId, isAdmin);
-                    return new QueryResult(QueryResultType.TICKET_LIST, tickets, tickets.size());
-                }
+    public QueryResult executeTicketQuery(TicketQueryType queryType,
+                                     Map<String, Object> filters,
+                                     String userId,
+                                     boolean isAdmin) {
+    try {
+        if (filters == null) filters = new HashMap<>();
+        final String filterTicketId   = (String) filters.get("ticketId");
+        final String filterStatusRaw  = (String) filters.get("status");
+        final String filterUserId     = (String) filters.getOrDefault("userId", userId);
+        final String filterEmergency  = (String) filters.get("emergencyType");
 
-                case COMPLETED_TICKETS: {
-                    List<Ticket> tickets = ticketService.getCompletedTicketsForUser(userId, isAdmin);
-                    return new QueryResult(QueryResultType.TICKET_LIST, tickets, tickets.size());
+        switch (queryType) {
+            case TICKET_DETAILS: {
+                if (filterTicketId == null || filterTicketId.isEmpty()) {
+                    return new QueryResult(false, "Missing ticketId for TICKET_DETAILS.");
                 }
-
-                case USER_TICKETS: {
-                    List<Ticket> tickets = ticketService.getTicketById(userId);
-                    return new QueryResult(QueryResultType.TICKET_LIST, tickets, tickets.size());
+                Optional<Ticket> opt = ticketService.getTicketByTicketId(filterTicketId);
+                if (opt.isEmpty()) {
+                    return new QueryResult(false, "Ticket not found: " + filterTicketId);
                 }
-
-                case SEARCH_TICKETS: {
-                    // Use filters (status, priority, etc.)
-                    List<Ticket> tickets = ticketService.searchTickets(filters, userId, isAdmin);
-                    return new QueryResult(QueryResultType.TICKET_LIST, tickets, tickets.size());
+                Ticket t = opt.get();
+                if (!isAdmin && !userId.equals(t.getUserId())) {
+                    return new QueryResult(false, "You are not allowed to view this ticket.");
                 }
-
-                case SYSTEM_STATS: {
-                    Map<String, Object> stats = ticketService.getSystemStatistics();
-                    return new QueryResult(QueryResultType.STATISTICS, stats, stats.size());
-                }
-
-                case EXPORT_DATA: {
-                    byte[] export = ticketService.exportTickets(filters, userId, isAdmin);
-                    Map<String, Object> metadata = new HashMap<>();
-                    metadata.put("exportFormat", "csv");
-                    metadata.put("size", export.length);
-                    return new QueryResult(QueryResultType.OPERATION_RESULT, export, 1, metadata);
-                }
-
-                case HELP: {
-                    String helpText = "Supported commands: show tickets, create ticket, update status, close ticket, assign ticket, add comment, update priority, export tickets, system stats.";
-                    return new QueryResult(QueryResultType.HELP, helpText, 1);
-                }
-
-                default:
-                    return new QueryResult(false, "Unsupported query type: " + queryType);
+                return new QueryResult(QueryResultType.TICKET_DETAILS, t, 1);
             }
 
-        } catch (Exception e) {
-            return new QueryResult(false, "Error while executing query: " + e.getMessage());
+            case USER_TICKETS: {
+                // If admin and a userId filter is present, show that user's tickets; otherwise:
+                List<Ticket> tickets = ticketService.getTicketsByUserId(filterUserId);
+                return new QueryResult(QueryResultType.TICKET_LIST, tickets, tickets.size());
+            }
+
+            case ACTIVE_TICKETS: {
+                if (isAdmin) {
+                    List<Ticket> tickets = ticketService.getTicketsByStatus("Active");
+                    return new QueryResult(QueryResultType.TICKET_LIST, tickets, tickets.size());
+                } else {
+                    List<Ticket> mine = ticketService.getTicketsByUserId(userId);
+                    List<Ticket> active = filterByStatuses(mine, "Active");
+                    return new QueryResult(QueryResultType.TICKET_LIST, active, active.size());
+                }
+            }
+
+            case COMPLETED_TICKETS: {
+                if (isAdmin) {
+                    List<Ticket> completed = ticketService.getTicketsByStatus("Completed");
+                    List<Ticket> closed    = ticketService.getTicketsByStatus("Closed");
+                    List<Ticket> all = new ArrayList<>(completed);
+                    all.addAll(closed);
+                    return new QueryResult(QueryResultType.TICKET_LIST, all, all.size());
+                } else {
+                    List<Ticket> mine = ticketService.getTicketsByUserId(userId);
+                    List<Ticket> done = filterByStatuses(mine, "Completed", "Closed");
+                    return new QueryResult(QueryResultType.TICKET_LIST, done, done.size());
+                }
+            }
+
+            case SEARCH_TICKETS: {
+                // Start from scope (admin = all, user = own)
+                List<Ticket> base = isAdmin ? ticketService.getAllTickets()
+                                            : ticketService.getTicketsByUserId(userId);
+
+                String normStatus = normalizeStatus(filterStatusRaw); // map "open"->Active, etc.
+
+                List<Ticket> out = base.stream()
+                    .filter(t -> filterTicketId == null || filterTicketId.equals(t.getTicketId()))
+                    .filter(t -> normStatus == null || normStatus.equalsIgnoreCase(t.getStatus())
+                               || (normStatus.equals("CompletedOrClosed")
+                                   && ("Completed".equalsIgnoreCase(t.getStatus())
+                                    || "Closed".equalsIgnoreCase(t.getStatus()))))
+                    .filter(t -> filterEmergency == null || equalsIgnoreCaseSafe(t.getEmergencyType(), filterEmergency))
+                    .collect(java.util.stream.Collectors.toList());
+
+                return new QueryResult(QueryResultType.TICKET_LIST, out, out.size());
+            }
+
+            case SYSTEM_STATS: {
+                Map<String, Object> stats = new HashMap<>();
+                if (isAdmin) {
+                    int total      = ticketService.getAllTickets().size();
+                    int active     = ticketService.getTicketsByStatus("Active").size();
+                    int completed  = ticketService.getTicketsByStatus("Completed").size();
+                    int closed     = ticketService.getTicketsByStatus("Closed").size();
+                    int rejected   = ticketService.getTicketsByStatus("Rejected").size();
+
+                    stats.put("scope", "system");
+                    stats.put("totalTickets", total);
+                    stats.put("active", active);
+                    stats.put("completed", completed);
+                    stats.put("closed", closed);
+                    stats.put("rejected", rejected);
+                } else {
+                    List<Ticket> mine = ticketService.getTicketsByUserId(userId);
+                    stats.put("scope", "user");
+                    stats.put("totalTickets", mine.size());
+                    stats.put("active", countByStatus(mine, "Active"));
+                    stats.put("completed", countByStatus(mine, "Completed"));
+                    stats.put("closed", countByStatus(mine, "Closed"));
+                    stats.put("rejected", countByStatus(mine, "Rejected"));
+                }
+                return new QueryResult(QueryResultType.STATISTICS, stats, 1);
+            }
+
+            case EXPORT_DATA: {
+                // Not implemented in TicketService; return an explicit error to caller.
+                return new QueryResult(false, "Export is not supported by the current TicketService.");
+            }
+
+            case HELP: {
+                String helpText = "Supported queries: my tickets, active tickets, completed tickets, ticket details, system stats, search by status/ticketId/emergency type.";
+                return new QueryResult(QueryResultType.HELP, helpText, 1);
+            }
+
+            default:
+                return new QueryResult(false, "Unsupported query type: " + queryType);
         }
+
+    } catch (Exception e) {
+        return new QueryResult(false, "Error while executing query: " + e.getMessage());
     }
+}
+
 
     /**
      * Execute a ticket management operation
