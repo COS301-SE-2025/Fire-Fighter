@@ -1,9 +1,14 @@
 package com.apex.firefighter.service.nlp;
 
 import org.springframework.stereotype.Service;
+import com.apex.firefighter.model.Ticket;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Optional;
+import java.util.ArrayList;
+
 
 /**
  * Service responsible for generating natural language responses from query results.
