@@ -1,9 +1,11 @@
 package com.apex.firefighter.service.nlp;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.apex.firefighter.config.NLPConfig;
 import com.apex.firefighter.model.Ticket;
+import com.apex.firefighter.model.User;
 import com.apex.firefighter.service.ticket.TicketService;
 
 import java.time.LocalDate;
@@ -41,6 +43,12 @@ public class EntityExtractionService {
     // For Validation
     @Autowired
     private TicketService ticketService;
+
+    @Autowired
+    private UserService userService;
+
+    // Map of entity type to list of patterns
+    private static final Map<EntityType, List<EntityPattern>> ENTITY_PATTERNS = new HashMap<>();
 
     // Common stop words to ignore during entity extraction
     private static final Set<String> STOP_WORDS = Set.of(
@@ -179,6 +187,7 @@ public class EntityExtractionService {
 
         String normalizedQuery = normalizeQuery(query);
         ExtractedEntities entities = new ExtractedEntities();
+
         entities.setTicketIds(new Arraylist<>());
         entities.setStatuses(new Arraylist<>());
         entities.setDates(new Arraylist<>());
