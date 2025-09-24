@@ -113,21 +113,33 @@ class QueryProcessingServiceTest {
 
     @Test   // ----- Execute Ticket Query Tests -----
     void testExecuteTicketQuery_SystemStats() {
-        Map<String, Object> stats = Map.of("totalTickets", 5, "openTickets", 2);
-        when(ticketService.getSystemStatistics()).thenReturn(stats);
+        // Mock tickets
+        List<Ticket> allTickets = Arrays.asList(
+                new Ticket("1", "Issue A", "open", "user1", "high", "0123456789"),
+                new Ticket("2", "Issue B", "open", "user2", "low", "0123456789"),
+                new Ticket("3", "Issue C", "closed", "user3", "medium", "0123456789"),
+                new Ticket("4", "Issue D", "in progress", "user4", "high", "0123456789"),
+                new Ticket("5", "Issue E", "open", "user5", "low", "0123456789")
+        );
+
+        when(ticketService.getAllTickets()).thenReturn(allTickets);
 
         QueryProcessingService.QueryResult result =
-                queryProcessingService.executeTicketQuery(QueryProcessingService.TicketQueryType.SYSTEM_STATS,
+                queryProcessingService.executeTicketQuery(
+                        QueryProcessingService.TicketQueryType.SYSTEM_STATS,
                         Collections.emptyMap(), "admin", true);
 
         assertEquals(QueryProcessingService.QueryResultType.STATISTICS, result.getResultType());
-        assertEquals(stats, result.getData());
+
+        Map<String, Object> stats = (Map<String, Object>) result.getData();
+        assertEquals(5, stats.get("totalTickets"));
+        assertEquals(3, stats.get("openTickets")); // matches tickets with "open" status
     }
 
     @Test   // ----- Execute Ticket Operation Tests -----
     void testExecuteTicketOperation_UpdateStatus() {
         Ticket updated = new Ticket("123", "Update status test", "closed", "otherUser", "high", "0123456789");
-        when(ticketService.updateTicketStatus("123", "closed", "user1", false)).thenReturn(updated);
+        when(ticketService.updateTicketStatus("123", "closed")).thenReturn(updated);
 
         EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
         EntityExtractionService.Entity ticketEntity = new EntityExtractionService.Entity(EntityExtractionService.EntityType.TICKET_ID, "123", 0, 3);
@@ -135,7 +147,7 @@ class QueryProcessingServiceTest {
         statusEntity.setNormalizedValue("closed"); // ensure lowercase normalization if needed
         entities.setTicketIds(Arrays.asList(ticketEntity));
         entities.setStatuses(Arrays.asList(statusEntity));
-        QueryProcessingService.QueryResult result = queryProcessingService.executeTicketOperation(QueryProcessingService.TicketOperation.UPDATE_STATUS, entities, "user1", false);
+        QueryProcessingService.QueryResult result = queryProcessingService.executeTicketOperation(QueryProcessingService.TicketOperation.UPDATE_TICKET_STATUS, entities, "user1", false);
 
         assertEquals(QueryProcessingService.QueryResultType.OPERATION_RESULT, result.getResultType());
         assertEquals(updated, result.getData());
