@@ -106,6 +106,13 @@ public class ResponseGenerationService {
         sb.append("Owner: ").append(ticket.getUserId()).append("\n");
         sb.append("Description: ").append(ticket.getDescription()).append("\n");
 
+        if (ticket.getEmergencyType() != null) {
+            sb.append("Emergency Type: ").append(ticket.getEmergencyType()).append("\n");
+        }
+        if (ticket.getDuration() != null) {
+            sb.append("Duration: ").append(ticket.getDuration()).append("\n");
+        }
+
         return sb.toString();
     }
 
