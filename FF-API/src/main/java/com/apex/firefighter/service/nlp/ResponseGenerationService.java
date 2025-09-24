@@ -62,9 +62,9 @@ public class ResponseGenerationService {
      * @param userRole The user's role
      * @return Natural language description of the tickets
      */
-    public String generateTicketListResponse(List<?> tickets, 
-                                           QueryContext queryContext, 
-                                           String userRole) {
+    public String generateTicketListResponse(QueryProcessingService.QueryResult result,
+                                            QueryContext context,
+                                            ResponsePreferences preferences) {
         // TODO: Implement ticket list response generation
         return null;
     }
