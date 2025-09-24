@@ -169,8 +169,12 @@ public class ResponseGenerationService {
     public String generateErrorResponse(ErrorType errorType,
                                         QueryContext context,
                                         ResponsePreferences preference) {
-        // TODO: Implement error response generation
-        return null;
+        switch (errorType) {
+        case :
+            return ;
+        default:
+            return "⚠️ An unknown error occurred.";
+    }
     }
 
     /**
