@@ -31,19 +31,19 @@ public class ResponseGenerationService {
 
         switch (result.getResultType()) {
             case TICKET_LIST:
-                response = generateTicketListResponse(result, context, preferences);
+                response = generateTicketListResponse(queryResult, context, preferences);
                 break;
             case TICKET_DETAILS:
-                response = generateTicketDetailsResponse(result, context, preferences);
+                response = generateTicketDetailsResponse(queryResult, context, preferences);
                 break;
             case OPERATION_RESULT:
-                response = generateOperationResponse(result, context, preferences);
+                response = generateOperationResponse(queryResult, context, preferences);
                 break;
             case STATISTICS:
-                response = generateStatisticsResponse(result, context, preferences);
+                response = generateStatisticsResponse(queryResult, context, preferences);
                 break;
             case HELP:
-                response = generateHelpResponse(result, context, preferences);
+                response = generateHelpResponse(queryResult, context, preferences);
                 break;
             case ERROR:
             default:
