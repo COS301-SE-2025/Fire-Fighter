@@ -49,7 +49,7 @@ class ResponseGenerationServiceTest {
         when(t.getStatus()).thenReturn(status);
         when(t.getDescription()).thenReturn(desc);
         when(t.getUserId()).thenReturn(user);
-        when(t.getPriority()).thenReturn(priority);
+        //when(t.getPriority()).thenReturn(priority);
         // optional fields:
         when(t.getEmergencyType()).thenReturn(null);
         when(t.getDuration()).thenReturn(null);
