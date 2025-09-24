@@ -127,6 +127,17 @@ public class ResponseGenerationService {
     public String generateOperationResponse(QueryProcessingService.QueryResult queryResult,
                                             QueryContext context,
                                             ResponsePreferences preferences) {
+        // Check metadata first for operation status
+        if (queryResult.getMetadata() != null) {
+            Object successFlag = queryResult.getMetadata().get("success");
+            if (successFlag instanceof Boolean && !(Boolean) successFlag) {
+                String reason = (String) queryResult.getMetadata().getOrDefault("reason", "Unknown error");
+                return "❌ Operation failed: " + reason;
+            }
+        }
+
+        // Handle success cases                                       
+    
         Object data = queryResult.getData();
 
         if (data instanceof Ticket) {
