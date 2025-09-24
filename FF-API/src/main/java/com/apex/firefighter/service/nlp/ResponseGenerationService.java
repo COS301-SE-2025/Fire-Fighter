@@ -178,20 +178,19 @@ public class ResponseGenerationService {
         }
 
         switch (errorType) {
-            case PERMISSION_DENIED:
+            case INSUFFICIENT_PERMISSIONS:
                 return "❌ You don't have permission to perform this action.";
             case DATA_NOT_FOUND:
                 return "⚠️ I couldn't find any matching data.";
             case QUERY_NOT_UNDERSTOOD:
                 return "🤔 I didn't understand that request. Try rephrasing.";
-            case INTERNAL_ERROR:
-                return "⚠️ Something went wrong on our side. Please try again later.";
-            case INVALID_INPUT:
+            case INVALID_PARAMETERS:
                 return "⚠️ The input provided was invalid. Please check and try again.";
-            case RATE_LIMITED:
-                return "⏳ Too many requests. Please slow down and try again.";
+            case OPERATION_FAILED:
+                return "❌ The operation could not be completed.";
+            case SYSTEM_ERROR:
             default:
-                return "⚠️ An unknown error occurred.";
+                return "⚠️ Something went wrong on our side. Please try again later.";
         }
     }
 
@@ -353,7 +352,7 @@ public class ResponseGenerationService {
                 return null;
         }
     }
-    
+
     private String humanizeFilters(Map<String, Object> filters) {
         StringBuilder sb = new StringBuilder("{");
         boolean first = true;
