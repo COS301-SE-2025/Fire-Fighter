@@ -30,9 +30,10 @@ public class ResponseGenerationService {
         String response;
 
         switch (result.getResultType()) {
-            case :
-                response = ;
+            case TICKET_LIST:
+                response = generateTicketListResponse(result, context, preferences);
                 break;
+            case ERROR:
             default:
                 response = generateErrorResponse(ErrorType.INTERNAL_ERROR, context, preferences);
                 break;
