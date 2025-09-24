@@ -119,14 +119,14 @@ public class ResponseGenerationService {
     /**
      * Generate a response for operation results
      * 
-     * @param operation The operation that was performed
-     * @param result The result of the operation
-     * @param userRole The user's role
+     * @param queryResult The query result containing operation outcome
+     * @param context Context about the original query
+     * @param preferences User preferences for response style
      * @return Natural language description of the operation result
      */
-    public String generateOperationResponse(QueryProcessingService.TicketOperation operation, 
-                                          Object result, 
-                                          String userRole) {
+    public String generateOperationResponse(QueryProcessingService.QueryResult queryResult,
+                                            QueryContext context,
+                                            ResponsePreferences preferences) {
         // TODO: Implement operation response generation
         return null;
     }
