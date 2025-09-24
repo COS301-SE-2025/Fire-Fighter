@@ -218,6 +218,10 @@ public class ResponseGenerationService {
                         "- create ticket <description>\n" +
                         "- update status of <ticketId>\n" +
                         "- close ticket <ticketId>";
+            case EXAMPLES:
+                return "Examples:\n" +
+                        "“show active tickets”\n" +
+                        "“create ticket printer not working”";
             default:
                 return "You can ask me to show, create, update, or close tickets, " +
                     "get system stats, or export data. Try “help commands” for more.";
