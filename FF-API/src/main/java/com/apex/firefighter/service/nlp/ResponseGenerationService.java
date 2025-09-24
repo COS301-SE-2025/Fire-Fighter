@@ -33,6 +33,9 @@ public class ResponseGenerationService {
             case TICKET_LIST:
                 response = generateTicketListResponse(result, context, preferences);
                 break;
+            case TICKET_DETAILS:
+                response = generateTicketDetailsResponse(result, context, preferences);
+                break;
             case ERROR:
             default:
                 response = generateErrorResponse(ErrorType.INTERNAL_ERROR, context, preferences);
