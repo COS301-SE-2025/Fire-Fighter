@@ -403,6 +403,12 @@ public class QueryProcessingService {
         }
     }
 
+    private String listFirstNormOrVal(List<EntityExtractionService.Entity> list) {
+        if (list == null || list.isEmpty()) return null;
+        String v = list.get(0).getNormalizedValue();
+        return (v == null || v.isEmpty()) ? list.get(0).getValue() : v;
+    }
+
 
     /**
      * Build query filters from extracted entities
