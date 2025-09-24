@@ -346,6 +346,10 @@ public class EntityExtractionService {
      */
     public List<EntityType> getSupportedEntityTypes() {
         List<EntityType> types = Arrays.asList(EntityType.values());
+        if (nlpConfig.isDebugEnabled()) {
+            System.out.println("DEBUG: Supported entity types: " +
+                types.stream().map(EntityType::getCode).collect(Collectors.joining(", ")));
+        }
         return types;
     }
 
