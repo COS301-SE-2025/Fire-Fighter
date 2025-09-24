@@ -172,6 +172,8 @@ public class ResponseGenerationService {
         switch (errorType) {
         case PERMISSION_DENIED:
             return "❌ You don’t have permission to perform this action.";
+        case DATA_NOT_FOUND:
+            return "⚠️ I couldn’t find any matching data.";        
         default:
             return "⚠️ An unknown error occurred.";
     }
