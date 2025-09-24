@@ -343,6 +343,19 @@ public class ResponseGenerationService {
         return out.toString();
     }
 
+    private String toCasual(String s, boolean withEmojis) {
+        // Gentle tone tweak without altering semantics
+        if (s.isBlank()) return s;
+        String lead = withEmojis ? "🙂 " : "";
+        // If it already starts with an emoji/prefix, don’t double it
+        if (s.startsWith("📋") || s.startsWith("🔎") || s.startsWith("🆕") ||
+            s.startsWith("✅") || s.startsWith("📊") || s.startsWith("⬇️") ||
+            s.startsWith("💡") || s.startsWith("🙂")) {
+            return s;
+        }
+        return lead + s;
+    }
+
     /**
      * Context information for query processing
      */
