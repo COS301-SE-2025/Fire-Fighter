@@ -331,7 +331,12 @@ public class EntityExtractionService {
             }
         }
 
-        return null;
+        if (nlpConfig.isDebugEnabled()) {
+            System.out.println("DEBUG: Validation result: valid=" + result.isValid() +
+                ", errors=" + result.getErrors() + ", warnings=" + result.getWarnings());
+        }
+
+        return result;
     }
 
     /**
