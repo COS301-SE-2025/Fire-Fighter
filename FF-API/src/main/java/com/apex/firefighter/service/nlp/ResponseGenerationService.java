@@ -170,8 +170,8 @@ public class ResponseGenerationService {
                                         QueryContext context,
                                         ResponsePreferences preference) {
         switch (errorType) {
-        case :
-            return ;
+        case PERMISSION_DENIED:
+            return "❌ You don’t have permission to perform this action.";
         default:
             return "⚠️ An unknown error occurred.";
     }
