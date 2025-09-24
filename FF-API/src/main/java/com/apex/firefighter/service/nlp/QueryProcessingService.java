@@ -337,6 +337,13 @@ public class QueryProcessingService {
         return tickets.stream().filter(t -> set.contains(t.getStatus())).collect(java.util.stream.Collectors.toList());
     }
 
+    private int countByStatus(List<Ticket> tickets, String status) {
+        if (tickets == null) return 0;
+        int c = 0;
+        for (Ticket t : tickets) if (status.equalsIgnoreCase(t.getStatus())) c++;
+        return c;
+    }
+
 
     /**
      * Build query filters from extracted entities
