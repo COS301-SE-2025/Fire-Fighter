@@ -285,6 +285,17 @@ public class EntityExtractionService {
                 result.getErrors().add("Invalid ticket ID: " + ticketId);
             }
         }
+
+        // Validate STATUS
+        List<String> validStatuses = Arrays.asList("open", "closed", "in progress"); // Fetch from TicketService if dynamic
+        for (Entity status : entities.getStatuses()) {
+            boolean valid = validStatuses.contains(status.getValue().toLowerCase());
+            result.getEntityValidation().put(EntityType.STATUS, valid);
+            if (!valid) {
+                result.setValid(false);
+                result.getErrors().add("Invalid status: " + status.getValue());
+            }
+        }
         
         return null;
     }
