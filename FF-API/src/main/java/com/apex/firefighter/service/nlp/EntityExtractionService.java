@@ -495,4 +495,26 @@ public class EntityExtractionService {
         public Map<EntityType, Boolean> getEntityValidation() { return entityValidation; }
         public void setEntityValidation(Map<EntityType, Boolean> entityValidation) { this.entityValidation = entityValidation; }
     }
+
+    /**
+     * Pattern class for entity extraction (similar to IntentPattern)
+     */
+    public static class EntityPattern {
+        private final double weight;
+        private final List<String> exactPhrases;
+        private final List<String> keywords;
+        private final List<Pattern> regexPatterns;
+
+        public EntityPattern(double weight, List<String> exactPhrases, List<String> keywords, List<Pattern> regexPatterns) {
+            this.weight = weight;
+            this.exactPhrases = exactPhrases != null ? exactPhrases : new ArrayList<>();
+            this.keywords = keywords != null ? keywords : new ArrayList<>();
+            this.regexPatterns = regexPatterns != null ? regexPatterns : new ArrayList<>();
+        }
+
+        public double getWeight() { return weight; }
+        public List<String> getExactPhrases() { return exactPhrases; }
+        public List<String> getKeywords() { return keywords; }
+        public List<Pattern> getRegexPatterns() { return regexPatterns; }
+    }
 }
