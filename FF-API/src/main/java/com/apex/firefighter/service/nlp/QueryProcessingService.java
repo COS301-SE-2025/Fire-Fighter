@@ -90,7 +90,6 @@ public class QueryProcessingService {
             default:
                 return new QueryResult(false, "Intent recognized but not yet supported.");
         }
-        return null;
     }
 
     /**
@@ -211,11 +210,6 @@ public class QueryProcessingService {
                     return new QueryResult(false, "Export is not supported by the current TicketService.");
                 }
 
-                case HELP: {
-                    String helpText = "Supported queries: my tickets, active tickets, completed tickets, ticket details, system stats, search by status/ticketId/emergency type.";
-                    return new QueryResult(QueryResultType.HELP, helpText, 1);
-                }
-
                 default:
                     return new QueryResult(false, "Unsupported query type: " + queryType);
             }
@@ -261,7 +255,7 @@ public class QueryProcessingService {
                     return new QueryResult(QueryResultType.OPERATION_RESULT, created, 1);
                 }
 
-                case UPDATE_STATUS: {
+                case UPDATE_TICKET_STATUS: {
                     String ticketId = firstNormalized(entities, EntityExtractionService.EntityType.TICKET_ID);
                     String status   = firstNormalized(entities, EntityExtractionService.EntityType.STATUS);
                     if (ticketId == null || status == null) {
@@ -460,7 +454,7 @@ public class QueryProcessingService {
             return true;
 
             case ADD_COMMENT:
-            case UPDATE_STATUS:
+            case UPDATE_TICKET_STATUS:
             case CLOSE_TICKET:
             case UPDATE_PRIORITY:
                 if (entities != null && entities.getAllEntities() != null) {
@@ -493,7 +487,6 @@ public class QueryProcessingService {
                 // Unknown/unsupported operation → reject
                 return false;
         }
-        return false;
     }
 
     /**
@@ -589,8 +582,8 @@ public class QueryProcessingService {
         ASSIGN_TICKET("assign_ticket", "Assign ticket to user"),
         CREATE_TICKET("create_ticket", "Create new ticket"),
         CLOSE_TICKET("close_ticket", "Close existing ticket"),
-        // ADD_COMMENT("add_comment", "Add comment to ticket"),
-        // UPDATE_PRIORITY("update_priority", "Update ticket priority");
+        ADD_COMMENT("add_comment", "Add comment to ticket"),
+        UPDATE_PRIORITY("update_priority", "Update ticket priority");
 
         private final String code;
         private final String description;

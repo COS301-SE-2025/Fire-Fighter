@@ -299,7 +299,8 @@ class IntentRecognitionServiceTest {
     }
 
     // ==================== Test recognizeMultipleIntents ====================
-    @Test testRecognizeMultipleIntents_validQuery() {
+    @Test 
+    void testRecognizeMultipleIntents_validQuery() {
         // Act 
         String query = "show my tickets and create a new ticket";
         List<IntentRecognitionService.Intent> intents = intentRecognitionService.recognizeMultipleIntents(query);
