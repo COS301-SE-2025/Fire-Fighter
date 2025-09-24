@@ -156,4 +156,15 @@ class ResponseGenerationServiceTest {
         assertTrue(out.contains("Operation successful on 2 ticket(s)."));
     }
 
+    @Test
+    void generateErrorResponse_mapsDataNotFound() {
+        var result = mockedResult(
+                QueryProcessingService.QueryResultType.ERROR,
+                null,
+                Map.of("errorType", ResponseGenerationService.ErrorType.DATA_NOT_FOUND));
+
+        String out = service.generateErrorResponse(result, context, prefs);
+        assertTrue(out.contains("I couldn't find any matching data"));
+    }
+
 }
