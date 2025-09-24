@@ -210,8 +210,14 @@ public class ResponseGenerationService {
             queryResult.getMetadata().containsKey("helpType")) {
             helpType = (HelpType) queryResult.getMetadata().get("helpType");
         }
-        
-        return null;
+
+        switch (helpType) {
+            case :
+                return ;
+            default:
+                return "You can ask me to show, create, update, or close tickets, " +
+                    "get system stats, or export data. Try “help commands” for more.";
+        }
     }
 
     /**
