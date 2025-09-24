@@ -38,23 +38,8 @@ public class NLPService {
      * @return NLPResponse containing the processed result
      */
     public NLPResponse processQuery(String query, String userId) {
-        IntentRecognitionService.Intent intent = intentRecognitionService.recognizeIntent(query);
-        if (!intent.isSuccess()) {
-            return new NLPResponse("Could not understand query", false);
-        }
-
-        if (!intentRecognitionService.isIntentAllowed(intent.getType(), userService.getUserRole(userId))) {
-            return new NLPResponse("Permission denied for intent: " + intent.getType().getCode(), false);
-        }
-
-        EntityExtractionService.ExtractedEntities entities = entityExtractionService.extractEntities(query);
-        EntityExtractionService.ValidationResult validation = entityExtractionService.validateEntities(entities);
-        if (!validation.isValid()) {
-            return new NLPResponse("Invalid entities: " + validation.getErrors(), false);
-        }
-
-        // TODO: query processing logic
-        return new NLPResponse("Processing query: " + query, true);
+        // TODO: Implement main query processing logic
+        return null;
     }
 
     /**
