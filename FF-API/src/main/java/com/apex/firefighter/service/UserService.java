@@ -1,5 +1,4 @@
 package com.apex.firefighter.service;
-package com.apex.firefighter.service.nlp;
 
 import com.apex.firefighter.model.User;
 import com.apex.firefighter.service.auth.AuthenticationService;
