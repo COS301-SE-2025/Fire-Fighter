@@ -55,6 +55,28 @@ public class ResponseGenerationService {
         return customizeResponse(response, context, preferences);
     }
 
+    public String generateResponse(QueryProcessingService.QueryResult result) {
+        if (result == null) {
+            return generateErrorResponse(ErrorType.QUERY_NOT_UNDERSTOOD);
+        }
+
+        switch (result.getType()) {
+            case TICKET_LIST:
+                return "Tickets: " + result.getData();
+            case TICKET_DETAILS:
+                return "Ticket details: " + result.getData();
+            case OPERATION_RESULT:
+                return "Operation result: " + result.getMessage();
+            case STATISTICS:
+                return "Statistics: " + result.getData();
+            case HELP:
+                return "Help instructions...";
+            case ERROR:
+            default:
+                return generateErrorResponse(ErrorType.INTERNAL_ERROR);
+        }
+    }
+
     /**
      * Generate a response for ticket list results
      * 
@@ -191,6 +213,16 @@ public class ResponseGenerationService {
             case SYSTEM_ERROR:
             default:
                 return "⚠️ Something went wrong on our side. Please try again later.";
+        }
+    }
+
+    private String generateErrorResponse(ErrorType type) {
+        switch (type) {
+            case QUERY_NOT_UNDERSTOOD:
+                return "Sorry, I couldn't understand your query.";
+            case INTERNAL_ERROR:
+            default:
+                return "An internal error occurred.";
         }
     }
 
