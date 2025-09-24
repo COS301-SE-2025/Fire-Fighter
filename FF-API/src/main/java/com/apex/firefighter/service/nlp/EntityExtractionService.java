@@ -296,7 +296,19 @@ public class EntityExtractionService {
                 result.getErrors().add("Invalid status: " + status.getValue());
             }
         }
-        
+
+        // Validate DATE
+        for (Entity date : entities.getDates()) {
+            try {
+                DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+                LocalDate.parse(date.getNormalizedValue(), formatter);
+                result.getEntityValidation().put(EntityType.DATE, true);
+            } catch (DateTimeParseException e) {
+                result.setValid(false);
+                result.getErrors().add("Invalid date format: " + date.getValue());
+            }
+        }
+
         return null;
     }
 
