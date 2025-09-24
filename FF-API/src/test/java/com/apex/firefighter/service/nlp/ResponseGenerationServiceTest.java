@@ -81,4 +81,16 @@ class ResponseGenerationServiceTest {
         // Ref: generateTicketListResponse
     }
 
+    @Test
+    void generateResponse_routesToTicketDetails() {
+        Ticket t = mockedTicket("T-2", "closed", "Reset router", "user2", "medium");
+        var result = mockedResult(QueryProcessingService.QueryResultType.TICKET_DETAILS, List.of(t), Map.of());
+
+        String out = service.generateResponse(result, context, prefs);
+        assertTrue(out.contains("Ticket [T-2]"));
+        assertTrue(out.contains("Status: closed"));
+        assertTrue(out.contains("Priority: medium"));
+        assertTrue(out.contains("Owner: user2"));
+    }
+
 }
