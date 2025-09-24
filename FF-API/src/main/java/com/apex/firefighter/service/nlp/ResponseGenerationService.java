@@ -170,31 +170,34 @@ public class ResponseGenerationService {
                                         QueryContext context,
                                         ResponsePreferences preference) {
         switch (errorType) {
-        case PERMISSION_DENIED:
-            return "❌ You don't have permission to perform this action.";
-        case DATA_NOT_FOUND:
-            return "⚠️ I couldn't find any matching data.";
-        case QUERY_NOT_UNDERSTOOD:
-            return "🤔 I didn't understand that request. Try rephrasing.";
-        case INTERNAL_ERROR:
-            return "⚠️ Something went wrong on our side. Please try again later.";
-        case INVALID_INPUT:
-            return "⚠️ The input provided was invalid. Please check and try again.";
-        case RATE_LIMITED:
-            return "⏳ Too many requests. Please slow down and try again.";
-        default:
-            return "⚠️ An unknown error occurred.";
-    }
+            case PERMISSION_DENIED:
+                return "❌ You don't have permission to perform this action.";
+            case DATA_NOT_FOUND:
+                return "⚠️ I couldn't find any matching data.";
+            case QUERY_NOT_UNDERSTOOD:
+                return "🤔 I didn't understand that request. Try rephrasing.";
+            case INTERNAL_ERROR:
+                return "⚠️ Something went wrong on our side. Please try again later.";
+            case INVALID_INPUT:
+                return "⚠️ The input provided was invalid. Please check and try again.";
+            case RATE_LIMITED:
+                return "⏳ Too many requests. Please slow down and try again.";
+            default:
+                return "⚠️ An unknown error occurred.";
+        }
     }
 
     /**
      * Generate help responses
      * 
-     * @param helpType The type of help requested
-     * @param userRole The user's role (affects available features)
+     * @param queryResult The query result containing help information
+     * @param context Context about the original query
+     * @param preferences User preferences for response style
      * @return Help information in natural language
      */
-    public String generateHelpResponse(HelpType helpType, String userRole) {
+    public String generateHelpResponse(QueryProcessingService.QueryResult queryResult,
+                                        QueryContext context,
+                                        ResponsePreferences preferences) {
         // TODO: Implement help response generation
         return null;
     }
