@@ -2,9 +2,14 @@ package com.apex.firefighter.service.nlp;
 
 import org.springframework.stereotype.Service;
 
+import com.apex.firefighter.config.NLPConfig;
+import com.apex.firefighter.model.Ticket;
+import com.apex.firefighter.service.ticket.TicketService;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Service responsible for extracting entities from natural language queries.
@@ -19,6 +24,22 @@ public class EntityExtractionService {
      * @param query The user's natural language input
      * @return ExtractedEntities object containing all found entities
      */
+
+    @Autowired 
+    private NLPConfig nlpConfig;
+
+    // For Validation
+    @Autowired
+    private TicketService ticketService;
+
+    // Common stop words to ignore during entity extraction
+    private static final Set<String> STOP_WORDS = Set.of(
+        "a", "an", "and", "are", "as", "at", "be", "but", "by", "for", "from", "in", "is",
+        "it", "of", "on", "or", "that", "the", "this", "to", "was", "were", "which", "with"
+    );
+
+    
+
     public ExtractedEntities extractEntities(String query) {
         // TODO: Implement entity extraction logic
         return null;
