@@ -7,11 +7,14 @@ import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.service.ticket.TicketService;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -99,6 +102,43 @@ public class EntityExtractionService {
             System.out.println("Debug: Normalized query: " + normalized);
         }
         return normalized;
+    }
+
+    private void extractPatternEntities(String query, EntityPattern pattern, EntityType type, List<Entity> entities) {
+        double threshold = nlpConfig != null ? nlpConfig.getEntityConfidenceThreshold() : 0.7;
+        boolean matched = false;
+
+        // Check exact phrases
+        for (Pattern regex : pattern.getRegexPatterns()) {
+            Matcher matcher = regex.matcher(query);
+            while (matcher.find()) {
+                String value = matcher.group();
+                Entity entity = new Entity(type, value, matcher.start(), matcher.end());
+                entity.setConfidence(pattern.getConfidence()*0.9); // Slightly lower confidence for regex matches
+                if (entity.getConfidence() >= threshold) {
+                    entity.setNormalizedValue(normalizeEntityValue(type, value));
+                    entities.add(entity);
+                    matched = true;
+                }
+            }
+        }
+
+        if (!matched && !pattern.getKeywords().isEmpty()) {
+            String[] words = query.split("\\s+");
+            for (String word : pattern.getKeywords()) {
+                for (int i = 0; i < words.length; i++) {
+                    if (!STOP_WORDS.contains(words[i]) && words[i].equals(word.toLowerCase())){
+                        Entity entity = new Entity(type, word, query.indexOf(word), query.indexOf(word) + word.length());
+                        entity.setNormalizedValue(normalizedEntityValue(type, word));
+                        entity.setConfidence(pattern.getWeight() * 0.6);
+                        if (entity.getConfidence() >= threshold) {
+                            entity.setNormalizedValue(normalizedEnitityValue(type, word));
+                            entities.add(entity);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public ExtractedEntities extractEntities(String query) {
