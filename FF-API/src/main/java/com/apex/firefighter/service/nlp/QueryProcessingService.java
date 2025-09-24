@@ -1,7 +1,9 @@
 package com.apex.firefighter.service.nlp;
 
+import com.apex.firefighter.config.NLPConfig;
 import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.service.ticket.TicketService;
+import com.apex.firefighter.service.nlp.IntentRecognitionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,12 @@ public class QueryProcessingService {
 
     @Autowired
     private EntityExtractionService entityExtractor;
+
+    @Autowired
+    private NLPConfig nlpConfig;
+
+    @Autowired
+    private IntentRecognitionService intentRecognitionService;
 
     /**
      * Process a query based on recognized intent and extracted entities
