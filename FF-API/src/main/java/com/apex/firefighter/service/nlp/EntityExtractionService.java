@@ -7,9 +7,12 @@ import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.service.ticket.TicketService;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Service responsible for extracting entities from natural language queries.
@@ -38,7 +41,55 @@ public class EntityExtractionService {
         "it", "of", "on", "or", "that", "the", "this", "to", "was", "were", "which", "with"
     );
 
-    
+    static {
+        initializeEntityPatterns();
+    }
+
+    /**
+     * Initialize entity patterns for all supported entity types
+     */
+    private static void initializeEntityPatterns() {
+        // TICKET_ID: Matches #123, ticket123
+        ENTITY_PATTERNS.put(EntityType.TICKET_ID, Arrays.asList(
+            new EntityPattern(1.0, Arrays.asList("#\\d+", "ticket\\d+"),
+                Arrays.asList("ticket"),
+                Arrays.asList(Pattern.compile("\\b#\\d+\\b"), Pattern.compile("\\bticket\\d+\\b")))
+        ));
+
+        // STATUS: Matches open, closed, in progress
+        ENTITY_PATTERNS.put(EntityType.STATUS, Arrays.asList(
+            new EntityPattern(1.0, Arrays.asList("open", "closed", "in progress"),
+                Arrays.asList("open", "closed", "progress"),
+                Arrays.asList(Pattern.compile("\\b(open|closed|in\\s+progress)\\b")))
+        ));
+
+        // DATE: Matches MM/DD/YYYY, YYYY-MM-DD, or relative terms like "today"
+        ENTITY_PATTERNS.put(EntityType.DATE, Arrays.asList(
+            new EntityPattern(1.0, Arrays.asList("today", "yesterday", "tomorrow"),
+                Arrays.asList("today", "yesterday", "tomorrow"),
+                Arrays.asList(Pattern.compile("\\b\\d{1,2}/\\d{1,2}/\\d{4}\\b"),
+                             Pattern.compile("\\b\\d{4}-\\d{2}-\\d{2}\\b"),
+                             Pattern.compile("\\b(today|yesterday|tomorrow)\\b")))
+        ));
+
+        // EMERGENCY_TYPE: Matches Dolibarr-specific types
+        ENTITY_PATTERNS.put(EntityType.EMERGENCY_TYPE, Arrays.asList(
+            new EntityPattern(1.0, Arrays.asList("hr emergency", "financial emergency", "management emergency"),
+                Arrays.asList("hr", "financial", "management", "logistics"),
+                Arrays.asList(Pattern.compile("\\b(hr|financial|management|logistics)\\s+emergency\\b")))
+        ));
+
+        // USER_NAME: Matches simple names (simplified for now)
+        ENTITY_PATTERNS.put(EntityType.USER_NAME, Arrays.asList(
+            new EntityPattern(0.8, Collections.emptyList(),
+                Arrays.asList("john", "jane", "admin"), // Populate with names from user database
+                Arrays.asList(Pattern.compile("\\b[A-Z][a-z]+\\b")))
+        ));
+
+        // Add more patterns later (example NUMBER, TIME, etc.) as needed
+    }
+
+
 
     public ExtractedEntities extractEntities(String query) {
         // TODO: Implement entity extraction logic
