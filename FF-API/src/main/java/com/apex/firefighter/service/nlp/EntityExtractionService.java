@@ -239,6 +239,9 @@ public class EntityExtractionService {
      */
     public Map<EntityType, List<Entity>> extractSpecificEntities(String query, List<EntityType> entityTypes) {
         if (query == null || query.trim().isEmpty() || entityTypes == null || entityTypes.isEmpty()) {
+            if (nlpConfig.isDebugEnabled()) {
+                System.out.println("DEBUG: Invalid input for extractSpecificEntities");
+            }
             return new HashMap<>();
         }
 
@@ -247,6 +250,14 @@ public class EntityExtractionService {
         for (EntityType type : entityTypes) {
             List<Entity> entities = allEntities.getAllEntities().getOrDefault(type, Collections.emptyList());
             result.put(type, entities);
+        }
+
+        if (nlpConfig.isDebugEnabled()) {
+            System.out.println("DEBUG: Specific entities extracted: " +
+                result.entrySet().stream()
+                    .map(e -> e.getKey() + ": " + e.getValue().stream()
+                        .map(Entity::getValue).collect(Collectors.joining(", ")))
+                    .collect(Collectors.joining("; ")));
         }
 
         return result;
