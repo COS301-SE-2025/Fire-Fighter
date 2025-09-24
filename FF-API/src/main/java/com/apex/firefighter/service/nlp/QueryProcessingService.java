@@ -60,10 +60,6 @@ public class QueryProcessingService {
             case EXPORT_TICKETS:
                 return executeTicketQuery(TicketQueryType.EXPORT_DATA,
                         buildQueryFilters(entities), userId, isAdmin);
-
-            case HELP:
-                return executeTicketQuery(TicketQueryType.HELP,
-                        buildQueryFilters(entities), userId, isAdmin);
             
             // ----------- Ticket Operations -----------
             case CREATE_TICKET:
@@ -244,59 +240,55 @@ public class QueryProcessingService {
                                           String userId,
                                           boolean isAdmin) {
         try {
-            // Permission gate (assumes you implemented this to check ownership for non-admins)
+            // Permission gate
             if (!validateUserOperation(operation, entities, userId, isAdmin)) {
                 return new QueryResult(false, "You are not allowed to perform this operation.");
             }
 
             switch (operation) {
                 case CREATE_TICKET: {
-                    String description      = firstNormalized(entities, NUMBER); // fallback if description is captured differently
-                    // Prefer pulling description from a more suitable entity if you have one; placeholder kept simple:
-                    if (description == null || description.isEmpty()) description = "Emergency assistance request";
+                    String description      = firstNormalized(entities, EntityExtractionService.EntityType.NUMBER);
+                    if (description == null || description.isEmpty()) {
+                        description = "Emergency assistance request";
+                    }
 
-                    String emergencyType    = firstNormalized(entities, EMERGENCY_TYPE);
-                    String emergencyContact = firstNormalized(entities, PHONE);
-                    Integer duration        = parseIntegerSafe(firstNormalized(entities, DURATION));
+                    String emergencyType    = firstNormalized(entities, EntityExtractionService.EntityType.EMERGENCY_TYPE);
+                    String emergencyContact = firstNormalized(entities, EntityExtractionService.EntityType.PHONE);
+                    Integer duration        = parseIntegerSafe(firstNormalized(entities, EntityExtractionService.EntityType.DURATION));
 
-                    Ticket created = ticketService.createTicket(description, userId, emergencyType, emergencyContact, duration);
+                    Ticket created = ticketService.createTicket(
+                            description, userId, emergencyType, emergencyContact, duration);
                     return new QueryResult(QueryResultType.OPERATION_RESULT, created, 1);
                 }
 
                 case UPDATE_STATUS: {
-                    String ticketId = firstNormalized(entities, TICKET_ID);
-                    String status   = firstNormalized(entities, STATUS);
+                    String ticketId = firstNormalized(entities, EntityExtractionService.EntityType.TICKET_ID);
+                    String status   = firstNormalized(entities, EntityExtractionService.EntityType.STATUS);
                     if (ticketId == null || status == null) {
                         return new QueryResult(false, "Missing ticketId or status.");
                     }
-
-                    // If non-admin, double-check ownership before mutation
                     if (!isAdmin) {
                         Optional<Ticket> t = ticketService.getTicketByTicketId(ticketId);
                         if (t.isEmpty() || !userId.equals(t.get().getUserId())) {
                             return new QueryResult(false, "You can only update your own tickets.");
                         }
                     }
-
-                    Ticket updated = ticketService.updateTicketStatus(ticketId, normalizeStatusForWrite(status));
+                    Ticket updated = ticketService.updateTicketStatus(ticketId,
+                            normalizeStatusForWrite(status));
                     return new QueryResult(QueryResultType.OPERATION_RESULT, updated, 1);
                 }
 
                 case CLOSE_TICKET: {
-                    String ticketId = firstNormalized(entities, TICKET_ID);
+                    String ticketId = firstNormalized(entities, EntityExtractionService.EntityType.TICKET_ID);
                     if (ticketId == null) {
                         return new QueryResult(false, "Missing ticketId.");
                     }
-
-                    // If non-admin, double-check ownership before mutation
                     if (!isAdmin) {
                         Optional<Ticket> t = ticketService.getTicketByTicketId(ticketId);
                         if (t.isEmpty() || !userId.equals(t.get().getUserId())) {
                             return new QueryResult(false, "You can only close your own tickets.");
                         }
                     }
-
-                    // Use updateTicketStatus to mark as Completed (or Closed if you prefer)
                     Ticket updated = ticketService.updateTicketStatus(ticketId, "Completed");
                     return new QueryResult(QueryResultType.OPERATION_RESULT, updated, 1);
                 }
@@ -304,16 +296,17 @@ public class QueryProcessingService {
                 case ASSIGN_TICKET:
                 case ADD_COMMENT:
                 case UPDATE_PRIORITY:
-                    // Not supported by TicketService right now
                     return new QueryResult(false, "Operation not supported: " + operation);
 
                 default:
                     return new QueryResult(false, "Unsupported operation: " + operation);
             }
+
         } catch (Exception e) {
             return new QueryResult(false, "Error while executing operation: " + e.getMessage());
         }
     }
+
 
     /* ----------------------- helpers ----------------------- */
 
@@ -391,57 +384,57 @@ public class QueryProcessingService {
     public Map<String, Object> buildQueryFilters(EntityExtractionService.ExtractedEntities entities) {
         Map<String, Object> filters = new HashMap<>();
 
-        if (entities == null || entities.getEntities() == null) {
-            return filters;
+            if (entities == null || entities.getAllEntities() == null) {
+                return filters;
+            }
+
+            for (EntityExtractionService.Entity entity : entities.getAllEntities().values().stream().flatMap(List::stream).toList()) {
+            switch (entity.getType()) {
+                case TICKET_ID:
+                    filters.put("ticketId", entity.getNormalizedValue());
+                    break;
+
+                case STATUS:
+                    filters.put("status", entity.getNormalizedValue().toLowerCase());
+                    break;
+
+                case USER_NAME:
+                    filters.put("assigned", entity.getNormalizedValue());
+                    break;
+
+                case PRIORITY:
+                    filters.put("priority", entity.getNormalizedValue().toLowerCase());
+                    break;
+
+                case DATE:
+                    filters.put("date", entity.getNormalizedValue());
+                    break;
+
+                case TIME:
+                    filters.put("time", entity.getNormalizedValue());
+                    break;
+
+                case DURATION:
+                    filters.put("duration", entity.getNormalizedValue());
+                    break; 
+                
+                case EMERGENCY_TYPE:
+                    filters.put("emergencyType", entity.getNormalizedValue());
+                    break;
+
+                case NUMBER:
+                    filters.put("number", entity.getNormalizedValue());
+                    break;
+
+                case LOCATION:
+                    filters.put("location", entity.getNormalizedValue());
+                    break;
+
+                default:
+                    // skip unknown or unneeded entity types
+                    break;
+            }
         }
-
-        for (EntityExtractionService.EntityType entity : entities.getEntities()) {
-        switch (entity.getType()) {
-            case TICKET_ID:
-                filters.put("ticketId", entity.getNormalizedValue());
-                break;
-
-            case STATUS:
-                filters.put("status", entity.getNormalizedValue().toLowerCase());
-                break;
-
-            case USER_NAME:
-                filters.put("assigned", entity.getNormalizedValue());
-                break;
-
-            case PRIORITY:
-                filters.put("priority", entity.getNormalizedValue().toLowerCase());
-                break;
-
-            case DATE:
-                filters.put("date", entity.getNormalizedValue());
-                break;
-
-            case TIME:
-                filters.put("time", entity.getNormalizedValue());
-                break;
-
-            case DURATION:
-                filters.put("duration", entity.getNormalizedValue());
-                break; 
-            
-            case EMERGENCY_TYPE:
-                filters.put("emergencyType", entity.getNormalizedValue());
-                break;
-
-            case NUMBER:
-                filters.put("number", entity.getNormalizedValue());
-                break;
-
-            case LOCATION:
-                filters.put("location", entity.getNormalizedValue());
-                break;
-
-            default:
-                // skip unknown or unneeded entity types
-                break;
-        }
-    }
 
         return filters;
     }
