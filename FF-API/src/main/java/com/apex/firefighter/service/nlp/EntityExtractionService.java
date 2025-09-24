@@ -309,6 +309,18 @@ public class EntityExtractionService {
             }
         }
 
+        // Validate EMERGENCY_TYPE
+        List<String> validEmergencyTypes = Arrays.asList("hr", "financial", "management", "logistics");
+        for (Entity emergency : entities.getEmergencyTypes()) {
+            String type = emergency.getValue().toLowerCase().replace(" emergency", "");
+            boolean valid = validEmergencyTypes.contains(type);
+            result.getEntityValidation().put(EntityType.EMERGENCY_TYPE, valid);
+            if (!valid) {
+                result.setValid(false);
+                result.getErrors().add("Invalid emergency type: " + emergency.getValue());
+            }
+        }
+
         return null;
     }
 
