@@ -21,10 +21,37 @@ public class ResponseGenerationService {
      * @return Generated natural language response
      */
     public String generateResponse(QueryProcessingService.QueryResult queryResult, 
-                                  String originalQuery, 
-                                  String userRole) {
-        // TODO: Implement response generation logic
-        return null;
+                                  QueryContext context,
+                                  ResponsePreferences preferences) {
+        if (queryResult == null) {
+            return generateErrorResponse(ErrorType.QUERY_NOT_UNDERSTOOD, context, preferences);
+        }
+
+        String response;
+
+        switch (result.getResultType()) {
+            case TICKET_LIST:
+                response = generateTicketListResponse(queryResult, context, preferences);
+                break;
+            case TICKET_DETAILS:
+                response = generateTicketDetailsResponse(queryResult, context, preferences);
+                break;
+            case OPERATION_RESULT:
+                response = generateOperationResponse(queryResult, context, preferences);
+                break;
+            case STATISTICS:
+                response = generateStatisticsResponse(queryResult, context, preferences);
+                break;
+            case HELP:
+                response = generateHelpResponse(queryResult, context, preferences);
+                break;
+            case ERROR:
+            default:
+                response = generateErrorResponse(ErrorType.INTERNAL_ERROR, context, preferences);
+                break;
+        }
+
+        return customizeResponse(response, preferences);
     }
 
     /**
