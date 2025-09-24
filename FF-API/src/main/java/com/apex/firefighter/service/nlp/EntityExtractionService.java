@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Service responsible for extracting entities from natural language queries.
@@ -89,11 +90,52 @@ public class EntityExtractionService {
         // Add more patterns later (example NUMBER, TIME, etc.) as needed
     }
 
-
+    private String normalizeQuery(String query) {
+        // TODO: Implement normalization logic (lowercasing, removing special chars, etc.)
+        return query;
+    }
 
     public ExtractedEntities extractEntities(String query) {
-        // TODO: Implement entity extraction logic
-        return null;
+       if (query == null || query.trim().isEmpty()) {
+           if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
+               System.out.println("Debug: Empty or null query provided for entity extraction.");
+            }   
+            return new ExtractedEntities();
+        }
+
+        String normalizedQuery = normalizeQuery(query);
+        ExtractedEntities entities = new ExtractedEntities();
+        entities.setTicketIds(new Arraylist<>());
+        entities.setStatuses(new Arraylist<>());
+        entities.setDates(new Arraylist<>());
+        entities.setUserNames(new Arraylist<>());
+        entities.setEmergencyTypes(new Arraylist<>());
+        entities.setNumbers(new Arraylist<>());
+        entities.setTimeExpressions(new Arraylist<>());
+        entities.setAllEntities(new HashMap<>());
+
+        for (EntityType type : ENTITY_PATTERNS.keySet()) {
+            List<EntityPattern> patterns = ENTITY_PATTERNS.get(type);
+            List<Entity> typeEntities = new ArrayList<>();
+            for (EntityPattern pattern : patterns) {
+                extractPatternEntities(normalizedQuery, pattern, type, typeEntities);
+            }
+
+            entities.getAllEntities().put(type, typeEntities);
+            // Set specific lists for easy access
+            switch (type) {
+                case TICKET_ID -> entities.setTicketIds(typeEntities);
+                case STATUS -> entities.setStatuses(typeEntities);
+                case DATE -> entities.setDates(typeEntities);
+                case USER_NAME -> entities.setUserNames(typeEntities);
+                case EMERGENCY_TYPE -> entities.setEmergencyTypes(typeEntities);
+                case NUMBER -> entities.setNumbers(typeEntities);
+                case TIME -> entities.setTimeExpressions(typeEntities);
+                default -> {}
+            }
+        }
+
+        return entities;
     }
 
     /**
