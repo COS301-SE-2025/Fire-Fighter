@@ -62,11 +62,23 @@ public class ResponseGenerationService {
      * @param userRole The user's role
      * @return Natural language description of the tickets
      */
-    public String generateTicketListResponse(List<?> tickets, 
-                                           QueryContext queryContext, 
-                                           String userRole) {
-        // TODO: Implement ticket list response generation
-        return null;
+    public String generateTicketListResponse(QueryProcessingService.QueryResult result,
+                                            QueryContext context,
+                                            ResponsePreferences preferences) {
+        List<Ticket> tickets = (List<Ticket>) result.getData();
+        if (tickets == null || tickets.isEmpty()) {
+            return "No tickets found matching your query.";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Here are your tickets:\n");
+        for (Ticket t : tickets) {
+            sb.append("• [").append(t.getTicketId()).append("] ")
+            .append(t.getStatus()).append(" - ")
+            .append(t.getDescription()).append("\n");
+        }
+        
+        return sb.toString();
     }
 
     /**
