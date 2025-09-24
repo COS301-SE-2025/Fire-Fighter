@@ -86,7 +86,7 @@ public class EntityExtractionService {
                 Arrays.asList(Pattern.compile("\\b(hr|financial|management|logistics)\\s+emergency\\b")))
         ));
 
-        // USER_NAME: Matches simple names (simplified for now)
+        // USER_NAME: Matches simple names (simplified for now. Remember to also change validateEnities method)
         ENTITY_PATTERNS.put(EntityType.USER_NAME, Arrays.asList(
             new EntityPattern(0.8, Collections.emptyList(),
                 Arrays.asList("john", "jane", "admin"), // Populate with names from user database
@@ -270,8 +270,73 @@ public class EntityExtractionService {
      * @return ValidationResult containing validation status and errors
      */
     public ValidationResult validateEntities(ExtractedEntities entities) {
-        // TODO: Implement entity validation logic
-        return null;
+        ValidationResult result = new ValidationResult(true);
+        result.setErrors(new ArrayList<>());
+        result.setWarnings(new ArrayList<>());
+        result.setEntityValidation(new HashMap<>());
+
+        // Validate TICKET_ID
+        for (Entity ticket : entities.getTicketIds()) {
+            String ticketId = ticket.getNormalizedValue();
+            boolean valid = ticketService.existsTicket(ticketId); // Assume TicketService method
+            result.getEntityValidation().put(EntityType.TICKET_ID, valid);
+            if (!valid) {
+                result.setValid(false);
+                result.getErrors().add("Invalid ticket ID: " + ticketId);
+            }
+        }
+
+        // Validate STATUS
+        List<String> validStatuses = Arrays.asList("open", "closed", "in progress"); // Fetch from TicketService if dynamic
+        for (Entity status : entities.getStatuses()) {
+            boolean valid = validStatuses.contains(status.getValue().toLowerCase());
+            result.getEntityValidation().put(EntityType.STATUS, valid);
+            if (!valid) {
+                result.setValid(false);
+                result.getErrors().add("Invalid status: " + status.getValue());
+            }
+        }
+
+        // Validate DATE
+        for (Entity date : entities.getDates()) {
+            try {
+                DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+                LocalDate.parse(date.getNormalizedValue(), formatter);
+                result.getEntityValidation().put(EntityType.DATE, true);
+            } catch (DateTimeParseException e) {
+                result.setValid(false);
+                result.getErrors().add("Invalid date format: " + date.getValue());
+            }
+        }
+
+        // Validate EMERGENCY_TYPE
+        List<String> validEmergencyTypes = Arrays.asList("hr", "financial", "management", "logistics");
+        for (Entity emergency : entities.getEmergencyTypes()) {
+            String type = emergency.getValue().toLowerCase().replace(" emergency", "");
+            boolean valid = validEmergencyTypes.contains(type);
+            result.getEntityValidation().put(EntityType.EMERGENCY_TYPE, valid);
+            if (!valid) {
+                result.setValid(false);
+                result.getErrors().add("Invalid emergency type: " + emergency.getValue());
+            }
+        }
+
+        
+        // temporary USER_NAME validation - replace with real user lookup
+        for (Entity user : entities.getUserNames()) {
+            boolean valid = ticketService.existsUser(user.getValue()); // Assume TicketService method
+            result.getEntityValidation().put(EntityType.USER_NAME, valid);
+            if (!valid) {
+                result.getWarnings().add("Unknown user name: " + user.getValue());
+            }
+        }
+
+        if (nlpConfig.isDebugEnabled()) {
+            System.out.println("DEBUG: Validation result: valid=" + result.isValid() +
+                ", errors=" + result.getErrors() + ", warnings=" + result.getWarnings());
+        }
+
+        return result;
     }
 
     /**
@@ -280,8 +345,12 @@ public class EntityExtractionService {
      * @return List of supported entity types
      */
     public List<EntityType> getSupportedEntityTypes() {
-        // TODO: Implement supported entity types logic
-        return null;
+        List<EntityType> types = Arrays.asList(EntityType.values());
+        if (nlpConfig.isDebugEnabled()) {
+            System.out.println("DEBUG: Supported entity types: " +
+                types.stream().map(EntityType::getCode).collect(Collectors.joining(", ")));
+        }
+        return types;
     }
 
     /**
@@ -425,5 +494,27 @@ public class EntityExtractionService {
         
         public Map<EntityType, Boolean> getEntityValidation() { return entityValidation; }
         public void setEntityValidation(Map<EntityType, Boolean> entityValidation) { this.entityValidation = entityValidation; }
+    }
+
+    /**
+     * Pattern class for entity extraction (similar to IntentPattern)
+     */
+    public static class EntityPattern {
+        private final double weight;
+        private final List<String> exactPhrases;
+        private final List<String> keywords;
+        private final List<Pattern> regexPatterns;
+
+        public EntityPattern(double weight, List<String> exactPhrases, List<String> keywords, List<Pattern> regexPatterns) {
+            this.weight = weight;
+            this.exactPhrases = exactPhrases != null ? exactPhrases : new ArrayList<>();
+            this.keywords = keywords != null ? keywords : new ArrayList<>();
+            this.regexPatterns = regexPatterns != null ? regexPatterns : new ArrayList<>();
+        }
+
+        public double getWeight() { return weight; }
+        public List<String> getExactPhrases() { return exactPhrases; }
+        public List<String> getKeywords() { return keywords; }
+        public List<Pattern> getRegexPatterns() { return regexPatterns; }
     }
 }
