@@ -293,6 +293,22 @@ public class ResponseGenerationService {
             response += meta.toString();
         }
 
+        switch (preferences.getStyle()) {
+            case CONCISE:
+                response = toConcise(response);
+                break;
+            case CASUAL:
+                response = toCasual(response, preferences.isIncludeEmojis());
+                break;
+            case TECHNICAL:
+                response = toTechnical(response);
+                break;
+            case PROFESSIONAL:
+            default:
+                response = toProfessional(response);
+                break;
+        }
+
         return null;
     }
 
