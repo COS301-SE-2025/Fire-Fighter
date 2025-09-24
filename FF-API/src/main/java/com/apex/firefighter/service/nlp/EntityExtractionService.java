@@ -141,6 +141,24 @@ public class EntityExtractionService {
             }
         }
 
+        if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
+            System.out.println("Debug: Extracted entities: " + 
+                entities
+                .getAllEntities()
+                .entrySet()
+                .stream()
+                .map(
+                    e -> e.getKey() + ": " + 
+                    e.getValue().stream()
+                    .map(
+                            Entity::getValue
+                    )
+                    .collect(Collectors.joining(", "))
+                )
+                .collect(Collectors.joining("; "))
+            );
+        }
+
         return entities;
     }
 
