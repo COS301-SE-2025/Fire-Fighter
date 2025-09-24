@@ -1,16 +1,11 @@
-package com.apex.firefighter.service.nlp;
+package com.apex.firefighter.service;
 
 import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.service.ticket.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.ArrayList;
-
+import java.util.*;
 
 /**
  * Service responsible for processing natural language queries and converting them
@@ -102,6 +97,19 @@ public class QueryProcessingService {
         return null;
     }
 
+    public QueryResult processQuery(String input) {
+            EntityExtractionService.ExtractedEntities entities = entityExtractor.extractEntities(input);
+            if (input.toLowerCase().contains("help")) {
+                return new QueryResult(true, "Help requested", null, QueryResultType.HELP);
+            }
+            if (input.toLowerCase().contains("stats")) {
+                Map<String, Object> stats = new HashMap<>();
+                stats.put("totalTickets", 0); // placeholder
+                return new QueryResult(true, "Statistics", stats, QueryResultType.STATISTICS);
+            }
+            return new QueryResult(false, "Query not understood", null, QueryResultType.ERROR);
+        }
+
     /**
      * Execute a ticket query operation
      * 
@@ -128,7 +136,7 @@ public class QueryProcessingService {
                 }
 
                 case USER_TICKETS: {
-                    List<Ticket> tickets = ticketService.getTicketsForUser(userId, isAdmin);
+                    List<Ticket> tickets = ticketService.getTicketById(userId);
                     return new QueryResult(QueryResultType.TICKET_LIST, tickets, tickets.size());
                 }
 
@@ -169,15 +177,15 @@ public class QueryProcessingService {
      * Execute a ticket management operation
      * 
      * @param operation The management operation to execute
-     * @param parameters The parameters for the operation
+     * @param entities 
      * @param userId The user performing the operation
      * @param isAdmin Whether the user has admin privileges
      * @return QueryResult containing the operation result
      */
-    public QueryResult executeTicketOperation(TicketOperation operation, 
-                                             Map<String, Object> parameters, 
-                                             String userId, 
-                                             boolean isAdmin) {
+    public QueryResult executeTicketOperation(TicketOperation operation,
+                                                EntityExtractionService.ExtractedEntities entities,
+                                                String userId,
+                                                boolean isAdmin) {
         try {
             // First validate user permissions
             if (!validateUserOperation(operation, entities, userId, isAdmin)) {
@@ -246,7 +254,7 @@ public class QueryProcessingService {
             return filters;
         }
 
-        for (EntityExtractionService.Entity entity : entities.getEntities()) {
+        for (EntityExtractionService.EntityType entity : entities.getEntities()) {
         switch (entity.getType()) {
             case TICKET_ID:
                 filters.put("ticketId", entity.getNormalizedValue());
@@ -321,7 +329,7 @@ public class QueryProcessingService {
             case CLOSE_TICKET:
             case UPDATE_PRIORITY:
                 if (entities != null && entities.getEntities() != null) {
-                    for (EntityExtractionService.Entity entity : entities.getEntities()) {
+                    for (EntityExtractionService.EntityType entity : entities.getEntities()) {
                         if (entity.getType() == EntityExtractionService.EntityType.TICKET_ID) {
                             String ticketId = entity.getNormalizedValue();
                             if (ticketId != null) {
@@ -385,19 +393,6 @@ public class QueryProcessingService {
             this.resultType = resultType;
             this.data = data;
             this.recordCount = recordCount;
-        }
-
-        public QueryResult processQuery(String input) {
-            EntityExtractionService.ExtractedEntities entities = entityExtractor.extractEntities(input);
-            if (input.toLowerCase().contains("help")) {
-                return new QueryResult(true, "Help requested", null, QueryResultType.HELP);
-            }
-            if (input.toLowerCase().contains("stats")) {
-                Map<String, Object> stats = new HashMap<>();
-                stats.put("totalTickets", 0); // placeholder
-                return new QueryResult(true, "Statistics", stats, QueryResultType.STATISTICS);
-            }
-            return new QueryResult(false, "Query not understood", null, QueryResultType.ERROR);
         }
 
         // Getters and setters
