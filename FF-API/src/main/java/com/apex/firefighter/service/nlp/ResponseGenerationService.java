@@ -222,6 +222,13 @@ public class ResponseGenerationService {
                 return "Examples:\n" +
                         "“show active tickets”\n" +
                         "“create ticket printer not working”";
+            case FEATURES:
+                return "Features:\n" +
+                        "- Ticket tracking\n" +
+                        "- Priority management\n" +
+                        "- System statistics\n" +
+                        "- Data export";
+            case GENERAL:
             default:
                 return "You can ask me to show, create, update, or close tickets, " +
                     "get system stats, or export data. Try “help commands” for more.";
