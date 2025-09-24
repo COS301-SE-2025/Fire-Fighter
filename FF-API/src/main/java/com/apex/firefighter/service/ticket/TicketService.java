@@ -67,7 +67,7 @@ public class TicketService {
     }
 
     public Optional<Ticket> getTicketById(Long id) {
-        return ticketRepository.findByTicketId(id);
+        return ticketRepository.findById(id);
     }
 
     public Optional<Ticket> getTicketByTicketId(String ticketId) {
@@ -113,7 +113,7 @@ public class TicketService {
             // Remove user from firefighter group if ticket is closed
             try {
                 if ("Closed".equals(newStatus) || "Completed".equals(newStatus)) {
-                    Optional<User> userOpt = userRepository.findByTicketId(ticket.getUserId());
+                    Optional<User> userOpt = userRepository.findById(ticket.getUserId());
                     if (userOpt.isPresent()) {
                         // Use emergency type for group allocation if available, otherwise fall back to description
                         String allocationText = (ticket.getEmergencyType() != null && !ticket.getEmergencyType().isEmpty())
@@ -188,7 +188,7 @@ public class TicketService {
     }
 
     public Ticket revokeTicket(Long id, String adminUserId, String rejectReason) {
-        Optional<Ticket> ticketOpt = ticketRepository.findByTicketId(id);
+        Optional<Ticket> ticketOpt = ticketRepository.findById(id);
         if (ticketOpt.isPresent()) {
             Ticket ticket = ticketOpt.get();
             ticket.setStatus("Rejected");
@@ -269,7 +269,7 @@ public class TicketService {
     }
 
     public Ticket updateTicket(Long id, String description, String status, String emergencyType, String emergencyContact, Integer duration) {
-        Optional<Ticket> ticketOpt = ticketRepository.findByTicketId(id);
+        Optional<Ticket> ticketOpt = ticketRepository.findById(id);
         if (ticketOpt.isPresent()) {
             Ticket ticket = ticketOpt.get();
 
