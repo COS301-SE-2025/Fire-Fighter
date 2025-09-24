@@ -161,14 +161,21 @@ public class ResponseGenerationService {
     /**
      * Generate error responses in natural language
      * 
-     * @param errorType The type of error that occurred
+     * @param queryResult The query result containing error information
      * @param context Context about the original query
      * @param preference User preferences for response style
      * @return User-friendly error message
      */
-    public String generateErrorResponse(ErrorType errorType,
+    public String generateErrorResponse(QueryProcessingService.QueryResult queryResult,
                                         QueryContext context,
-                                        ResponsePreferences preference) {
+                                        ResponsePreferences preferences) {
+        ErrorType errorType = ErrorType.INTERNAL_ERROR;
+
+        if (queryResult.getMetadata() != null &&
+            queryResult.getMetadata().containsKey("errorType")) {
+            errorType = (ErrorType) queryResult.getMetadata().get("errorType");
+        }
+
         switch (errorType) {
             case PERMISSION_DENIED:
                 return "❌ You don't have permission to perform this action.";
