@@ -42,6 +42,9 @@ public class ResponseGenerationService {
             case STATISTICS:
                 response = generateStatisticsResponse(result, context, preferences);
                 break;
+            case HELP:
+                response = generateHelpResponse(result, context, preferences);
+                break;
             case ERROR:
             default:
                 response = generateErrorResponse(ErrorType.INTERNAL_ERROR, context, preferences);
