@@ -65,7 +65,11 @@ public class ResponseGenerationService {
     public String generateTicketListResponse(QueryProcessingService.QueryResult result,
                                             QueryContext context,
                                             ResponsePreferences preferences) {
-        // TODO: Implement ticket list response generation
+        List<Ticket> tickets = (List<Ticket>) result.getData();
+        if (tickets == null || tickets.isEmpty()) {
+            return "No tickets found matching your query.";
+        }
+        
         return null;
     }
 
