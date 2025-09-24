@@ -16,8 +16,8 @@ public class ResponseGenerationService {
      * Generate a natural language response from query results
      * 
      * @param queryResult The result of query processing
-     * @param originalQuery The original user query
-     * @param userRole The role of the user (for response customization)
+     * @param context Context about the original query
+     * @param preferences User preferences for response style
      * @return Generated natural language response
      */
     public String generateResponse(QueryProcessingService.QueryResult queryResult, 
@@ -58,8 +58,8 @@ public class ResponseGenerationService {
      * Generate a response for ticket list results
      * 
      * @param tickets The list of tickets to describe
-     * @param queryContext Context about the original query
-     * @param userRole The user's role
+     * @param context Context about the original query
+     * @param preferences User preferences for response style
      * @return Natural language description of the tickets
      */
     public String generateTicketListResponse(QueryProcessingService.QueryResult result,
@@ -77,23 +77,43 @@ public class ResponseGenerationService {
             .append(t.getStatus()).append(" - ")
             .append(t.getDescription()).append("\n");
         }
-        
+
         return sb.toString();
     }
 
     /**
      * Generate a response for single ticket details
      * 
-     * @param ticket The ticket to describe
-     * @param requestedDetails What specific details were requested
-     * @param userRole The user's role
+     * @param queryResult The query result containing ticket details
+     * @param context Context about the original query
+     * @param preferences User preferences for response style
      * @return Natural language description of the ticket
      */
-    public String generateTicketDetailsResponse(Object ticket, 
-                                              List<String> requestedDetails, 
-                                              String userRole) {
-        // TODO: Implement ticket details response generation
-        return null;
+    public String generateTicketDetailsResponse(QueryProcessingService.QueryResult queryResult,
+                                                QueryContext context,
+                                                ResponsePreferences preferences) {
+        List<Ticket> tickets = (List<Ticket>) queryResult.getData();
+        if (tickets == null || tickets.isEmpty()) {
+            return "No ticket details available.";
+        }
+
+        Ticket ticket = tickets.get(0); // assume single ticket for details
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("Ticket [").append(ticket.getTicketId()).append("]\n");
+        sb.append("Status: ").append(ticket.getStatus()).append("\n");
+        sb.append("Priority: ").append(ticket.getPriority()).append("\n");
+        sb.append("Owner: ").append(ticket.getUserId()).append("\n");
+        sb.append("Description: ").append(ticket.getDescription()).append("\n");
+
+        if (ticket.getEmergencyType() != null) {
+            sb.append("Emergency Type: ").append(ticket.getEmergencyType()).append("\n");
+        }
+        if (ticket.getDuration() != null) {
+            sb.append("Duration: ").append(ticket.getDuration()).append("\n");
+        }
+
+        return sb.toString();
     }
 
     /**
