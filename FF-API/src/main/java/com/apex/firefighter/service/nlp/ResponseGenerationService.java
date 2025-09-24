@@ -69,8 +69,16 @@ public class ResponseGenerationService {
         if (tickets == null || tickets.isEmpty()) {
             return "No tickets found matching your query.";
         }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Here are your tickets:\n");
+        for (Ticket t : tickets) {
+            sb.append("• [").append(t.getTicketId()).append("] ")
+            .append(t.getStatus()).append(" - ")
+            .append(t.getDescription()).append("\n");
+        }
         
-        return null;
+        return sb.toString();
     }
 
     /**
