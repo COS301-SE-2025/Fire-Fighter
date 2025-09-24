@@ -146,4 +146,14 @@ class ResponseGenerationServiceTest {
         assertEquals("No tickets found matching your query.", out);
     }
 
+    @Test
+    void generateOperationResponse_handlesList() {
+        Ticket a = mockedTicket("A", "open", "Foo", "u", "low");
+        Ticket b = mockedTicket("B", "open", "Bar", "u", "low");
+        var result = mockedResult(QueryProcessingService.QueryResultType.OPERATION_RESULT, List.of(a, b), Map.of("success", true));
+
+        String out = service.generateOperationResponse(result, context, prefs);
+        assertTrue(out.contains("Operation successful on 2 ticket(s)."));
+    }
+
 }
