@@ -251,8 +251,14 @@ public class ResponseGenerationService {
     public String generateStatisticsResponse(QueryProcessingService.QueryResult queryResult,
                                             QueryContext context,
                                             ResponsePreferences preferences) {
-        // TODO: Implement statistics response generation
-        return null;
+        Map<String, Object> stats = (Map<String, Object>) queryResult.getData();
+        if (stats == null || stats.isEmpty()) {
+            return "No statistics available.";
+        }
+
+        StringBuilder sb = new StringBuilder("📊 System Statistics:\n");
+        stats.forEach((k, v) -> sb.append("- ").append(k).append(": ").append(v).append("\n"));
+        return sb.toString();
     }
 
     /**
