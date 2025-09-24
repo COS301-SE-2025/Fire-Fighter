@@ -70,21 +70,21 @@ public class QueryProcessingService {
                 return executeTicketOperation(TicketOperation.CLOSE_TICKET,
                         entities, userId, isAdmin);
 
-            case UPDATE_STATUS:
-                return executeTicketOperation(TicketOperation.UPDATE_STATUS,
+            case UPDATE_TICKET_STATUS:
+                return executeTicketOperation(TicketOperation.UPDATE_TICKET_STATUS,
                         entities, userId, isAdmin);
 
             case ASSIGN_TICKET:
                 return executeTicketOperation(TicketOperation.ASSIGN_TICKET,
                         entities, userId, isAdmin);
 
-            case ADD_COMMENT:
-                return executeTicketOperation(TicketOperation.ADD_COMMENT,
-                        entities, userId, isAdmin);
+            // case ADD_COMMENT:
+            //     return executeTicketOperation(TicketOperation.ADD_COMMENT,
+            //             entities, userId, isAdmin);
 
-            case UPDATE_PRIORITY:
-                return executeTicketOperation(TicketOperation.UPDATE_PRIORITY,
-                        entities, userId, isAdmin);
+            // case UPDATE_PRIORITY:
+            //     return executeTicketOperation(TicketOperation.UPDATE_PRIORITY,
+            //             entities, userId, isAdmin);
 
             // ----------- Fallback -----------
             default:
@@ -585,12 +585,12 @@ public class QueryProcessingService {
      * Types of ticket operations that can be executed
      */
     public enum TicketOperation {
-        UPDATE_STATUS("update_status", "Update ticket status"),
+        UPDATE_TICKET_STATUS("update_status", "Update ticket status"),
         ASSIGN_TICKET("assign_ticket", "Assign ticket to user"),
         CREATE_TICKET("create_ticket", "Create new ticket"),
         CLOSE_TICKET("close_ticket", "Close existing ticket"),
-        ADD_COMMENT("add_comment", "Add comment to ticket"),
-        UPDATE_PRIORITY("update_priority", "Update ticket priority");
+        // ADD_COMMENT("add_comment", "Add comment to ticket"),
+        // UPDATE_PRIORITY("update_priority", "Update ticket priority");
 
         private final String code;
         private final String description;
