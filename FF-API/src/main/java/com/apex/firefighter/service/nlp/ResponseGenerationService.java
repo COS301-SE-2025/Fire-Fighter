@@ -205,7 +205,12 @@ public class ResponseGenerationService {
     public String generateHelpResponse(QueryProcessingService.QueryResult queryResult,
                                         QueryContext context,
                                         ResponsePreferences preferences) {
-        // TODO: Implement help response generation
+        HelpType helpType = HelpType.GENERAL;
+        if (queryResult.getMetadata() != null &&
+            queryResult.getMetadata().containsKey("helpType")) {
+            helpType = (HelpType) queryResult.getMetadata().get("helpType");
+        }
+        
         return null;
     }
 
