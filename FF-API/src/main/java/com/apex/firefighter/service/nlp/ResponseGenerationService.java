@@ -173,7 +173,9 @@ public class ResponseGenerationService {
         case PERMISSION_DENIED:
             return "❌ You don’t have permission to perform this action.";
         case DATA_NOT_FOUND:
-            return "⚠️ I couldn’t find any matching data.";        
+            return "⚠️ I couldn’t find any matching data.";
+        case QUERY_NOT_UNDERSTOOD:
+            return "🤔 I didn’t understand that request. Try rephrasing.";
         default:
             return "⚠️ An unknown error occurred.";
     }
