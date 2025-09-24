@@ -228,6 +228,10 @@ public class ResponseGenerationService {
                         "- Priority management\n" +
                         "- System statistics\n" +
                         "- Data export";
+            case TROUBLESHOOTING:
+                return "Troubleshooting:\n" +
+                        "- If commands aren’t recognized, try rephrasing.\n" +
+                        "- Check your permissions for admin actions.";
             case GENERAL:
             default:
                 return "You can ask me to show, create, update, or close tickets, " +
