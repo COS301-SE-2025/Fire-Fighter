@@ -25,7 +25,7 @@ public class ResponseGenerationService {
                                   QueryContext context,
                                   ResponsePreferences preferences) {
         if (queryResult == null) {
-            return generateErrorResponse(ErrorType.QUERY_NOT_UNDERSTOOD, context, preferences);
+            return generateErrorResponse(queryResult, context, preferences);
         }
 
         String response;
@@ -48,7 +48,7 @@ public class ResponseGenerationService {
                 break;
             case ERROR:
             default:
-                response = generateErrorResponse(ErrorType.ERROR, context, preferences);
+                response = generateErrorResponse(queryResult, context, preferences);
                 break;
         }
 
@@ -60,7 +60,7 @@ public class ResponseGenerationService {
             return generateErrorResponse(ErrorType.QUERY_NOT_UNDERSTOOD);
         }
 
-        switch (result.getType()) {
+        switch (result.getResultType()) {
             case TICKET_LIST:
                 List<Ticket> tickets = (List<Ticket>) result.getData();
                 if (tickets == null || tickets.isEmpty()) {
@@ -107,7 +107,7 @@ public class ResponseGenerationService {
 
             case ERROR:
             default:
-                return generateErrorResponse(ErrorType.INTERNAL_ERROR);
+                return generateErrorResponse(ErrorType.SYSTEM_ERROR);
         }
     }
 
@@ -226,7 +226,7 @@ public class ResponseGenerationService {
     public String generateErrorResponse(QueryProcessingService.QueryResult queryResult,
                                         QueryContext context,
                                         ResponsePreferences preferences) {
-        ErrorType errorType = ErrorType.INTERNAL_ERROR;
+        ErrorType errorType = ErrorType.SYSTEM_ERROR;
 
         if (queryResult.getMetadata() != null &&
             queryResult.getMetadata().containsKey("errorType")) {
@@ -254,7 +254,7 @@ public class ResponseGenerationService {
         switch (type) {
             case QUERY_NOT_UNDERSTOOD:
                 return "Sorry, I couldn't understand your query.";
-            case INTERNAL_ERROR:
+            case SYSTEM_ERROR:
             default:
                 return "An internal error occurred.";
         }
