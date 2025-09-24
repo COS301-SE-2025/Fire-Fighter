@@ -212,8 +212,12 @@ public class ResponseGenerationService {
         }
 
         switch (helpType) {
-            case :
-                return ;
+            case COMMANDS:
+                return "Available commands:\n" +
+                        "- show my tickets\n" +
+                        "- create ticket <description>\n" +
+                        "- update status of <ticketId>\n" +
+                        "- close ticket <ticketId>";
             default:
                 return "You can ask me to show, create, update, or close tickets, " +
                     "get system stats, or export data. Try “help commands” for more.";
