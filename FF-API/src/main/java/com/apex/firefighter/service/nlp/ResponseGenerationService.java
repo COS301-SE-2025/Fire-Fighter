@@ -309,7 +309,12 @@ public class ResponseGenerationService {
                 break;
         }
 
-        return null;
+        int max = Math.max(80, preferences.getMaxResponseLength()); // keep sane minimum
+        if (response.length() > max) {
+            response = response.substring(0, Math.max(0, max - 1)) + "…";
+        }
+
+        return response;
     }
 
     /**
