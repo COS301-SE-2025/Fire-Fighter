@@ -28,6 +28,23 @@ public class QueryProcessingService {
     @Autowired
     private IntentRecognitionService intentRecognitionService;
 
+    // Setter methods for testing
+    public void setTicketService(TicketService ticketService) {
+        this.ticketService = ticketService;
+    }
+
+    public void setEntityExtractor(EntityExtractionService entityExtractor) {
+        this.entityExtractor = entityExtractor;
+    }
+
+    public void setNlpConfig(NLPConfig nlpConfig) {
+        this.nlpConfig = nlpConfig;
+    }
+
+    public void setIntentRecognitionService(IntentRecognitionService intentRecognitionService) {
+        this.intentRecognitionService = intentRecognitionService;
+    }
+
     /**
      * Process a query based on recognized intent and extracted entities
      * 
@@ -270,7 +287,8 @@ public class QueryProcessingService {
 
             switch (operation) {
                 case CREATE_TICKET: {
-                    String description      = firstNormalized(entities, EntityExtractionService.EntityType.NUMBER);
+                    // Extract description from the query - try multiple approaches
+                    String description = extractDescriptionFromEntities(entities);
                     if (description == null || description.isEmpty()) {
                         description = "Emergency assistance request";
                     }
@@ -397,6 +415,60 @@ public class QueryProcessingService {
         return (v == null || v.isEmpty()) ? list.get(0).getValue() : v;
     }
 
+    /**
+     * Extract description text from entities or fall back to extracting from query text
+     *
+     * @param entities The extracted entities
+     * @return Description text or null if not found
+     */
+    private String extractDescriptionFromEntities(EntityExtractionService.ExtractedEntities entities) {
+        if (entities == null || entities.getAllEntities() == null) {
+            return null;
+        }
+
+        // First try to get description from DESCRIPTION entity type
+        String description = firstNormalized(entities, EntityExtractionService.EntityType.DESCRIPTION);
+        if (description != null && !description.trim().isEmpty()) {
+            return description.trim();
+        }
+
+        // Fallback: Check for general text/number entities that might contain description
+        List<EntityExtractionService.Entity> numbers = entities.getAllEntities().get(EntityExtractionService.EntityType.NUMBER);
+        if (numbers != null && !numbers.isEmpty()) {
+            // Look for non-numeric text in "number" entities (often contains description text)
+            for (EntityExtractionService.Entity entity : numbers) {
+                String value = entity.getValue();
+                if (value != null && !value.trim().isEmpty() && !isNumeric(value)) {
+                    description = value.trim();
+                    break;
+                }
+            }
+        }
+
+        // If no description found, try to extract from location or other text fields
+        if (description == null || description.isEmpty()) {
+            List<EntityExtractionService.Entity> locations = entities.getAllEntities().get(EntityExtractionService.EntityType.LOCATION);
+            if (locations != null && !locations.isEmpty()) {
+                description = locations.get(0).getValue();
+            }
+        }
+
+        return description;
+    }
+
+    /**
+     * Check if a string is purely numeric
+     */
+    private boolean isNumeric(String str) {
+        if (str == null || str.trim().isEmpty()) return false;
+        try {
+            Double.parseDouble(str.trim());
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
 
     /**
      * Build query filters from extracted entities
@@ -507,10 +579,12 @@ public class QueryProcessingService {
                         }
                     }
                 }
+                // If no ticket ID found in entities, deny access
+                return false;
 
             case ASSIGN_TICKET:
-            // Only admins can reassign tickets
-            return false;
+                // Only admins can reassign tickets
+                return false;
 
             default:
                 // Unknown/unsupported operation → reject

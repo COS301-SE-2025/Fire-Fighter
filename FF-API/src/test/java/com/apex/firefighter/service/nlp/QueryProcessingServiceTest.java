@@ -1,3 +1,5 @@
+package com.apex.firefighter.service.nlp;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -23,6 +25,7 @@ class QueryProcessingServiceTest {
     void setUp() {
         ticketService = Mockito.mock(TicketService.class);
         queryProcessingService = new QueryProcessingService();
+        queryProcessingService.setTicketService(ticketService);
     }
 
     private EntityExtractionService.Entity makeEntity(EntityExtractionService.EntityType type, String value) {
@@ -53,6 +56,7 @@ class QueryProcessingServiceTest {
         EntityExtractionService.Entity ticket =
                 new EntityExtractionService.Entity(
                         EntityExtractionService.EntityType.TICKET_ID, "123", 0, 3);
+        ticket.setNormalizedValue("123"); // Set normalized value for filter building
 
         EntityExtractionService.Entity status =
                 new EntityExtractionService.Entity(
@@ -105,6 +109,7 @@ class QueryProcessingServiceTest {
 
         EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
         EntityExtractionService.Entity ticketEntity = new EntityExtractionService.Entity(EntityExtractionService.EntityType.TICKET_ID, "123", 0, 3);
+        ticketEntity.setNormalizedValue("123"); // Set normalized value for validation
         entities.setTicketIds(Arrays.asList(ticketEntity));
         boolean allowed = queryProcessingService.validateUserOperation(QueryProcessingService.TicketOperation.UPDATE_PRIORITY, entities, "user1", false);
         

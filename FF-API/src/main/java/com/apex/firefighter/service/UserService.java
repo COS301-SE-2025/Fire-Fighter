@@ -74,6 +74,18 @@ public class UserService {
     }
 
     /**
+     * Get user role by Firebase UID
+     */
+    public String getUserRole(String firebaseUid) {
+        Optional<User> userOpt = getUserByFirebaseUid(firebaseUid);
+        if (userOpt.isPresent()) {
+            String role = userOpt.get().getRole();
+            return role != null ? role : "USER"; // Default to USER if no role set
+        }
+        return "GUEST"; // Default for non-existent users
+    }
+
+    /**
      * ADMIN OPERATIONS - Delegates to AuthorizationService
      */
     public User authorizeUser(String firebaseUid, String authorizedBy) {

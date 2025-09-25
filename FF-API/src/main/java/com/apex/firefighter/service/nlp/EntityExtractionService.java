@@ -103,6 +103,17 @@ public class EntityExtractionService {
                 Arrays.asList(Pattern.compile("\\b[A-Z][a-z]+\\b")))
         ));
 
+        // DESCRIPTION: Matches descriptive text after common trigger words
+        ENTITY_PATTERNS.put(EntityType.DESCRIPTION, Arrays.asList(
+            new EntityPattern(0.9, Arrays.asList("create ticket", "new ticket", "report"),
+                Arrays.asList("issue", "problem", "emergency", "help", "assistance"),
+                Arrays.asList(
+                    Pattern.compile("(?:create ticket|new ticket|report)\\s+(.+?)(?:\\s+(?:with|for|at|in|emergency|type|contact|duration)|$)", Pattern.CASE_INSENSITIVE),
+                    Pattern.compile("(?:issue|problem|emergency)\\s*:?\\s*(.+?)(?:\\s+(?:with|for|at|in|type|contact|duration)|$)", Pattern.CASE_INSENSITIVE),
+                    Pattern.compile("help\\s+(?:with|for)\\s+(.+?)(?:\\s+(?:with|for|at|in|type|contact|duration)|$)", Pattern.CASE_INSENSITIVE)
+                ))
+        ));
+
         // Add more patterns later (example NUMBER, TIME, etc.) as needed
     }
 
@@ -143,21 +154,53 @@ public class EntityExtractionService {
     }
 
     private void extractPatternEntities(String query, EntityPattern pattern, EntityType type, List<Entity> entities) {
+        // Input validation
+        if (query == null || pattern == null || type == null || entities == null) {
+            return;
+        }
+
         double threshold = nlpConfig != null ? nlpConfig.getEntityConfidenceThreshold() : 0.7;
         boolean matched = false;
 
-        // Check exact phrases
-        for (Pattern regex : pattern.getRegexPatterns()) {
-            Matcher matcher = regex.matcher(query);
-            while (matcher.find()) {
-                String value = matcher.group();
-                Entity entity = new Entity(type, value, matcher.start(), matcher.end());
-                entity.setConfidence(pattern.getWeight()*0.9); // Slightly lower confidence for regex matches
-                if (entity.getConfidence() >= threshold) {
-                    entity.setNormalizedValue(normalizeEntityValue(type, value));
-                    entities.add(entity);
-                    matched = true;
+        // Check exact phrases with error handling
+        try {
+            if (pattern.getRegexPatterns() != null) {
+                for (Pattern regex : pattern.getRegexPatterns()) {
+                    if (regex != null) {
+                        try {
+                            Matcher matcher = regex.matcher(query);
+                            while (matcher.find()) {
+                                try {
+                                    String value = matcher.group();
+                                    if (value != null && !value.trim().isEmpty()) {
+                                        Entity entity = new Entity(type, value, matcher.start(), matcher.end());
+                                        entity.setConfidence(pattern.getWeight() * 0.9); // Slightly lower confidence for regex matches
+                                        if (entity.getConfidence() >= threshold) {
+                                            entity.setNormalizedValue(normalizeEntityValue(type, value));
+                                            entities.add(entity);
+                                            matched = true;
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    // Log error but continue with next match
+                                    if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
+                                        System.out.println("DEBUG: Error processing regex match: " + e.getMessage());
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            // Log error but continue with next regex
+                            if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
+                                System.out.println("DEBUG: Error with regex pattern: " + e.getMessage());
+                            }
+                        }
+                    }
                 }
+            }
+        } catch (Exception e) {
+            // Log error but continue with exact phrases
+            if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
+                System.out.println("DEBUG: Error in regex pattern processing: " + e.getMessage());
             }
         }
 
@@ -391,29 +434,59 @@ public class EntityExtractionService {
         private List<Entity> timeExpressions;
         private Map<EntityType, List<Entity>> allEntities;
 
-        public ExtractedEntities() {}
+        public ExtractedEntities() {
+            this.allEntities = new HashMap<>();
+        }
 
         // Getters and setters
         public List<Entity> getTicketIds() { return ticketIds; }
-        public void setTicketIds(List<Entity> ticketIds) { this.ticketIds = ticketIds; }
-        
+        public void setTicketIds(List<Entity> ticketIds) {
+            this.ticketIds = ticketIds;
+            if (this.allEntities == null) this.allEntities = new HashMap<>();
+            this.allEntities.put(EntityType.TICKET_ID, ticketIds);
+        }
+
         public List<Entity> getStatuses() { return statuses; }
-        public void setStatuses(List<Entity> statuses) { this.statuses = statuses; }
+        public void setStatuses(List<Entity> statuses) {
+            this.statuses = statuses;
+            if (this.allEntities == null) this.allEntities = new HashMap<>();
+            this.allEntities.put(EntityType.STATUS, statuses);
+        }
         
         public List<Entity> getDates() { return dates; }
-        public void setDates(List<Entity> dates) { this.dates = dates; }
-        
+        public void setDates(List<Entity> dates) {
+            this.dates = dates;
+            if (this.allEntities == null) this.allEntities = new HashMap<>();
+            this.allEntities.put(EntityType.DATE, dates);
+        }
+
         public List<Entity> getUserNames() { return userNames; }
-        public void setUserNames(List<Entity> userNames) { this.userNames = userNames; }
-        
+        public void setUserNames(List<Entity> userNames) {
+            this.userNames = userNames;
+            if (this.allEntities == null) this.allEntities = new HashMap<>();
+            this.allEntities.put(EntityType.USER_NAME, userNames);
+        }
+
         public List<Entity> getEmergencyTypes() { return emergencyTypes; }
-        public void setEmergencyTypes(List<Entity> emergencyTypes) { this.emergencyTypes = emergencyTypes; }
-        
+        public void setEmergencyTypes(List<Entity> emergencyTypes) {
+            this.emergencyTypes = emergencyTypes;
+            if (this.allEntities == null) this.allEntities = new HashMap<>();
+            this.allEntities.put(EntityType.EMERGENCY_TYPE, emergencyTypes);
+        }
+
         public List<Entity> getNumbers() { return numbers; }
-        public void setNumbers(List<Entity> numbers) { this.numbers = numbers; }
-        
+        public void setNumbers(List<Entity> numbers) {
+            this.numbers = numbers;
+            if (this.allEntities == null) this.allEntities = new HashMap<>();
+            this.allEntities.put(EntityType.NUMBER, numbers);
+        }
+
         public List<Entity> getTimeExpressions() { return timeExpressions; }
-        public void setTimeExpressions(List<Entity> timeExpressions) { this.timeExpressions = timeExpressions; }
+        public void setTimeExpressions(List<Entity> timeExpressions) {
+            this.timeExpressions = timeExpressions;
+            if (this.allEntities == null) this.allEntities = new HashMap<>();
+            this.allEntities.put(EntityType.TIME, timeExpressions);
+        }
         
         public Map<EntityType, List<Entity>> getAllEntities() { return allEntities; }
         public void setAllEntities(Map<EntityType, List<Entity>> allEntities) { this.allEntities = allEntities; }
@@ -478,7 +551,8 @@ public class EntityExtractionService {
         PRIORITY("priority", "Priority level"),
         LOCATION("location", "Geographic location"),
         EMAIL("email", "Email address"),
-        PHONE("phone", "Phone number");
+        PHONE("phone", "Phone number"),
+        DESCRIPTION("description", "Ticket description text");
 
         private final String code;
         private final String description;

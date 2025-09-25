@@ -43,9 +43,12 @@ public class SecurityConfig {
                 .requestMatchers("/api/notifications/**").authenticated()
                 // Tickets require authentication
                 .requestMatchers("/api/tickets/**").authenticated()
+                // NLP endpoints require authentication (except health check)
+                .requestMatchers("/api/nlp/health").permitAll()
+                .requestMatchers("/api/nlp/**").authenticated()
                 // Require API key for extra secured endpoints
                 .requestMatchers("/api/endpoints/**").authenticated()
-                // Require API key for protected endpoints  
+                // Require API key for protected endpoints
                 .requestMatchers("/api/protected/**").authenticated()
                 // Allow other API endpoints for development
                 .requestMatchers("/api/**").permitAll()
