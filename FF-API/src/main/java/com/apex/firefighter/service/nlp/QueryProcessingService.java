@@ -109,7 +109,10 @@ public class QueryProcessingService {
                     return new QueryResult(false, "Unsupported intent: " + intent.getType().getCode(), null, QueryResultType.ERROR);
             }
         } catch (Exception e) {
-            QueryResult qr = QueryResult(false, "Error processing query: " + e.getMessage(), null, QueryResultType.ERROR).getErrors().add(e.getMessage());
+            QueryResult qr = new QueryResult(false, "Error processing query: " + e.getMessage(), null, QueryResultType.ERROR);
+            if (qr.getErrors() == null) {
+                qr.setErrors(new ArrayList<>());
+            }
             qr.getErrors().add(e.getMessage());
             return qr;
         }
@@ -154,7 +157,7 @@ public class QueryProcessingService {
                 case USER_TICKETS: {
                     // If admin and a userId filter is present, show that user's tickets; otherwise:
                     List<Ticket> tickets = ticketService.getTicketsByUserId(filterUserId);
-                    return new QueryResult(true, "Retrived " + tickets.size() ,QueryResultType.TICKET_LIST, tickets, tickets.size());
+                    return new QueryResult(QueryResultType.TICKET_LIST, tickets, tickets.size());
                 }
 
                 case ACTIVE_TICKETS: {
