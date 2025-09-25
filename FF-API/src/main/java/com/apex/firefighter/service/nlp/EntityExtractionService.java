@@ -67,7 +67,7 @@ public class EntityExtractionService {
      * Initialize entity patterns for all supported entity types
      */
     @PostConstruct
-    private static void initializeEntityPatterns() {
+    private void initializeEntityPatterns() {
         // TICKET_ID: Matches #123, ticket123
         ENTITY_PATTERNS.put(EntityType.TICKET_ID, Arrays.asList(
             new EntityPattern(1.0, Arrays.asList("#\\d+", "ticket\\d+"),
