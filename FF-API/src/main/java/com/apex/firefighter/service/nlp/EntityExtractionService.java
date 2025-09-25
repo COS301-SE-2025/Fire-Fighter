@@ -129,11 +129,11 @@ public class EntityExtractionService {
                 Arrays.asList("issue", "problem", "emergency", "help", "assistance"),
                 Arrays.asList(
                     // Pattern for emergency-type-specific tickets: "create hr-emergency ticket for [description]"
-                    Pattern.compile("(?:create|new)\\s+(?:hr-emergency|financial-emergency|management-emergency|logistics-emergency)\\s+ticket\\s+for\\s+([^,]+?)(?:\\s*,\\s*(?:duration|contact|phone)|$)", Pattern.CASE_INSENSITIVE),
+                    Pattern.compile("(?:create|new)\\s+(?:hr-emergency|financial-emergency|management-emergency|logistics-emergency)\\s+ticket\\s+for\\s+(.+?)(?:\\s*,\\s*(?:duration|contact|phone)|\\s+(?:duration|contact|phone))", Pattern.CASE_INSENSITIVE),
                     // Pattern for general tickets: "create ticket for [description]"
-                    Pattern.compile("(?:create|new)\\s+(?:emergency\\s+)?ticket\\s+for\\s+([^,]+?)(?:\\s*,\\s*(?:duration|contact|phone)|$)", Pattern.CASE_INSENSITIVE),
+                    Pattern.compile("(?:create|new)\\s+(?:emergency\\s+)?ticket\\s+for\\s+(.+?)(?:\\s*,\\s*(?:duration|contact|phone)|\\s+(?:duration|contact|phone))", Pattern.CASE_INSENSITIVE),
                     // Pattern for simple format: "create ticket [description]"
-                    Pattern.compile("(?:create|new)\\s+ticket\\s+([^,]+?)(?:\\s*,\\s*(?:duration|contact|phone)|$)", Pattern.CASE_INSENSITIVE),
+                    Pattern.compile("(?:create|new)\\s+ticket\\s+(.+?)(?:\\s*,\\s*(?:duration|contact|phone)|\\s+(?:duration|contact|phone))", Pattern.CASE_INSENSITIVE),
                     // Pattern for issue/problem format
                     Pattern.compile("(?:issue|problem|emergency)\\s*:?\\s*([^,]+?)(?:\\s*,\\s*(?:duration|contact|phone)|$)", Pattern.CASE_INSENSITIVE),
                     // Pattern for help format
