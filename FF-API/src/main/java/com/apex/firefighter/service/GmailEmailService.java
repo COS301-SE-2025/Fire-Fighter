@@ -697,7 +697,7 @@ public class GmailEmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setTo(recipientEmail);
-            helper.setSubject("FireFighter Platform - SUSPICIOUS Group Change Alert (" + suspicionLevel + " Risk): " + user.getUsername());
+            helper.setSubject("FireFighter Platform - Group Change Alert (" + suspicionLevel + " Risk data): " + user.getUsername());
 
             String htmlContent = createSuspiciousGroupChangeEmailContent(user, ticketId, oldGroup, newGroup, reason, suspicionLevel);
             helper.setText(htmlContent, true);
@@ -726,8 +726,8 @@ public class GmailEmailService {
         html.append("</div>");
         html.append("<div class=\"content\">");
 
-        html.append("<div class=\"greeting\">🚨 SECURITY ALERT - Administrator Action Required,</div>");
-        html.append("<p><strong>SUSPICIOUS ACTIVITY DETECTED:</strong> A potentially suspicious user group change has been detected in the Dolibarr ERP system following ticket creation.</p>");
+        html.append("<div class=\"greeting\">SECURITY ALERT - Administrator Notification,</div>");
+        html.append("<p><strong>ACTIVITY DETECTED:</strong> A user group change has been detected in the Dolibarr ERP system following ticket creation.</p>");
         html.append("<p><strong>Risk Level: <span style=\"color: " + getRiskLevelColor(suspicionLevel) + "; font-weight: bold;\">" + suspicionLevel + "</span></strong></p>");
         
         html.append("<div class=\"info-box\">");
@@ -770,7 +770,7 @@ public class GmailEmailService {
         html.append("</div>");
         
         html.append("<div class=\"security-notice\">");
-        html.append("<strong>⚠️ IMMEDIATE ACTION REQUIRED:</strong> This group change has been flagged as suspicious due to security sensitivity. ");
+        html.append("<strong>⚠️ POTENTIAL ACTION REQUIRED:</strong> This group change has been flagged as suspicious due to security sensitivity. ");
         html.append("Risk Level: <strong>" + suspicionLevel + "</strong>. ");
         html.append("Please immediately verify that this change is legitimate and authorized. ");
         html.append("Review the associated ticket, contact the user directly, and investigate any unauthorized access. ");
@@ -825,8 +825,8 @@ public class GmailEmailService {
         html.append("</div>");
         html.append("<div class=\"content\">");
 
-        html.append("<div class=\"greeting\">🚨 SECURITY ALERT - Anomalous Behavior Detected,</div>");
-        html.append("<p><strong>ANOMALY DETECTED:</strong> Suspicious user behavior has been identified in the emergency response system.</p>");
+        html.append("<div class=\"greeting\"> SECURITY ALERT - Anomalous Behavior Detected,</div>");
+        html.append("<p><strong>ANOMALY DETECTED:</strong> Potentially suspicious user behavior has been identified in the emergency response system.</p>");
         html.append("<p><strong>Anomaly Type: ").append(getAnomalyTypeDescription(anomalyType)).append("</strong></p>");
         html.append("<p><strong>Risk Level: <span style=\"color: " + getRiskLevelColor(riskLevel) + "; font-weight: bold;\">" + riskLevel + "</span></strong></p>");
         
