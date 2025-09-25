@@ -159,9 +159,9 @@ public class IntentRecognitionService {
 
         INTENT_PATTERNS.put(IntentType.EXPORT_TICKETS, Arrays.asList(
             new IntentPattern(1.0,
-                Arrays.asList("export tickets", "download tickets", "export data"),
+                Arrays.asList("export tickets", "download tickets", "export data", "export"),
                 Arrays.asList("export", "download", "csv", "excel"),
-                Arrays.asList(Pattern.compile("export.*tickets"), Pattern.compile("download.*data"))
+                Arrays.asList(Pattern.compile("export.*tickets"), Pattern.compile("download.*data"), Pattern.compile("^export$"))
             )
         ));
 

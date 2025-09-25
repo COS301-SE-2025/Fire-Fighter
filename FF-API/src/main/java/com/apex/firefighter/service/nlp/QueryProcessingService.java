@@ -2,11 +2,17 @@ package com.apex.firefighter.service.nlp;
 
 import com.apex.firefighter.config.NLPConfig;
 import com.apex.firefighter.model.Ticket;
+import com.apex.firefighter.model.User;
 import com.apex.firefighter.service.ticket.TicketService;
+import com.apex.firefighter.service.GmailEmailService;
+import com.apex.firefighter.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Service responsible for processing natural language queries and converting them
@@ -23,6 +29,12 @@ public class QueryProcessingService {
 
     @Autowired
     private IntentRecognitionService intentRecognitionService;
+
+    @Autowired
+    private GmailEmailService gmailEmailService;
+
+    @Autowired
+    private UserService userService;
 
     // Setter methods for testing
     public void setTicketService(TicketService ticketService) {
@@ -277,8 +289,88 @@ public class QueryProcessingService {
                 }
 
                 case EXPORT_DATA: {
-                    // Not implemented in TicketService; return an explicit error to caller.
-                    return new QueryResult(false, "Export is not supported by the current TicketService.");
+                    System.out.println("🔵 EXPORT: Starting ticket export process for user: " + userId);
+
+                    try {
+                        // Get user information for email
+                        Optional<User> userOpt = userService.getUserWithRoles(userId);
+                        if (!userOpt.isPresent()) {
+                            System.out.println("❌ EXPORT: User not found: " + userId);
+                            return new QueryResult(false, "User not found for export request");
+                        }
+
+                        User user = userOpt.get();
+                        String userEmail = user.getEmail();
+                        if (userEmail == null || userEmail.trim().isEmpty()) {
+                            System.out.println("❌ EXPORT: User email not found for: " + userId);
+                            return new QueryResult(false, "User email not found. Cannot send export.");
+                        }
+
+                        System.out.println("🔵 EXPORT: User email found: " + userEmail);
+
+                        // Extract date range from filters if provided
+                        final LocalDateTime startDate = filters.containsKey("startDate") ?
+                            (LocalDateTime) filters.get("startDate") : null;
+                        final LocalDateTime endDate = filters.containsKey("endDate") ?
+                            (LocalDateTime) filters.get("endDate") : null;
+
+                        if (startDate != null) {
+                            System.out.println("🔵 EXPORT: Start date filter: " + startDate);
+                        }
+                        if (endDate != null) {
+                            System.out.println("🔵 EXPORT: End date filter: " + endDate);
+                        }
+
+                        // Get tickets based on date range filtering (similar to TicketController)
+                        List<Ticket> tickets;
+                        if (startDate != null && endDate != null) {
+                            System.out.println("🔵 EXPORT: Filtering tickets by date range: " + startDate + " to " + endDate);
+                            tickets = ticketService.getAllTickets().stream()
+                                    .filter(ticket -> ticket.getDateCreated().isAfter(startDate) && ticket.getDateCreated().isBefore(endDate))
+                                    .collect(Collectors.toList());
+                            System.out.println("🔵 EXPORT: Retrieved " + tickets.size() + " tickets with date range filter");
+                        } else if (startDate != null) {
+                            System.out.println("🔵 EXPORT: Filtering tickets from start date: " + startDate);
+                            tickets = ticketService.getAllTickets().stream()
+                                    .filter(ticket -> ticket.getDateCreated().isAfter(startDate))
+                                    .collect(Collectors.toList());
+                            System.out.println("🔵 EXPORT: Retrieved " + tickets.size() + " tickets from start date");
+                        } else if (endDate != null) {
+                            System.out.println("🔵 EXPORT: Filtering tickets until end date: " + endDate);
+                            tickets = ticketService.getAllTickets().stream()
+                                    .filter(ticket -> ticket.getDateCreated().isBefore(endDate))
+                                    .collect(Collectors.toList());
+                            System.out.println("🔵 EXPORT: Retrieved " + tickets.size() + " tickets until end date");
+                        } else {
+                            tickets = ticketService.getAllTickets();
+                            System.out.println("🔵 EXPORT: Retrieved " + tickets.size() + " tickets (all tickets)");
+                        }
+
+                        // Generate CSV
+                        String csvContent = gmailEmailService.exportTicketsToCsv(tickets);
+                        System.out.println("🔵 EXPORT: Generated CSV content, length: " + csvContent.length() + " characters");
+
+                        // Send email with CSV attachment
+                        gmailEmailService.sendTicketsCsv(userEmail, csvContent, user);
+                        System.out.println("✅ EXPORT: Email sent successfully to: " + userEmail);
+
+                        // Create success message
+                        String dateRangeInfo = (startDate != null || endDate != null) ? " (filtered by date range)" : "";
+                        String successMessage = "Tickets exported and emailed successfully to " + userEmail + dateRangeInfo;
+
+                        // Return success result
+                        Map<String, Object> exportData = new HashMap<>();
+                        exportData.put("email", userEmail);
+                        exportData.put("ticketCount", tickets.size());
+                        exportData.put("hasDateFilter", startDate != null || endDate != null);
+
+                        return new QueryResult(true, successMessage, exportData, QueryResultType.INFORMATION);
+
+                    } catch (Exception e) {
+                        System.out.println("❌ EXPORT: Export failed with error: " + e.getMessage());
+                        e.printStackTrace();
+                        return new QueryResult(false, "Export failed: " + e.getMessage());
+                    }
                 }
 
                 default:

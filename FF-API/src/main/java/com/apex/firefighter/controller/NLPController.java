@@ -67,8 +67,11 @@ public class NLPController {
                     .body(new NLPService.NLPResponse("Query cannot be empty", false));
             }
 
-            // Process the query
-            NLPService.NLPResponse response = nlpService.processQuery(request.getQuery(), userId);
+            // Get admin flag from JWT
+            Boolean isAdminFromJWT = (Boolean) httpRequest.getAttribute("isAdmin");
+
+            // Process the query with admin flag
+            NLPService.NLPResponse response = nlpService.processQuery(request.getQuery(), userId, isAdminFromJWT);
 
             return ResponseEntity.ok(response);
 
