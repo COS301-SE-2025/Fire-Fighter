@@ -239,35 +239,121 @@ public class IntentRecognitionService {
      * @return Intent object containing the recognized intent and confidence score
      */
     public Intent recognizeIntent(String query) {
-        if (query == null || query.trim().isEmpty()) {
-            return new Intent(IntentType.UNKNOWN, 0.0, "Empty query");
+        try {
+            // Input validation
+            if (query == null || query.trim().isEmpty()) {
+                return createUnknownIntent("Empty or null query provided");
+            }
+
+            // Normalize the query
+            String normalizedQuery = normalizeQuery(query);
+            if (normalizedQuery.isEmpty()) {
+                return createUnknownIntent("Query became empty after normalization");
+            }
+
+            // Calculate scores for each intent type
+            Map<IntentType, Double> intentScores = calculateIntentScores(normalizedQuery);
+            if (intentScores.isEmpty()) {
+                return createUnknownIntent("No intent patterns could be evaluated");
+            }
+
+            // Find the best matching intent with improved selection logic
+            IntentMatchResult matchResult = findBestIntent(intentScores, normalizedQuery);
+
+            // Apply confidence threshold
+            double threshold = getConfidenceThreshold();
+            if (matchResult.confidence < threshold) {
+                return createUnknownIntent(String.format(
+                    "Confidence %.3f below threshold %.3f", matchResult.confidence, threshold));
+            }
+
+            // Create successful intent with metadata
+            Intent intent = new Intent(matchResult.intentType, matchResult.confidence,
+                "Intent recognized successfully");
+
+            logIntentRecognition(query, matchResult);
+            return intent;
+
+        } catch (Exception e) {
+            System.err.println("❌ INTENT RECOGNITION: Error processing query '" + query + "': " + e.getMessage());
+            return createUnknownIntent("Error during intent recognition: " + e.getMessage());
         }
+    }
 
-        // Normalize the query
-        String normalizedQuery = normalizeQuery(query);
+    /**
+     * Create an unknown intent with proper metadata
+     */
+    private Intent createUnknownIntent(String reason) {
+        return new Intent(IntentType.UNKNOWN, 0.0, reason);
+    }
 
-        // Calculate scores for each intent type
-        Map<IntentType, Double> intentScores = calculateIntentScores(normalizedQuery);
+    /**
+     * Get confidence threshold with fallback
+     */
+    private double getConfidenceThreshold() {
+        return nlpConfig != null ? nlpConfig.getIntentConfidenceThreshold() : 0.7;
+    }
 
-        // Find the best matching intent
+    /**
+     * Find the best intent match with improved logic
+     */
+    private IntentMatchResult findBestIntent(Map<IntentType, Double> intentScores, String normalizedQuery) {
         IntentType bestIntent = IntentType.UNKNOWN;
         double bestScore = 0.0;
+        double secondBestScore = 0.0;
 
+        // Find top two scores for confidence calculation
         for (Map.Entry<IntentType, Double> entry : intentScores.entrySet()) {
-            if (entry.getValue() > bestScore) {
-                bestScore = entry.getValue();
+            double score = entry.getValue();
+            if (score > bestScore) {
+                secondBestScore = bestScore;
+                bestScore = score;
                 bestIntent = entry.getKey();
+            } else if (score > secondBestScore) {
+                secondBestScore = score;
             }
         }
 
-        // Apply confidence threshold
-        double threshold = nlpConfig != null ? nlpConfig.getIntentConfidenceThreshold() : 0.7;
-        if (bestScore < threshold) {
-            return new Intent(IntentType.UNKNOWN, bestScore,
-                "Confidence below threshold (" + threshold + ")");
+        // Calculate adjusted confidence based on score separation
+        double confidence = calculateAdjustedConfidence(bestScore, secondBestScore);
+
+        return new IntentMatchResult(bestIntent, confidence);
+    }
+
+    /**
+     * Calculate adjusted confidence considering score separation
+     */
+    private double calculateAdjustedConfidence(double bestScore, double secondBestScore) {
+        if (bestScore == 0.0) {
+            return 0.0;
         }
 
-        return new Intent(bestIntent, bestScore, "Intent recognized successfully");
+        // If there's a clear winner (good separation), boost confidence
+        double separation = bestScore - secondBestScore;
+        double separationBonus = Math.min(0.1, separation * 0.2);
+
+        return Math.min(1.0, bestScore + separationBonus);
+    }
+
+    /**
+     * Log intent recognition results for debugging
+     */
+    private void logIntentRecognition(String originalQuery, IntentMatchResult result) {
+        System.out.println("🔍 INTENT RECOGNITION: '" + originalQuery + "' -> " +
+            result.intentType + " (confidence: " + String.format("%.3f", result.confidence) + ")");
+    }
+
+    /**
+     * Helper class for intent matching results
+     */
+    private static class IntentMatchResult {
+        final IntentType intentType;
+        final double confidence;
+
+        IntentMatchResult(IntentType intentType, double confidence) {
+            this.intentType = intentType;
+            this.confidence = confidence;
+        }
     }
 
     /**

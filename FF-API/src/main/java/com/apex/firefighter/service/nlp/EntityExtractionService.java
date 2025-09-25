@@ -296,21 +296,61 @@ public class EntityExtractionService {
     }
 
     public ExtractedEntities extractEntities(String query) {
-        // Ensure patterns are initialized
-        if (!patternsInitialized) {
-            initializeEntityPatterns();
-        }
-
-        if (query == null || query.trim().isEmpty()) {
-           if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
-               System.out.println("Debug: Empty or null query provided for entity extraction.");
+        try {
+            // Ensure patterns are initialized
+            if (!patternsInitialized) {
+                initializeEntityPatterns();
             }
-            return new ExtractedEntities();
+
+            // Input validation
+            if (query == null || query.trim().isEmpty()) {
+                logDebug("Empty or null query provided for entity extraction");
+                return createEmptyEntities();
+            }
+
+            // Normalize query
+            String normalizedQuery = normalizeQuery(query);
+            if (normalizedQuery.isEmpty()) {
+                logDebug("Query became empty after normalization");
+                return createEmptyEntities();
+            }
+
+            logDebug("Extracting entities from: '" + query + "' (normalized: '" + normalizedQuery + "')");
+
+            // Create entities container
+            ExtractedEntities entities = createEmptyEntities();
+
+            // Extract entities for each type
+            for (EntityType type : ENTITY_PATTERNS.keySet()) {
+                try {
+                    List<Entity> typeEntities = extractEntitiesForType(normalizedQuery, type);
+                    entities.getAllEntities().put(type, typeEntities);
+                    setSpecificEntityList(entities, type, typeEntities);
+
+                    if (!typeEntities.isEmpty()) {
+                        logDebug("Found " + typeEntities.size() + " entities of type " + type);
+                    }
+                } catch (Exception e) {
+                    System.err.println("❌ ENTITY EXTRACTION: Error extracting " + type + " entities: " + e.getMessage());
+                    // Continue with other entity types
+                    entities.getAllEntities().put(type, new ArrayList<>());
+                }
+            }
+
+            logDebug("Entity extraction completed successfully");
+            return entities;
+
+        } catch (Exception e) {
+            System.err.println("❌ ENTITY EXTRACTION: Critical error processing query '" + query + "': " + e.getMessage());
+            return createEmptyEntities();
         }
+    }
 
-        String normalizedQuery = normalizeQuery(query);
+    /**
+     * Create an empty entities container with all lists initialized
+     */
+    private ExtractedEntities createEmptyEntities() {
         ExtractedEntities entities = new ExtractedEntities();
-
         entities.setTicketIds(new ArrayList<>());
         entities.setStatuses(new ArrayList<>());
         entities.setDates(new ArrayList<>());
@@ -325,55 +365,59 @@ public class EntityExtractionService {
         entities.setLocations(new ArrayList<>());
         entities.setEmails(new ArrayList<>());
         entities.setAllEntities(new HashMap<>());
-
-        for (EntityType type : ENTITY_PATTERNS.keySet()) {
-            List<EntityPattern> patterns = ENTITY_PATTERNS.get(type);
-            List<Entity> typeEntities = new ArrayList<>();
-            for (EntityPattern pattern : patterns) {
-                extractPatternEntities(normalizedQuery, pattern, type, typeEntities);
-            }
-
-            entities.getAllEntities().put(type, typeEntities);
-            // Set specific lists for easy access
-            switch (type) {
-                case TICKET_ID -> entities.setTicketIds(typeEntities);
-                case STATUS -> entities.setStatuses(typeEntities);
-                case DATE -> entities.setDates(typeEntities);
-                case USER_NAME -> entities.setUserNames(typeEntities);
-                case EMERGENCY_TYPE -> entities.setEmergencyTypes(typeEntities);
-                case NUMBER -> entities.setNumbers(typeEntities);
-                case TIME -> entities.setTimeExpressions(typeEntities);
-                case DURATION -> entities.setDurations(typeEntities);
-                case PHONE -> entities.setPhones(typeEntities);
-                case DESCRIPTION -> entities.setDescriptions(typeEntities);
-                case PRIORITY -> entities.setPriorities(typeEntities);
-                case LOCATION -> entities.setLocations(typeEntities);
-                case EMAIL -> entities.setEmails(typeEntities);
-                default -> {}
-            }
-        }
-
-
-
-        if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
-            System.out.println("Debug: Extracted entities: " +
-                entities
-                .getAllEntities()
-                .entrySet()
-                .stream()
-                .map(
-                    e -> e.getKey() + ": " +
-                    e.getValue().stream()
-                    .map(
-                            Entity::getValue
-                    )
-                    .collect(Collectors.joining(", "))
-                )
-                .collect(Collectors.joining("; "))
-            );
-        }
-
         return entities;
+    }
+
+    /**
+     * Extract entities for a specific type
+     */
+    private List<Entity> extractEntitiesForType(String normalizedQuery, EntityType type) {
+        List<EntityPattern> patterns = ENTITY_PATTERNS.get(type);
+        if (patterns == null || patterns.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<Entity> typeEntities = new ArrayList<>();
+        for (EntityPattern pattern : patterns) {
+            try {
+                extractPatternEntities(normalizedQuery, pattern, type, typeEntities);
+            } catch (Exception e) {
+                System.err.println("❌ ENTITY EXTRACTION: Error with pattern for type " + type + ": " + e.getMessage());
+                // Continue with other patterns
+            }
+        }
+
+        return typeEntities;
+    }
+
+    /**
+     * Set specific entity list based on type
+     */
+    private void setSpecificEntityList(ExtractedEntities entities, EntityType type, List<Entity> typeEntities) {
+        switch (type) {
+            case TICKET_ID -> entities.setTicketIds(typeEntities);
+            case STATUS -> entities.setStatuses(typeEntities);
+            case DATE -> entities.setDates(typeEntities);
+            case USER_NAME -> entities.setUserNames(typeEntities);
+            case EMERGENCY_TYPE -> entities.setEmergencyTypes(typeEntities);
+            case NUMBER -> entities.setNumbers(typeEntities);
+            case TIME -> entities.setTimeExpressions(typeEntities);
+            case DURATION -> entities.setDurations(typeEntities);
+            case PHONE -> entities.setPhones(typeEntities);
+            case DESCRIPTION -> entities.setDescriptions(typeEntities);
+            case PRIORITY -> entities.setPriorities(typeEntities);
+            case LOCATION -> entities.setLocations(typeEntities);
+            case EMAIL -> entities.setEmails(typeEntities);
+        }
+    }
+
+    /**
+     * Log debug message if debug mode is enabled
+     */
+    private void logDebug(String message) {
+        if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
+            System.out.println("🔍 ENTITY EXTRACTION: " + message);
+        }
     }
 
     /**
