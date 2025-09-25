@@ -181,6 +181,55 @@ public class IntentRecognitionService {
                 Arrays.asList(Pattern.compile("\\bhelp\\b"), Pattern.compile("\\bhow\\s+to\\b"))
             )
         ));
+
+        INTENT_PATTERNS.put(IntentType.SHOW_RECENT_ACTIVITY, Arrays.asList(
+            new IntentPattern(1.0,
+                Arrays.asList("show recent activity", "recent activity", "latest activity", "recent changes"),
+                Arrays.asList("recent", "latest", "activity", "changes"),
+                Arrays.asList(
+                    Pattern.compile("\\brecent\\s+activity\\b"),
+                    Pattern.compile("\\blatest\\s+activity\\b"),
+                    Pattern.compile("\\bshow.*recent.*activity\\b")
+                )
+            )
+        ));
+
+        INTENT_PATTERNS.put(IntentType.SHOW_EMERGENCY_TYPES, Arrays.asList(
+            new IntentPattern(1.0,
+                Arrays.asList("what emergency types are available", "emergency types", "available emergency types", "list emergency types"),
+                Arrays.asList("emergency", "types", "available"),
+                Arrays.asList(
+                    Pattern.compile("\\bemergency\\s+types\\b"),
+                    Pattern.compile("\\bavailable.*emergency.*types\\b"),
+                    Pattern.compile("\\bwhat.*emergency.*types\\b")
+                )
+            )
+        ));
+
+        INTENT_PATTERNS.put(IntentType.REQUEST_EMERGENCY_ACCESS_HELP, Arrays.asList(
+            new IntentPattern(1.0,
+                Arrays.asList("how do i request emergency access", "request emergency access", "emergency access help"),
+                Arrays.asList("request", "emergency", "access", "how"),
+                Arrays.asList(
+                    Pattern.compile("\\brequest.*emergency.*access\\b"),
+                    Pattern.compile("\\bhow.*request.*emergency\\b"),
+                    Pattern.compile("\\bemergency.*access.*help\\b")
+                )
+            )
+        ));
+
+        INTENT_PATTERNS.put(IntentType.SHOW_MY_ACCESS_LEVEL, Arrays.asList(
+            new IntentPattern(1.0,
+                Arrays.asList("what elevated access do i currently have", "my access level", "current access", "my permissions"),
+                Arrays.asList("elevated", "access", "permissions", "level"),
+                Arrays.asList(
+                    Pattern.compile("\\belevated.*access\\b"),
+                    Pattern.compile("\\bmy.*access.*level\\b"),
+                    Pattern.compile("\\bcurrent.*access\\b"),
+                    Pattern.compile("\\bmy.*permissions\\b")
+                )
+            )
+        ));
     }
 
     /**
@@ -403,7 +452,11 @@ public class IntentRecognitionService {
             IntentType.UPDATE_TICKET_STATUS,
             IntentType.CLOSE_TICKET,
             IntentType.GET_HELP,
-            IntentType.SHOW_CAPABILITIES
+            IntentType.SHOW_CAPABILITIES,
+            IntentType.SHOW_RECENT_ACTIVITY,
+            IntentType.SHOW_EMERGENCY_TYPES,
+            IntentType.REQUEST_EMERGENCY_ACCESS_HELP,
+            IntentType.SHOW_MY_ACCESS_LEVEL
         ));
         // For simplicity, admins can access all intents
         roleIntents.put("ADMIN", Arrays.asList(
@@ -520,7 +573,11 @@ public class IntentRecognitionService {
         // Help and information
         GET_HELP("get_help", "Get help information"),
         SHOW_CAPABILITIES("show_capabilities", "Show available capabilities"),
-        
+        SHOW_RECENT_ACTIVITY("show_recent_activity", "Show recent activity and changes"),
+        SHOW_EMERGENCY_TYPES("show_emergency_types", "Show available emergency types"),
+        REQUEST_EMERGENCY_ACCESS_HELP("request_emergency_access_help", "Help with requesting emergency access"),
+        SHOW_MY_ACCESS_LEVEL("show_my_access_level", "Show current user access level and permissions"),
+
         // Unknown or unclear intent
         UNKNOWN("unknown", "Intent could not be determined");
 

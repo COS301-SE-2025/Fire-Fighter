@@ -40,7 +40,6 @@ export class ChatPage implements OnInit, AfterViewChecked {
 
   suggestedQuestions: string[] = [
     'Show me my tickets',
-    'What elevated access do I currently have?',
     'Show my active tickets',
     'How do I create a new emergency request?'
   ];
@@ -50,7 +49,6 @@ export class ChatPage implements OnInit, AfterViewChecked {
     'Show recent activity',
     'What emergency types are available?',
     'How do I request emergency access?',
-    'What elevated access do I currently have?',
     'Help'
   ];
 
@@ -158,7 +156,6 @@ export class ChatPage implements OnInit, AfterViewChecked {
       'Show me my tickets',
       'Show my access tickets',
       'Show my active tickets',
-      'What elevated access do I currently have?',
       'Do I have any active access permissions?',
       'Show my current access',
       'Show recent access activity',

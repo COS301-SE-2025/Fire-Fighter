@@ -118,6 +118,25 @@ public class QueryProcessingService {
                 //     return executeTicketOperation(TicketOperation.UPDATE_PRIORITY,
                 //             entities, userId, isAdmin);
 
+                // ----------- Information and Help -----------
+                case GET_HELP:
+                    return generateHelpResponse();
+
+                case SHOW_CAPABILITIES:
+                    return generateCapabilitiesResponse();
+
+                case SHOW_RECENT_ACTIVITY:
+                    return generateRecentActivityResponse(userId, isAdmin);
+
+                case SHOW_EMERGENCY_TYPES:
+                    return generateEmergencyTypesResponse();
+
+                case REQUEST_EMERGENCY_ACCESS_HELP:
+                    return generateEmergencyAccessHelpResponse();
+
+                case SHOW_MY_ACCESS_LEVEL:
+                    return generateMyAccessLevelResponse(userId);
+
                 // ----------- Fallback -----------
                 default:
                     System.out.println("❌ QUERY PROCESSING: Unsupported intent reached default case: " + intent.getType().getCode());
@@ -719,6 +738,180 @@ public class QueryProcessingService {
     }
 
     /**
+     * Generate help response for users
+     */
+    private QueryResult generateHelpResponse() {
+        String helpMessage = "🔥 **FireFighter Emergency Management Help** 🔥\n\n" +
+            "**Available Commands:**\n" +
+            "• `Show my active tickets` - View your current active tickets\n" +
+            "• `Show recent activity` - See latest system activity\n" +
+            "• `Create [emergency-type] ticket for [description]` - Create new emergency ticket\n" +
+            "• `What emergency types are available?` - List available emergency types\n" +
+            "• `How do I request emergency access?` - Get help with emergency access\n" +
+            "• `What elevated access do I currently have?` - Check your current permissions\n\n" +
+            "**Emergency Types:** HR, Financial, Management, Logistics\n\n" +
+            "**Example:** `Create hr-emergency ticket for employee leave, duration 30 minutes, contact 0123456789`";
+
+        return new QueryResult(true, helpMessage, helpMessage, QueryResultType.HELP);
+    }
+
+    /**
+     * Generate capabilities response
+     */
+    private QueryResult generateCapabilitiesResponse() {
+        String capabilitiesMessage = "🤖 **Ada Capabilities** 🤖\n\n" +
+            "I can help you with:\n" +
+            "• **Ticket Management** - Create, view, and manage emergency tickets\n" +
+            "• **Emergency Access** - Guide you through emergency access procedures\n" +
+            "• **System Information** - Show emergency types, recent activity, and your access level\n" +
+            "• **Natural Language Processing** - Understand your requests in plain English\n\n" +
+            "Just ask me in natural language, and I'll help you manage your FireFighter emergency tickets!";
+
+        return new QueryResult(true, capabilitiesMessage, capabilitiesMessage, QueryResultType.HELP);
+    }
+
+    /**
+     * Generate recent activity response
+     */
+    private QueryResult generateRecentActivityResponse(String userId, boolean isAdmin) {
+        try {
+            // Get recent tickets for the user (or all if admin)
+            List<Ticket> recentTickets;
+            if (isAdmin) {
+                recentTickets = ticketService.getAllTickets().stream()
+                    .sorted((t1, t2) -> t2.getDateCreated().compareTo(t1.getDateCreated()))
+                    .limit(5)
+                    .collect(java.util.stream.Collectors.toList());
+            } else {
+                recentTickets = ticketService.getTicketsByUserId(userId).stream()
+                    .sorted((t1, t2) -> t2.getDateCreated().compareTo(t1.getDateCreated()))
+                    .limit(5)
+                    .collect(java.util.stream.Collectors.toList());
+            }
+
+            if (recentTickets.isEmpty()) {
+                return new QueryResult(true, "No recent activity found.", "No recent tickets or activity.", QueryResultType.TICKET_LIST);
+            }
+
+            StringBuilder activityMessage = new StringBuilder("📊 **Recent Activity** 📊\n\n");
+            for (Ticket ticket : recentTickets) {
+                activityMessage.append("• **[").append(ticket.getTicketId()).append("]** ")
+                    .append(ticket.getStatus()).append(" - ")
+                    .append(ticket.getDescription())
+                    .append(" (").append(ticket.getEmergencyType()).append(")\n");
+            }
+
+            return new QueryResult(true, activityMessage.toString(), recentTickets, QueryResultType.TICKET_LIST);
+        } catch (Exception e) {
+            return new QueryResult(false, "Error retrieving recent activity: " + e.getMessage(), null, QueryResultType.ERROR);
+        }
+    }
+
+    /**
+     * Generate emergency types response
+     */
+    private QueryResult generateEmergencyTypesResponse() {
+        String emergencyTypesMessage = "🚨 **Available Emergency Types** 🚨\n\n" +
+            "• **HR Emergency** - Human resources related emergencies\n" +
+            "  - Employee incidents, workplace safety, urgent HR matters\n" +
+            "  - Example: `Create hr-emergency ticket for employee leave`\n\n" +
+            "• **Financial Emergency** - Financial and budget related emergencies\n" +
+            "  - Budget issues, payment problems, financial crises\n" +
+            "  - Example: `Create financial-emergency ticket for budget overrun`\n\n" +
+            "• **Management Emergency** - Management and operational emergencies\n" +
+            "  - Leadership decisions, operational crises, strategic issues\n" +
+            "  - Example: `Create management-emergency ticket for system outage`\n\n" +
+            "• **Logistics Emergency** - Supply chain and logistics emergencies\n" +
+            "  - Supply issues, delivery problems, resource shortages\n" +
+            "  - Example: `Create logistics-emergency ticket for supply shortage`";
+
+        return new QueryResult(true, emergencyTypesMessage, emergencyTypesMessage, QueryResultType.HELP);
+    }
+
+    /**
+     * Generate emergency access help response
+     */
+    private QueryResult generateEmergencyAccessHelpResponse() {
+        String accessHelpMessage = "🔐 **Emergency Access Request Guide** 🔐\n\n" +
+            "**How to Request Emergency Access:**\n\n" +
+            "1. **Create an Emergency Ticket**\n" +
+            "   - Use: `Create [emergency-type] ticket for [reason]`\n" +
+            "   - Include duration and contact information\n\n" +
+            "2. **Emergency Types Grant Different Access:**\n" +
+            "   - **HR Emergency** → HR Group Access\n" +
+            "   - **Financial Emergency** → Financial Group Access\n" +
+            "   - **Management Emergency** → Manager Group Access\n" +
+            "   - **Logistics Emergency** → Logistics Group Access\n\n" +
+            "3. **Access is Automatically Granted**\n" +
+            "   - Once your ticket is created, you're automatically added to the appropriate group\n" +
+            "   - Access is temporary and tied to your emergency ticket\n\n" +
+            "4. **Example Request:**\n" +
+            "   `Create hr-emergency ticket for employee incident, duration 60 minutes, contact 0123456789`\n\n" +
+            "**Need immediate help?** Contact your system administrator.";
+
+        return new QueryResult(true, accessHelpMessage, accessHelpMessage, QueryResultType.HELP);
+    }
+
+    /**
+     * Generate user access level response
+     */
+    private QueryResult generateMyAccessLevelResponse(String userId) {
+        try {
+            // Get user's current tickets to determine access level
+            List<Ticket> userTickets = ticketService.getTicketsByUserId(userId);
+            List<Ticket> activeTickets = userTickets.stream()
+                .filter(t -> "Active".equals(t.getStatus()))
+                .collect(java.util.stream.Collectors.toList());
+
+            StringBuilder accessMessage = new StringBuilder("👤 **Your Current Access Level** 👤\n\n");
+
+            if (activeTickets.isEmpty()) {
+                accessMessage.append("**Standard User Access**\n")
+                    .append("• Create and view your own tickets\n")
+                    .append("• Request emergency access through ticket creation\n\n")
+                    .append("**No Active Emergency Access**\n")
+                    .append("You currently have no active emergency tickets granting elevated access.");
+            } else {
+                accessMessage.append("**Standard User Access** + **Emergency Access**\n\n");
+                accessMessage.append("**Active Emergency Access:**\n");
+
+                for (Ticket ticket : activeTickets) {
+                    String emergencyType = ticket.getEmergencyType();
+                    String groupAccess = getGroupAccessForEmergencyType(emergencyType);
+                    accessMessage.append("• **[").append(ticket.getTicketId()).append("]** ")
+                        .append(emergencyType).append(" → ").append(groupAccess).append("\n");
+                }
+
+                accessMessage.append("\n**This grants you temporary elevated permissions for the duration of your emergency tickets.**");
+            }
+
+            return new QueryResult(true, accessMessage.toString(), activeTickets, QueryResultType.HELP);
+        } catch (Exception e) {
+            return new QueryResult(false, "Error retrieving access level: " + e.getMessage(), null, QueryResultType.ERROR);
+        }
+    }
+
+    /**
+     * Helper method to map emergency types to group access
+     */
+    private String getGroupAccessForEmergencyType(String emergencyType) {
+        if (emergencyType == null) return "Unknown Access";
+
+        switch (emergencyType.toLowerCase()) {
+            case "hr-emergency":
+                return "HR Group Access";
+            case "financial-emergency":
+                return "Financial Group Access";
+            case "management-emergency":
+                return "Manager Group Access";
+            case "logistics-emergency":
+                return "Logistics Group Access";
+            default:
+                return "Standard Access";
+        }
+    }
+
+    /**
      * Result of query processing
      */
     public static class QueryResult {
@@ -836,7 +1029,8 @@ public class QueryProcessingService {
         OPERATION_RESULT("operation_result", "Result of an operation"),
         STATISTICS("statistics", "Statistical data"),
         ERROR("error", "Error result"),
-        HELP("help", "Help information");
+        HELP("help", "Help information"),
+        INFORMATION("information", "General information");
 
         private final String code;
         private final String description;
