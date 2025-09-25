@@ -835,10 +835,6 @@ public class GmailEmailService {
         html.append("<span class=\"info-label\">User: </span>");
         html.append("<span class=\"info-value\">").append(user.getUsername()).append(" (").append(user.getEmail()).append(")</span>");
         html.append("</div>");
-        html.append("<div class=\"info-item\">");
-        html.append("<span class=\"info-label\">User ID: </span>");
-        html.append("<span class=\"info-value\">").append(user.getUserId()).append("</span>");
-        html.append("</div>");
         if (user.getDepartment() != null) {
             html.append("<div class=\"info-item\">");
             html.append("<span class=\"info-label\">Department: </span>");
