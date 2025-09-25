@@ -154,7 +154,7 @@ public class QueryProcessingService {
                 case USER_TICKETS: {
                     // If admin and a userId filter is present, show that user's tickets; otherwise:
                     List<Ticket> tickets = ticketService.getTicketsByUserId(filterUserId);
-                    return new QueryResult(QueryResultType.TICKET_LIST, tickets, tickets.size());
+                    return new QueryResult(true, "Retrived " + tickets.size() ,QueryResultType.TICKET_LIST, tickets, tickets.size());
                 }
 
                 case ACTIVE_TICKETS: {
@@ -234,11 +234,14 @@ public class QueryProcessingService {
                 }
 
                 default:
-                    return new QueryResult(false, "Unsupported query type: " + queryType);
+                    return new QueryResult(false, "Unsupported query type: " + queryType.getCode());
             }
 
         } catch (Exception e) {
-            return new QueryResult(false, "Error while executing query: " + e.getMessage());
+            if (nlpConfig.isDebugEnabled()) {
+                System.out.println("Debug: Error executing query: " + e.getMessage());
+            }
+            return new QueryResult(false, "Error while executing query: " + e.getMessage(), null, QueryResultType.ERROR);
         }
     }
 
