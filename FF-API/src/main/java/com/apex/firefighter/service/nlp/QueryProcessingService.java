@@ -55,57 +55,63 @@ public class QueryProcessingService {
             return new QueryResult(false, "Query exceeds maximum length of " + nlpConfig.getMaxQueryLength() + " characters.", null, QueryResultType.ERROR);
         }
 
-        switch (intent.getType()) {
-            // ----------- Ticket Queries -----------
-            case SHOW_ACTIVE_TICKETS:
-                return executeTicketQuery(TicketQueryType.ACTIVE_TICKETS,
-                        buildQueryFilters(entities), userId, isAdmin);
+        try {
+            switch (intent.getType()) {
+                // ----------- Ticket Queries -----------
+                case SHOW_ACTIVE_TICKETS:
+                    return executeTicketQuery(TicketQueryType.ACTIVE_TICKETS,
+                            buildQueryFilters(entities), userId, isAdmin);
 
-            case SHOW_COMPLETED_TICKETS:
-                return executeTicketQuery(TicketQueryType.COMPLETED_TICKETS,
-                        buildQueryFilters(entities), userId, isAdmin);
+                case SHOW_COMPLETED_TICKETS:
+                    return executeTicketQuery(TicketQueryType.COMPLETED_TICKETS,
+                            buildQueryFilters(entities), userId, isAdmin);
 
-            case SHOW_ALL_TICKETS:
-            case SHOW_TICKETS:
-                return executeTicketQuery(TicketQueryType.USER_TICKETS,
-                        buildQueryFilters(entities), userId, isAdmin);
-            
-            case GET_SYSTEM_STATS:
-                return executeTicketQuery(TicketQueryType.SYSTEM_STATS,
-                        buildQueryFilters(entities), userId, isAdmin);
+                case SHOW_ALL_TICKETS:
+                case SHOW_TICKETS:
+                    return executeTicketQuery(TicketQueryType.USER_TICKETS,
+                            buildQueryFilters(entities), userId, isAdmin);
+                
+                case GET_SYSTEM_STATS:
+                    return executeTicketQuery(TicketQueryType.SYSTEM_STATS,
+                            buildQueryFilters(entities), userId, isAdmin);
 
-            case EXPORT_TICKETS:
-                return executeTicketQuery(TicketQueryType.EXPORT_DATA,
-                        buildQueryFilters(entities), userId, isAdmin);
-            
-            // ----------- Ticket Operations -----------
-            case CREATE_TICKET:
-                return executeTicketOperation(TicketOperation.CREATE_TICKET,
-                        entities, userId, isAdmin);
+                case EXPORT_TICKETS:
+                    return executeTicketQuery(TicketQueryType.EXPORT_DATA,
+                            buildQueryFilters(entities), userId, isAdmin);
+                
+                // ----------- Ticket Operations -----------
+                case CREATE_TICKET:
+                    return executeTicketOperation(TicketOperation.CREATE_TICKET,
+                            entities, userId, isAdmin);
 
-            case CLOSE_TICKET:
-                return executeTicketOperation(TicketOperation.CLOSE_TICKET,
-                        entities, userId, isAdmin);
+                case CLOSE_TICKET:
+                    return executeTicketOperation(TicketOperation.CLOSE_TICKET,
+                            entities, userId, isAdmin);
 
-            case UPDATE_TICKET_STATUS:
-                return executeTicketOperation(TicketOperation.UPDATE_TICKET_STATUS,
-                        entities, userId, isAdmin);
+                case UPDATE_TICKET_STATUS:
+                    return executeTicketOperation(TicketOperation.UPDATE_TICKET_STATUS,
+                            entities, userId, isAdmin);
 
-            case ASSIGN_TICKET:
-                return executeTicketOperation(TicketOperation.ASSIGN_TICKET,
-                        entities, userId, isAdmin);
+                case ASSIGN_TICKET:
+                    return executeTicketOperation(TicketOperation.ASSIGN_TICKET,
+                            entities, userId, isAdmin);
 
-            // case ADD_COMMENT:
-            //     return executeTicketOperation(TicketOperation.ADD_COMMENT,
-            //             entities, userId, isAdmin);
+                // case ADD_COMMENT:
+                //     return executeTicketOperation(TicketOperation.ADD_COMMENT,
+                //             entities, userId, isAdmin);
 
-            // case UPDATE_PRIORITY:
-            //     return executeTicketOperation(TicketOperation.UPDATE_PRIORITY,
-            //             entities, userId, isAdmin);
+                // case UPDATE_PRIORITY:
+                //     return executeTicketOperation(TicketOperation.UPDATE_PRIORITY,
+                //             entities, userId, isAdmin);
 
-            // ----------- Fallback -----------
-            default:
-                return new QueryResult(false, "Intent recognized but not yet supported.");
+                // ----------- Fallback -----------
+                default:
+                    return new QueryResult(false, "Unsupported intent: " + intent.getType().getCode(), null, QueryResultType.ERROR);
+            }
+        } catch (Exception e) {
+            QueryResult qr = QueryResult(false, "Error processing query: " + e.getMessage(), null, QueryResultType.ERROR).getErrors().add(e.getMessage());
+            qr.getErrors().add(e.getMessage());
+            return qr;
         }
     }
 
