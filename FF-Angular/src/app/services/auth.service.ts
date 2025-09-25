@@ -97,9 +97,26 @@ export class AuthService {
   // Initialization flag to prevent multiple init calls
   private initialized = false;
 
+  // Token monitoring service will be injected when needed
+  private tokenMonitoringService: any = null;
+
   constructor() {
     // Initialize auth state restoration when service is created
     this.initializeAuthState();
+  }
+
+  /**
+   * Initialize token monitoring service (lazy injection to avoid circular dependencies)
+   */
+  private initializeTokenMonitoring(): void {
+    if (!this.tokenMonitoringService) {
+      // Lazy injection to avoid circular dependencies
+      import('./token-monitoring.service').then(({ TokenMonitoringService }) => {
+        // We'll manually instantiate to avoid circular dependency
+        // In a real scenario, you might want to use a different approach
+        console.log('📊 TOKEN MONITORING: Service loaded');
+      });
+    }
   }
 
   /**
@@ -199,12 +216,42 @@ export class AuthService {
   private storeJwtToken(token: string): void {
     try {
       localStorage.setItem('jwt_token', token);
+      
+      // Store expiration time (assuming 1 hour expiration as per backend config)
+      const expirationTime = new Date(Date.now() + (60 * 60 * 1000)); // 1 hour
+      localStorage.setItem('jwt_expiration', expirationTime.toISOString());
+      
       this.jwtTokenSubject.next(token);
-      console.log('✅ JWT token stored successfully');
+      console.log('✅ JWT token stored successfully with expiration:', expirationTime);
+
+      // Start token monitoring after successful token storage
+      this.startTokenMonitoring();
+
     } catch (error) {
       console.error('Failed to store JWT token:', error);
     }
   }
+
+    /**
+   * Start token monitoring (lazy load to avoid circular dependencies)
+   */
+  private startTokenMonitoring(): void {
+    try {
+      import('./token-monitoring.service').then(({ TokenMonitoringService }) => {
+        // Create a new instance manually to avoid circular dependencies
+        const monitoring = new (TokenMonitoringService as any)();
+        if (monitoring.startMonitoring) {
+          monitoring.startMonitoring();
+          console.log('📊 Token monitoring started');
+        }
+      }).catch(error => {
+        console.warn('⚠️ Could not start token monitoring:', error);
+      });
+    } catch (error) {
+      console.warn('⚠️ Token monitoring service not available:', error);
+    }
+  }
+
 
   /**
    * Get stored JWT token
@@ -224,10 +271,96 @@ export class AuthService {
   private clearJwtToken(): void {
     try {
       localStorage.removeItem('jwt_token');
+      localStorage.removeItem('jwt_expiration');
+
       this.jwtTokenSubject.next(null);
       console.log('✅ JWT token cleared');
     } catch (error) {
       console.error('Failed to clear JWT token:', error);
+    }
+  }
+
+    /**
+   * Check if JWT token is expired or will expire soon
+   */
+  isTokenExpiredOrExpiringSoon(minutesThreshold: number = 5): boolean {
+    try {
+      const token = this.getJwtToken();
+      if (!token) return true;
+
+      const expirationTime = localStorage.getItem('jwt_expiration');
+      if (!expirationTime) return true;
+
+      const expiration = new Date(expirationTime);
+      const threshold = new Date(Date.now() + (minutesThreshold * 60 * 1000));
+      
+      return expiration <= threshold;
+    } catch (error) {
+      console.error('Error checking token expiration:', error);
+      return true;
+    }
+  }
+
+  /**
+   * Get token expiration time
+   */
+  getTokenExpiration(): Date | null {
+    try {
+      const expirationTime = localStorage.getItem('jwt_expiration');
+      return expirationTime ? new Date(expirationTime) : null;
+    } catch (error) {
+      console.error('Error getting token expiration:', error);
+      return null;
+    }
+  }
+  
+  /**
+   * Refresh JWT token using Firebase token refresh
+   */
+  async refreshJwtToken(): Promise<boolean> {
+    try {
+      console.log('🔄 Refreshing JWT token...');
+      
+      const currentUser = this.auth.currentUser;
+      if (!currentUser) {
+        console.log('❌ No current user for token refresh');
+        return false;
+      }
+
+      // Force refresh Firebase ID token
+      const newIdToken = await currentUser.getIdToken(true);
+      
+      // Exchange for new JWT
+      const response = await this.http.post<JwtAuthResponse>(
+        `${this.getCurrentApiUrl()}/auth/refresh-token`,
+        { idToken: newIdToken } as FirebaseLoginRequest
+      ).toPromise();
+
+      if (response) {
+        this.storeJwtToken(response.token);
+        console.log('✅ JWT token refreshed successfully');
+        return true;
+      } else {
+        console.log('❌ No response from token refresh');
+        return false;
+      }
+    } catch (error) {
+      console.error('❌ JWT token refresh failed:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Auto-refresh token if it's expiring soon
+   */
+  async autoRefreshTokenIfNeeded(): Promise<void> {
+    try {
+      if (this.isTokenExpiredOrExpiringSoon(10)) { // 10 minutes threshold
+        console.log('🔄 Token expiring soon, auto-refreshing...');
+        await this.refreshJwtToken();
+      }
+    } catch (error) {
+      console.error('Error in auto-refresh:', error);
     }
   }
 

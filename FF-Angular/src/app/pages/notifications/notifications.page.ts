@@ -10,6 +10,8 @@ import { logOutOutline } from 'ionicons/icons';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Observable } from 'rxjs';
 import { trigger, state, style, transition, animate } from '@angular/animations';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../services/language.service';
 
 @Component({
   selector: 'app-notifications',
@@ -23,7 +25,8 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
     IonContent,
     IonRefresher,
     IonRefresherContent,
-    NavbarComponent
+    NavbarComponent,
+    TranslateModule
   ],
   animations: [
     trigger('modalBackdrop', [
@@ -73,7 +76,8 @@ export class NotificationsPage{
 
   constructor(
     private authService: AuthService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private languageService: LanguageService
   ) {
     // Register icons
     addIcons({ logOutOutline });
@@ -136,22 +140,52 @@ export class NotificationsPage{
     const diffInSeconds = Math.floor((now.getTime() - timestamp.getTime()) / 1000);
 
     if (diffInSeconds < 60) {
-      return 'just now';
+      return this.languageService.getInstantTranslation('NOTIFICATIONS.TIME_AGO.JUST_NOW');
     }
 
     const diffInMinutes = Math.floor(diffInSeconds / 60);
     if (diffInMinutes < 60) {
-      return `${diffInMinutes} minute${diffInMinutes === 1 ? '' : 's'} ago`;
+      if (diffInMinutes === 1) {
+        return this.languageService.getInstantTranslation('NOTIFICATIONS.TIME_AGO.MINUTE_SINGULAR');
+      } else {
+        const key = 'NOTIFICATIONS.TIME_AGO.MINUTE_PLURAL';
+        const currentLang = this.languageService.getCurrentLanguage();
+        if (currentLang === 'de') {
+          return this.languageService.getInstantTranslation(key, { count: diffInMinutes });
+        } else {
+          return `${diffInMinutes} ${this.languageService.getInstantTranslation(key)}`;
+        }
+      }
     }
 
     const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) {
-      return `${diffInHours} hour${diffInHours === 1 ? '' : 's'} ago`;
+      if (diffInHours === 1) {
+        return this.languageService.getInstantTranslation('NOTIFICATIONS.TIME_AGO.HOUR_SINGULAR');
+      } else {
+        const key = 'NOTIFICATIONS.TIME_AGO.HOUR_PLURAL';
+        const currentLang = this.languageService.getCurrentLanguage();
+        if (currentLang === 'de') {
+          return this.languageService.getInstantTranslation(key, { count: diffInHours });
+        } else {
+          return `${diffInHours} ${this.languageService.getInstantTranslation(key)}`;
+        }
+      }
     }
 
     const diffInDays = Math.floor(diffInHours / 24);
     if (diffInDays < 7) {
-      return `${diffInDays} day${diffInDays === 1 ? '' : 's'} ago`;
+      if (diffInDays === 1) {
+        return this.languageService.getInstantTranslation('NOTIFICATIONS.TIME_AGO.DAY_SINGULAR');
+      } else {
+        const key = 'NOTIFICATIONS.TIME_AGO.DAY_PLURAL';
+        const currentLang = this.languageService.getCurrentLanguage();
+        if (currentLang === 'de') {
+          return this.languageService.getInstantTranslation(key, { count: diffInDays });
+        } else {
+          return `${diffInDays} ${this.languageService.getInstantTranslation(key)}`;
+        }
+      }
     }
 
     return timestamp.toLocaleDateString();
@@ -182,6 +216,14 @@ export class NotificationsPage{
 
   hasReadNotifications(notifications: Notification[]): boolean {
     return notifications.some(n => n.read);
+  }
+
+  getNotificationCountText(count: number): string {
+    if (count === 1) {
+      return this.languageService.getInstantTranslation('NOTIFICATIONS.LIST.COUNT_SINGLE');
+    } else {
+      return this.languageService.getInstantTranslation('NOTIFICATIONS.LIST.COUNT_PLURAL');
+    }
   }
 
   // Modal control methods

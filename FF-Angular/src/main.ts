@@ -32,6 +32,8 @@ import { AppComponent } from './app/app.component';
 import { ApiConfigService } from './app/services/api-config.service';
 import { environment } from './environments/environment';
 import { jwtInterceptor } from './app/interceptors/jwt.interceptor';
+import { authErrorInterceptor } from './app/interceptors/auth-error.interceptor';
+
 
 // ← THESE imports are from @angular/fire
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
@@ -62,7 +64,8 @@ bootstrapApplication(AppComponent, {
     provideIonicAngular(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
     provideHttpClient(withInterceptors([
-      jwtInterceptor, // Add JWT token to all API requests
+      jwtInterceptor, // Add JWT token to all API requests and handle refresh
+      authErrorInterceptor, // Handle 401 errors and automatic token refresh
       (req, next) => {
         const apiConfigService = inject(ApiConfigService);
         const currentApiUrl = apiConfigService.getCurrentApiUrlSync();

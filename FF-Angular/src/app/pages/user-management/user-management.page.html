@@ -8,7 +8,7 @@
           <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
           <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
         </svg>
-        <span class="sr-only">Loading...</span>
+        <span class="sr-only">{{ 'USER_MANAGEMENT.LOADING' | translate }}</span>
       </div>
     </ion-refresher-content>
   </ion-refresher>
@@ -25,26 +25,11 @@
             </svg>
           </div>
           <div class="flex-1 min-w-0">
-            <h1 class="text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900 dark:text-white">User Management</h1>
-            <p class="text-sm lg:text-base text-gray-600 dark:text-gray-400">Manage user accounts, roles, and permissions</p>
+            <h1 class="text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900 dark:text-white">{{ 'USER_MANAGEMENT.TITLE' | translate }}</h1>
+            <p class="text-sm lg:text-base text-gray-600 dark:text-gray-400">{{ 'USER_MANAGEMENT.SUBTITLE' | translate }}</p>
           </div>
         </div>
-        <div class="flex flex-col space-y-2 lg:flex-row lg:items-center lg:space-y-0 lg:space-x-3">
-          <button class="w-full lg:w-auto inline-flex items-center justify-center px-4 lg:px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg shadow hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-700 dark:hover:bg-blue-800 dark:focus:ring-blue-900">
-            <svg class="w-4 lg:w-5 h-4 lg:h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-            </svg>
-            <span class="hidden sm:inline">Add New User</span>
-            <span class="sm:hidden">Add User</span>
-          </button>
-          <button class="w-full lg:w-auto inline-flex items-center justify-center px-4 lg:px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow hover:bg-gray-50 focus:ring-4 focus:outline-none focus:ring-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-700">
-            <svg class="w-4 lg:w-5 h-4 lg:h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18v-1.5M7.5 12l4.5 4.5m0 0l4.5-4.5m-4.5 4.5V3"/>
-            </svg>
-            <span class="hidden sm:inline">Export Users</span>
-            <span class="sm:hidden">Export</span>
-          </button>
-        </div>
+
       </div>
     </div>
 
@@ -54,7 +39,7 @@
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm">
         <div class="flex items-center justify-between mb-2">
           <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
-            Normal Users
+            {{ 'USER_MANAGEMENT.STATS.NORMAL_USERS' | translate }}
           </div>
           <div class="flex items-center text-blue-500 text-sm font-medium">
             <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -63,14 +48,14 @@
           </div>
         </div>
         <div class="text-3xl font-bold text-gray-900 dark:text-white mb-1">{{ normalUsers }}</div>
-        <div class="text-sm text-gray-600 dark:text-gray-400">Standard user accounts</div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">{{ 'USER_MANAGEMENT.STATS.NORMAL_USERS_DESC' | translate }}</div>
       </div>
 
       <!-- Admin Users -->
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm">
         <div class="flex items-center justify-between mb-2">
           <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
-            Admin Users
+            {{ 'USER_MANAGEMENT.STATS.ADMIN_USERS' | translate }}
           </div>
           <div class="flex items-center text-purple-500 text-sm font-medium">
             <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -79,7 +64,7 @@
           </div>
         </div>
         <div class="text-3xl font-bold text-gray-900 dark:text-white mb-1">{{ adminUsers }}</div>
-        <div class="text-sm text-gray-600 dark:text-gray-400">With admin privileges</div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">{{ 'USER_MANAGEMENT.STATS.ADMIN_USERS_DESC' | translate }}</div>
       </div>
     </div>
 
@@ -88,8 +73,8 @@
       <div class="p-6 border-b border-gray-200 dark:border-gray-700">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
           <div>
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">All Users</h2>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Manage user accounts and permissions</p>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ 'USER_MANAGEMENT.TABLE.TITLE' | translate }}</h2>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ 'USER_MANAGEMENT.TABLE.SUBTITLE' | translate }}</p>
           </div>
           <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
             <!-- Search Input -->
@@ -99,12 +84,12 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
               </div>
-              <input type="text" [(ngModel)]="searchTerm" (input)="filterUsers()" placeholder="Search users..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              <input type="text" [(ngModel)]="searchTerm" (input)="filterUsers()" [placeholder]="'USER_MANAGEMENT.TABLE.SEARCH_PLACEHOLDER' | translate" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
             </div>
             <!-- Filter Dropdown -->
             <select [(ngModel)]="selectedFilter" (change)="filterUsers()" class="block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-              <option value="all">All Users</option>
-              <option value="admin">Admins</option>
+              <option value="all">{{ 'USER_MANAGEMENT.TABLE.FILTER_ALL' | translate }}</option>
+              <option value="admin">{{ 'USER_MANAGEMENT.TABLE.FILTER_ADMIN' | translate }}</option>
             </select>
           </div>
         </div>
@@ -115,11 +100,11 @@
         <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
           <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
-              <th scope="col" class="px-6 py-3">User</th>
-              <th scope="col" class="px-6 py-3">Role</th>
-              <th scope="col" class="px-6 py-3">Dolibarr ID</th>
-              <th scope="col" class="px-6 py-3">Last Login</th>
-              <th scope="col" class="px-6 py-3">Actions</th>
+              <th scope="col" class="px-6 py-3">{{ 'USER_MANAGEMENT.TABLE.HEADERS.USER' | translate }}</th>
+              <th scope="col" class="px-6 py-3">{{ 'USER_MANAGEMENT.TABLE.HEADERS.ROLE' | translate }}</th>
+              <th scope="col" class="px-6 py-3">{{ 'USER_MANAGEMENT.TABLE.HEADERS.DOLIBARR_ID' | translate }}</th>
+              <th scope="col" class="px-6 py-3">{{ 'USER_MANAGEMENT.TABLE.HEADERS.LAST_LOGIN' | translate }}</th>
+              <th scope="col" class="px-6 py-3">{{ 'USER_MANAGEMENT.TABLE.HEADERS.ACTIONS' | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -141,25 +126,25 @@
                     'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300': user.isAdmin,
                     'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300': !user.isAdmin
                   }" class="px-2 py-1 text-xs font-medium rounded-full">
-                    {{ user.isAdmin ? 'Admin' : 'User' }}
+                    {{ getTranslatedRole(user.isAdmin) }}
                   </span>
                 </td>
                 <td class="px-6 py-4">
                   <span *ngIf="user.dolibarrId; else noDolibarrId" class="text-sm text-gray-900 dark:text-white font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">{{ user.dolibarrId }}</span>
                   <ng-template #noDolibarrId>
-                    <span class="text-sm text-gray-400 dark:text-gray-500 italic">Not set</span>
+                    <span class="text-sm text-gray-400 dark:text-gray-500 italic">{{ 'USER_MANAGEMENT.DOLIBARR.NOT_SET' | translate }}</span>
                   </ng-template>
                 </td>
                 <td class="px-6 py-4">
                   <span class="text-sm text-gray-900 dark:text-white">{{ formatDate(user.lastLogin) }}</span>
                 </td>
                 <td class="px-6 py-4">
-                  <button (click)="toggleExpandUser(user.userId)" class="details-button inline-flex items-center px-3 py-2 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors duration-200" [ngClass]="{'expanded': expandedUserId === user.userId}" [title]="'Manage actions for ' + user.username">
+                  <button (click)="toggleExpandUser(user.userId)" class="details-button inline-flex items-center px-3 py-2 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors duration-200" [ngClass]="{'expanded': expandedUserId === user.userId}" [title]="getManageActionsTitle(user.username)">
                     <svg class="chevron-icon w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
-                    <span class="hidden xl:inline">Actions</span>
-                    <span class="sr-only">View Actions</span>
+                    <span class="hidden xl:inline">{{ 'USER_MANAGEMENT.ACTIONS.ACTIONS' | translate }}</span>
+                    <span class="sr-only">{{ 'USER_MANAGEMENT.ACTIONS.VIEW_ACTIONS' | translate }}</span>
                   </button>
                 </td>
               </tr>
@@ -172,7 +157,7 @@
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
-                        User Management Actions
+                        {{ 'USER_MANAGEMENT.ACTIONS.USER_MANAGEMENT_ACTIONS' | translate }}
                       </h4>
 
                       <!-- Action Button -->
@@ -182,8 +167,8 @@
                           <svg class="w-10 h-10 text-purple-600 dark:text-purple-400 mb-3 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path>
                           </svg>
-                          <span class="text-base font-medium text-purple-700 dark:text-purple-300">Manage Dolibarr ID</span>
-                          <span class="text-sm text-purple-600 dark:text-purple-400 text-center mt-1">Update integration settings</span>
+                          <span class="text-base font-medium text-purple-700 dark:text-purple-300">{{ 'USER_MANAGEMENT.ACTIONS.MANAGE_DOLIBARR_ID' | translate }}</span>
+                          <span class="text-sm text-purple-600 dark:text-purple-400 text-center mt-1">{{ 'USER_MANAGEMENT.ACTIONS.UPDATE_INTEGRATION_SETTINGS' | translate }}</span>
                         </button>
                       </div>
 
@@ -202,7 +187,7 @@
         <!-- User Count Info -->
         <div class="flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
           <div class="text-sm text-gray-600 dark:text-gray-400">
-            {{ filteredUsers.length }} users
+            {{ getUserCountText(filteredUsers.length) }}
           </div>
         </div>
 
@@ -226,7 +211,7 @@
                     'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300': user.isAdmin,
                     'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300': !user.isAdmin
                   }" class="px-2 py-1 text-xs font-medium rounded-full">
-                    {{ user.isAdmin ? 'Admin' : 'User' }}
+                    {{ getTranslatedRole(user.isAdmin) }}
                   </span>
                 </div>
               </div>
@@ -236,16 +221,16 @@
             <div class="p-4">
               <div class="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Dolibarr ID</div>
+                  <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{ 'USER_MANAGEMENT.DOLIBARR.LABEL' | translate }}</div>
                   <div class="text-gray-900 dark:text-white">
                     <span *ngIf="user.dolibarrId; else noDolibarrIdMobile" class="text-sm font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">{{ user.dolibarrId }}</span>
                     <ng-template #noDolibarrIdMobile>
-                      <span class="text-sm text-gray-400 dark:text-gray-500 italic">Not set</span>
+                      <span class="text-sm text-gray-400 dark:text-gray-500 italic">{{ 'USER_MANAGEMENT.DOLIBARR.NOT_SET' | translate }}</span>
                     </ng-template>
                   </div>
                 </div>
                 <div>
-                  <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Last Login</div>
+                  <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{ 'USER_MANAGEMENT.TABLE.HEADERS.LAST_LOGIN' | translate }}</div>
                   <div class="text-gray-900 dark:text-white text-sm">{{ formatDate(user.lastLogin) }}</div>
                 </div>
               </div>
@@ -256,7 +241,7 @@
                   <svg class="chevron-icon w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                   </svg>
-                  Manage User
+                  {{ 'USER_MANAGEMENT.ACTIONS.MANAGE_USER' | translate }}
                 </button>
               </div>
             </div>
@@ -268,7 +253,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                 </svg>
-                User Management Actions
+                {{ 'USER_MANAGEMENT.ACTIONS.USER_MANAGEMENT_ACTIONS' | translate }}
               </h4>
 
               <!-- Action Button (Mobile) -->
@@ -278,7 +263,7 @@
                   <svg class="w-6 h-6 text-purple-600 dark:text-purple-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path>
                   </svg>
-                  <span class="text-base font-medium text-purple-700 dark:text-purple-300">Manage Dolibarr ID</span>
+                  <span class="text-base font-medium text-purple-700 dark:text-purple-300">{{ 'USER_MANAGEMENT.ACTIONS.MANAGE_DOLIBARR_ID' | translate }}</span>
                 </button>
               </div>
             </div>
@@ -291,8 +276,8 @@
         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"></path>
         </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No users found</h3>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Try adjusting your search or filter criteria.</p>
+        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">{{ 'USER_MANAGEMENT.EMPTY_STATE.TITLE' | translate }}</h3>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ 'USER_MANAGEMENT.EMPTY_STATE.MESSAGE' | translate }}</p>
       </div>
 
       <!-- Empty State (Mobile) -->
@@ -301,8 +286,8 @@
           <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"></path>
           </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No users found</h3>
-          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Try adjusting your search or filter criteria.</p>
+          <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">{{ 'USER_MANAGEMENT.EMPTY_STATE.TITLE' | translate }}</h3>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ 'USER_MANAGEMENT.EMPTY_STATE.MESSAGE' | translate }}</p>
         </div>
       </div>
     </div>
@@ -331,10 +316,12 @@
                 </div>
                 <div>
                   <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="dolibarr-modal-title">
-                    {{ selectedUser?.dolibarrId ? 'Edit Dolibarr ID' : 'Set Dolibarr ID' }}
+                    {{ selectedUser?.dolibarrId ?
+                       ('USER_MANAGEMENT.MODAL.EDIT_DOLIBARR_ID' | translate) :
+                       ('USER_MANAGEMENT.MODAL.SET_DOLIBARR_ID' | translate) }}
                   </h3>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Managing Dolibarr ID for {{ selectedUser?.username }}
+                    {{ 'USER_MANAGEMENT.MODAL.MANAGING_FOR' | translate }} {{ selectedUser?.username }}
                   </p>
                 </div>
               </div>
@@ -347,7 +334,7 @@
               <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
               </svg>
-              <span class="sr-only">Close modal</span>
+              <span class="sr-only">{{ 'USER_MANAGEMENT.MODAL.CLOSE_MODAL' | translate }}</span>
             </button>
           </div>
 
@@ -357,14 +344,14 @@
             <!-- Dolibarr ID Field -->
             <div>
               <label for="dolibarr-id" class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                Dolibarr User ID
+                {{ 'USER_MANAGEMENT.MODAL.DOLIBARR_USER_ID' | translate }}
               </label>
               <input
                 id="dolibarr-id"
                 type="text"
                 [(ngModel)]="editingDolibarrId"
                 name="dolibarrId"
-                placeholder="Enter Dolibarr user ID (e.g., DOL123456)"
+                [placeholder]="'USER_MANAGEMENT.MODAL.PLACEHOLDER' | translate"
                 [disabled]="isUpdatingDolibarrId"
                 (input)="onDolibarrIdInput($event)"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -372,10 +359,10 @@
                 [class.focus:border-red-500]="!isValidDolibarrId() && editingDolibarrId.length > 0"
               />
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" *ngIf="isValidDolibarrId() || editingDolibarrId.length === 0">
-                Enter the unique Dolibarr user identifier (alphanumeric characters, underscores, and hyphens allowed)
+                {{ 'USER_MANAGEMENT.MODAL.HELP_TEXT' | translate }}
               </p>
               <p class="mt-1 text-xs text-red-600 dark:text-red-400" *ngIf="!isValidDolibarrId() && editingDolibarrId.length > 0">
-                Please enter a valid Dolibarr ID (alphanumeric characters, underscores, and hyphens only)
+                {{ 'USER_MANAGEMENT.MODAL.ERROR_TEXT' | translate }}
               </p>
             </div>
 
@@ -387,7 +374,7 @@
                 [disabled]="isUpdatingDolibarrId"
                 class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
               >
-                Cancel
+                {{ 'USER_MANAGEMENT.MODAL.CANCEL' | translate }}
               </button>
               <button
                 type="submit"
@@ -398,8 +385,10 @@
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span *ngIf="!isUpdatingDolibarrId">{{ selectedUser?.dolibarrId ? 'Update' : 'Set' }} Dolibarr ID</span>
-                <span *ngIf="isUpdatingDolibarrId">Saving...</span>
+                <span *ngIf="!isUpdatingDolibarrId">{{ selectedUser?.dolibarrId ?
+                  ('USER_MANAGEMENT.MODAL.UPDATE' | translate) :
+                  ('USER_MANAGEMENT.MODAL.SET' | translate) }} {{ 'USER_MANAGEMENT.DOLIBARR.LABEL' | translate }}</span>
+                <span *ngIf="isUpdatingDolibarrId">{{ 'USER_MANAGEMENT.MODAL.SAVING' | translate }}</span>
               </button>
             </div>
 

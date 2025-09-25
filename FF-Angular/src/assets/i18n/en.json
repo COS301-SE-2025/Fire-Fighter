@@ -23,7 +23,7 @@
     "HELP": "Help",
     "SETTINGS": "Settings",
     "ADMIN": "Admin Console",
-    "CHAT": "Gemini",
+    "CHAT": "Ada",
     "LOGIN": "Login",
     "REGISTER": "Register",
     "LOGOUT": "Logout"
@@ -42,7 +42,7 @@
     "NAVIGATION": {
       "DASHBOARD": "Dashboard",
       "MY_REQUESTS": "My Requests",
-      "GEMINI": "Gemini",
+      "GEMINI": "Ada",
       "ADMIN_CONSOLE": "Admin Console",
       "NOTIFICATIONS": "Notifications"
     },
@@ -174,8 +174,8 @@
       "NOTIFICATIONS_DESC": "View pending alerts",
       "AUDIT_LOGS": "Audit Logs",
       "AUDIT_LOGS_DESC": "Review activity logs",
-      "GEMINI": "Gemini",
-      "GEMINI_DESC": "Ask AI assistant"
+      "ADA": "Ada",
+      "ADA_DESC": "Query and manage tickets"
     },
     "RECENT_ACTIVITY": {
       "TITLE": "Recent Activity",
@@ -203,23 +203,219 @@
     }
   },
   "REQUESTS": {
-    "TITLE": "Requests",
+    "TITLE": "Emergency Requests",
+    "SUBTITLE": "Manage your FireFighter emergency access requests and sessions",
     "NEW_REQUEST": "New Request",
     "MY_REQUESTS": "My Requests",
     "ALL_REQUESTS": "All Requests",
+    "STATS": {
+      "TOTAL": "Total",
+      "ACTIVE": "Active",
+      "COMPLETED": "Completed",
+      "REJECTED": "Rejected"
+    },
+    "SEARCH": {
+      "PLACEHOLDER": "Search by ticket ID or reason...",
+      "LABEL": "Search requests",
+      "NO_RESULTS": "Try adjusting your search criteria",
+      "FIRST_REQUEST": "Create your first emergency access request to get started"
+    },
+    "FILTERS": {
+      "ALL": "All",
+      "ACTIVE": "Active",
+      "COMPLETED": "Completed",
+      "REJECTED": "Rejected"
+    },
     "STATUS": {
       "PENDING": "Pending",
       "APPROVED": "Approved",
       "REJECTED": "Rejected",
       "IN_PROGRESS": "In Progress",
-      "COMPLETED": "Completed"
+      "COMPLETED": "Completed",
+      "ACTIVE": "Active",
+      "CLOSED": "Closed"
+    },
+    "LOADING": "Loading requests...",
+    "ERROR": "Error!",
+    "NO_REQUESTS": {
+      "TITLE": "No requests found",
+      "CREATE_BUTTON": "Create New Request"
+    },
+    "CARD": {
+      "REQUESTED": "Requested",
+      "REASON": "Reason",
+      "REQUEST_DATE": "Request Date",
+      "REVOKE_ACCESS": "Revoke Access",
+      "VIEW_DETAILS": "View Details"
+    },
+    "MODAL": {
+      "TITLE": "Create Emergency Request",
+      "SUBTITLE": "Submit a new FireFighter emergency access request",
+      "CLOSE": "Close modal",
+      "REQUEST_DATE": {
+        "LABEL": "Request Date",
+        "REQUIRED": "*"
+      },
+      "EMERGENCY_TYPE": {
+        "LABEL": "Emergency Type",
+        "PLACEHOLDER": "Select emergency type",
+        "HR": "HR / Human Resources Emergency",
+        "FINANCIAL": "Financial / Payment Emergency",
+        "MANAGEMENT": "Management / Admin Emergency",
+        "LOGISTICS": "Logistics / Supply Emergency"
+      },
+      "REASON": {
+        "LABEL": "Reason for Emergency Access",
+        "PLACEHOLDER": "Please provide a detailed explanation of the emergency situation and why immediate access is required. Include specific systems, users, or data affected...",
+        "HELP": "Be specific about the nature of the emergency and systems requiring access.",
+        "REQUIRED": "*"
+      },
+      "CONTACT": {
+        "LABEL": "Emergency Contact",
+        "PLACEHOLDER": "Phone number or email for urgent contact",
+        "AUTO_FILLED": "(Auto-filled from profile)",
+        "USE_SAVED": "Use Saved",
+        "HELP_NO_SAVED": "You can add a contact number in your account settings to auto-fill this field.",
+        "HELP_AUTO_FILLED": "Contact number auto-filled from your profile. You can edit it if needed.",
+        "HELP_SAVED_AVAILABLE": "Your saved contact number ({{contactNumber}}) is available. Click \"Use Saved\" to fill it."
+      },
+      "DURATION": {
+        "LABEL": "Access Duration (minutes)",
+        "REQUIRED": "*",
+        "HELP": "Use the +/- buttons to adjust duration. Range: 15-120 minutes in 15-minute increments.",
+        "MIN_SUFFIX": "min",
+        "ERROR_MIN": "Duration must be at least 15 minutes",
+        "ERROR_MAX": "Duration cannot exceed 2 hours"
+      },
+      "WARNING": {
+        "TITLE": "Emergency Access Notice:",
+        "DURATION": "Emergency access duration can be selected from 15 minutes to 2 hours",
+        "LOGGED": "All activities are logged and audited",
+        "MISUSE": "Misuse may result in disciplinary action"
+      },
+      "BUTTONS": {
+        "CANCEL": "Cancel",
+        "SUBMIT": "Submit Emergency Request",
+        "SUBMITTING": "Submitting..."
+      }
+    },
+    "FOOTER": {
+      "NEW_EMERGENCY_REQUEST": "New Emergency Request"
+    },
+    "TOAST": {
+      "ACCESS_REVOKED": "Access for ticket {{ticketId}} has been revoked"
     }
   },
   "NOTIFICATIONS": {
     "TITLE": "Notifications",
-    "MARK_ALL_READ": "Mark All as Read",
-    "NO_NOTIFICATIONS": "No notifications",
-    "CLEAR_ALL": "Clear All"
+    "SUBTITLE": "Stay updated on FireFighter emergency system activity",
+    "LOADING": "Loading...",
+    "PULL_TO_REFRESH": "Loading...",
+    "STATS": {
+      "TOTAL": "Total",
+      "UNREAD": "Unread",
+      "EMERGENCY": "Emergency"
+    },
+    "ACTIONS": {
+      "MARK_ALL_READ": "Mark Read",
+      "CLEAR_READ": "Clear Read"
+    },
+    "LIST": {
+      "HEADER": "Recent Activity",
+      "COUNT_SINGLE": "notification",
+      "COUNT_PLURAL": "notifications"
+    },
+    "EMPTY_STATE": {
+      "TITLE": "No notifications",
+      "MESSAGE": "You're all caught up! New notifications will appear here."
+    },
+    "ITEM": {
+      "VIEW_DETAILS": "View Details →",
+      "MARK_AS_READ": "Mark as Read",
+      "DELETE_TOOLTIP": "Delete notification"
+    },
+    "TIME_AGO": {
+      "JUST_NOW": "just now",
+      "MINUTE_SINGULAR": "minute ago",
+      "MINUTE_PLURAL": "minutes ago",
+      "HOUR_SINGULAR": "hour ago",
+      "HOUR_PLURAL": "hours ago",
+      "DAY_SINGULAR": "day ago",
+      "DAY_PLURAL": "days ago"
+    },
+    "DELETE_MODAL": {
+      "TITLE_SINGLE": "Delete Notification",
+      "TITLE_MULTIPLE": "Delete Read Notifications",
+      "MESSAGE_SINGLE": "Are you sure you want to delete this notification?",
+      "MESSAGE_MULTIPLE": "Are you sure you want to delete all read notifications?",
+      "WARNING": "This action cannot be undone.",
+      "CANCEL": "Cancel",
+      "CONFIRM": "Confirm",
+      "DELETING": "Deleting..."
+    }
+  },
+  "USER_MANAGEMENT": {
+    "TITLE": "User Management",
+    "SUBTITLE": "Manage user accounts, roles, and permissions",
+    "LOADING": "Loading...",
+    "STATS": {
+      "NORMAL_USERS": "Normal Users",
+      "NORMAL_USERS_DESC": "Standard user accounts",
+      "ADMIN_USERS": "Admin Users",
+      "ADMIN_USERS_DESC": "With admin privileges"
+    },
+    "TABLE": {
+      "TITLE": "All Users",
+      "SUBTITLE": "Manage user accounts and permissions",
+      "SEARCH_PLACEHOLDER": "Search users...",
+      "FILTER_ALL": "All Users",
+      "FILTER_ADMIN": "Admins",
+      "HEADERS": {
+        "USER": "User",
+        "ROLE": "Role",
+        "DOLIBARR_ID": "Dolibarr ID",
+        "LAST_LOGIN": "Last Login",
+        "ACTIONS": "Actions"
+      }
+    },
+    "ROLES": {
+      "ADMIN": "Admin",
+      "USER": "User"
+    },
+    "DOLIBARR": {
+      "NOT_SET": "Not set",
+      "LABEL": "Dolibarr ID"
+    },
+    "ACTIONS": {
+      "ACTIONS": "Actions",
+      "VIEW_ACTIONS": "View Actions",
+      "MANAGE_USER": "Manage User",
+      "USER_MANAGEMENT_ACTIONS": "User Management Actions",
+      "MANAGE_DOLIBARR_ID": "Manage Dolibarr ID",
+      "UPDATE_INTEGRATION_SETTINGS": "Update integration settings",
+      "MANAGE_ACTIONS_FOR": "Manage actions for"
+    },
+    "MOBILE": {
+      "USER_COUNT": "users"
+    },
+    "EMPTY_STATE": {
+      "TITLE": "No users found",
+      "MESSAGE": "Try adjusting your search or filter criteria."
+    },
+    "MODAL": {
+      "EDIT_DOLIBARR_ID": "Edit Dolibarr ID",
+      "SET_DOLIBARR_ID": "Set Dolibarr ID",
+      "MANAGING_FOR": "Managing Dolibarr ID for",
+      "CLOSE_MODAL": "Close modal",
+      "DOLIBARR_USER_ID": "Dolibarr User ID",
+      "PLACEHOLDER": "Enter Dolibarr user ID (e.g., DOL123456)",
+      "HELP_TEXT": "Enter the unique Dolibarr user identifier (alphanumeric characters, underscores, and hyphens allowed)",
+      "ERROR_TEXT": "Please enter a valid Dolibarr ID (alphanumeric characters, underscores, and hyphens only)",
+      "CANCEL": "Cancel",
+      "UPDATE": "Update",
+      "SET": "Set",
+      "SAVING": "Saving..."
+    }
   },
   "ACCOUNT": {
     "TITLE": "Account",
@@ -253,5 +449,101 @@
     "NOT_FOUND": "Resource not found",
     "SERVER_ERROR": "Internal server error",
     "UNKNOWN_ERROR": "An unknown error occurred"
+  },
+  "ACCOUNT": {
+    "TITLE": "Account Settings",
+    "SUBTITLE": "Manage your FireFighter emergency access profile and preferences",
+    "LOADING": "Loading...",
+    "PROFILE": {
+      "VERIFIED": "Verified",
+      "MEMBER_SINCE": "Member since",
+      "LAST_ACTIVE": "Last active",
+      "JUST_NOW": "Just now",
+      "HOURS_AGO": "hour ago",
+      "HOURS_AGO_PLURAL": "hours ago",
+      "DAYS_AGO": "day ago",
+      "DAYS_AGO_PLURAL": "days ago",
+      "UNKNOWN": "Unknown",
+      "FIREFIGHTER_USER": "FireFighter User"
+    },
+    "ROLES": {
+      "ADMINISTRATOR": "Administrator",
+      "USER": "User"
+    },
+    "CONTACT": {
+      "NO_CONTACT_NUMBER": "No contact number added",
+      "EDIT": "Edit",
+      "ADD": "Add"
+    },
+    "SECURITY": {
+      "TITLE": "Security Information",
+      "EMAIL_VERIFICATION": {
+        "TITLE": "Email Verification",
+        "DESCRIPTION": "Your email address is verified",
+        "STATUS": "Verified"
+      },
+      "ACCOUNT_SECURITY": {
+        "TITLE": "Account Security",
+        "DESCRIPTION": "Strong password protection",
+        "STATUS": "Secure"
+      },
+      "EMERGENCY_ACCESS": {
+        "TITLE": "Emergency Access",
+        "DESCRIPTION": "FireFighter privileges enabled",
+        "STATUS": "Active"
+      }
+    },
+    "QUICK_ACTIONS": {
+      "TITLE": "Quick Actions",
+      "DASHBOARD": {
+        "TITLE": "Go to Dashboard",
+        "DESCRIPTION": "View emergency requests and system status"
+      },
+      "REQUESTS": {
+        "TITLE": "Emergency Requests",
+        "DESCRIPTION": "Submit or manage access requests"
+      },
+      "NOTIFICATIONS": {
+        "TITLE": "Notifications",
+        "DESCRIPTION": "View alerts and system messages"
+      }
+    },
+    "MANAGEMENT": {
+      "TITLE": "Account Management",
+      "SIGN_OUT": {
+        "TITLE": "Sign Out",
+        "DESCRIPTION": "Securely sign out of your FireFighter account",
+        "BUTTON": "Sign Out"
+      }
+    },
+    "CONTACT_MODAL": {
+      "EDIT_TITLE": "Edit Contact Number",
+      "ADD_TITLE": "Add Contact Number",
+      "DESCRIPTION": "This will be used for emergency ticket notifications",
+      "CLOSE_MODAL": "Close modal",
+      "LABEL": "Contact Number",
+      "PLACEHOLDER": "Enter 10-digit phone number (e.g., 0123456789)",
+      "HELP_TEXT": "Enter a 10-digit phone number (numbers only, no spaces or special characters)",
+      "ERROR_TEXT": "Please enter exactly 10 digits (0-9 only)",
+      "INFO": {
+        "TITLE": "Contact Number Usage:",
+        "ITEM_1": "Will be auto-filled when creating emergency tickets",
+        "ITEM_2": "Used for urgent notifications and contact purposes",
+        "ITEM_3": "Must be exactly 10 digits (local format)",
+        "ITEM_4": "You can update this anytime from your account settings"
+      },
+      "CANCEL": "Cancel",
+      "UPDATE": "Update",
+      "ADD": "Add",
+      "CONTACT_NUMBER": "Contact Number",
+      "SAVING": "Saving..."
+    },
+    "TOAST": {
+      "USER_NOT_FOUND": "User not found. Please try logging in again.",
+      "INVALID_PHONE": "Please enter a valid 10-digit phone number.",
+      "UPDATE_SUCCESS": "Contact number updated successfully!",
+      "UPDATE_FAILED": "Failed to update contact number. Please try again.",
+      "SERVICE_UNAVAILABLE": "Service is temporarily unavailable. Please try again later."
+    }
   }
 }
