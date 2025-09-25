@@ -59,9 +59,9 @@ public class EntityExtractionService {
         "it", "of", "on", "or", "that", "the", "this", "to", "was", "were", "which", "with"
     );
 
-    static {
+    /* static {
         initializeEntityPatterns();
-    }
+    } */
 
     /**
      * Initialize entity patterns for all supported entity types
