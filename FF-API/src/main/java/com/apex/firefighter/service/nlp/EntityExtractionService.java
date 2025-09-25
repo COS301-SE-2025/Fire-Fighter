@@ -2,6 +2,7 @@ package com.apex.firefighter.service.nlp;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import jakarta.annotation.PostConstruct;
 
 import com.apex.firefighter.config.NLPConfig;
 import com.apex.firefighter.model.Ticket;
@@ -10,7 +11,6 @@ import com.apex.firefighter.service.ticket.TicketService;
 import com.apex.firefighter.service.UserService;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -24,7 +24,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import jakarta.annotation.PostConstruct;
 
 /**
  * Service responsible for extracting entities from natural language queries.
@@ -51,7 +50,7 @@ public class EntityExtractionService {
     private UserService userService;
 
     // Map of entity type to list of patterns
-    private static final Map<EntityType, List<EntityPattern>> ENTITY_PATTERNS = new HashMap<>();
+    private final Map<EntityType, List<EntityPattern>> ENTITY_PATTERNS = new HashMap<>();
 
     // Common stop words to ignore during entity extraction
     private static final Set<String> STOP_WORDS = Set.of(
@@ -59,15 +58,20 @@ public class EntityExtractionService {
         "it", "of", "on", "or", "that", "the", "this", "to", "was", "were", "which", "with"
     );
 
-    /* static {
+    private boolean patternsInitialized = false;
+
+    @PostConstruct
+    public void init() {
         initializeEntityPatterns();
-    } */
+    }
 
     /**
      * Initialize entity patterns for all supported entity types
      */
-    @PostConstruct
     private void initializeEntityPatterns() {
+        if (patternsInitialized) {
+            return;
+        }
         // TICKET_ID: Matches #123, ticket123
         ENTITY_PATTERNS.put(EntityType.TICKET_ID, Arrays.asList(
             new EntityPattern(1.0, Arrays.asList("#\\d+", "ticket\\d+"),
@@ -91,11 +95,16 @@ public class EntityExtractionService {
                              Pattern.compile("\\b(today|yesterday|tomorrow)\\b")))
         ));
 
-        // EMERGENCY_TYPE: Matches Dolibarr-specific types
+        // EMERGENCY_TYPE: Matches exact Dolibarr emergency types from frontend
         ENTITY_PATTERNS.put(EntityType.EMERGENCY_TYPE, Arrays.asList(
-            new EntityPattern(1.0, Arrays.asList("hr emergency", "financial emergency", "management emergency"),
-                Arrays.asList("hr", "financial", "management", "logistics"),
-                Arrays.asList(Pattern.compile("\\b(hr|financial|management|logistics)\\s+emergency\\b")))
+            new EntityPattern(1.0,
+                Arrays.asList("hr-emergency", "financial-emergency", "management-emergency", "logistics-emergency"),
+                Arrays.asList("hr", "financial", "management", "logistics", "hr-emergency", "financial-emergency", "management-emergency", "logistics-emergency"),
+                Arrays.asList(
+                    Pattern.compile("\\b(hr|financial|management|logistics)-emergency\\b"),
+                    Pattern.compile("\\b(hr|financial|management|logistics)\\s+emergency\\b"),
+                    Pattern.compile("\\b(hr|human\\s+resources|financial|payment|management|admin|logistics|supply)\\s+emergency\\b")
+                ))
         ));
 
         // USER_NAME: Matches names from database
@@ -119,13 +128,46 @@ public class EntityExtractionService {
             new EntityPattern(0.9, Arrays.asList("create ticket", "new ticket", "report"),
                 Arrays.asList("issue", "problem", "emergency", "help", "assistance"),
                 Arrays.asList(
-                    Pattern.compile("(?:create ticket|new ticket|report)\\s+(.+?)(?:\\s+(?:with|for|at|in|emergency|type|contact|duration)|$)", Pattern.CASE_INSENSITIVE),
-                    Pattern.compile("(?:issue|problem|emergency)\\s*:?\\s*(.+?)(?:\\s+(?:with|for|at|in|type|contact|duration)|$)", Pattern.CASE_INSENSITIVE),
-                    Pattern.compile("help\\s+(?:with|for)\\s+(.+?)(?:\\s+(?:with|for|at|in|type|contact|duration)|$)", Pattern.CASE_INSENSITIVE)
+                    // Pattern for emergency-type-specific tickets: "create hr-emergency ticket for [description]"
+                    Pattern.compile("(?:create|new)\\s+(?:hr-emergency|financial-emergency|management-emergency|logistics-emergency)\\s+ticket\\s+for\\s+([^,]+?)(?:\\s*,\\s*(?:duration|contact|phone)|$)", Pattern.CASE_INSENSITIVE),
+                    // Pattern for general tickets: "create ticket for [description]"
+                    Pattern.compile("(?:create|new)\\s+(?:emergency\\s+)?ticket\\s+for\\s+([^,]+?)(?:\\s*,\\s*(?:duration|contact|phone)|$)", Pattern.CASE_INSENSITIVE),
+                    // Pattern for simple format: "create ticket [description]"
+                    Pattern.compile("(?:create|new)\\s+ticket\\s+([^,]+?)(?:\\s*,\\s*(?:duration|contact|phone)|$)", Pattern.CASE_INSENSITIVE),
+                    // Pattern for issue/problem format
+                    Pattern.compile("(?:issue|problem|emergency)\\s*:?\\s*([^,]+?)(?:\\s*,\\s*(?:duration|contact|phone)|$)", Pattern.CASE_INSENSITIVE),
+                    // Pattern for help format
+                    Pattern.compile("help\\s+(?:with|for)\\s+([^,]+?)(?:\\s*,\\s*(?:duration|contact|phone)|$)", Pattern.CASE_INSENSITIVE)
                 ))
         ));
 
-        // Add more patterns later (example NUMBER, TIME, etc.) as needed
+        // DURATION: Matches time duration expressions
+        ENTITY_PATTERNS.put(EntityType.DURATION, Arrays.asList(
+            new EntityPattern(1.0,
+                Arrays.asList("15 minutes", "30 minutes", "45 minutes", "60 minutes", "90 minutes", "120 minutes"),
+                Arrays.asList("minutes", "mins", "min", "hour", "hours"),
+                Arrays.asList(
+                    Pattern.compile("\\b(\\d+)\\s*(?:minutes?|mins?)\\b"),
+                    Pattern.compile("\\b(\\d+)\\s*(?:hours?)\\b"),
+                    Pattern.compile("\\bduration\\s+(\\d+)\\s*(?:minutes?|mins?|hours?)\\b"),
+                    Pattern.compile("\\b(\\d+)\\s*(?:min|hr)\\b")
+                ))
+        ));
+
+        // PHONE: Matches phone number patterns
+        ENTITY_PATTERNS.put(EntityType.PHONE, Arrays.asList(
+            new EntityPattern(1.0,
+                Arrays.asList("contact", "phone", "number"),
+                Arrays.asList("contact", "phone", "call"),
+                Arrays.asList(
+                    Pattern.compile("\\b(?:contact|phone)\\s+(\\d{10,15})\\b"),
+                    Pattern.compile("\\b(\\d{10})\\b"), // 10-digit phone numbers
+                    Pattern.compile("\\b(\\+?\\d{1,3}[-\\s]?\\d{3,4}[-\\s]?\\d{3,4}[-\\s]?\\d{3,4})\\b"), // International format
+                    Pattern.compile("\\b(\\d{3,4}[-\\s]?\\d{6,7})\\b") // Local format
+                ))
+        ));
+
+        patternsInitialized = true;
     }
 
     private String normalizeQuery(String query) {
@@ -182,7 +224,15 @@ public class EntityExtractionService {
                             Matcher matcher = regex.matcher(query);
                             while (matcher.find()) {
                                 try {
-                                    String value = matcher.group();
+                                    // For DESCRIPTION patterns, use the captured group (group 1) instead of the full match
+                                    String value;
+                                    if (type == EntityType.DESCRIPTION && matcher.groupCount() > 0) {
+                                        value = matcher.group(1); // Get the captured group (the description part)
+                                        System.out.println("🔵 DESCRIPTION REGEX: Full match: '" + matcher.group() + "', Captured group: '" + value + "'");
+                                    } else {
+                                        value = matcher.group(); // Get the full match for other entity types
+                                    }
+
                                     if (value != null && !value.trim().isEmpty()) {
                                         Entity entity = new Entity(type, value, matcher.start(), matcher.end());
                                         entity.setConfidence(pattern.getWeight() * 0.9); // Slightly lower confidence for regex matches
@@ -246,10 +296,15 @@ public class EntityExtractionService {
     }
 
     public ExtractedEntities extractEntities(String query) {
-       if (query == null || query.trim().isEmpty()) {
+        // Ensure patterns are initialized
+        if (!patternsInitialized) {
+            initializeEntityPatterns();
+        }
+
+        if (query == null || query.trim().isEmpty()) {
            if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
                System.out.println("Debug: Empty or null query provided for entity extraction.");
-            }   
+            }
             return new ExtractedEntities();
         }
 
@@ -263,6 +318,12 @@ public class EntityExtractionService {
         entities.setEmergencyTypes(new ArrayList<>());
         entities.setNumbers(new ArrayList<>());
         entities.setTimeExpressions(new ArrayList<>());
+        entities.setDurations(new ArrayList<>());
+        entities.setPhones(new ArrayList<>());
+        entities.setDescriptions(new ArrayList<>());
+        entities.setPriorities(new ArrayList<>());
+        entities.setLocations(new ArrayList<>());
+        entities.setEmails(new ArrayList<>());
         entities.setAllEntities(new HashMap<>());
 
         for (EntityType type : ENTITY_PATTERNS.keySet()) {
@@ -282,18 +343,26 @@ public class EntityExtractionService {
                 case EMERGENCY_TYPE -> entities.setEmergencyTypes(typeEntities);
                 case NUMBER -> entities.setNumbers(typeEntities);
                 case TIME -> entities.setTimeExpressions(typeEntities);
+                case DURATION -> entities.setDurations(typeEntities);
+                case PHONE -> entities.setPhones(typeEntities);
+                case DESCRIPTION -> entities.setDescriptions(typeEntities);
+                case PRIORITY -> entities.setPriorities(typeEntities);
+                case LOCATION -> entities.setLocations(typeEntities);
+                case EMAIL -> entities.setEmails(typeEntities);
                 default -> {}
             }
         }
 
+
+
         if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
-            System.out.println("Debug: Extracted entities: " + 
+            System.out.println("Debug: Extracted entities: " +
                 entities
                 .getAllEntities()
                 .entrySet()
                 .stream()
                 .map(
-                    e -> e.getKey() + ": " + 
+                    e -> e.getKey() + ": " +
                     e.getValue().stream()
                     .map(
                             Entity::getValue
@@ -328,6 +397,8 @@ public class EntityExtractionService {
             List<Entity> entities = allEntities.getAllEntities().getOrDefault(type, Collections.emptyList());
             result.put(type, entities);
         }
+
+
 
         if (nlpConfig.isDebugEnabled()) {
             System.out.println("DEBUG: Specific entities extracted: " +
@@ -387,19 +458,72 @@ public class EntityExtractionService {
             }
         }
 
-        // Validate EMERGENCY_TYPE
-        List<String> validEmergencyTypes = Arrays.asList("hr", "financial", "management", "logistics");
+        // Validate EMERGENCY_TYPE - must match exact frontend values
+        List<String> validEmergencyTypes = Arrays.asList("hr-emergency", "financial-emergency", "management-emergency", "logistics-emergency");
         for (Entity emergency : entities.getEmergencyTypes()) {
-            String type = emergency.getValue().toLowerCase().replace(" emergency", "");
+            String type = emergency.getNormalizedValue();
+            if (type == null) {
+                type = emergency.getValue();
+            }
+            type = type.toLowerCase().trim();
+
+            // Normalize common variations to the correct format
+            if (type.equals("hr") || type.equals("hr emergency")) {
+                type = "hr-emergency";
+            } else if (type.equals("financial") || type.equals("financial emergency")) {
+                type = "financial-emergency";
+            } else if (type.equals("management") || type.equals("management emergency")) {
+                type = "management-emergency";
+            } else if (type.equals("logistics") || type.equals("logistics emergency")) {
+                type = "logistics-emergency";
+            }
+
             boolean valid = validEmergencyTypes.contains(type);
             result.getEntityValidation().put(EntityType.EMERGENCY_TYPE, valid);
             if (!valid) {
                 result.setValid(false);
-                result.getErrors().add("Invalid emergency type: " + emergency.getValue());
+                result.getErrors().add("Invalid emergency type: " + emergency.getValue() + ". Must be one of: hr-emergency, financial-emergency, management-emergency, logistics-emergency");
             }
         }
 
-        
+        // Validate DURATION
+        for (Entity duration : entities.getDurations()) {
+            String durationStr = duration.getNormalizedValue();
+            if (durationStr == null) {
+                durationStr = duration.getValue();
+            }
+
+            try {
+                int durationValue = Integer.parseInt(durationStr.replaceAll("[^0-9]", ""));
+                boolean valid = durationValue >= 15 && durationValue <= 120;
+                result.getEntityValidation().put(EntityType.DURATION, valid);
+                if (!valid) {
+                    result.setValid(false);
+                    result.getErrors().add("Duration must be between 15 and 120 minutes. Found: " + durationValue + " minutes");
+                }
+            } catch (NumberFormatException e) {
+                result.setValid(false);
+                result.getErrors().add("Invalid duration format: " + duration.getValue());
+            }
+        }
+
+        // Validate PHONE
+        for (Entity phone : entities.getPhones()) {
+            String phoneStr = phone.getNormalizedValue();
+            if (phoneStr == null) {
+                phoneStr = phone.getValue();
+            }
+
+            // Basic phone validation - must be 10+ digits
+            String digitsOnly = phoneStr.replaceAll("[^0-9]", "");
+            boolean valid = digitsOnly.length() >= 10 && digitsOnly.length() <= 15;
+            result.getEntityValidation().put(EntityType.PHONE, valid);
+            if (!valid) {
+                result.setValid(false);
+                result.getErrors().add("Invalid phone number format: " + phone.getValue());
+            }
+        }
+
         // temporary USER_NAME validation - replace with real user lookup
         for (Entity user : entities.getUserNames()) {
             Optional<Ticket> ticketOpt = ticketService.getTicketByTicketId(user.getValue());
@@ -409,6 +533,8 @@ public class EntityExtractionService {
                 result.getWarnings().add("Unknown user name: " + user.getValue());
             }
         }
+
+
 
         if (nlpConfig.isDebugEnabled()) {
             System.out.println("DEBUG: Validation result: valid=" + result.isValid() +
@@ -443,6 +569,12 @@ public class EntityExtractionService {
         private List<Entity> emergencyTypes;
         private List<Entity> numbers;
         private List<Entity> timeExpressions;
+        private List<Entity> durations;
+        private List<Entity> phones;
+        private List<Entity> descriptions;
+        private List<Entity> priorities;
+        private List<Entity> locations;
+        private List<Entity> emails;
         private Map<EntityType, List<Entity>> allEntities;
 
         public ExtractedEntities() {
@@ -498,7 +630,49 @@ public class EntityExtractionService {
             if (this.allEntities == null) this.allEntities = new HashMap<>();
             this.allEntities.put(EntityType.TIME, timeExpressions);
         }
-        
+
+        public List<Entity> getDurations() { return durations; }
+        public void setDurations(List<Entity> durations) {
+            this.durations = durations;
+            if (this.allEntities == null) this.allEntities = new HashMap<>();
+            this.allEntities.put(EntityType.DURATION, durations);
+        }
+
+        public List<Entity> getPhones() { return phones; }
+        public void setPhones(List<Entity> phones) {
+            this.phones = phones;
+            if (this.allEntities == null) this.allEntities = new HashMap<>();
+            this.allEntities.put(EntityType.PHONE, phones);
+        }
+
+        public List<Entity> getDescriptions() { return descriptions; }
+        public void setDescriptions(List<Entity> descriptions) {
+            this.descriptions = descriptions;
+            if (this.allEntities == null) this.allEntities = new HashMap<>();
+            this.allEntities.put(EntityType.DESCRIPTION, descriptions);
+        }
+
+        public List<Entity> getPriorities() { return priorities; }
+        public void setPriorities(List<Entity> priorities) {
+            this.priorities = priorities;
+            if (this.allEntities == null) this.allEntities = new HashMap<>();
+            this.allEntities.put(EntityType.PRIORITY, priorities);
+        }
+
+        public List<Entity> getLocations() { return locations; }
+        public void setLocations(List<Entity> locations) {
+            this.locations = locations;
+            if (this.allEntities == null) this.allEntities = new HashMap<>();
+            this.allEntities.put(EntityType.LOCATION, locations);
+        }
+
+        public List<Entity> getEmails() { return emails; }
+        public void setEmails(List<Entity> emails) {
+            this.emails = emails;
+            if (this.allEntities == null) this.allEntities = new HashMap<>();
+            this.allEntities.put(EntityType.EMAIL, emails);
+        }
+
         public Map<EntityType, List<Entity>> getAllEntities() { return allEntities; }
         public void setAllEntities(Map<EntityType, List<Entity>> allEntities) { this.allEntities = allEntities; }
     }
