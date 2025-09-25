@@ -12,11 +12,12 @@ import org.springframework.test.context.ActiveProfiles;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -36,6 +37,9 @@ class DolibarrDatabaseServiceTest {
     @Mock
     private PreparedStatement mockStatement;
 
+    @Mock
+    private ResultSet mockResultSet;
+
     private DolibarrDatabaseService dolibarrDatabaseService;
     
     private static final String TEST_DB_HOST = "localhost";
@@ -44,13 +48,8 @@ class DolibarrDatabaseServiceTest {
     private static final String TEST_DB_USERNAME = "test_user";
     private static final String TEST_DB_PASSWORD = "test_password";
     private static final String TEST_DB_SSL_MODE = "disable";
-    private static final String TEST_FIREFIGHTER_GROUP_ID = "5";
+    private static final Integer TEST_FIREFIGHTER_GROUP_ID = 5;
 
-    @BeforeEach
-    void setUp() {
-        // We'll test the service methods directly without creating the actual DataSource
-        // since that would require a real database connection
-    }
 
     @Test
     void constructor_WithValidParameters_ShouldCreateService() {
@@ -101,28 +100,121 @@ class DolibarrDatabaseServiceTest {
     }
 
     @Test
-    void removeUserFromFirefighterGroup_WithInvalidUserId_ShouldThrowException() {
+    void removeUserFromFirefighterGroup_WithValidIds_ShouldExecuteSuccessfully() throws SQLException {
+        // Setup mocks for this test
+        when(mockDataSource.getConnection()).thenReturn(mockConnection);
+        when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
+        when(mockStatement.executeUpdate()).thenReturn(1);
+        
+        // Create service with mocked DataSource
+        DolibarrDatabaseService service = createServiceWithMockedDataSource();
+
+        // Test with valid user ID and group ID
+        service.removeUserFromFirefighterGroup("123", TEST_FIREFIGHTER_GROUP_ID);
+
+        // Verify the SQL was executed with correct parameters
+        verify(mockStatement).setInt(1, 123);
+        verify(mockStatement).setInt(2, TEST_FIREFIGHTER_GROUP_ID);
+        verify(mockStatement).executeUpdate();
+    }
+
+    @Test
+    void removeUserFromFirefighterGroup_WithInvalidUserId_ShouldThrowException() throws SQLException {
+        // Setup mocks for this test
+        when(mockDataSource.getConnection()).thenReturn(mockConnection);
+        when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
+        
         // Create service with mocked DataSource to test the method logic
         DolibarrDatabaseService service = createServiceWithMockedDataSource();
 
         // Test with invalid user ID format
         assertThatThrownBy(() -> {
-            service.removeUserFromFirefighterGroup("invalid_user_id", 5);
+            service.removeUserFromFirefighterGroup("invalid_user_id", TEST_FIREFIGHTER_GROUP_ID);
         }).isInstanceOf(IllegalArgumentException.class)
           .hasMessageContaining("Invalid ID format");
     }
 
     @Test
-    void removeUserFromFirefighterGroup_WithInvalidGroupId_ShouldThrowException() {
+    void removeUserFromFirefighterGroup_WithNullGroupId_ShouldThrowException() {
         // Create service to test the method logic
         DolibarrDatabaseService service = createServiceWithMockedDataSource();
 
-        // Test with invalid group ID format - this would be caught by the Integer parameter type
-        // but we can test with null to simulate invalid group ID
+        // Test with null group ID
         assertThatThrownBy(() -> {
             service.removeUserFromFirefighterGroup("123", null);
-        }).isInstanceOf(IllegalArgumentException.class)
-          .hasMessageContaining("Invalid ID format");
+        }).isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    void addUserToFirefighterGroup_WithValidIds_ShouldExecuteSuccessfully() throws SQLException {
+        // Setup mocks for this test
+        when(mockDataSource.getConnection()).thenReturn(mockConnection);
+        when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
+        when(mockStatement.executeQuery()).thenReturn(mockResultSet);
+        when(mockResultSet.next()).thenReturn(true);
+        when(mockResultSet.getInt(1)).thenReturn(0);
+        when(mockStatement.executeUpdate()).thenReturn(1);
+        
+        // Create service with mocked DataSource
+        DolibarrDatabaseService service = createServiceWithMockedDataSource();
+
+        // Test with valid user ID and group ID
+        service.addUserToFirefighterGroup("123", TEST_FIREFIGHTER_GROUP_ID);
+
+        // Verify the check query was executed
+        verify(mockStatement, atLeastOnce()).setInt(1, 123);
+        verify(mockStatement, atLeastOnce()).setInt(2, TEST_FIREFIGHTER_GROUP_ID);
+        
+        // Verify the insert was executed
+        verify(mockStatement).executeUpdate();
+    }
+
+    @Test
+    void addUserToFirefighterGroup_WithUserAlreadyInGroup_ShouldSkipInsertion() throws SQLException {
+        // Setup mocks for this test
+        when(mockDataSource.getConnection()).thenReturn(mockConnection);
+        when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
+        when(mockStatement.executeQuery()).thenReturn(mockResultSet);
+        when(mockResultSet.next()).thenReturn(true);
+        when(mockResultSet.getInt(1)).thenReturn(1);
+        
+        // Create service with mocked DataSource
+        DolibarrDatabaseService service = createServiceWithMockedDataSource();
+
+        // Test with valid user ID and group ID
+        service.addUserToFirefighterGroup("123", TEST_FIREFIGHTER_GROUP_ID);
+
+        // Verify only the check query was executed, not the insert
+        verify(mockStatement, never()).executeUpdate();
+    }
+
+    @Test
+    void testConnection_WithValidConnection_ShouldReturnTrue() throws SQLException {
+        // Setup mocks for this test
+        when(mockDataSource.getConnection()).thenReturn(mockConnection);
+        when(mockConnection.isValid(5)).thenReturn(true);
+        
+        // Create service with mocked DataSource
+        DolibarrDatabaseService service = createServiceWithMockedDataSource();
+
+        boolean result = service.testConnection();
+
+        assertThat(result).isTrue();
+        verify(mockConnection).isValid(5);
+    }
+
+    @Test
+    void testConnection_WithInvalidConnection_ShouldReturnFalse() throws SQLException {
+        // Setup mocks for this test
+        when(mockDataSource.getConnection()).thenReturn(mockConnection);
+        when(mockConnection.isValid(5)).thenThrow(new SQLException("Connection failed"));
+        
+        // Create service with mocked DataSource
+        DolibarrDatabaseService service = createServiceWithMockedDataSource();
+
+        boolean result = service.testConnection();
+
+        assertThat(result).isFalse();
     }
 
     /**
@@ -138,8 +230,9 @@ class DolibarrDatabaseServiceTest {
             TEST_DB_SSL_MODE
         ) {
             @Override
-            public boolean testConnection() {
-                return true; // Mock successful connection
+            protected DataSource createDolibarrDataSource(String dbHost, String dbPort, String dolibarrDbName, 
+                                                        String dbUsername, String dbPassword, String dbSslMode) {
+                return mockDataSource;
             }
         };
     }

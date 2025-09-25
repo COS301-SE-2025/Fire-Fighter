@@ -1,5 +1,6 @@
 package com.apex.firefighter.integration.externalservices;
 
+import com.apex.firefighter.config.TestConfig;
 import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.model.User;
 import com.apex.firefighter.service.GmailEmailService;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessagePreparator;
@@ -24,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 
 @SpringBootTest
+@Import(TestConfig.class)
 @ActiveProfiles("test")
 public class GmailEmailServiceIntegrationTest {
 

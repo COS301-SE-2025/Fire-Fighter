@@ -6,6 +6,8 @@ import com.apex.firefighter.repository.TicketRepository;
 import com.apex.firefighter.repository.UserRepository;
 import com.apex.firefighter.service.NotificationService;
 import com.apex.firefighter.service.DolibarrUserGroupService;
+import com.apex.firefighter.service.AnomalyNotificationService;
+import com.apex.firefighter.service.anomaly.AnomalyDetectionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,13 +22,19 @@ public class TicketService {
     private final NotificationService notificationService;
     private final DolibarrUserGroupService dolibarrUserGroupService;
     private final UserRepository userRepository;
+    private final AnomalyDetectionService anomalyDetectionService;
+    private final AnomalyNotificationService anomalyNotificationService;
 
     @Autowired
-    public TicketService(TicketRepository ticketRepository, NotificationService notificationService, DolibarrUserGroupService dolibarrUserGroupService, UserRepository userRepository) {
+    public TicketService(TicketRepository ticketRepository, NotificationService notificationService, 
+                        DolibarrUserGroupService dolibarrUserGroupService, UserRepository userRepository,
+                        AnomalyDetectionService anomalyDetectionService, AnomalyNotificationService anomalyNotificationService) {
         this.ticketRepository = ticketRepository;
         this.notificationService = notificationService;
         this.dolibarrUserGroupService = dolibarrUserGroupService;
         this.userRepository = userRepository;
+        this.anomalyDetectionService = anomalyDetectionService;
+        this.anomalyNotificationService = anomalyNotificationService;
     }
 
     public Ticket createTicket(String description, String userId, String emergencyType, String emergencyContact, Integer duration) {
@@ -39,6 +47,26 @@ public class TicketService {
 
         Ticket savedTicket = ticketRepository.save(ticket);
 
+        
+        // Check for anomalous behavior after ticket creation and notify admins
+        try {
+            // Find the user object for notification purposes
+            Optional<User> userOpt = userRepository.findById(userId);
+            if (userOpt.isPresent()) {
+                User user = userOpt.get();
+                
+                // Use the comprehensive anomaly check and notification method
+                anomalyNotificationService.checkAndNotifyAnomalies(user, savedTicket);
+                
+                System.out.println("✅ TICKET SERVICE: Completed anomaly detection and notification for user: " + userId);
+            } else {
+                System.err.println("⚠️ TICKET SERVICE: Could not find user " + userId + " for anomaly notification");
+            }
+
+        } catch(Exception e){
+            System.err.println("⚠️ TICKET SERVICE: Failed to check for anomalies for user: " + userId + " - " + e.getMessage());
+        }
+
         // Create notification with email support
         try {
             notificationService.createTicketCreationNotification(userId, ticketId, savedTicket);
@@ -47,7 +75,7 @@ public class TicketService {
             System.err.println("⚠️ TICKET SERVICE: Failed to create notification for ticket: " + ticketId + " - " + e.getMessage());
         }
 
-        //add user to firefighter group
+        //add user to firefighter group and notify admins
         try {
             Optional<User> userOpt = userRepository.findById(userId);
             if (userOpt.isPresent()) {
@@ -55,7 +83,9 @@ public class TicketService {
                 String allocationText = (emergencyType != null && !emergencyType.isEmpty())
                     ? emergencyType + " " + description
                     : description;
-                dolibarrUserGroupService.addUserToGroup(userOpt.get().getDolibarrId(), allocationText);
+                // Pass the ticket ID to enable admin notifications
+                dolibarrUserGroupService.addUserToGroup(userOpt.get().getDolibarrId(), allocationText, ticketId);
+                System.out.println("✅ TICKET SERVICE: Added user to firefighter group and notified admins for ticket: " + ticketId);
             } else {
                 throw new RuntimeException("User not found with ID: " + userId);
             }
@@ -110,7 +140,7 @@ public class TicketService {
                 }
             }
 
-            // Remove user from firefighter group if ticket is closed
+            // Remove user from firefighter group if ticket is closed and notify admins
             try {
                 if ("Closed".equals(newStatus) || "Completed".equals(newStatus)) {
                     Optional<User> userOpt = userRepository.findById(ticket.getUserId());
@@ -119,7 +149,9 @@ public class TicketService {
                         String allocationText = (ticket.getEmergencyType() != null && !ticket.getEmergencyType().isEmpty())
                             ? ticket.getEmergencyType() + " " + ticket.getDescription()
                             : ticket.getDescription();
-                        dolibarrUserGroupService.removeUserFromGroup(userOpt.get().getDolibarrId(), allocationText);
+                        // Pass the ticket ID to enable admin notifications
+                        dolibarrUserGroupService.removeUserFromGroup(userOpt.get().getDolibarrId(), allocationText, ticketId);
+                        System.out.println("✅ TICKET SERVICE: Removed user from firefighter group and notified admins for ticket: " + ticketId);
                     } else {
                         System.err.println("⚠️ TICKET SERVICE: User not found with ID: " + ticket.getUserId());
                     }
@@ -154,7 +186,7 @@ public class TicketService {
             ticket.setStatus("Closed");
             ticketRepository.save(ticket);
 
-            // Remove user from firefighter group when ticket is automatically closed
+            // Remove user from firefighter group when ticket is automatically closed and notify admins
             try {
                 Optional<User> user = userRepository.findById(ticket.getUserId());
                 if (user.isPresent()) {
@@ -162,8 +194,9 @@ public class TicketService {
                     String allocationText = (ticket.getEmergencyType() != null && !ticket.getEmergencyType().isEmpty())
                         ? ticket.getEmergencyType() + " " + ticket.getDescription()
                         : ticket.getDescription();
-                    dolibarrUserGroupService.removeUserFromGroup(user.get().getDolibarrId(), allocationText);
-                    System.out.println("✅ AUTO-CLOSE (24h): Successfully removed user " + ticket.getUserId() + " from firefighter group for ticket: " + ticket.getTicketId());
+                    // Pass the ticket ID to enable admin notifications
+                    dolibarrUserGroupService.removeUserFromGroup(user.get().getDolibarrId(), allocationText, ticket.getTicketId());
+                    System.out.println("✅ AUTO-CLOSE (24h): Successfully removed user " + ticket.getUserId() + " from firefighter group and notified admins for ticket: " + ticket.getTicketId());
                 } else {
                     System.err.println("⚠️ AUTO-CLOSE (24h): User not found with ID: " + ticket.getUserId());
                 }

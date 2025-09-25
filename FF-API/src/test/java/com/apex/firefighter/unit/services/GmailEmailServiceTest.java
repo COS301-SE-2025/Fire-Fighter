@@ -790,4 +790,284 @@ class GmailEmailServiceTest {
         verify(mailSender).createMimeMessage();
         verify(mailSender).send(mimeMessage);
     }
+
+    // ==================== ANOMALY DETECTION EMAIL TESTS ====================
+
+    @Test
+    void sendAnomalyDetectionNotificationEmail_WithValidParameters_ShouldSendEmailSuccessfully() throws MessagingException {
+        // Arrange
+        String anomalyType = "FREQUENT_REQUESTS";
+        String anomalyDetails = "User has made 10 requests in the last hour (threshold: 5)";
+        String riskLevel = "MEDIUM";
+        
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doNothing().when(mailSender).send(any(MimeMessage.class));
+
+        // Act
+        gmailEmailService.sendAnomalyDetectionNotificationEmail(TEST_EMAIL, testUser, testTicket, anomalyType, anomalyDetails, riskLevel);
+
+        // Assert
+        verify(mailSender).createMimeMessage();
+        verify(mailSender).send(mimeMessage);
+    }
+
+    @Test
+    void sendAnomalyDetectionNotificationEmail_WithHighRiskDormantUser_ShouldSendEmailSuccessfully() throws MessagingException {
+        // Arrange
+        String anomalyType = "DORMANT_USER_ACTIVITY";
+        String anomalyDetails = "User was dormant for 30+ days, logged in at 2024-01-15T10:30:00 and made 5 actions within 15 minutes";
+        String riskLevel = "HIGH";
+        
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doNothing().when(mailSender).send(any(MimeMessage.class));
+
+        // Act
+        gmailEmailService.sendAnomalyDetectionNotificationEmail(TEST_EMAIL, testUser, testTicket, anomalyType, anomalyDetails, riskLevel);
+
+        // Assert
+        verify(mailSender).createMimeMessage();
+        verify(mailSender).send(mimeMessage);
+    }
+
+    @Test
+    void sendAnomalyDetectionNotificationEmail_WithLowRiskOffHours_ShouldSendEmailSuccessfully() throws MessagingException {
+        // Arrange
+        String anomalyType = "OFF_HOURS_ACTIVITY";
+        String anomalyDetails = "User made a request at 22:00 which is outside of regular work hours! (allowed: 7:00 AM - 17:00 PM)";
+        String riskLevel = "LOW";
+        
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doNothing().when(mailSender).send(any(MimeMessage.class));
+
+        // Act
+        gmailEmailService.sendAnomalyDetectionNotificationEmail(TEST_EMAIL, testUser, testTicket, anomalyType, anomalyDetails, riskLevel);
+
+        // Assert
+        verify(mailSender).createMimeMessage();
+        verify(mailSender).send(mimeMessage);
+    }
+
+    @Test
+    void sendAnomalyDetectionNotificationEmail_WithMailSenderException_ShouldPropagateException() throws MessagingException {
+        // Arrange
+        String anomalyType = "FREQUENT_REQUESTS";
+        String anomalyDetails = "Test anomaly details";
+        String riskLevel = "MEDIUM";
+        
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doThrow(new RuntimeException("Mail server error")).when(mailSender).send(any(MimeMessage.class));
+
+        // Act & Assert
+        assertThatThrownBy(() -> gmailEmailService.sendAnomalyDetectionNotificationEmail(TEST_EMAIL, testUser, testTicket, anomalyType, anomalyDetails, riskLevel))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessage("Mail server error");
+
+        verify(mailSender).createMimeMessage();
+        verify(mailSender).send(mimeMessage);
+    }
+
+    @Test
+    void sendAnomalyDetectionNotificationEmail_WithCreateMessageException_ShouldPropagateException() {
+        // Arrange
+        String anomalyType = "FREQUENT_REQUESTS";
+        String anomalyDetails = "Test anomaly details";
+        String riskLevel = "MEDIUM";
+        
+        when(mailSender.createMimeMessage()).thenThrow(new RuntimeException("Failed to create message"));
+
+        // Act & Assert
+        assertThatThrownBy(() -> gmailEmailService.sendAnomalyDetectionNotificationEmail(TEST_EMAIL, testUser, testTicket, anomalyType, anomalyDetails, riskLevel))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessage("Failed to create message");
+
+        verify(mailSender).createMimeMessage();
+        verify(mailSender, never()).send(any(MimeMessage.class));
+    }
+
+    @Test
+    void sendAnomalyDetectionNotificationEmail_WithNullUser_ShouldThrowException() {
+        // Arrange
+        String anomalyType = "FREQUENT_REQUESTS";
+        String anomalyDetails = "Test anomaly details";
+        String riskLevel = "MEDIUM";
+        
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+
+        // Act & Assert
+        assertThatThrownBy(() -> gmailEmailService.sendAnomalyDetectionNotificationEmail(TEST_EMAIL, null, testTicket, anomalyType, anomalyDetails, riskLevel))
+            .isInstanceOf(Exception.class);
+
+        verify(mailSender).createMimeMessage();
+    }
+
+    @Test
+    void sendAnomalyDetectionNotificationEmail_WithNullTicket_ShouldThrowException() {
+        // Arrange
+        String anomalyType = "FREQUENT_REQUESTS";
+        String anomalyDetails = "Test anomaly details";
+        String riskLevel = "MEDIUM";
+        
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+
+        // Act & Assert
+        assertThatThrownBy(() -> gmailEmailService.sendAnomalyDetectionNotificationEmail(TEST_EMAIL, testUser, null, anomalyType, anomalyDetails, riskLevel))
+            .isInstanceOf(Exception.class);
+
+        verify(mailSender).createMimeMessage();
+    }
+
+    @Test
+    void sendAnomalyDetectionNotificationEmail_WithNullAnomalyType_ShouldHandleGracefully() throws MessagingException {
+        // Arrange
+        String anomalyDetails = "Test anomaly details";
+        String riskLevel = "MEDIUM";
+        
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doNothing().when(mailSender).send(any(MimeMessage.class));
+
+        // Act
+        gmailEmailService.sendAnomalyDetectionNotificationEmail(TEST_EMAIL, testUser, testTicket, null, anomalyDetails, riskLevel);
+
+        // Assert
+        verify(mailSender).createMimeMessage();
+        verify(mailSender).send(mimeMessage);
+    }
+
+    @Test
+    void sendAnomalyDetectionNotificationEmail_WithEmptyAnomalyDetails_ShouldHandleGracefully() throws MessagingException {
+        // Arrange
+        String anomalyType = "FREQUENT_REQUESTS";
+        String anomalyDetails = "";
+        String riskLevel = "MEDIUM";
+        
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doNothing().when(mailSender).send(any(MimeMessage.class));
+
+        // Act
+        gmailEmailService.sendAnomalyDetectionNotificationEmail(TEST_EMAIL, testUser, testTicket, anomalyType, anomalyDetails, riskLevel);
+
+        // Assert
+        verify(mailSender).createMimeMessage();
+        verify(mailSender).send(mimeMessage);
+    }
+
+    @Test
+    void sendAnomalyDetectionNotificationEmail_WithUnknownAnomalyType_ShouldHandleGracefully() throws MessagingException {
+        // Arrange
+        String anomalyType = "UNKNOWN_ANOMALY_TYPE";
+        String anomalyDetails = "Unknown anomaly detected";
+        String riskLevel = "MEDIUM";
+        
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doNothing().when(mailSender).send(any(MimeMessage.class));
+
+        // Act
+        gmailEmailService.sendAnomalyDetectionNotificationEmail(TEST_EMAIL, testUser, testTicket, anomalyType, anomalyDetails, riskLevel);
+
+        // Assert
+        verify(mailSender).createMimeMessage();
+        verify(mailSender).send(mimeMessage);
+    }
+
+    @Test
+    void sendAnomalyDetectionNotificationEmail_WithUserHavingNullDepartment_ShouldHandleGracefully() throws MessagingException {
+        // Arrange
+        testUser.setDepartment(null);
+        String anomalyType = "FREQUENT_REQUESTS";
+        String anomalyDetails = "Test anomaly details";
+        String riskLevel = "MEDIUM";
+        
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doNothing().when(mailSender).send(any(MimeMessage.class));
+
+        // Act
+        gmailEmailService.sendAnomalyDetectionNotificationEmail(TEST_EMAIL, testUser, testTicket, anomalyType, anomalyDetails, riskLevel);
+
+        // Assert
+        verify(mailSender).createMimeMessage();
+        verify(mailSender).send(mimeMessage);
+    }
+
+    // ==================== SUSPICIOUS GROUP CHANGE EMAIL TESTS ====================
+
+    @Test
+    void sendSuspiciousGroupChangeNotificationEmail_WithValidParameters_ShouldSendEmailSuccessfully() throws MessagingException {
+        // Arrange
+        String ticketId = "TICKET-001";
+        String oldGroup = "HR Emergency Group";
+        String newGroup = "Financial Emergency Group";
+        String reason = "Emergency ticket creation";
+        String suspicionLevel = "HIGH";
+        
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doNothing().when(mailSender).send(any(MimeMessage.class));
+
+        // Act
+        gmailEmailService.sendSuspiciousGroupChangeNotificationEmail(TEST_EMAIL, testUser, ticketId, oldGroup, newGroup, reason, suspicionLevel);
+
+        // Assert
+        verify(mailSender).createMimeMessage();
+        verify(mailSender).send(mimeMessage);
+    }
+
+    @Test
+    void sendSuspiciousGroupChangeNotificationEmail_WithMediumRisk_ShouldSendEmailSuccessfully() throws MessagingException {
+        // Arrange
+        String ticketId = "TICKET-002";
+        String oldGroup = "Logistics Emergency Group";
+        String newGroup = "HR Emergency Group";
+        String reason = "Department transfer";
+        String suspicionLevel = "MEDIUM";
+        
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doNothing().when(mailSender).send(any(MimeMessage.class));
+
+        // Act
+        gmailEmailService.sendSuspiciousGroupChangeNotificationEmail(TEST_EMAIL, testUser, ticketId, oldGroup, newGroup, reason, suspicionLevel);
+
+        // Assert
+        verify(mailSender).createMimeMessage();
+        verify(mailSender).send(mimeMessage);
+    }
+
+    @Test
+    void sendSuspiciousGroupChangeNotificationEmail_WithNullOldGroup_ShouldHandleGracefully() throws MessagingException {
+        // Arrange
+        String ticketId = "TICKET-003";
+        String oldGroup = null;
+        String newGroup = "Management Emergency Group";
+        String reason = "New user assignment";
+        String suspicionLevel = "HIGH";
+        
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doNothing().when(mailSender).send(any(MimeMessage.class));
+
+        // Act
+        gmailEmailService.sendSuspiciousGroupChangeNotificationEmail(TEST_EMAIL, testUser, ticketId, oldGroup, newGroup, reason, suspicionLevel);
+
+        // Assert
+        verify(mailSender).createMimeMessage();
+        verify(mailSender).send(mimeMessage);
+    }
+
+    @Test
+    void sendSuspiciousGroupChangeNotificationEmail_WithMailSenderException_ShouldPropagateException() throws MessagingException {
+        // Arrange
+        String ticketId = "TICKET-004";
+        String oldGroup = "HR Emergency Group";
+        String newGroup = "Financial Emergency Group";
+        String reason = "Emergency ticket creation";
+        String suspicionLevel = "HIGH";
+        
+        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        doThrow(new RuntimeException("Mail server error")).when(mailSender).send(any(MimeMessage.class));
+
+        // Act & Assert
+        assertThatThrownBy(() -> gmailEmailService.sendSuspiciousGroupChangeNotificationEmail(TEST_EMAIL, testUser, ticketId, oldGroup, newGroup, reason, suspicionLevel))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessage("Mail server error");
+
+        verify(mailSender).createMimeMessage();
+        verify(mailSender).send(mimeMessage);
+    }
 }

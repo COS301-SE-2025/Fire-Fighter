@@ -40,4 +40,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     // Find active tickets older than a specific date
     @Query("SELECT t FROM Ticket t WHERE t.status = 'Active' AND t.dateCreated < :cutoffDate")
     List<Ticket> findActiveTicketsOlderThan(@Param("cutoffDate") LocalDateTime cutoffDate);
+
+    // Count tickets created by a user within a time period
+    @Query("SELECT COUNT(t) FROM Ticket t WHERE t.userId = :userId AND t.dateCreated >= :startTime")
+    long countTicketsByUserSince(@Param("userId") String userId, @Param("startTime") LocalDateTime startTime);
 }

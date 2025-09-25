@@ -44,15 +44,13 @@ class ResponseGenerationServiceTest {
     // ----- Helpers -----
 
     @SuppressWarnings("unchecked")
-    private Ticket mockedTicket(String id, String status, String desc, String user, String priority) {
+    private Ticket mockedTicket(String id, String status, String desc, String user, String emergencyType) {
         Ticket t = mock(Ticket.class);
         when(t.getTicketId()).thenReturn(id);
         when(t.getStatus()).thenReturn(status);
         when(t.getDescription()).thenReturn(desc);
         when(t.getUserId()).thenReturn(user);
-        //when(t.getPriority()).thenReturn(priority);
-        // optional fields:
-        when(t.getEmergencyType()).thenReturn(null);
+        when(t.getEmergencyType()).thenReturn(emergencyType);
         when(t.getDuration()).thenReturn(null);
         return t;
     }
@@ -75,7 +73,7 @@ class ResponseGenerationServiceTest {
 
     @Test
     void generateResponse_routesToTicketList() {
-        Ticket t = mockedTicket("T-1", "open", "Printer jam", "user1", "high");
+        Ticket t = mockedTicket("T-1", "open", "Printer jam", "user1", null);
         List<Ticket> tickets = List.of(t);
 
         var result = mockedResult(QueryProcessingService.QueryResultType.TICKET_LIST, tickets, Map.of());
@@ -89,19 +87,19 @@ class ResponseGenerationServiceTest {
 
     @Test
     void generateResponse_routesToTicketDetails() {
-        Ticket t = mockedTicket("T-2", "closed", "Reset router", "user2", "medium");
+        Ticket t = mockedTicket("T-2", "closed", "Reset router", "user2", "hr");
         var result = mockedResult(QueryProcessingService.QueryResultType.TICKET_DETAILS, List.of(t), Map.of());
 
         String out = service.generateResponse(result, context, prefs);
         assertTrue(out.contains("Ticket [T-2]"));
         assertTrue(out.contains("Status: closed"));
-        assertTrue(out.contains("Priority: medium"));
+        assertTrue(out.contains("Description: Reset router"));
         assertTrue(out.contains("Owner: user2"));
     }
 
     @Test
     void generateResponse_routesToOperationResult_successTicket() {
-        Ticket t = mockedTicket("T-3", "closed", "Door fixed", "user3", "low");
+        Ticket t = mockedTicket("T-3", "closed", "Door fixed", "user3", null);
         var result = mockedResult(QueryProcessingService.QueryResultType.OPERATION_RESULT, t, Map.of("success", true));
 
         String out = service.generateResponse(result, context, prefs);
@@ -154,8 +152,8 @@ class ResponseGenerationServiceTest {
 
     @Test
     void generateOperationResponse_handlesList() {
-        Ticket a = mockedTicket("A", "open", "Foo", "u", "low");
-        Ticket b = mockedTicket("B", "open", "Bar", "u", "low");
+        Ticket a = mockedTicket("A", "open", "Foo", "u", null);
+        Ticket b = mockedTicket("B", "open", "Bar", "u", null);
         var result = mockedResult(QueryProcessingService.QueryResultType.OPERATION_RESULT, List.of(a, b), Map.of("success", true));
 
         String out = service.generateOperationResponse(result, context, prefs);

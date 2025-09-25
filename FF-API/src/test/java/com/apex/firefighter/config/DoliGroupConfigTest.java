@@ -3,6 +3,8 @@ package com.apex.firefighter.config;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.Map;
@@ -10,6 +12,8 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
+@Import(TestConfig.class)
+@ActiveProfiles("test")
 @TestPropertySource(properties = {
     "DOLIBARR_FF_HR_GROUP_ID=7",
     "DOLIBARR_FF_FINANCIALS_GROUP_ID=6", 

@@ -298,10 +298,145 @@ void shouldRollbackTransaction_whenErrorOccurs() {
 | AuthenticationService | 5% | 80% |
 | AuthorizationService | 5% | 80% |
 
+## Anomaly Detection and Notification Tests (NEW)
+
+### GmailEmailServiceTest.java ✅ COMPLETED
+Comprehensive unit tests for GmailEmailService including anomaly detection email notifications.
+
+**Test Coverage Includes:**
+1. **CSV Export and Email Tests**:
+   - CSV generation with various ticket data scenarios
+   - Email sending with attachments and proper formatting
+   - Error handling for mail server failures
+
+2. **Ticket Lifecycle Email Tests**:
+   - Ticket creation notifications
+   - Ticket completion notifications  
+   - Ticket revocation notifications
+   - Five-minute warning notifications
+
+3. **Anomaly Detection Email Tests** (NEW):
+   - Frequent request anomaly notifications (MEDIUM risk)
+   - Dormant user activity notifications (HIGH risk)
+   - Off-hours activity notifications (LOW risk)
+   - Risk level classification and color coding
+   - Error handling for anomaly notification failures
+
+4. **Suspicious Group Change Email Tests** (NEW):
+   - High-risk group changes (Financial/Management groups)
+   - Medium-risk group changes (HR group transitions)
+   - Suspicious group change detection logic
+   - Enhanced security alert messaging
+
+5. **Edge Cases and Error Handling**:
+   - Null parameter handling
+   - Mail server exceptions
+   - Message creation failures
+   - Large content handling
+
+**Mock Strategy:**
+- Uses Mockito to mock JavaMailSender and MimeMessage
+- Verifies email sending without actual SMTP connections
+- Tests HTML content generation indirectly through successful sends
+
+**Key Features Tested:**
+- Professional HTML email templates with risk-based styling
+- Color-coded risk levels (RED=HIGH, ORANGE=MEDIUM, YELLOW=LOW)
+- Comprehensive user and ticket information inclusion
+- Contextual security notices based on anomaly/change type
+- Robust error handling that doesn't break core functionality
+
+### AnomalyNotificationServiceTest.java ✅ COMPLETED
+Comprehensive unit tests for AnomalyNotificationService - the central orchestrator for anomaly detection notifications.
+
+**Test Coverage Includes:**
+1. **Anomaly Detection and Notification Tests**:
+   - Multi-type anomaly detection (Frequent Requests, Dormant User, Off-Hours)
+   - Risk-based email notification sending to admin users
+   - Proper risk level classification (HIGH/MEDIUM/LOW)
+   - Integration with GmailEmailService for actual email delivery
+
+2. **Risk Level Classification Tests**:
+   - HIGH Risk: Dormant User Activity (account takeover indicators)
+   - MEDIUM Risk: Frequent Requests (potential abuse/automation)
+   - LOW Risk: Off-Hours Activity (unusual but not necessarily malicious)
+
+3. **Comprehensive Anomaly Checking**:
+   - checkAndNotifyAnomalies() method testing
+   - Multiple simultaneous anomaly detection
+   - Integration with AnomalyDetectionService
+   - Proper handling when no anomalies are detected
+
+4. **Admin User Management**:
+   - Admin user retrieval and notification
+   - Handling scenarios with no admin users
+   - Continuation of notifications when individual emails fail
+   - Admin notification count functionality
+
+5. **Error Handling and Resilience**:
+   - Database connection failures
+   - Email service exceptions
+   - Null parameter handling
+   - Service integration failures
+
+**Mock Strategy:**
+- Mocks GmailEmailService to verify email calls without sending
+- Mocks UserRepository for admin user management
+- Mocks AnomalyDetectionService for controlled anomaly scenarios
+
+**Key Testing Principles:**
+- Verifies that anomaly notifications don't break core emergency response
+- Ensures proper error isolation (email failures don't stop other notifications)
+- Validates risk-appropriate response levels
+- Tests integration between multiple detection systems
+
+### GroupChangeNotificationServiceTest.java ✅ COMPLETED
+Comprehensive unit tests for GroupChangeNotificationService - intelligent suspicious group change detection and notification.
+
+**Test Coverage Includes:**
+1. **Suspicious Group Change Detection Logic**:
+   - HIGH RISK: Changes involving Financial Emergency Group (ID: 2) or Management Emergency Group (ID: 3)
+   - MEDIUM RISK: Changes involving HR Emergency Group (ID: 1) or transitions to/from HR
+   - LOW RISK (Non-Suspicious): Changes involving only Logistics Emergency Group (ID: 4)
+
+2. **Risk-Based Notification Tests**:
+   - Validates that only suspicious changes trigger notifications
+   - Tests proper risk level classification and email content
+   - Verifies that routine Logistics-only changes are filtered out
+   - Ensures no-change scenarios don't trigger alerts
+
+3. **Group ID Resolution Tests**:
+   - Tests automatic resolution of group IDs to human-readable names
+   - Handles unknown group IDs gracefully
+   - Manages null group IDs (new user assignments or removals)
+
+4. **Admin Notification Management**:
+   - Sends notifications to all admin users for suspicious changes
+   - Handles scenarios with no admin users available
+   - Continues notifications even when individual emails fail
+   - Provides admin user count functionality
+
+5. **Error Handling and Edge Cases**:
+   - Database connection failures
+   - Email service exceptions
+   - Null parameter handling (users, tickets, groups, reasons)
+   - Repository exceptions
+
+**Security Benefits Tested:**
+- Reduces alert fatigue by filtering routine changes
+- Focuses admin attention on security-sensitive group transitions
+- Maintains oversight of high-privilege group assignments
+- Provides clear risk assessment for rapid decision-making
+
+**Mock Strategy:**
+- Mocks GmailEmailService to verify suspicious change email calls
+- Mocks UserRepository for admin user management
+- Tests the core suspicious change detection logic without external dependencies
+
 ## Next Steps
 
-1. **Create GmailEmailServiceTest** - Highest impact (2,364 missed instructions)
-2. **Create TicketQueryServiceTest** - AI service testing (1,473 missed instructions)
-3. **Create UserServiceTest** - Core functionality
-4. **Improve existing test coverage** - Add edge cases and error scenarios
-5. **Add integration points testing** - Service-to-service interactions
+1. **Create TicketQueryServiceTest** - AI service testing (1,473 missed instructions)
+2. **Create UserServiceTest** - Core functionality
+3. **Improve existing test coverage** - Add edge cases and error scenarios
+4. **Add integration points testing** - Service-to-service interactions
+5. **Expand anomaly detection test scenarios** - Additional edge cases and risk scenarios
