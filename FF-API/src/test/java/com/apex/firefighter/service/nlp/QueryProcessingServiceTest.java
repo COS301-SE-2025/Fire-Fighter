@@ -152,7 +152,7 @@ class QueryProcessingServiceTest {
         statusEntity.setNormalizedValue("closed"); // ensure lowercase normalization if needed
         entities.setTicketIds(Arrays.asList(ticketEntity));
         entities.setStatuses(Arrays.asList(statusEntity));
-        QueryProcessingService.QueryResult result = queryProcessingService.executeTicketOperation(QueryProcessingService.TicketOperation.UPDATE_TICKET_STATUS, entities, "user1", false);
+        QueryProcessingService.QueryResult result = queryProcessingService.executeTicketOperation(QueryProcessingService.TicketOperation.UPDATE_TICKET_STATUS, entities, "user1", false, "update ticket status");
 
         assertEquals(QueryProcessingService.QueryResultType.OPERATION_RESULT, result.getResultType());
         assertEquals(updated, result.getData());

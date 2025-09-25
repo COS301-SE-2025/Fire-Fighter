@@ -1,15 +1,12 @@
 package com.apex.firefighter.service.nlp;
 
-import com.apex.firefighter.model.User;
 import com.apex.firefighter.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Main Natural Language Processing service that orchestrates all NLP operations
@@ -74,21 +71,29 @@ public class NLPService {
         }
 
         try {
-            // Step 1: Recognize intent
+            // Step 1: Trust the controller's authentication
+            // The NLPController.extractAndVerifyUserId() already verified user authentication
+
+            // Step 2: Recognize intent
             if (intentRecognitionService == null) {
                 return new NLPResponse("Intent recognition service is not available", false);
             }
 
             IntentRecognitionService.Intent intent = intentRecognitionService.recognizeIntent(query);
+            System.out.println("🔵 NLP SERVICE: Intent recognition result: " + (intent != null ? intent.getType() : "null"));
+
             if (intent == null) {
                 return new NLPResponse("Failed to recognize intent from query", false);
             }
 
             if (!intent.isSuccess()) {
+                System.out.println("🔵 NLP SERVICE: Intent not successful: " + intent.getType());
                 return new NLPResponse("Could not understand query: " + query, false);
             }
 
-            // Step 2: Check permissions
+            System.out.println("🔵 NLP SERVICE: Processing intent: " + intent.getType());
+
+            // Step 3: Check permissions (simplified - trust controller authentication)
             if (userService == null) {
                 return new NLPResponse("User service is not available", false);
             }
@@ -101,14 +106,14 @@ public class NLPService {
             }
 
             if (userRole == null) {
-                userRole = "GUEST"; // Default fallback
+                userRole = "USER"; // Default to USER for authenticated users
             }
 
             if (!intentRecognitionService.isIntentAllowed(intent.getType(), userRole)) {
                 return new NLPResponse("Permission denied for intent: " + intent.getType().getCode(), false);
             }
 
-            // Step 3: Extract entities
+            // Step 4: Extract entities
             if (entityExtractionService == null) {
                 return new NLPResponse("Entity extraction service is not available", false);
             }
@@ -118,30 +123,59 @@ public class NLPService {
                 return new NLPResponse("Failed to extract entities from query", false);
             }
 
-            EntityExtractionService.ValidationResult validation = entityExtractionService.validateEntities(entities);
-            if (validation == null) {
-                return new NLPResponse("Failed to validate extracted entities", false);
-            }
-
-            if (!validation.isValid()) {
-                String errorMessage = "Invalid entities";
-                if (validation.getErrors() != null && !validation.getErrors().isEmpty()) {
-                    errorMessage += ": " + String.join(", ", validation.getErrors());
+            // Debug: Show what entities were extracted
+            System.out.println("🔵 NLP SERVICE: Extracted entities:");
+            if (entities.getAllEntities() != null) {
+                for (EntityExtractionService.EntityType type : entities.getAllEntities().keySet()) {
+                    List<EntityExtractionService.Entity> entitiesOfType = entities.getAllEntities().get(type);
+                    if (entitiesOfType != null && !entitiesOfType.isEmpty()) {
+                        System.out.println("  - " + type + ": " + entitiesOfType.size() + " items");
+                        for (EntityExtractionService.Entity entity : entitiesOfType) {
+                            System.out.println("    * '" + entity.getValue() + "' (normalized: '" + entity.getNormalizedValue() + "')");
+                        }
+                    }
                 }
-                return new NLPResponse(errorMessage, false);
             }
 
-            // Step 4: Process the query
+            // Skip entity validation for CREATE_TICKET operations since ticket ID is auto-generated
+            System.out.println("🔵 NLP SERVICE: Checking if entity validation needed for intent: " + intent.getType());
+            if (intent.getType() != IntentRecognitionService.IntentType.CREATE_TICKET) {
+                System.out.println("🔵 NLP SERVICE: Running entity validation for non-CREATE_TICKET intent");
+                EntityExtractionService.ValidationResult validation = entityExtractionService.validateEntities(entities);
+                if (validation == null) {
+                    return new NLPResponse("Failed to validate extracted entities", false);
+                }
+
+                if (!validation.isValid()) {
+                    String errorMessage = "Invalid entities";
+                    if (validation.getErrors() != null && !validation.getErrors().isEmpty()) {
+                        errorMessage += ": " + String.join(", ", validation.getErrors());
+                    }
+                    return new NLPResponse(errorMessage, false);
+                }
+            } else {
+                System.out.println("🔵 NLP SERVICE: Skipping entity validation for CREATE_TICKET intent");
+            }
+
+            // Step 5: Process the query
             if (queryProcessingService == null) {
                 return new NLPResponse("Query processing service is not available", false);
             }
 
             QueryProcessingService.QueryResult result = queryProcessingService.processQuery(intent, entities, userId, false);
+            System.out.println("🔵 NLP SERVICE: Query processing result: " + (result != null ? "success=" + result.isSuccess() : "null"));
+
             if (result == null) {
+                System.out.println("❌ NLP SERVICE: Query processing returned null");
                 return new NLPResponse("Failed to process query", false);
             }
 
-            // Step 5: Generate response
+            if (!result.isSuccess()) {
+                System.out.println("❌ NLP SERVICE: Query processing failed: " + result.getMessage());
+                return new NLPResponse(result.getMessage(), false);
+            }
+
+            // Step 6: Generate response
             if (responseGenerationService == null) {
                 return new NLPResponse("Response generation service is not available", false);
             }
@@ -180,31 +214,9 @@ public class NLPService {
         }
 
         try {
-            // Step 1: Verify admin privileges
-            if (userService == null) {
-                return new NLPResponse("User service is not available", false);
-            }
-
-            String userRole;
-            try {
-                userRole = userService.getUserRole(userId);
-            } catch (Exception e) {
-                return new NLPResponse("Failed to retrieve user role for admin verification: " + e.getMessage(), false);
-            }
-
-            // Check admin privileges using multiple methods for robustness
-            boolean isAdmin = "ADMIN".equals(userRole);
-            if (!isAdmin) {
-                try {
-                    isAdmin = userService.hasRole(userId, "ADMIN");
-                } catch (Exception e) {
-                    // If hasRole method fails, fall back to role check only
-                }
-            }
-
-            if (!isAdmin) {
-                return new NLPResponse("Access denied: Admin privileges required", false);
-            }
+            // Step 1: Trust the controller's admin verification
+            // The NLPController.extractAndVerifyAdminUser() already verified admin privileges
+            // This follows the same pattern as other services that trust controller authentication
 
             // Step 2: Recognize intent
             if (intentRecognitionService == null) {
@@ -230,17 +242,20 @@ public class NLPService {
                 return new NLPResponse("Failed to extract entities from admin query", false);
             }
 
-            EntityExtractionService.ValidationResult validation = entityExtractionService.validateEntities(entities);
-            if (validation == null) {
-                return new NLPResponse("Failed to validate extracted entities", false);
-            }
-
-            if (!validation.isValid()) {
-                String errorMessage = "Invalid entities in admin query";
-                if (validation.getErrors() != null && !validation.getErrors().isEmpty()) {
-                    errorMessage += ": " + String.join(", ", validation.getErrors());
+            // Skip entity validation for CREATE_TICKET operations since ticket ID is auto-generated
+            if (intent.getType() != IntentRecognitionService.IntentType.CREATE_TICKET) {
+                EntityExtractionService.ValidationResult validation = entityExtractionService.validateEntities(entities);
+                if (validation == null) {
+                    return new NLPResponse("Failed to validate extracted entities", false);
                 }
-                return new NLPResponse(errorMessage, false);
+
+                if (!validation.isValid()) {
+                    String errorMessage = "Invalid entities in admin query";
+                    if (validation.getErrors() != null && !validation.getErrors().isEmpty()) {
+                        errorMessage += ": " + String.join(", ", validation.getErrors());
+                    }
+                    return new NLPResponse(errorMessage, false);
+                }
             }
 
             // Step 4: Process the query with admin privileges

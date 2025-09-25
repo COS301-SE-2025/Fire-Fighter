@@ -46,9 +46,31 @@ public class IntentRecognitionService {
 
         INTENT_PATTERNS.put(IntentType.SHOW_COMPLETED_TICKETS, Arrays.asList(
             new IntentPattern(1.0,
-                Arrays.asList("show completed tickets", "completed tickets", "finished tickets"),
+                Arrays.asList("show completed tickets", "completed tickets", "finished tickets", "show closed tickets", "closed tickets"),
                 Arrays.asList("completed", "finished", "done", "closed"),
-                Arrays.asList(Pattern.compile("\\bcompleted\\s+tickets\\b"), Pattern.compile("\\bfinished\\s+tickets\\b"))
+                Arrays.asList(
+                    Pattern.compile("\\bcompleted\\s+tickets\\b"),
+                    Pattern.compile("\\bfinished\\s+tickets\\b"),
+                    Pattern.compile("\\bclosed\\s+tickets\\b"),
+                    Pattern.compile("\\bshow.*closed.*tickets\\b"),
+                    Pattern.compile("\\bmy.*closed.*tickets\\b")
+                )
+            )
+        ));
+
+        INTENT_PATTERNS.put(IntentType.SHOW_REJECTED_TICKETS, Arrays.asList(
+            new IntentPattern(1.0,
+                Arrays.asList("show rejected tickets", "rejected tickets", "denied tickets", "show denied tickets", "revoked tickets", "show revoked tickets"),
+                Arrays.asList("rejected", "denied", "declined", "refused", "revoked"),
+                Arrays.asList(
+                    Pattern.compile("\\brejected\\s+tickets\\b"),
+                    Pattern.compile("\\bdenied\\s+tickets\\b"),
+                    Pattern.compile("\\brevoked\\s+tickets\\b"),
+                    Pattern.compile("\\bshow.*rejected.*tickets\\b"),
+                    Pattern.compile("\\bshow.*revoked.*tickets\\b"),
+                    Pattern.compile("\\bmy.*rejected.*tickets\\b"),
+                    Pattern.compile("\\bmy.*revoked.*tickets\\b")
+                )
             )
         ));
 
@@ -293,6 +315,8 @@ public class IntentRecognitionService {
             }
         }
 
+
+
         // Debug logging
         if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
             System.out.println("Debug: Pattern score for intent " + pattern.getExactPhrases() +
@@ -334,7 +358,7 @@ public class IntentRecognitionService {
             .map(entry -> {
                 Intent intent = new Intent(entry.getKey(), entry.getValue(), query);
                 if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
-                    System.out.println("Debug: Recognized intent " + intent.getType().getCode() + " with confidence " + entry.getValue()); 
+                    System.out.println("Debug: Recognized intent " + intent.getType().getCode() + " with confidence " + entry.getValue());
                 }
                 return intent;
             })
@@ -346,7 +370,7 @@ public class IntentRecognitionService {
             if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
                 System.out.println("Debug: No intents recognized above threshold (" + threshold + ")");
             }
-            return Collections.singletonList(new Intent(IntentType.UNKNOWN, 0, 
+            return Collections.singletonList(new Intent(IntentType.UNKNOWN, 0,
                 "No intents recognized above threshold (" + threshold + ")"));
         }
         return intents;
@@ -372,6 +396,7 @@ public class IntentRecognitionService {
             IntentType.SHOW_TICKETS,
             IntentType.SHOW_ACTIVE_TICKETS,
             IntentType.SHOW_COMPLETED_TICKETS,
+            IntentType.SHOW_REJECTED_TICKETS,
             IntentType.SEARCH_TICKETS,
             IntentType.GET_TICKET_DETAILS,
             IntentType.CREATE_TICKET,
@@ -388,6 +413,10 @@ public class IntentRecognitionService {
         String normalizedRole = userRole.trim().toUpperCase();
         List<IntentType> supportedIntents = roleIntents.getOrDefault(normalizedRole, Collections.emptyList());
     
+        if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
+            System.out.println("Debug: Supported intents for role " + normalizedRole + ": " +
+                supportedIntents.stream().map(IntentType::getCode).collect(Collectors.joining(", ")));
+        }
         if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
             System.out.println("Debug: Supported intents for role " + normalizedRole + ": " +
                 supportedIntents.stream().map(IntentType::getCode).collect(Collectors.joining(", ")));
@@ -472,6 +501,7 @@ public class IntentRecognitionService {
         SHOW_TICKETS("show_tickets", "Display user's tickets"),
         SHOW_ACTIVE_TICKETS("show_active_tickets", "Display active tickets"),
         SHOW_COMPLETED_TICKETS("show_completed_tickets", "Display completed tickets"),
+        SHOW_REJECTED_TICKETS("show_rejected_tickets", "Display rejected tickets"),
         SEARCH_TICKETS("search_tickets", "Search for specific tickets"),
         GET_TICKET_DETAILS("get_ticket_details", "Get details of a specific ticket"),
         

@@ -3,7 +3,6 @@ package com.apex.firefighter.service.nlp;
 import com.apex.firefighter.config.NLPConfig;
 import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.service.ticket.TicketService;
-import com.apex.firefighter.service.nlp.IntentRecognitionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +19,6 @@ public class QueryProcessingService {
     private TicketService ticketService;
 
     @Autowired
-    private EntityExtractionService entityExtractor;
-
-    @Autowired
     private NLPConfig nlpConfig;
 
     @Autowired
@@ -31,10 +27,6 @@ public class QueryProcessingService {
     // Setter methods for testing
     public void setTicketService(TicketService ticketService) {
         this.ticketService = ticketService;
-    }
-
-    public void setEntityExtractor(EntityExtractionService entityExtractor) {
-        this.entityExtractor = entityExtractor;
     }
 
     public void setNlpConfig(NLPConfig nlpConfig) {
@@ -73,6 +65,7 @@ public class QueryProcessingService {
         }
 
         try {
+            System.out.println("🔵 QUERY PROCESSING: Processing intent: " + intent.getType());
             switch (intent.getType()) {
                 // ----------- Ticket Queries -----------
                 case SHOW_ACTIVE_TICKETS:
@@ -81,6 +74,10 @@ public class QueryProcessingService {
 
                 case SHOW_COMPLETED_TICKETS:
                     return executeTicketQuery(TicketQueryType.COMPLETED_TICKETS,
+                            buildQueryFilters(entities), userId, isAdmin);
+
+                case SHOW_REJECTED_TICKETS:
+                    return executeTicketQuery(TicketQueryType.REJECTED_TICKETS,
                             buildQueryFilters(entities), userId, isAdmin);
 
                 case SHOW_ALL_TICKETS:
@@ -99,19 +96,19 @@ public class QueryProcessingService {
                 // ----------- Ticket Operations -----------
                 case CREATE_TICKET:
                     return executeTicketOperation(TicketOperation.CREATE_TICKET,
-                            entities, userId, isAdmin);
+                            entities, userId, isAdmin, intent.getOriginalQuery());
 
                 case CLOSE_TICKET:
                     return executeTicketOperation(TicketOperation.CLOSE_TICKET,
-                            entities, userId, isAdmin);
+                            entities, userId, isAdmin, intent.getOriginalQuery());
 
                 case UPDATE_TICKET_STATUS:
                     return executeTicketOperation(TicketOperation.UPDATE_TICKET_STATUS,
-                            entities, userId, isAdmin);
+                            entities, userId, isAdmin, intent.getOriginalQuery());
 
                 case ASSIGN_TICKET:
                     return executeTicketOperation(TicketOperation.ASSIGN_TICKET,
-                            entities, userId, isAdmin);
+                            entities, userId, isAdmin, intent.getOriginalQuery());
 
                 // case ADD_COMMENT:
                 //     return executeTicketOperation(TicketOperation.ADD_COMMENT,
@@ -123,6 +120,7 @@ public class QueryProcessingService {
 
                 // ----------- Fallback -----------
                 default:
+                    System.out.println("❌ QUERY PROCESSING: Unsupported intent reached default case: " + intent.getType().getCode());
                     return new QueryResult(false, "Unsupported intent: " + intent.getType().getCode(), null, QueryResultType.ERROR);
             }
         } catch (Exception e) {
@@ -202,6 +200,17 @@ public class QueryProcessingService {
                     }
                 }
 
+                case REJECTED_TICKETS: {
+                    if (isAdmin) {
+                        List<Ticket> rejected = ticketService.getTicketsByStatus("Rejected");
+                        return new QueryResult(QueryResultType.TICKET_LIST, rejected, rejected.size());
+                    } else {
+                        List<Ticket> mine = ticketService.getTicketsByUserId(userId);
+                        List<Ticket> rejected = filterByStatuses(mine, "Rejected");
+                        return new QueryResult(QueryResultType.TICKET_LIST, rejected, rejected.size());
+                    }
+                }
+
                 case SEARCH_TICKETS: {
                     // Start from scope (admin = all, user = own)
                     List<Ticket> base = isAdmin ? ticketService.getAllTickets()
@@ -278,7 +287,8 @@ public class QueryProcessingService {
     public QueryResult executeTicketOperation(TicketOperation operation,
                                           EntityExtractionService.ExtractedEntities entities,
                                           String userId,
-                                          boolean isAdmin) {
+                                          boolean isAdmin,
+                                          String originalQuery) {
         try {
             // Permission gate
             if (!validateUserOperation(operation, entities, userId, isAdmin)) {
@@ -287,18 +297,70 @@ public class QueryProcessingService {
 
             switch (operation) {
                 case CREATE_TICKET: {
-                    // Extract description from the query - try multiple approaches
+                    // Extract and validate required information
                     String description = extractDescriptionFromEntities(entities);
-                    if (description == null || description.isEmpty()) {
-                        description = "Emergency assistance request";
+
+                    // If no description found in entities, try to extract from the original query
+                    if ((description == null || description.trim().isEmpty()) && originalQuery != null) {
+                        description = extractDescriptionFromQuery(originalQuery);
                     }
 
-                    String emergencyType    = firstNormalized(entities, EntityExtractionService.EntityType.EMERGENCY_TYPE);
-                    String emergencyContact = firstNormalized(entities, EntityExtractionService.EntityType.PHONE);
-                    Integer duration        = parseIntegerSafe(firstNormalized(entities, EntityExtractionService.EntityType.DURATION));
+                    String durationStr = firstNormalized(entities, EntityExtractionService.EntityType.DURATION);
+                    Integer duration = parseIntegerSafe(durationStr);
+                    String emergencyType = firstNormalized(entities, EntityExtractionService.EntityType.EMERGENCY_TYPE);
 
+                    // Debug: Show extracted values for validation
+                    System.out.println("🔵 CREATE_TICKET: Extracted values:");
+                    System.out.println("  - Description: '" + description + "'");
+                    System.out.println("  - Duration String: '" + durationStr + "'");
+                    System.out.println("  - Duration Parsed: " + duration);
+                    System.out.println("  - Emergency Type: '" + emergencyType + "'");
+
+                    // Validate required fields
+                    List<String> missingFields = new ArrayList<>();
+
+                    if (description == null || description.trim().isEmpty()) {
+                        missingFields.add("reason/description for the emergency");
+                    }
+
+                    if (duration == null) {
+                        missingFields.add("duration (15-120 minutes)");
+                    } else if (duration < 15 || duration > 120) {
+                        return new QueryResult(false, "Duration must be between 15 and 120 minutes. You specified: " + duration + " minutes.");
+                    }
+
+                    // Emergency type is REQUIRED - determines ERP usergroup assignment
+                    if (emergencyType == null || emergencyType.trim().isEmpty()) {
+                        missingFields.add("emergency type (hr-emergency, financial-emergency, management-emergency, or logistics-emergency)");
+                    } else {
+                        // Validate emergency type is one of the allowed values
+                        String[] validTypes = {"hr-emergency", "financial-emergency", "management-emergency", "logistics-emergency"};
+                        boolean isValidType = false;
+                        for (String validType : validTypes) {
+                            if (validType.equals(emergencyType.toLowerCase().trim())) {
+                                isValidType = true;
+                                break;
+                            }
+                        }
+                        if (!isValidType) {
+                            return new QueryResult(false, "Invalid emergency type: '" + emergencyType + "'. Must be one of: hr-emergency, financial-emergency, management-emergency, logistics-emergency");
+                        }
+                    }
+
+                    // If required fields are missing, provide helpful guidance
+                    if (!missingFields.isEmpty()) {
+                        String guidance = "To create an emergency ticket, I need the following information: " +
+                                        String.join(", ", missingFields) + ". " +
+                                        "Example: 'create hr-emergency ticket for office fire, duration 30 minutes, contact 555-1234'";
+                        return new QueryResult(false, guidance);
+                    }
+
+                    // Extract optional fields
+                    String emergencyContact = firstNormalized(entities, EntityExtractionService.EntityType.PHONE);
+
+                    // Create the ticket with validated information
                     Ticket created = ticketService.createTicket(
-                            description, userId, emergencyType, emergencyContact, duration);
+                            description.trim(), userId, emergencyType, emergencyContact, duration);
                     return new QueryResult(QueryResultType.OPERATION_RESULT, created, 1);
                 }
 
@@ -391,7 +453,12 @@ public class QueryProcessingService {
     }
 
     private Integer parseIntegerSafe(String s) {
-        try { return (s == null) ? null : Integer.parseInt(s); }
+        if (s == null) return null;
+        try {
+            // Extract just the numbers from the string (for cases like "15 minutes")
+            String numbersOnly = s.replaceAll("[^0-9]", "");
+            return numbersOnly.isEmpty() ? null : Integer.parseInt(numbersOnly);
+        }
         catch (NumberFormatException nfe) { return null; }
     }
 
@@ -409,11 +476,68 @@ public class QueryProcessingService {
         return null;
     }
 
-    private String listFirstNormOrVal(List<EntityExtractionService.Entity> list) {
-        if (list == null || list.isEmpty()) return null;
-        String v = list.get(0).getNormalizedValue();
-        return (v == null || v.isEmpty()) ? list.get(0).getValue() : v;
+    /**
+     * Extract description from the original query text for ticket creation
+     * This is a fallback when entity extraction doesn't capture the description properly
+     */
+    private String extractDescriptionFromQuery(String originalQuery) {
+        if (originalQuery == null || originalQuery.trim().isEmpty()) {
+            return null;
+        }
+
+        String query = originalQuery.toLowerCase().trim();
+
+        // Remove common ticket creation phrases to extract the actual description
+        // Order matters - more specific patterns first
+        String[] prefixesToRemove = {
+            "create hr-emergency ticket for", "create financial-emergency ticket for",
+            "create management-emergency ticket for", "create logistics-emergency ticket for",
+            "new hr-emergency ticket for", "new financial-emergency ticket for",
+            "new management-emergency ticket for", "new logistics-emergency ticket for",
+            "create emergency ticket for", "new emergency ticket for",
+            "create ticket for", "new ticket for",
+            "hr-emergency ticket for", "financial-emergency ticket for",
+            "management-emergency ticket for", "logistics-emergency ticket for",
+            "emergency ticket for", "ticket for"
+        };
+
+        String description = query;
+        System.out.println("🔵 DESCRIPTION FALLBACK: Original query: '" + query + "'");
+
+        for (String prefix : prefixesToRemove) {
+            if (description.startsWith(prefix)) {
+                description = description.substring(prefix.length()).trim();
+                System.out.println("🔵 DESCRIPTION FALLBACK: After removing prefix '" + prefix + "': '" + description + "'");
+                break;
+            }
+        }
+
+        // Remove trailing information (duration, contact, etc.)
+        String[] suffixesToRemove = {
+            ", duration", " duration", ", contact", " contact", ", phone", " phone"
+        };
+
+        for (String suffix : suffixesToRemove) {
+            int index = description.indexOf(suffix);
+            if (index > 0) {
+                description = description.substring(0, index).trim();
+                System.out.println("🔵 DESCRIPTION FALLBACK: After removing suffix '" + suffix + "': '" + description + "'");
+                break;
+            }
+        }
+
+        // If we removed everything or it's too short, return null
+        if (description.isEmpty() || description.length() < 3) {
+            System.out.println("🔵 DESCRIPTION FALLBACK: Description too short or empty, returning null");
+            return null;
+        }
+
+        // Clean up and return
+        System.out.println("🔵 DESCRIPTION FALLBACK: Final description: '" + description.trim() + "'");
+        return description.trim();
     }
+
+
 
     /**
      * Extract description text from entities or fall back to extracting from query text
@@ -428,6 +552,7 @@ public class QueryProcessingService {
 
         // First try to get description from DESCRIPTION entity type
         String description = firstNormalized(entities, EntityExtractionService.EntityType.DESCRIPTION);
+        System.out.println("🔵 DESCRIPTION EXTRACTION: From entities: '" + description + "'");
         if (description != null && !description.trim().isEmpty()) {
             return description.trim();
         }
@@ -453,6 +578,7 @@ public class QueryProcessingService {
             }
         }
 
+        System.out.println("🔵 DESCRIPTION EXTRACTION: No description found in entities, returning null");
         return description;
     }
 
@@ -660,6 +786,7 @@ public class QueryProcessingService {
         USER_TICKETS("user_tickets", "Get tickets for a specific user"),
         ACTIVE_TICKETS("active_tickets", "Get all active tickets"),
         COMPLETED_TICKETS("completed_tickets", "Get completed tickets"),
+        REJECTED_TICKETS("rejected_tickets", "Get rejected tickets"),
         SEARCH_TICKETS("search_tickets", "Search tickets by criteria"),
         TICKET_DETAILS("ticket_details", "Get details of specific ticket"),
         SYSTEM_STATS("system_stats", "Get system statistics"),
