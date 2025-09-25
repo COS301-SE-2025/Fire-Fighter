@@ -47,7 +47,7 @@ public class EntityExtractionService {
     private TicketService ticketService;
 
     @Autowired
-    private static UserService userService;
+    private UserService userService;
 
     // Map of entity type to list of patterns
     private static final Map<EntityType, List<EntityPattern>> ENTITY_PATTERNS = new HashMap<>();
