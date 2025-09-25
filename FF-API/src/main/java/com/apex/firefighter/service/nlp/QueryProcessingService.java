@@ -43,7 +43,11 @@ public class QueryProcessingService {
                                    boolean isAdmin) {
         
         if (intent == null || intent.getType() == IntentRecognitionService.IntentType.UNKNOWN) {
-            return new QueryResult(false, "Sorry, I couldn't understand your request.");
+            return new QueryResult(false, "Invalid or unknown intent", null, QueryResultType.ERROR);
+        }
+
+        if (!intentRecognitionService.isIntentAllowed(intent.getType(), isAdmin ? "ADMIN" : "USER")) {
+            return new QueryResult(false, "Permission denied for intent: " + intent.getType().getCode(), null, QueryResultType.ERROR); 
         }
 
         switch (intent.getType()) {
