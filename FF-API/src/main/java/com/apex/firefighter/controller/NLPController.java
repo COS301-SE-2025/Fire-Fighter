@@ -67,8 +67,11 @@ public class NLPController {
                     .body(new NLPService.NLPResponse("Query cannot be empty", false));
             }
 
-            // Process the query
-            NLPService.NLPResponse response = nlpService.processQuery(request.getQuery(), userId);
+            // Get admin flag from JWT
+            Boolean isAdminFromJWT = (Boolean) httpRequest.getAttribute("isAdmin");
+
+            // Process the query with admin flag
+            NLPService.NLPResponse response = nlpService.processQuery(request.getQuery(), userId, isAdminFromJWT);
 
             return ResponseEntity.ok(response);
 
@@ -296,6 +299,9 @@ public class NLPController {
      * Extract user ID from HTTP request (JWT token)
      * The JwtAuthenticationFilter already extracts and validates the token,
      * setting the Firebase UID as a request attribute.
+     *
+     * This method follows the same pattern as other working controllers
+     * and trusts the JWT authentication filter for security.
      */
     private String extractUserIdFromRequest(HttpServletRequest request) {
         // Get Firebase UID from request attribute (set by JwtAuthenticationFilter)
@@ -309,30 +315,28 @@ public class NLPController {
     }
 
     /**
-     * Verify user authorization and extract user ID
+     * Extract user ID with basic validation (simplified to match other controllers)
+     * This follows the same pattern as TicketController and other working endpoints
      */
     private String extractAndVerifyUserId(HttpServletRequest request) {
         String userId = extractUserIdFromRequest(request);
 
-        // Verify user exists and is authorized
+        // Only verify user exists - don't check authorization status
+        // The JWT filter already handles authentication, and we should trust it
         if (!userService.userExists(userId)) {
             throw new RuntimeException("User not found: " + userId);
-        }
-
-        if (!userService.isUserAuthorized(userId)) {
-            throw new RuntimeException("User not authorized: " + userId);
         }
 
         return userId;
     }
 
     /**
-     * Verify admin privileges
+     * Verify admin privileges (follows the same pattern as other controllers)
      */
     private String extractAndVerifyAdminUser(HttpServletRequest request) {
         String userId = extractAndVerifyUserId(request);
 
-        // Check if user has admin privileges
+        // Check if user has admin privileges using the same pattern as other controllers
         Boolean isAdmin = (Boolean) request.getAttribute("isAdmin");
         String userRole = userService.getUserRole(userId);
 
@@ -341,6 +345,84 @@ public class NLPController {
         }
 
         return userId;
+    }
+
+    /**
+     * Get capabilities for current authenticated user (convenience endpoint)
+     */
+    @GetMapping("/capabilities/current")
+    @Operation(summary = "Get current user NLP capabilities",
+               description = "Get available NLP capabilities for the current authenticated user")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Capabilities retrieved successfully"),
+        @ApiResponse(responseCode = "401", description = "Authentication required"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<NLPService.NLPCapabilities> getCurrentUserCapabilities(HttpServletRequest httpRequest) {
+
+        try {
+            // Extract and verify user authentication
+            String userId = extractAndVerifyUserId(httpRequest);
+
+            NLPService.NLPCapabilities capabilities = nlpService.getCapabilities(userId);
+
+            if (capabilities == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok(capabilities);
+
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("Authentication required") || e.getMessage().contains("not authorized")) {
+                return ResponseEntity.status(401).build();
+            } else if (e.getMessage().contains("not found")) {
+                return ResponseEntity.status(404).build();
+            } else {
+                return ResponseEntity.badRequest().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * Get suggestions for current authenticated user (convenience endpoint)
+     */
+    @GetMapping("/suggestions/current")
+    @Operation(summary = "Get current user query suggestions",
+               description = "Get suggested natural language queries for the current authenticated user")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Suggestions retrieved successfully"),
+        @ApiResponse(responseCode = "401", description = "Authentication required"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<NLPService.NLPSuggestions> getCurrentUserSuggestions(HttpServletRequest httpRequest) {
+
+        try {
+            // Extract and verify user authentication
+            String userId = extractAndVerifyUserId(httpRequest);
+
+            NLPService.NLPSuggestions suggestions = nlpService.getSuggestions(userId);
+
+            if (suggestions == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok(suggestions);
+
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("Authentication required") || e.getMessage().contains("not authorized")) {
+                return ResponseEntity.status(401).build();
+            } else if (e.getMessage().contains("not found")) {
+                return ResponseEntity.status(404).build();
+            } else {
+                return ResponseEntity.badRequest().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     /**

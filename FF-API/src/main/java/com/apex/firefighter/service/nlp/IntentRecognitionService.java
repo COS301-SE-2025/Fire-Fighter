@@ -46,9 +46,31 @@ public class IntentRecognitionService {
 
         INTENT_PATTERNS.put(IntentType.SHOW_COMPLETED_TICKETS, Arrays.asList(
             new IntentPattern(1.0,
-                Arrays.asList("show completed tickets", "completed tickets", "finished tickets"),
+                Arrays.asList("show completed tickets", "completed tickets", "finished tickets", "show closed tickets", "closed tickets"),
                 Arrays.asList("completed", "finished", "done", "closed"),
-                Arrays.asList(Pattern.compile("\\bcompleted\\s+tickets\\b"), Pattern.compile("\\bfinished\\s+tickets\\b"))
+                Arrays.asList(
+                    Pattern.compile("\\bcompleted\\s+tickets\\b"),
+                    Pattern.compile("\\bfinished\\s+tickets\\b"),
+                    Pattern.compile("\\bclosed\\s+tickets\\b"),
+                    Pattern.compile("\\bshow.*closed.*tickets\\b"),
+                    Pattern.compile("\\bmy.*closed.*tickets\\b")
+                )
+            )
+        ));
+
+        INTENT_PATTERNS.put(IntentType.SHOW_REJECTED_TICKETS, Arrays.asList(
+            new IntentPattern(1.0,
+                Arrays.asList("show rejected tickets", "rejected tickets", "denied tickets", "show denied tickets", "revoked tickets", "show revoked tickets"),
+                Arrays.asList("rejected", "denied", "declined", "refused", "revoked"),
+                Arrays.asList(
+                    Pattern.compile("\\brejected\\s+tickets\\b"),
+                    Pattern.compile("\\bdenied\\s+tickets\\b"),
+                    Pattern.compile("\\brevoked\\s+tickets\\b"),
+                    Pattern.compile("\\bshow.*rejected.*tickets\\b"),
+                    Pattern.compile("\\bshow.*revoked.*tickets\\b"),
+                    Pattern.compile("\\bmy.*rejected.*tickets\\b"),
+                    Pattern.compile("\\bmy.*revoked.*tickets\\b")
+                )
             )
         ));
 
@@ -137,9 +159,9 @@ public class IntentRecognitionService {
 
         INTENT_PATTERNS.put(IntentType.EXPORT_TICKETS, Arrays.asList(
             new IntentPattern(1.0,
-                Arrays.asList("export tickets", "download tickets", "export data"),
+                Arrays.asList("export tickets", "download tickets", "export data", "export"),
                 Arrays.asList("export", "download", "csv", "excel"),
-                Arrays.asList(Pattern.compile("export.*tickets"), Pattern.compile("download.*data"))
+                Arrays.asList(Pattern.compile("export.*tickets"), Pattern.compile("download.*data"), Pattern.compile("^export$"))
             )
         ));
 
@@ -159,6 +181,55 @@ public class IntentRecognitionService {
                 Arrays.asList(Pattern.compile("\\bhelp\\b"), Pattern.compile("\\bhow\\s+to\\b"))
             )
         ));
+
+        INTENT_PATTERNS.put(IntentType.SHOW_RECENT_ACTIVITY, Arrays.asList(
+            new IntentPattern(1.0,
+                Arrays.asList("show recent activity", "recent activity", "latest activity", "recent changes"),
+                Arrays.asList("recent", "latest", "activity", "changes"),
+                Arrays.asList(
+                    Pattern.compile("\\brecent\\s+activity\\b"),
+                    Pattern.compile("\\blatest\\s+activity\\b"),
+                    Pattern.compile("\\bshow.*recent.*activity\\b")
+                )
+            )
+        ));
+
+        INTENT_PATTERNS.put(IntentType.SHOW_EMERGENCY_TYPES, Arrays.asList(
+            new IntentPattern(1.0,
+                Arrays.asList("what emergency types are available", "emergency types", "available emergency types", "list emergency types"),
+                Arrays.asList("emergency", "types", "available"),
+                Arrays.asList(
+                    Pattern.compile("\\bemergency\\s+types\\b"),
+                    Pattern.compile("\\bavailable.*emergency.*types\\b"),
+                    Pattern.compile("\\bwhat.*emergency.*types\\b")
+                )
+            )
+        ));
+
+        INTENT_PATTERNS.put(IntentType.REQUEST_EMERGENCY_ACCESS_HELP, Arrays.asList(
+            new IntentPattern(1.0,
+                Arrays.asList("how do i request emergency access", "request emergency access", "emergency access help"),
+                Arrays.asList("request", "emergency", "access", "how"),
+                Arrays.asList(
+                    Pattern.compile("\\brequest.*emergency.*access\\b"),
+                    Pattern.compile("\\bhow.*request.*emergency\\b"),
+                    Pattern.compile("\\bemergency.*access.*help\\b")
+                )
+            )
+        ));
+
+        INTENT_PATTERNS.put(IntentType.SHOW_MY_ACCESS_LEVEL, Arrays.asList(
+            new IntentPattern(1.0,
+                Arrays.asList("what elevated access do i currently have", "my access level", "current access", "my permissions"),
+                Arrays.asList("elevated", "access", "permissions", "level"),
+                Arrays.asList(
+                    Pattern.compile("\\belevated.*access\\b"),
+                    Pattern.compile("\\bmy.*access.*level\\b"),
+                    Pattern.compile("\\bcurrent.*access\\b"),
+                    Pattern.compile("\\bmy.*permissions\\b")
+                )
+            )
+        ));
     }
 
     /**
@@ -168,35 +239,121 @@ public class IntentRecognitionService {
      * @return Intent object containing the recognized intent and confidence score
      */
     public Intent recognizeIntent(String query) {
-        if (query == null || query.trim().isEmpty()) {
-            return new Intent(IntentType.UNKNOWN, 0.0, "Empty query");
+        try {
+            // Input validation
+            if (query == null || query.trim().isEmpty()) {
+                return createUnknownIntent("Empty or null query provided");
+            }
+
+            // Normalize the query
+            String normalizedQuery = normalizeQuery(query);
+            if (normalizedQuery.isEmpty()) {
+                return createUnknownIntent("Query became empty after normalization");
+            }
+
+            // Calculate scores for each intent type
+            Map<IntentType, Double> intentScores = calculateIntentScores(normalizedQuery);
+            if (intentScores.isEmpty()) {
+                return createUnknownIntent("No intent patterns could be evaluated");
+            }
+
+            // Find the best matching intent with improved selection logic
+            IntentMatchResult matchResult = findBestIntent(intentScores, normalizedQuery);
+
+            // Apply confidence threshold
+            double threshold = getConfidenceThreshold();
+            if (matchResult.confidence < threshold) {
+                return createUnknownIntent(String.format(
+                    "Confidence %.3f below threshold %.3f", matchResult.confidence, threshold));
+            }
+
+            // Create successful intent with metadata
+            Intent intent = new Intent(matchResult.intentType, matchResult.confidence,
+                "Intent recognized successfully");
+
+            logIntentRecognition(query, matchResult);
+            return intent;
+
+        } catch (Exception e) {
+            System.err.println("❌ INTENT RECOGNITION: Error processing query '" + query + "': " + e.getMessage());
+            return createUnknownIntent("Error during intent recognition: " + e.getMessage());
         }
+    }
 
-        // Normalize the query
-        String normalizedQuery = normalizeQuery(query);
+    /**
+     * Create an unknown intent with proper metadata
+     */
+    private Intent createUnknownIntent(String reason) {
+        return new Intent(IntentType.UNKNOWN, 0.0, reason);
+    }
 
-        // Calculate scores for each intent type
-        Map<IntentType, Double> intentScores = calculateIntentScores(normalizedQuery);
+    /**
+     * Get confidence threshold with fallback
+     */
+    private double getConfidenceThreshold() {
+        return nlpConfig != null ? nlpConfig.getIntentConfidenceThreshold() : 0.7;
+    }
 
-        // Find the best matching intent
+    /**
+     * Find the best intent match with improved logic
+     */
+    private IntentMatchResult findBestIntent(Map<IntentType, Double> intentScores, String normalizedQuery) {
         IntentType bestIntent = IntentType.UNKNOWN;
         double bestScore = 0.0;
+        double secondBestScore = 0.0;
 
+        // Find top two scores for confidence calculation
         for (Map.Entry<IntentType, Double> entry : intentScores.entrySet()) {
-            if (entry.getValue() > bestScore) {
-                bestScore = entry.getValue();
+            double score = entry.getValue();
+            if (score > bestScore) {
+                secondBestScore = bestScore;
+                bestScore = score;
                 bestIntent = entry.getKey();
+            } else if (score > secondBestScore) {
+                secondBestScore = score;
             }
         }
 
-        // Apply confidence threshold
-        double threshold = nlpConfig != null ? nlpConfig.getIntentConfidenceThreshold() : 0.7;
-        if (bestScore < threshold) {
-            return new Intent(IntentType.UNKNOWN, bestScore,
-                "Confidence below threshold (" + threshold + ")");
+        // Calculate adjusted confidence based on score separation
+        double confidence = calculateAdjustedConfidence(bestScore, secondBestScore);
+
+        return new IntentMatchResult(bestIntent, confidence);
+    }
+
+    /**
+     * Calculate adjusted confidence considering score separation
+     */
+    private double calculateAdjustedConfidence(double bestScore, double secondBestScore) {
+        if (bestScore == 0.0) {
+            return 0.0;
         }
 
-        return new Intent(bestIntent, bestScore, "Intent recognized successfully");
+        // If there's a clear winner (good separation), boost confidence
+        double separation = bestScore - secondBestScore;
+        double separationBonus = Math.min(0.1, separation * 0.2);
+
+        return Math.min(1.0, bestScore + separationBonus);
+    }
+
+    /**
+     * Log intent recognition results for debugging
+     */
+    private void logIntentRecognition(String originalQuery, IntentMatchResult result) {
+        System.out.println("🔍 INTENT RECOGNITION: '" + originalQuery + "' -> " +
+            result.intentType + " (confidence: " + String.format("%.3f", result.confidence) + ")");
+    }
+
+    /**
+     * Helper class for intent matching results
+     */
+    private static class IntentMatchResult {
+        final IntentType intentType;
+        final double confidence;
+
+        IntentMatchResult(IntentType intentType, double confidence) {
+            this.intentType = intentType;
+            this.confidence = confidence;
+        }
     }
 
     /**
@@ -293,6 +450,8 @@ public class IntentRecognitionService {
             }
         }
 
+
+
         // Debug logging
         if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
             System.out.println("Debug: Pattern score for intent " + pattern.getExactPhrases() +
@@ -334,7 +493,7 @@ public class IntentRecognitionService {
             .map(entry -> {
                 Intent intent = new Intent(entry.getKey(), entry.getValue(), query);
                 if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
-                    System.out.println("Debug: Recognized intent " + intent.getType().getCode() + " with confidence " + entry.getValue()); 
+                    System.out.println("Debug: Recognized intent " + intent.getType().getCode() + " with confidence " + entry.getValue());
                 }
                 return intent;
             })
@@ -346,7 +505,7 @@ public class IntentRecognitionService {
             if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
                 System.out.println("Debug: No intents recognized above threshold (" + threshold + ")");
             }
-            return Collections.singletonList(new Intent(IntentType.UNKNOWN, 0, 
+            return Collections.singletonList(new Intent(IntentType.UNKNOWN, 0,
                 "No intents recognized above threshold (" + threshold + ")"));
         }
         return intents;
@@ -372,13 +531,18 @@ public class IntentRecognitionService {
             IntentType.SHOW_TICKETS,
             IntentType.SHOW_ACTIVE_TICKETS,
             IntentType.SHOW_COMPLETED_TICKETS,
+            IntentType.SHOW_REJECTED_TICKETS,
             IntentType.SEARCH_TICKETS,
             IntentType.GET_TICKET_DETAILS,
             IntentType.CREATE_TICKET,
             IntentType.UPDATE_TICKET_STATUS,
             IntentType.CLOSE_TICKET,
             IntentType.GET_HELP,
-            IntentType.SHOW_CAPABILITIES
+            IntentType.SHOW_CAPABILITIES,
+            IntentType.SHOW_RECENT_ACTIVITY,
+            IntentType.SHOW_EMERGENCY_TYPES,
+            IntentType.REQUEST_EMERGENCY_ACCESS_HELP,
+            IntentType.SHOW_MY_ACCESS_LEVEL
         ));
         // For simplicity, admins can access all intents
         roleIntents.put("ADMIN", Arrays.asList(
@@ -388,6 +552,10 @@ public class IntentRecognitionService {
         String normalizedRole = userRole.trim().toUpperCase();
         List<IntentType> supportedIntents = roleIntents.getOrDefault(normalizedRole, Collections.emptyList());
     
+        if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
+            System.out.println("Debug: Supported intents for role " + normalizedRole + ": " +
+                supportedIntents.stream().map(IntentType::getCode).collect(Collectors.joining(", ")));
+        }
         if (nlpConfig != null && nlpConfig.isDebugEnabled()) {
             System.out.println("Debug: Supported intents for role " + normalizedRole + ": " +
                 supportedIntents.stream().map(IntentType::getCode).collect(Collectors.joining(", ")));
@@ -472,6 +640,7 @@ public class IntentRecognitionService {
         SHOW_TICKETS("show_tickets", "Display user's tickets"),
         SHOW_ACTIVE_TICKETS("show_active_tickets", "Display active tickets"),
         SHOW_COMPLETED_TICKETS("show_completed_tickets", "Display completed tickets"),
+        SHOW_REJECTED_TICKETS("show_rejected_tickets", "Display rejected tickets"),
         SEARCH_TICKETS("search_tickets", "Search for specific tickets"),
         GET_TICKET_DETAILS("get_ticket_details", "Get details of a specific ticket"),
         
@@ -490,7 +659,11 @@ public class IntentRecognitionService {
         // Help and information
         GET_HELP("get_help", "Get help information"),
         SHOW_CAPABILITIES("show_capabilities", "Show available capabilities"),
-        
+        SHOW_RECENT_ACTIVITY("show_recent_activity", "Show recent activity and changes"),
+        SHOW_EMERGENCY_TYPES("show_emergency_types", "Show available emergency types"),
+        REQUEST_EMERGENCY_ACCESS_HELP("request_emergency_access_help", "Help with requesting emergency access"),
+        SHOW_MY_ACCESS_LEVEL("show_my_access_level", "Show current user access level and permissions"),
+
         // Unknown or unclear intent
         UNKNOWN("unknown", "Intent could not be determined");
 

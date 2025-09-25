@@ -125,17 +125,17 @@
           </div>
         </div>
 
-        <!-- Gemini Message -->
+        <!-- Ada Message -->
         <div *ngIf="!message.isUser" class="flex items-start gap-2.5 max-w-[85%] sm:max-w-[70%] message-bubble">
-          <!-- Gemini Avatar -->
-          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-red-500 flex items-center justify-center flex-shrink-0">
-            <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M20.616 10.835a14.147 14.147 0 01-4.45-3.001 14.111 14.111 0 01-3.678-6.452.503.503 0 00-.975 0 14.134 14.134 0 01-3.679 6.452 14.155 14.155 0 01-4.45 3.001c-.65.28-1.318.505-2.002.678a.502.502 0 000 .975c.684.172 1.35.397 2.002.677a14.147 14.147 0 014.45 3.001 14.112 14.112 0 013.679 6.453.502.502 0 00.975 0c.172-.685.397-1.351.677-2.003a14.145 14.145 0 013.001-4.45 14.113 14.113 0 016.453-3.678.503.503 0 000-.975 13.245 13.245 0 01-2.003-.678z" fill="currentColor"></path>
+          <!-- Ada Avatar -->
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"></path>
             </svg>
           </div>
           <div class="flex flex-col w-full leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700 dark:border-gray-600">
             <div class="flex items-center space-x-2 rtl:space-x-reverse mb-2">
-              <span class="text-sm font-semibold text-gray-900 dark:text-white">Gemini</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-white">Ada</span>
               <span class="text-sm font-normal text-gray-500 dark:text-gray-400">{{ formatTime(message.timestamp) }}</span>
             </div>
             <div class="text-sm font-normal text-gray-900 dark:text-white" [innerHTML]="formatMessageContent(message.content)"></div>
@@ -145,7 +145,7 @@
                 <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
                 <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
               </div>
-              <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">Gemini is typing...</span>
+              <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">Ada is typing...</span>
             </div>
 
             <!-- Copy to Clipboard Button -->

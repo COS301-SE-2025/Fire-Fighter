@@ -8,6 +8,7 @@ import { ChatbotService, ChatbotResponse, ChatbotSuggestions, ChatbotHealth } fr
 import { User } from '@angular/fire/auth';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { ApiConfigService } from '../../services/api-config.service';
 
 export interface ChatMessage {
   id: string;
@@ -39,7 +40,6 @@ export class ChatPage implements OnInit, AfterViewChecked {
 
   suggestedQuestions: string[] = [
     'Show me my tickets',
-    'What elevated access do I currently have?',
     'Show my active tickets',
     'How do I create a new emergency request?'
   ];
@@ -49,7 +49,6 @@ export class ChatPage implements OnInit, AfterViewChecked {
     'Show recent activity',
     'What emergency types are available?',
     'How do I request emergency access?',
-    'What elevated access do I currently have?',
     'Help'
   ];
 
@@ -59,7 +58,8 @@ export class ChatPage implements OnInit, AfterViewChecked {
   constructor(
     private authService: AuthService,
     private chatbotService: ChatbotService,
-    private http: HttpClient
+    private http: HttpClient,
+    private apiConfigService: ApiConfigService
   ) { }
 
   ngOnInit() {
@@ -67,10 +67,16 @@ export class ChatPage implements OnInit, AfterViewChecked {
       apiUrl: environment.apiUrl,
       production: environment.production
     });
-    
+
+    // Reset API configuration to use localhost for development
+    if (!environment.production) {
+      console.log('🔄 Resetting API configuration to localhost for development');
+      this.apiConfigService.reset();
+    }
+
     // Test basic connectivity first
     this.testConnectivity();
-    
+
     // Check API health immediately when component loads
     this.checkAPIHealth();
 
@@ -78,15 +84,22 @@ export class ChatPage implements OnInit, AfterViewChecked {
     this.authService.user$.subscribe(user => {
       this.user = user;
       if (user?.uid) {
-        this.loadSuggestions();
+        // Load suggestions with a delay to ensure user is fully authenticated
+        setTimeout(() => {
+          this.loadSuggestions();
+        }, 1500); // Give time for JWT token to be properly set
+      } else {
+        // User not authenticated, use default suggestions
+        this.setDefaultSuggestions();
       }
     });
   }
 
   private testConnectivity(): void {
     console.log('🌐 Testing basic connectivity...');
-    
-    this.http.get(`${environment.apiUrl}/health`, { 
+
+    // Test the general health endpoint first (doesn't require auth)
+    this.http.get(`${environment.apiUrl}/health`, {
       observe: 'response'
     }).subscribe({
       next: (response: HttpResponse<any>) => {
@@ -98,6 +111,7 @@ export class ChatPage implements OnInit, AfterViewChecked {
           message: error.message,
           url: error.url
         });
+        // Don't let connectivity issues affect the page load
       }
     });
   }
@@ -107,11 +121,19 @@ export class ChatPage implements OnInit, AfterViewChecked {
    */
   private loadSuggestions(): void {
     console.log('🤖 CHAT PAGE: Loading suggestions...');
+
+    // Check if user is still authenticated before making API call
+    if (!this.user?.uid) {
+      console.log('🤖 CHAT PAGE: User not authenticated, using default suggestions');
+      this.setDefaultSuggestions();
+      return;
+    }
+
     this.chatbotService.getSuggestions().subscribe({
       next: (response: ChatbotSuggestions) => {
         console.log('🤖 CHAT PAGE: Suggestions loaded:', response);
-        if (response.suggestions && response.suggestions.length > 0) {
-          this.suggestedQuestions = response.suggestions;
+        if (response.available && response.suggestedQueries && response.suggestedQueries.length > 0) {
+          this.suggestedQuestions = response.suggestedQueries;
         } else {
           // Use enhanced default suggestions if API doesn't return any
           this.setDefaultSuggestions();
@@ -119,7 +141,7 @@ export class ChatPage implements OnInit, AfterViewChecked {
       },
       error: (error: any) => {
         console.warn('🤖 CHAT PAGE: Failed to load suggestions, using enhanced defaults:', error);
-        // Use enhanced default suggestions if API fails
+        // Don't let API errors affect authentication - just use defaults
         this.setDefaultSuggestions();
       }
     });
@@ -134,7 +156,6 @@ export class ChatPage implements OnInit, AfterViewChecked {
       'Show me my tickets',
       'Show my access tickets',
       'Show my active tickets',
-      'What elevated access do I currently have?',
       'Do I have any active access permissions?',
       'Show my current access',
       'Show recent access activity',
@@ -178,13 +199,14 @@ export class ChatPage implements OnInit, AfterViewChecked {
       return;
     }
 
-    console.log('🔍 Checking API health...');
+    console.log('🔍 Checking NLP API health...');
 
     // Set checking state
     this.healthCheckLoading = true;
     this.apiHealthy = null;
     this.apiHealthStatus = 'Checking...';
 
+    // Health check doesn't require authentication, so it should be safe
     this.chatbotService.getHealth().subscribe({
       next: (health: ChatbotHealth) => {
         console.log('Health check successful:', health);
@@ -192,17 +214,23 @@ export class ChatPage implements OnInit, AfterViewChecked {
 
         // Update status text based on result
         if (health.status === 'healthy') {
-          this.apiHealthStatus = 'Service Online';
+          this.apiHealthStatus = 'NLP Service Online';
         } else {
-          // Check if we have detailed service information
-          if (health.services?.geminiAI) {
-            if (health.services.geminiAI.includes('DOWN')) {
-              this.apiHealthStatus = 'Service Offline - API Key Required';
+          // Check if we have detailed component information
+          if (health.components) {
+            const downComponents = Object.entries(health.components)
+              .filter(([_, status]) => status !== 'UP')
+              .map(([component, _]) => component);
+
+            if (downComponents.length > 0) {
+              this.apiHealthStatus = `Service Issues: ${downComponents.join(', ')}`;
             } else {
               this.apiHealthStatus = 'Service Issues';
             }
+          } else if (health.error) {
+            this.apiHealthStatus = `Service Error: ${health.error}`;
           } else {
-            this.apiHealthStatus = 'Service Offline';
+            this.apiHealthStatus = 'NLP Service Offline';
           }
         }
         this.healthCheckLoading = false;
@@ -240,8 +268,8 @@ export class ChatPage implements OnInit, AfterViewChecked {
     this.currentMessage = '';
     this.shouldScrollToBottom = true;
 
-    // Send to real API
-    this.sendToGeminiAPI(messageContent);
+    // Send to NLP API
+    this.sendToNLPAPI(messageContent);
   }
 
   sendSuggestedMessage(suggestion: string) {
@@ -260,7 +288,7 @@ export class ChatPage implements OnInit, AfterViewChecked {
     }
   }
 
-  private sendToGeminiAPI(userMessage: string) {
+  private sendToNLPAPI(userMessage: string) {
     if (!this.user?.uid) {
       this.addErrorMessage('Please log in to use the AI assistant.');
       return;
@@ -302,15 +330,15 @@ export class ChatPage implements OnInit, AfterViewChecked {
         // Remove typing indicator
         this.messages = this.messages.filter(msg => !msg.isTyping);
 
-        // Add API response
-        const geminiMessage: ChatMessage = {
+        // Add NLP API response
+        const nlpMessage: ChatMessage = {
           id: this.generateMessageId(),
           content: response.message,
           isUser: false,
           timestamp: new Date(response.timestamp)
         };
 
-        this.messages.push(geminiMessage);
+        this.messages.push(nlpMessage);
         this.isLoading = false;
         this.shouldScrollToBottom = true;
       },

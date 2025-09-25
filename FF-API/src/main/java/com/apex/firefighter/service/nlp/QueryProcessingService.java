@@ -2,12 +2,17 @@ package com.apex.firefighter.service.nlp;
 
 import com.apex.firefighter.config.NLPConfig;
 import com.apex.firefighter.model.Ticket;
+import com.apex.firefighter.model.User;
 import com.apex.firefighter.service.ticket.TicketService;
-import com.apex.firefighter.service.nlp.IntentRecognitionService;
+import com.apex.firefighter.service.GmailEmailService;
+import com.apex.firefighter.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Service responsible for processing natural language queries and converting them
@@ -20,21 +25,20 @@ public class QueryProcessingService {
     private TicketService ticketService;
 
     @Autowired
-    private EntityExtractionService entityExtractor;
-
-    @Autowired
     private NLPConfig nlpConfig;
 
     @Autowired
     private IntentRecognitionService intentRecognitionService;
 
+    @Autowired
+    private GmailEmailService gmailEmailService;
+
+    @Autowired
+    private UserService userService;
+
     // Setter methods for testing
     public void setTicketService(TicketService ticketService) {
         this.ticketService = ticketService;
-    }
-
-    public void setEntityExtractor(EntityExtractionService entityExtractor) {
-        this.entityExtractor = entityExtractor;
     }
 
     public void setNlpConfig(NLPConfig nlpConfig) {
@@ -73,6 +77,7 @@ public class QueryProcessingService {
         }
 
         try {
+            System.out.println("🔵 QUERY PROCESSING: Processing intent: " + intent.getType());
             switch (intent.getType()) {
                 // ----------- Ticket Queries -----------
                 case SHOW_ACTIVE_TICKETS:
@@ -81,6 +86,10 @@ public class QueryProcessingService {
 
                 case SHOW_COMPLETED_TICKETS:
                     return executeTicketQuery(TicketQueryType.COMPLETED_TICKETS,
+                            buildQueryFilters(entities), userId, isAdmin);
+
+                case SHOW_REJECTED_TICKETS:
+                    return executeTicketQuery(TicketQueryType.REJECTED_TICKETS,
                             buildQueryFilters(entities), userId, isAdmin);
 
                 case SHOW_ALL_TICKETS:
@@ -99,19 +108,19 @@ public class QueryProcessingService {
                 // ----------- Ticket Operations -----------
                 case CREATE_TICKET:
                     return executeTicketOperation(TicketOperation.CREATE_TICKET,
-                            entities, userId, isAdmin);
+                            entities, userId, isAdmin, intent.getOriginalQuery());
 
                 case CLOSE_TICKET:
                     return executeTicketOperation(TicketOperation.CLOSE_TICKET,
-                            entities, userId, isAdmin);
+                            entities, userId, isAdmin, intent.getOriginalQuery());
 
                 case UPDATE_TICKET_STATUS:
                     return executeTicketOperation(TicketOperation.UPDATE_TICKET_STATUS,
-                            entities, userId, isAdmin);
+                            entities, userId, isAdmin, intent.getOriginalQuery());
 
                 case ASSIGN_TICKET:
                     return executeTicketOperation(TicketOperation.ASSIGN_TICKET,
-                            entities, userId, isAdmin);
+                            entities, userId, isAdmin, intent.getOriginalQuery());
 
                 // case ADD_COMMENT:
                 //     return executeTicketOperation(TicketOperation.ADD_COMMENT,
@@ -121,8 +130,28 @@ public class QueryProcessingService {
                 //     return executeTicketOperation(TicketOperation.UPDATE_PRIORITY,
                 //             entities, userId, isAdmin);
 
+                // ----------- Information and Help -----------
+                case GET_HELP:
+                    return generateHelpResponse();
+
+                case SHOW_CAPABILITIES:
+                    return generateCapabilitiesResponse();
+
+                case SHOW_RECENT_ACTIVITY:
+                    return generateRecentActivityResponse(userId, isAdmin);
+
+                case SHOW_EMERGENCY_TYPES:
+                    return generateEmergencyTypesResponse();
+
+                case REQUEST_EMERGENCY_ACCESS_HELP:
+                    return generateEmergencyAccessHelpResponse();
+
+                case SHOW_MY_ACCESS_LEVEL:
+                    return generateMyAccessLevelResponse(userId);
+
                 // ----------- Fallback -----------
                 default:
+                    System.out.println("❌ QUERY PROCESSING: Unsupported intent reached default case: " + intent.getType().getCode());
                     return new QueryResult(false, "Unsupported intent: " + intent.getType().getCode(), null, QueryResultType.ERROR);
             }
         } catch (Exception e) {
@@ -202,6 +231,17 @@ public class QueryProcessingService {
                     }
                 }
 
+                case REJECTED_TICKETS: {
+                    if (isAdmin) {
+                        List<Ticket> rejected = ticketService.getTicketsByStatus("Rejected");
+                        return new QueryResult(QueryResultType.TICKET_LIST, rejected, rejected.size());
+                    } else {
+                        List<Ticket> mine = ticketService.getTicketsByUserId(userId);
+                        List<Ticket> rejected = filterByStatuses(mine, "Rejected");
+                        return new QueryResult(QueryResultType.TICKET_LIST, rejected, rejected.size());
+                    }
+                }
+
                 case SEARCH_TICKETS: {
                     // Start from scope (admin = all, user = own)
                     List<Ticket> base = isAdmin ? ticketService.getAllTickets()
@@ -249,8 +289,88 @@ public class QueryProcessingService {
                 }
 
                 case EXPORT_DATA: {
-                    // Not implemented in TicketService; return an explicit error to caller.
-                    return new QueryResult(false, "Export is not supported by the current TicketService.");
+                    System.out.println("🔵 EXPORT: Starting ticket export process for user: " + userId);
+
+                    try {
+                        // Get user information for email
+                        Optional<User> userOpt = userService.getUserWithRoles(userId);
+                        if (!userOpt.isPresent()) {
+                            System.out.println("❌ EXPORT: User not found: " + userId);
+                            return new QueryResult(false, "User not found for export request");
+                        }
+
+                        User user = userOpt.get();
+                        String userEmail = user.getEmail();
+                        if (userEmail == null || userEmail.trim().isEmpty()) {
+                            System.out.println("❌ EXPORT: User email not found for: " + userId);
+                            return new QueryResult(false, "User email not found. Cannot send export.");
+                        }
+
+                        System.out.println("🔵 EXPORT: User email found: " + userEmail);
+
+                        // Extract date range from filters if provided
+                        final LocalDateTime startDate = filters.containsKey("startDate") ?
+                            (LocalDateTime) filters.get("startDate") : null;
+                        final LocalDateTime endDate = filters.containsKey("endDate") ?
+                            (LocalDateTime) filters.get("endDate") : null;
+
+                        if (startDate != null) {
+                            System.out.println("🔵 EXPORT: Start date filter: " + startDate);
+                        }
+                        if (endDate != null) {
+                            System.out.println("🔵 EXPORT: End date filter: " + endDate);
+                        }
+
+                        // Get tickets based on date range filtering (similar to TicketController)
+                        List<Ticket> tickets;
+                        if (startDate != null && endDate != null) {
+                            System.out.println("🔵 EXPORT: Filtering tickets by date range: " + startDate + " to " + endDate);
+                            tickets = ticketService.getAllTickets().stream()
+                                    .filter(ticket -> ticket.getDateCreated().isAfter(startDate) && ticket.getDateCreated().isBefore(endDate))
+                                    .collect(Collectors.toList());
+                            System.out.println("🔵 EXPORT: Retrieved " + tickets.size() + " tickets with date range filter");
+                        } else if (startDate != null) {
+                            System.out.println("🔵 EXPORT: Filtering tickets from start date: " + startDate);
+                            tickets = ticketService.getAllTickets().stream()
+                                    .filter(ticket -> ticket.getDateCreated().isAfter(startDate))
+                                    .collect(Collectors.toList());
+                            System.out.println("🔵 EXPORT: Retrieved " + tickets.size() + " tickets from start date");
+                        } else if (endDate != null) {
+                            System.out.println("🔵 EXPORT: Filtering tickets until end date: " + endDate);
+                            tickets = ticketService.getAllTickets().stream()
+                                    .filter(ticket -> ticket.getDateCreated().isBefore(endDate))
+                                    .collect(Collectors.toList());
+                            System.out.println("🔵 EXPORT: Retrieved " + tickets.size() + " tickets until end date");
+                        } else {
+                            tickets = ticketService.getAllTickets();
+                            System.out.println("🔵 EXPORT: Retrieved " + tickets.size() + " tickets (all tickets)");
+                        }
+
+                        // Generate CSV
+                        String csvContent = gmailEmailService.exportTicketsToCsv(tickets);
+                        System.out.println("🔵 EXPORT: Generated CSV content, length: " + csvContent.length() + " characters");
+
+                        // Send email with CSV attachment
+                        gmailEmailService.sendTicketsCsv(userEmail, csvContent, user);
+                        System.out.println("✅ EXPORT: Email sent successfully to: " + userEmail);
+
+                        // Create success message
+                        String dateRangeInfo = (startDate != null || endDate != null) ? " (filtered by date range)" : "";
+                        String successMessage = "Tickets exported and emailed successfully to " + userEmail + dateRangeInfo;
+
+                        // Return success result
+                        Map<String, Object> exportData = new HashMap<>();
+                        exportData.put("email", userEmail);
+                        exportData.put("ticketCount", tickets.size());
+                        exportData.put("hasDateFilter", startDate != null || endDate != null);
+
+                        return new QueryResult(true, successMessage, exportData, QueryResultType.INFORMATION);
+
+                    } catch (Exception e) {
+                        System.out.println("❌ EXPORT: Export failed with error: " + e.getMessage());
+                        e.printStackTrace();
+                        return new QueryResult(false, "Export failed: " + e.getMessage());
+                    }
                 }
 
                 default:
@@ -278,7 +398,8 @@ public class QueryProcessingService {
     public QueryResult executeTicketOperation(TicketOperation operation,
                                           EntityExtractionService.ExtractedEntities entities,
                                           String userId,
-                                          boolean isAdmin) {
+                                          boolean isAdmin,
+                                          String originalQuery) {
         try {
             // Permission gate
             if (!validateUserOperation(operation, entities, userId, isAdmin)) {
@@ -287,18 +408,70 @@ public class QueryProcessingService {
 
             switch (operation) {
                 case CREATE_TICKET: {
-                    // Extract description from the query - try multiple approaches
+                    // Extract and validate required information
                     String description = extractDescriptionFromEntities(entities);
-                    if (description == null || description.isEmpty()) {
-                        description = "Emergency assistance request";
+
+                    // If no description found in entities, try to extract from the original query
+                    if ((description == null || description.trim().isEmpty()) && originalQuery != null) {
+                        description = extractDescriptionFromQuery(originalQuery);
                     }
 
-                    String emergencyType    = firstNormalized(entities, EntityExtractionService.EntityType.EMERGENCY_TYPE);
-                    String emergencyContact = firstNormalized(entities, EntityExtractionService.EntityType.PHONE);
-                    Integer duration        = parseIntegerSafe(firstNormalized(entities, EntityExtractionService.EntityType.DURATION));
+                    String durationStr = firstNormalized(entities, EntityExtractionService.EntityType.DURATION);
+                    Integer duration = parseIntegerSafe(durationStr);
+                    String emergencyType = firstNormalized(entities, EntityExtractionService.EntityType.EMERGENCY_TYPE);
 
+                    // Debug: Show extracted values for validation
+                    System.out.println("🔵 CREATE_TICKET: Extracted values:");
+                    System.out.println("  - Description: '" + description + "'");
+                    System.out.println("  - Duration String: '" + durationStr + "'");
+                    System.out.println("  - Duration Parsed: " + duration);
+                    System.out.println("  - Emergency Type: '" + emergencyType + "'");
+
+                    // Validate required fields
+                    List<String> missingFields = new ArrayList<>();
+
+                    if (description == null || description.trim().isEmpty()) {
+                        missingFields.add("reason/description for the emergency");
+                    }
+
+                    if (duration == null) {
+                        missingFields.add("duration (15-120 minutes)");
+                    } else if (duration < 15 || duration > 120) {
+                        return new QueryResult(false, "Duration must be between 15 and 120 minutes. You specified: " + duration + " minutes.");
+                    }
+
+                    // Emergency type is REQUIRED - determines ERP usergroup assignment
+                    if (emergencyType == null || emergencyType.trim().isEmpty()) {
+                        missingFields.add("emergency type (hr-emergency, financial-emergency, management-emergency, or logistics-emergency)");
+                    } else {
+                        // Validate emergency type is one of the allowed values
+                        String[] validTypes = {"hr-emergency", "financial-emergency", "management-emergency", "logistics-emergency"};
+                        boolean isValidType = false;
+                        for (String validType : validTypes) {
+                            if (validType.equals(emergencyType.toLowerCase().trim())) {
+                                isValidType = true;
+                                break;
+                            }
+                        }
+                        if (!isValidType) {
+                            return new QueryResult(false, "Invalid emergency type: '" + emergencyType + "'. Must be one of: hr-emergency, financial-emergency, management-emergency, logistics-emergency");
+                        }
+                    }
+
+                    // If required fields are missing, provide helpful guidance
+                    if (!missingFields.isEmpty()) {
+                        String guidance = "To create an emergency ticket, I need the following information: " +
+                                        String.join(", ", missingFields) + ". " +
+                                        "Example: 'create hr-emergency ticket for office fire, duration 30 minutes, contact 555-1234'";
+                        return new QueryResult(false, guidance);
+                    }
+
+                    // Extract optional fields
+                    String emergencyContact = firstNormalized(entities, EntityExtractionService.EntityType.PHONE);
+
+                    // Create the ticket with validated information
                     Ticket created = ticketService.createTicket(
-                            description, userId, emergencyType, emergencyContact, duration);
+                            description.trim(), userId, emergencyType, emergencyContact, duration);
                     return new QueryResult(QueryResultType.OPERATION_RESULT, created, 1);
                 }
 
@@ -391,7 +564,12 @@ public class QueryProcessingService {
     }
 
     private Integer parseIntegerSafe(String s) {
-        try { return (s == null) ? null : Integer.parseInt(s); }
+        if (s == null) return null;
+        try {
+            // Extract just the numbers from the string (for cases like "15 minutes")
+            String numbersOnly = s.replaceAll("[^0-9]", "");
+            return numbersOnly.isEmpty() ? null : Integer.parseInt(numbersOnly);
+        }
         catch (NumberFormatException nfe) { return null; }
     }
 
@@ -409,11 +587,68 @@ public class QueryProcessingService {
         return null;
     }
 
-    private String listFirstNormOrVal(List<EntityExtractionService.Entity> list) {
-        if (list == null || list.isEmpty()) return null;
-        String v = list.get(0).getNormalizedValue();
-        return (v == null || v.isEmpty()) ? list.get(0).getValue() : v;
+    /**
+     * Extract description from the original query text for ticket creation
+     * This is a fallback when entity extraction doesn't capture the description properly
+     */
+    private String extractDescriptionFromQuery(String originalQuery) {
+        if (originalQuery == null || originalQuery.trim().isEmpty()) {
+            return null;
+        }
+
+        String query = originalQuery.toLowerCase().trim();
+
+        // Remove common ticket creation phrases to extract the actual description
+        // Order matters - more specific patterns first
+        String[] prefixesToRemove = {
+            "create hr-emergency ticket for", "create financial-emergency ticket for",
+            "create management-emergency ticket for", "create logistics-emergency ticket for",
+            "new hr-emergency ticket for", "new financial-emergency ticket for",
+            "new management-emergency ticket for", "new logistics-emergency ticket for",
+            "create emergency ticket for", "new emergency ticket for",
+            "create ticket for", "new ticket for",
+            "hr-emergency ticket for", "financial-emergency ticket for",
+            "management-emergency ticket for", "logistics-emergency ticket for",
+            "emergency ticket for", "ticket for"
+        };
+
+        String description = query;
+        System.out.println("🔵 DESCRIPTION FALLBACK: Original query: '" + query + "'");
+
+        for (String prefix : prefixesToRemove) {
+            if (description.startsWith(prefix)) {
+                description = description.substring(prefix.length()).trim();
+                System.out.println("🔵 DESCRIPTION FALLBACK: After removing prefix '" + prefix + "': '" + description + "'");
+                break;
+            }
+        }
+
+        // Remove trailing information (duration, contact, etc.)
+        String[] suffixesToRemove = {
+            ", duration", " duration", ", contact", " contact", ", phone", " phone"
+        };
+
+        for (String suffix : suffixesToRemove) {
+            int index = description.indexOf(suffix);
+            if (index > 0) {
+                description = description.substring(0, index).trim();
+                System.out.println("🔵 DESCRIPTION FALLBACK: After removing suffix '" + suffix + "': '" + description + "'");
+                break;
+            }
+        }
+
+        // If we removed everything or it's too short, return null
+        if (description.isEmpty() || description.length() < 3) {
+            System.out.println("🔵 DESCRIPTION FALLBACK: Description too short or empty, returning null");
+            return null;
+        }
+
+        // Clean up and return
+        System.out.println("🔵 DESCRIPTION FALLBACK: Final description: '" + description.trim() + "'");
+        return description.trim();
     }
+
+
 
     /**
      * Extract description text from entities or fall back to extracting from query text
@@ -428,6 +663,7 @@ public class QueryProcessingService {
 
         // First try to get description from DESCRIPTION entity type
         String description = firstNormalized(entities, EntityExtractionService.EntityType.DESCRIPTION);
+        System.out.println("🔵 DESCRIPTION EXTRACTION: From entities: '" + description + "'");
         if (description != null && !description.trim().isEmpty()) {
             return description.trim();
         }
@@ -453,6 +689,7 @@ public class QueryProcessingService {
             }
         }
 
+        System.out.println("🔵 DESCRIPTION EXTRACTION: No description found in entities, returning null");
         return description;
     }
 
@@ -593,6 +830,180 @@ public class QueryProcessingService {
     }
 
     /**
+     * Generate help response for users
+     */
+    private QueryResult generateHelpResponse() {
+        String helpMessage = "🔥 **FireFighter Emergency Management Help** 🔥\n\n" +
+            "**Available Commands:**\n" +
+            "• `Show my active tickets` - View your current active tickets\n" +
+            "• `Show recent activity` - See latest system activity\n" +
+            "• `Create [emergency-type] ticket for [description]` - Create new emergency ticket\n" +
+            "• `What emergency types are available?` - List available emergency types\n" +
+            "• `How do I request emergency access?` - Get help with emergency access\n" +
+            "• `What elevated access do I currently have?` - Check your current permissions\n\n" +
+            "**Emergency Types:** HR, Financial, Management, Logistics\n\n" +
+            "**Example:** `Create hr-emergency ticket for employee leave, duration 30 minutes, contact 0123456789`";
+
+        return new QueryResult(true, helpMessage, helpMessage, QueryResultType.HELP);
+    }
+
+    /**
+     * Generate capabilities response
+     */
+    private QueryResult generateCapabilitiesResponse() {
+        String capabilitiesMessage = "🤖 **Ada Capabilities** 🤖\n\n" +
+            "I can help you with:\n" +
+            "• **Ticket Management** - Create, view, and manage emergency tickets\n" +
+            "• **Emergency Access** - Guide you through emergency access procedures\n" +
+            "• **System Information** - Show emergency types, recent activity, and your access level\n" +
+            "• **Natural Language Processing** - Understand your requests in plain English\n\n" +
+            "Just ask me in natural language, and I'll help you manage your FireFighter emergency tickets!";
+
+        return new QueryResult(true, capabilitiesMessage, capabilitiesMessage, QueryResultType.HELP);
+    }
+
+    /**
+     * Generate recent activity response
+     */
+    private QueryResult generateRecentActivityResponse(String userId, boolean isAdmin) {
+        try {
+            // Get recent tickets for the user (or all if admin)
+            List<Ticket> recentTickets;
+            if (isAdmin) {
+                recentTickets = ticketService.getAllTickets().stream()
+                    .sorted((t1, t2) -> t2.getDateCreated().compareTo(t1.getDateCreated()))
+                    .limit(5)
+                    .collect(java.util.stream.Collectors.toList());
+            } else {
+                recentTickets = ticketService.getTicketsByUserId(userId).stream()
+                    .sorted((t1, t2) -> t2.getDateCreated().compareTo(t1.getDateCreated()))
+                    .limit(5)
+                    .collect(java.util.stream.Collectors.toList());
+            }
+
+            if (recentTickets.isEmpty()) {
+                return new QueryResult(true, "No recent activity found.", "No recent tickets or activity.", QueryResultType.TICKET_LIST);
+            }
+
+            StringBuilder activityMessage = new StringBuilder("📊 **Recent Activity** 📊\n\n");
+            for (Ticket ticket : recentTickets) {
+                activityMessage.append("• **[").append(ticket.getTicketId()).append("]** ")
+                    .append(ticket.getStatus()).append(" - ")
+                    .append(ticket.getDescription())
+                    .append(" (").append(ticket.getEmergencyType()).append(")\n");
+            }
+
+            return new QueryResult(true, activityMessage.toString(), recentTickets, QueryResultType.TICKET_LIST);
+        } catch (Exception e) {
+            return new QueryResult(false, "Error retrieving recent activity: " + e.getMessage(), null, QueryResultType.ERROR);
+        }
+    }
+
+    /**
+     * Generate emergency types response
+     */
+    private QueryResult generateEmergencyTypesResponse() {
+        String emergencyTypesMessage = "🚨 **Available Emergency Types** 🚨\n\n" +
+            "• **HR Emergency** - Human resources related emergencies\n" +
+            "  - Employee incidents, workplace safety, urgent HR matters\n" +
+            "  - Example: `Create hr-emergency ticket for employee leave`\n\n" +
+            "• **Financial Emergency** - Financial and budget related emergencies\n" +
+            "  - Budget issues, payment problems, financial crises\n" +
+            "  - Example: `Create financial-emergency ticket for budget overrun`\n\n" +
+            "• **Management Emergency** - Management and operational emergencies\n" +
+            "  - Leadership decisions, operational crises, strategic issues\n" +
+            "  - Example: `Create management-emergency ticket for system outage`\n\n" +
+            "• **Logistics Emergency** - Supply chain and logistics emergencies\n" +
+            "  - Supply issues, delivery problems, resource shortages\n" +
+            "  - Example: `Create logistics-emergency ticket for supply shortage`";
+
+        return new QueryResult(true, emergencyTypesMessage, emergencyTypesMessage, QueryResultType.HELP);
+    }
+
+    /**
+     * Generate emergency access help response
+     */
+    private QueryResult generateEmergencyAccessHelpResponse() {
+        String accessHelpMessage = "🔐 **Emergency Access Request Guide** 🔐\n\n" +
+            "**How to Request Emergency Access:**\n\n" +
+            "1. **Create an Emergency Ticket**\n" +
+            "   - Use: `Create [emergency-type] ticket for [reason]`\n" +
+            "   - Include duration and contact information\n\n" +
+            "2. **Emergency Types Grant Different Access:**\n" +
+            "   - **HR Emergency** → HR Group Access\n" +
+            "   - **Financial Emergency** → Financial Group Access\n" +
+            "   - **Management Emergency** → Manager Group Access\n" +
+            "   - **Logistics Emergency** → Logistics Group Access\n\n" +
+            "3. **Access is Automatically Granted**\n" +
+            "   - Once your ticket is created, you're automatically added to the appropriate group\n" +
+            "   - Access is temporary and tied to your emergency ticket\n\n" +
+            "4. **Example Request:**\n" +
+            "   `Create hr-emergency ticket for employee incident, duration 60 minutes, contact 0123456789`\n\n" +
+            "**Need immediate help?** Contact your system administrator.";
+
+        return new QueryResult(true, accessHelpMessage, accessHelpMessage, QueryResultType.HELP);
+    }
+
+    /**
+     * Generate user access level response
+     */
+    private QueryResult generateMyAccessLevelResponse(String userId) {
+        try {
+            // Get user's current tickets to determine access level
+            List<Ticket> userTickets = ticketService.getTicketsByUserId(userId);
+            List<Ticket> activeTickets = userTickets.stream()
+                .filter(t -> "Active".equals(t.getStatus()))
+                .collect(java.util.stream.Collectors.toList());
+
+            StringBuilder accessMessage = new StringBuilder("👤 **Your Current Access Level** 👤\n\n");
+
+            if (activeTickets.isEmpty()) {
+                accessMessage.append("**Standard User Access**\n")
+                    .append("• Create and view your own tickets\n")
+                    .append("• Request emergency access through ticket creation\n\n")
+                    .append("**No Active Emergency Access**\n")
+                    .append("You currently have no active emergency tickets granting elevated access.");
+            } else {
+                accessMessage.append("**Standard User Access** + **Emergency Access**\n\n");
+                accessMessage.append("**Active Emergency Access:**\n");
+
+                for (Ticket ticket : activeTickets) {
+                    String emergencyType = ticket.getEmergencyType();
+                    String groupAccess = getGroupAccessForEmergencyType(emergencyType);
+                    accessMessage.append("• **[").append(ticket.getTicketId()).append("]** ")
+                        .append(emergencyType).append(" → ").append(groupAccess).append("\n");
+                }
+
+                accessMessage.append("\n**This grants you temporary elevated permissions for the duration of your emergency tickets.**");
+            }
+
+            return new QueryResult(true, accessMessage.toString(), activeTickets, QueryResultType.HELP);
+        } catch (Exception e) {
+            return new QueryResult(false, "Error retrieving access level: " + e.getMessage(), null, QueryResultType.ERROR);
+        }
+    }
+
+    /**
+     * Helper method to map emergency types to group access
+     */
+    private String getGroupAccessForEmergencyType(String emergencyType) {
+        if (emergencyType == null) return "Unknown Access";
+
+        switch (emergencyType.toLowerCase()) {
+            case "hr-emergency":
+                return "HR Group Access";
+            case "financial-emergency":
+                return "Financial Group Access";
+            case "management-emergency":
+                return "Manager Group Access";
+            case "logistics-emergency":
+                return "Logistics Group Access";
+            default:
+                return "Standard Access";
+        }
+    }
+
+    /**
      * Result of query processing
      */
     public static class QueryResult {
@@ -660,6 +1071,7 @@ public class QueryProcessingService {
         USER_TICKETS("user_tickets", "Get tickets for a specific user"),
         ACTIVE_TICKETS("active_tickets", "Get all active tickets"),
         COMPLETED_TICKETS("completed_tickets", "Get completed tickets"),
+        REJECTED_TICKETS("rejected_tickets", "Get rejected tickets"),
         SEARCH_TICKETS("search_tickets", "Search tickets by criteria"),
         TICKET_DETAILS("ticket_details", "Get details of specific ticket"),
         SYSTEM_STATS("system_stats", "Get system statistics"),
@@ -709,7 +1121,8 @@ public class QueryProcessingService {
         OPERATION_RESULT("operation_result", "Result of an operation"),
         STATISTICS("statistics", "Statistical data"),
         ERROR("error", "Error result"),
-        HELP("help", "Help information");
+        HELP("help", "Help information"),
+        INFORMATION("information", "General information");
 
         private final String code;
         private final String description;

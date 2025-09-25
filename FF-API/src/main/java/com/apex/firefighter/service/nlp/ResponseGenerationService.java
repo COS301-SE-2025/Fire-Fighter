@@ -46,6 +46,9 @@ public class ResponseGenerationService {
             case HELP:
                 response = generateHelpResponse(queryResult, context, preferences);
                 break;
+            case INFORMATION:
+                response = generateInformationResponse(queryResult, context, preferences);
+                break;
             case ERROR:
             default:
                 response = generateErrorResponse(queryResult, context, preferences);
@@ -103,7 +106,12 @@ public class ResponseGenerationService {
                 return "Statistics: " + result.getData();
 
             case HELP:
-                return "You can ask me to show, create, update, or close tickets, get system stats, or export data.";
+                // Return the actual message from the QueryResult instead of hardcoded text
+                return result.getMessage() != null ? result.getMessage() : "You can ask me to show, create, update, or close tickets, get system stats, or export data.";
+
+            case INFORMATION:
+                // Return the actual message from the QueryResult for information responses
+                return result.getMessage() != null ? result.getMessage() : "Information not available.";
 
             case ERROR:
             default:
@@ -261,8 +269,23 @@ public class ResponseGenerationService {
     }
 
     /**
+     * Generate information responses
+     *
+     * @param queryResult The query result containing information
+     * @param context Context about the original query
+     * @param preferences User preferences for response style
+     * @return Information in natural language
+     */
+    public String generateInformationResponse(QueryProcessingService.QueryResult queryResult,
+                                            QueryContext context,
+                                            ResponsePreferences preferences) {
+        // For information responses, return the message directly from the QueryResult
+        return queryResult.getMessage() != null ? queryResult.getMessage() : "Information not available.";
+    }
+
+    /**
      * Generate help responses
-     * 
+     *
      * @param queryResult The query result containing help information
      * @param context Context about the original query
      * @param preferences User preferences for response style
@@ -414,6 +437,14 @@ public class ResponseGenerationService {
             case GET_HELP:
             case SHOW_CAPABILITIES:
                 return "💡";
+            case SHOW_RECENT_ACTIVITY:
+                return "📊";
+            case SHOW_EMERGENCY_TYPES:
+                return "🚨";
+            case REQUEST_EMERGENCY_ACCESS_HELP:
+                return "🔐";
+            case SHOW_MY_ACCESS_LEVEL:
+                return "👤";
             default:
                 return null;
         }
