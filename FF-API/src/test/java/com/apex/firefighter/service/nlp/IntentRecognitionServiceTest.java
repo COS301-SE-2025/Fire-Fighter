@@ -1,6 +1,8 @@
-package com.apex.firefighter.service.nlp;
-
+import com.apex.firefighter.service.nlp.EntityExtractionService;
+import com.apex.firefighter.service.nlp.IntentRecognitionService;
+import com.apex.firefighter.service.nlp.QueryProcessingService;
 import com.apex.firefighter.config.NLPConfig;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,7 +11,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
+
 import static org.mockito.Mockito.lenient;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * Unit tests for IntentRecognitionService
@@ -26,8 +34,10 @@ class IntentRecognitionServiceTest {
     @BeforeEach
     void setUp() {
         intentRecognitionService = new IntentRecognitionService();
-        intentRecognitionService.nlpConfig = mockNlpConfig;
         
+        // Use ReflectionTestUtils to set the package-private field
+        ReflectionTestUtils.setField(intentRecognitionService, "nlpConfig", mockNlpConfig);
+
         // Set up default configuration with lenient stubbing
         lenient().when(mockNlpConfig.getIntentConfidenceThreshold()).thenReturn(0.7);
     }
@@ -269,4 +279,59 @@ class IntentRecognitionServiceTest {
         assertThat(result.getType()).isEqualTo(IntentRecognitionService.IntentType.CREATE_TICKET);
         assertThat(result.getConfidence()).isGreaterThan(0.7);
     }
+
+
+    // ==================== Test recognizeIntents ====================
+    @ParameterizedTest
+    @CsvSource({
+        "show my tickets, SHOW_TICKETS, true",
+        "create ticket, CREATE_TICKET, true",
+        "invalid query, UNKNOWN, false",
+        ", UNKNOWN, false"
+    })
+    void testRecognizeIntent(String query, IntentRecognitionService.IntentType expectedType, boolean expectedSuccess)
+    {
+        // Act
+        IntentRecognitionService.Intent result = intentRecognitionService.recognizeIntent(query);
+        
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.getType()).isEqualTo(expectedType);
+        assertThat(result.isSuccess()).isEqualTo(expectedSuccess);
+        if (expectedSuccess) {
+            assertThat(result.getConfidence()).isGreaterThanOrEqualTo(0.7);
+        } else {
+            assertThat(result.getConfidence()).isLessThan(0.7);
+        }
+    }
+
+    // ==================== Test recognizeMultipleIntents ====================
+    @Test 
+    void testRecognizeMultipleIntents_validQuery() {
+        // Act 
+        String query = "show my tickets and create a new ticket";
+        List<IntentRecognitionService.Intent> intents = intentRecognitionService.recognizeMultipleIntents(query);
+
+        // Assert
+        assertThat(intents).isNotNull();
+        assertThat(intents).isNotEmpty();
+        assertThat(intents.stream().map(IntentRecognitionService.Intent::getType))
+            .containsAnyOf(
+                IntentRecognitionService.IntentType.SHOW_TICKETS,
+                IntentRecognitionService.IntentType.CREATE_TICKET
+            );
+        assertThat(intents.get(0).getConfidence()).isGreaterThanOrEqualTo(0.7);
+    }
+
+    @Test
+    void testRecognizeMultipleIntents_emptyQuery() {
+        List<IntentRecognitionService.Intent> intents = intentRecognitionService.recognizeMultipleIntents("");
+
+        assertThat(intents).hasSize(1);
+        assertThat(intents.get(0).getType()).isEqualTo(IntentRecognitionService.IntentType.UNKNOWN);
+        assertThat(intents.get(0).getConfidence()).isEqualTo(0.0);
+    }
+
+    
+
 }

@@ -1,6 +1,7 @@
 package com.apex.firefighter.controller;
 
 import com.apex.firefighter.service.nlp.NLPService;
+import com.apex.firefighter.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,18 @@ public class NLPController {
     @Autowired
     private NLPService nlpService;
 
+    @Autowired
+    private UserService userService;
+
+    // Setter methods for testing
+    public void setNlpService(NLPService nlpService) {
+        this.nlpService = nlpService;
+    }
+
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+
     /**
      * Process a natural language query from a user
      */
@@ -45,9 +58,9 @@ public class NLPController {
             HttpServletRequest httpRequest) {
         
         try {
-            // TODO: Extract user ID from JWT token
-            String userId = extractUserIdFromRequest(httpRequest);
-            
+            // Extract and verify user authentication
+            String userId = extractAndVerifyUserId(httpRequest);
+
             // Validate request
             if (request.getQuery() == null || request.getQuery().trim().isEmpty()) {
                 return ResponseEntity.badRequest()
@@ -56,9 +69,21 @@ public class NLPController {
 
             // Process the query
             NLPService.NLPResponse response = nlpService.processQuery(request.getQuery(), userId);
-            
+
             return ResponseEntity.ok(response);
-            
+
+        } catch (RuntimeException e) {
+            // Handle authentication/authorization errors
+            if (e.getMessage().contains("Authentication required") || e.getMessage().contains("not authorized")) {
+                return ResponseEntity.status(401)
+                    .body(new NLPService.NLPResponse(e.getMessage(), false));
+            } else if (e.getMessage().contains("not found")) {
+                return ResponseEntity.status(404)
+                    .body(new NLPService.NLPResponse(e.getMessage(), false));
+            } else {
+                return ResponseEntity.badRequest()
+                    .body(new NLPService.NLPResponse(e.getMessage(), false));
+            }
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                 .body(new NLPService.NLPResponse("Error processing query: " + e.getMessage(), false));
@@ -84,9 +109,9 @@ public class NLPController {
             HttpServletRequest httpRequest) {
         
         try {
-            // TODO: Extract user ID from JWT token and verify admin role
-            String userId = extractUserIdFromRequest(httpRequest);
-            
+            // Extract and verify admin user authentication
+            String userId = extractAndVerifyAdminUser(httpRequest);
+
             // Validate request
             if (request.getQuery() == null || request.getQuery().trim().isEmpty()) {
                 return ResponseEntity.badRequest()
@@ -95,9 +120,24 @@ public class NLPController {
 
             // Process the admin query
             NLPService.NLPResponse response = nlpService.processAdminQuery(request.getQuery(), userId);
-            
+
             return ResponseEntity.ok(response);
-            
+
+        } catch (RuntimeException e) {
+            // Handle authentication/authorization errors
+            if (e.getMessage().contains("Authentication required") || e.getMessage().contains("not authorized")) {
+                return ResponseEntity.status(401)
+                    .body(new NLPService.NLPResponse(e.getMessage(), false));
+            } else if (e.getMessage().contains("Admin privileges required")) {
+                return ResponseEntity.status(403)
+                    .body(new NLPService.NLPResponse(e.getMessage(), false));
+            } else if (e.getMessage().contains("not found")) {
+                return ResponseEntity.status(404)
+                    .body(new NLPService.NLPResponse(e.getMessage(), false));
+            } else {
+                return ResponseEntity.badRequest()
+                    .body(new NLPService.NLPResponse(e.getMessage(), false));
+            }
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                 .body(new NLPService.NLPResponse("Error processing admin query: " + e.getMessage(), false));
@@ -122,16 +162,34 @@ public class NLPController {
             HttpServletRequest httpRequest) {
         
         try {
-            // TODO: Verify user authorization
-            
+            // Verify user authorization and ensure they can only access their own capabilities
+            String authenticatedUserId = extractAndVerifyUserId(httpRequest);
+
+            // Users can only access their own capabilities unless they're admin
+            if (!authenticatedUserId.equals(userId)) {
+                Boolean isAdmin = (Boolean) httpRequest.getAttribute("isAdmin");
+                if (isAdmin == null || !isAdmin) {
+                    return ResponseEntity.status(403)
+                        .body(null); // Forbidden - can't access other user's capabilities
+                }
+            }
+
             NLPService.NLPCapabilities capabilities = nlpService.getCapabilities(userId);
-            
+
             if (capabilities == null) {
                 return ResponseEntity.notFound().build();
             }
-            
+
             return ResponseEntity.ok(capabilities);
-            
+
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("Authentication required") || e.getMessage().contains("not authorized")) {
+                return ResponseEntity.status(401).build();
+            } else if (e.getMessage().contains("not found")) {
+                return ResponseEntity.status(404).build();
+            } else {
+                return ResponseEntity.badRequest().build();
+            }
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
@@ -155,16 +213,34 @@ public class NLPController {
             HttpServletRequest httpRequest) {
         
         try {
-            // TODO: Verify user authorization
-            
+            // Verify user authorization and ensure they can only access their own suggestions
+            String authenticatedUserId = extractAndVerifyUserId(httpRequest);
+
+            // Users can only access their own suggestions unless they're admin
+            if (!authenticatedUserId.equals(userId)) {
+                Boolean isAdmin = (Boolean) httpRequest.getAttribute("isAdmin");
+                if (isAdmin == null || !isAdmin) {
+                    return ResponseEntity.status(403)
+                        .body(null); // Forbidden - can't access other user's suggestions
+                }
+            }
+
             NLPService.NLPSuggestions suggestions = nlpService.getSuggestions(userId);
-            
+
             if (suggestions == null) {
                 return ResponseEntity.notFound().build();
             }
-            
+
             return ResponseEntity.ok(suggestions);
-            
+
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("Authentication required") || e.getMessage().contains("not authorized")) {
+                return ResponseEntity.status(401).build();
+            } else if (e.getMessage().contains("not found")) {
+                return ResponseEntity.status(404).build();
+            } else {
+                return ResponseEntity.badRequest().build();
+            }
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
@@ -218,12 +294,53 @@ public class NLPController {
 
     /**
      * Extract user ID from HTTP request (JWT token)
-     * TODO: Implement proper JWT token extraction
+     * The JwtAuthenticationFilter already extracts and validates the token,
+     * setting the Firebase UID as a request attribute.
      */
     private String extractUserIdFromRequest(HttpServletRequest request) {
-        // TODO: Implement JWT token extraction and validation
-        // This should extract the Firebase UID from the JWT token
-        return "placeholder-user-id";
+        // Get Firebase UID from request attribute (set by JwtAuthenticationFilter)
+        String firebaseUid = (String) request.getAttribute("firebaseUid");
+
+        if (firebaseUid == null || firebaseUid.trim().isEmpty()) {
+            throw new RuntimeException("Authentication required: No valid Firebase UID found in request");
+        }
+
+        return firebaseUid;
+    }
+
+    /**
+     * Verify user authorization and extract user ID
+     */
+    private String extractAndVerifyUserId(HttpServletRequest request) {
+        String userId = extractUserIdFromRequest(request);
+
+        // Verify user exists and is authorized
+        if (!userService.userExists(userId)) {
+            throw new RuntimeException("User not found: " + userId);
+        }
+
+        if (!userService.isUserAuthorized(userId)) {
+            throw new RuntimeException("User not authorized: " + userId);
+        }
+
+        return userId;
+    }
+
+    /**
+     * Verify admin privileges
+     */
+    private String extractAndVerifyAdminUser(HttpServletRequest request) {
+        String userId = extractAndVerifyUserId(request);
+
+        // Check if user has admin privileges
+        Boolean isAdmin = (Boolean) request.getAttribute("isAdmin");
+        String userRole = userService.getUserRole(userId);
+
+        if (!"ADMIN".equals(userRole) && (isAdmin == null || !isAdmin)) {
+            throw new RuntimeException("Admin privileges required for user: " + userId);
+        }
+
+        return userId;
     }
 
     /**
