@@ -1,15 +1,20 @@
 package com.apex.firefighter.service;
 
 import com.apex.firefighter.config.DoliGroupConfig;
+import com.apex.firefighter.config.TestConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
+@Import(TestConfig.class)
+@ActiveProfiles("test")
 @TestPropertySource(properties = {
     "DOLIBARR_FF_HR_GROUP_ID=7",
     "DOLIBARR_FF_FINANCIALS_GROUP_ID=6", 
