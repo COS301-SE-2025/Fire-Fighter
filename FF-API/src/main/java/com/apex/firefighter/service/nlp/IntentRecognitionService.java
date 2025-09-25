@@ -480,8 +480,6 @@ public class IntentRecognitionService {
         ASSIGN_TICKET("assign_ticket", "Assign a ticket to a user"),
         CREATE_TICKET("create_ticket", "Create a new ticket"),
         CLOSE_TICKET("close_ticket", "Close an existing ticket"),
-        ADD_COMMENT("add_comment", "Add a comment to a ticket"),
-        UPDATE_PRIORITY("update_priority", "Update ticket priority"),
         
         // Admin intents
         SHOW_ALL_TICKETS("show_all_tickets", "Display all tickets in system"),
