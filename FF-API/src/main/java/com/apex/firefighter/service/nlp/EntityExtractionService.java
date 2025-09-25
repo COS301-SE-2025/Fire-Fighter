@@ -47,7 +47,7 @@ public class EntityExtractionService {
     private TicketService ticketService;
 
     @Autowired
-    private UserService userService;
+    private static UserService userService;
 
     // Map of entity type to list of patterns
     private static final Map<EntityType, List<EntityPattern>> ENTITY_PATTERNS = new HashMap<>();
@@ -96,10 +96,19 @@ public class EntityExtractionService {
                 Arrays.asList(Pattern.compile("\\b(hr|financial|management|logistics)\\s+emergency\\b")))
         ));
 
-        // USER_NAME: Matches simple names (simplified for now. Remember to also change validateEnities method)
+        // USER_NAME: Matches names from database
+        List<User> users = userService.getAuthorizedUsers(); // Fetch authorized users
+        List<String> userNames = new ArrayList<>();
+        for (User user : users) {
+            if (user.getUsername() != null && !user.getUsername().isEmpty()) {
+                userNames.add(user.getUsername().toLowerCase());
+            }
+        }
+                
         ENTITY_PATTERNS.put(EntityType.USER_NAME, Arrays.asList(
             new EntityPattern(0.8, Collections.emptyList(),
-                Arrays.asList("john", "jane", "admin"), // Populate with names from user database
+                //Arrays.asList("john", "jane", "admin"), // Populate with names from user database
+                userNames,
                 Arrays.asList(Pattern.compile("\\b[A-Z][a-z]+\\b")))
         ));
 
