@@ -3,6 +3,8 @@ package com.apex.firefighter.service.usergroups;
 import com.apex.firefighter.service.DolibarrDatabaseService;
 import com.apex.firefighter.service.DolibarrUserGroupService;
 import com.apex.firefighter.service.DolibarrGroupAllocater;
+import com.apex.firefighter.service.GroupChangeNotificationService;
+import com.apex.firefighter.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +32,12 @@ class DolibarrUserGroupServiceTest {
     @Mock
     private DolibarrGroupAllocater mockGroupAllocater;
 
+    @Mock
+    private GroupChangeNotificationService mockNotificationService;
+
+    @Mock
+    private UserRepository mockUserRepository;
+
     private DolibarrUserGroupService dolibarrUserGroupService;
 
     private static final Integer TEST_FIREFIGHTER_GROUP_ID = 5;
@@ -40,7 +48,9 @@ class DolibarrUserGroupServiceTest {
     void setUp() {
         dolibarrUserGroupService = new DolibarrUserGroupService(
             mockDolibarrDatabaseService,
-            mockGroupAllocater
+            mockGroupAllocater,
+            mockNotificationService,
+            mockUserRepository
         );
     }
 
@@ -174,7 +184,9 @@ class DolibarrUserGroupServiceTest {
 
         DolibarrUserGroupService service = new DolibarrUserGroupService(
             mockDolibarrDatabaseService,
-            mockGroupAllocater
+            mockGroupAllocater,
+            mockNotificationService,
+            mockUserRepository
         );
 
         // The service should be created successfully

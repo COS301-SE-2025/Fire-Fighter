@@ -36,7 +36,7 @@ public class DolibarrDatabaseService {
     /**
      * Creates a dedicated DataSource for the Dolibarr database
      */
-    private DataSource createDolibarrDataSource(String dbHost, String dbPort, String dolibarrDbName, 
+    protected DataSource createDolibarrDataSource(String dbHost, String dbPort, String dolibarrDbName, 
                                                String dbUsername, String dbPassword, String dbSslMode) {
         
         if (dbPassword == null || dbPassword.trim().isEmpty()) {

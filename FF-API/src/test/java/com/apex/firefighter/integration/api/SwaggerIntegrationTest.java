@@ -1,9 +1,11 @@
 package com.apex.firefighter.integration.api;
 
+import com.apex.firefighter.config.TestConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
@@ -11,6 +13,7 @@ import org.springframework.test.context.TestPropertySource;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Import(TestConfig.class)
 @TestPropertySource(properties = {
     "spring.datasource.url=jdbc:h2:mem:testdb",
     "spring.jpa.hibernate.ddl-auto=create-drop"

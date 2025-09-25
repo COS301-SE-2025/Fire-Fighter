@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,4 +33,8 @@ public interface AccessSessionRepository extends JpaRepository<AccessSession, Lo
     
     // Find session by session token
     Optional<AccessSession> findBySessionToken(String sessionToken);
+    
+    // Find sessions by user before a certain date (for dormant user detection)
+    @Query("SELECT as FROM AccessSession as WHERE as.user.userId = :userId AND as.startTime < :beforeDate ORDER BY as.startTime DESC")
+    List<AccessSession> findByUserIdBeforeDate(@Param("userId") String userId, @Param("beforeDate") LocalDateTime beforeDate);
 }

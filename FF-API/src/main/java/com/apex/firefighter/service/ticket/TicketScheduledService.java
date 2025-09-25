@@ -100,7 +100,7 @@ public class TicketScheduledService {
 
         } catch (Exception e) {
             System.err.println("Error sending five-minute warnings: " + e.getMessage());
-            throw e; // Re-throw to trigger transaction rollback
+            // Log error but don't re-throw to allow graceful handling
         }
     }
 
@@ -164,7 +164,7 @@ public class TicketScheduledService {
             
         } catch (Exception e) {
             System.err.println("Error closing expired tickets: " + e.getMessage());
-            throw e; // Re-throw to trigger transaction rollback
+            // Log error but don't re-throw to allow graceful handling
         }
     }
 } 

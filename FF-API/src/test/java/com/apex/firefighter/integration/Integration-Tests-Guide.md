@@ -190,6 +190,83 @@ class ApiIntegrationTest {
 - JaCoCo coverage reports include integration test coverage
 - Test results integrated with CI/CD pipeline
 
+## Service Integration Tests (NEW)
+
+### TicketServiceAnomalyIntegrationTest.java ✅ COMPLETED
+Integration tests for TicketService anomaly detection functionality.
+
+This test suite validates the seamless integration of anomaly detection into the ticket creation workflow, ensuring that security monitoring doesn't disrupt critical emergency response operations.
+
+**Test Coverage Includes:**
+
+1. **Ticket Creation with Anomaly Detection Integration**:
+   - Validates that anomaly detection runs automatically during ticket creation
+   - Ensures ticket creation succeeds even if anomaly detection fails
+   - Tests proper integration with AnomalyNotificationService
+   - Verifies user lookup and notification workflow
+
+2. **Service Integration Resilience**:
+   - Tests behavior when user is not found in repository
+   - Validates graceful handling of anomaly notification failures
+   - Ensures other services (Dolibarr, Notification) continue working
+   - Verifies that core ticket functionality is never compromised
+
+3. **Error Isolation and Recovery**:
+   - Database connection failures during user lookup
+   - AnomalyNotificationService exceptions
+   - UserRepository exceptions
+   - Ticket repository failures (should propagate as expected)
+
+4. **Workflow Validation**:
+   - Correct service call ordering
+   - Proper parameter passing between services
+   - Default duration handling with anomaly detection
+   - Integration with existing notification and group services
+
+5. **Edge Case Handling**:
+   - Null and empty parameter handling
+   - Missing emergency types and contacts
+   - Various duration scenarios (null, zero, negative)
+
+**Integration Testing Strategy:**
+- Mocks all external dependencies while testing service integration
+- Focuses on the interaction between TicketService and AnomalyNotificationService
+- Validates that anomaly detection is a non-blocking enhancement
+- Ensures emergency response capabilities are never compromised by security features
+
+**Key Principles Tested:**
+- Emergency response takes priority over security monitoring
+- Anomaly detection failures don't prevent ticket creation
+- All services work together harmoniously
+- Error handling maintains system stability
+
+**Test Methods Include:**
+- `createTicket_WithValidUser_ShouldCheckForAnomaliesAndNotify()`
+- `createTicket_WithUserNotFound_ShouldStillCreateTicketButNotCheckAnomalies()`
+- `createTicket_WithAnomalyNotificationException_ShouldStillCreateTicket()`
+- `createTicket_WithUserRepositoryException_ShouldStillCreateTicket()`
+- `createTicket_WithNullDuration_ShouldUseDefaultDurationAndCheckAnomalies()`
+- `createTicket_ShouldIntegrateWithAllServices()`
+- `createTicket_WithDolibarrServiceException_ShouldStillCheckAnomalies()`
+- `createTicket_WithNotificationServiceException_ShouldStillCheckAnomalies()`
+- Various edge case and error handling tests
+
+**Mock Configuration:**
+```java
+@Mock private TicketRepository ticketRepository;
+@Mock private NotificationService notificationService;
+@Mock private DolibarrUserGroupService dolibarrUserGroupService;
+@Mock private UserRepository userRepository;
+@Mock private AnomalyDetectionService anomalyDetectionService;
+@Mock private AnomalyNotificationService anomalyNotificationService;
+```
+
+**Key Verification Points:**
+- Service call ordering and dependencies
+- Error isolation (anomaly failures don't break ticket creation)
+- Proper parameter passing between integrated services
+- Graceful degradation when components fail
+
 ## Next Steps
 
 1. **Add database integration tests** for complex queries and transactions
@@ -197,3 +274,4 @@ class ApiIntegrationTest {
 3. **Implement contract testing** for API versioning
 4. **Add performance integration tests** for critical endpoints
 5. **Set up TestContainers** for more realistic database testing
+6. **Expand anomaly detection integration tests** - Additional service integration scenarios
