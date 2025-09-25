@@ -41,13 +41,18 @@ public class QueryProcessingService {
                                    EntityExtractionService.ExtractedEntities entities, 
                                    String userId, 
                                    boolean isAdmin) {
-        
+        // Empty or unknown intent
         if (intent == null || intent.getType() == IntentRecognitionService.IntentType.UNKNOWN) {
             return new QueryResult(false, "Invalid or unknown intent", null, QueryResultType.ERROR);
         }
-
+        // Check if user has permission to perform the query
         if (!intentRecognitionService.isIntentAllowed(intent.getType(), isAdmin ? "ADMIN" : "USER")) {
             return new QueryResult(false, "Permission denied for intent: " + intent.getType().getCode(), null, QueryResultType.ERROR); 
+        }
+
+        // Check if query is within max length
+        if (intent.getOriginalQuery() != null && intent.getOriginalQuery().length() > nlpConfig.getMaxQueryLength()) {
+            return new QueryResult(false, "Query exceeds maximum length of " + nlpConfig.getMaxQueryLength() + " characters.", null, QueryResultType.ERROR);
         }
 
         switch (intent.getType()) {
