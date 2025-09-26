@@ -1,0 +1,21 @@
+description,emergencyType,emergencyContact,duration
+"House fire on Main Street - immediate response needed",fire,"+27123456789",30
+"Medical emergency - cardiac arrest at shopping mall",medical,"+27123456790",45
+"Vehicle accident with trapped passengers on highway",rescue,"+27123456791",60
+"Chemical spill at industrial facility",hazmat,"+27123456792",90
+"Apartment building fire - multiple units affected",fire,"+27123456793",120
+"Elderly person fallen and cannot get up",medical,"+27123456794",25
+"Cat stuck in tree - owner distressed",rescue,"+27123456795",15
+"Gas leak reported in residential area",hazmat,"+27123456796",75
+"Kitchen fire in restaurant",fire,"+27123456797",40
+"Heart attack victim at office building",medical,"+27123456798",35
+"Person trapped in elevator",rescue,"+27123456799",20
+"Unknown chemical odor at school",hazmat,"+27123456800",50
+"Grass fire spreading near homes",fire,"+27123456801",80
+"Diabetic emergency at gym",medical,"+27123456802",30
+"Water rescue at local lake",rescue,"+27123456803",65
+"Suspicious powder found in mailroom",hazmat,"+27123456804",45
+"Electrical fire in office building",fire,"+27123456805",55
+"Stroke victim needs immediate transport",medical,"+27123456806",40
+"Child locked in hot car",rescue,"+27123456807",10
+"Paint fumes causing evacuation",hazmat,"+27123456808",35
