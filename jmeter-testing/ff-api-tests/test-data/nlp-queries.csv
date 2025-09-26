@@ -1,0 +1,21 @@
+query,userType
+"Show me all fire emergencies from today",regular
+"How many medical tickets are open?",regular
+"List all tickets assigned to me",regular
+"What's the status of ticket FF-2024-001?",regular
+"Show recent hazmat incidents",regular
+"How many active emergencies right now?",admin
+"Show all tickets from last week",admin
+"Which users created the most tickets?",admin
+"What's the average response time for fire calls?",admin
+"Show me all overdue tickets",admin
+"List all users in the system",admin
+"Show tickets by emergency type",regular
+"What tickets need immediate attention?",regular
+"Show me my notification history",regular
+"How many tickets were closed today?",regular
+"Show all high priority emergencies",admin
+"Which areas have the most incidents?",admin
+"Show user activity for the past month",admin
+"What's the current system status?",regular
+"Show me all pending approvals",admin
