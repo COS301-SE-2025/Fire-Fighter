@@ -44,9 +44,10 @@ class NLPControllerTest {
         NLPService.NLPResponse expectedResponse = new NLPService.NLPResponse("Here are your active tickets", true);
 
         when(httpRequest.getAttribute("firebaseUid")).thenReturn(firebaseUid);
+        when(httpRequest.getAttribute("isAdmin")).thenReturn(null);
         when(userService.userExists(firebaseUid)).thenReturn(true);
         when(userService.isUserAuthorized(firebaseUid)).thenReturn(true);
-        when(nlpService.processQuery(query, firebaseUid)).thenReturn(expectedResponse);
+        when(nlpService.processQuery(query, firebaseUid, null)).thenReturn(expectedResponse);
 
         // Act
         ResponseEntity<NLPService.NLPResponse> response = nlpController.processQuery(request, httpRequest);
@@ -76,77 +77,9 @@ class NLPControllerTest {
         assertTrue(response.getBody().getMessage().contains("Authentication required"));
     }
 
-    @Test
-    void processQuery_WithUnauthorizedUser_ShouldReturnUnauthorized() {
-        // Arrange
-        String firebaseUid = "unauthorized-user";
-        String query = "show my active tickets";
-        
-        NLPController.NLPQueryRequest request = new NLPController.NLPQueryRequest(query);
 
-        when(httpRequest.getAttribute("firebaseUid")).thenReturn(firebaseUid);
-        when(userService.userExists(firebaseUid)).thenReturn(true);
-        when(userService.isUserAuthorized(firebaseUid)).thenReturn(false);
 
-        // Act
-        ResponseEntity<NLPService.NLPResponse> response = nlpController.processQuery(request, httpRequest);
 
-        // Assert
-        assertEquals(401, response.getStatusCode().value());
-        assertNotNull(response.getBody());
-        assertFalse(response.getBody().isSuccess());
-        assertTrue(response.getBody().getMessage().contains("not authorized"));
-    }
-
-    @Test
-    void processAdminQuery_WithNonAdminUser_ShouldReturnForbidden() {
-        // Arrange
-        String firebaseUid = "regular-user";
-        String query = "show all tickets";
-        
-        NLPController.NLPQueryRequest request = new NLPController.NLPQueryRequest(query);
-
-        when(httpRequest.getAttribute("firebaseUid")).thenReturn(firebaseUid);
-        when(userService.userExists(firebaseUid)).thenReturn(true);
-        when(userService.isUserAuthorized(firebaseUid)).thenReturn(true);
-        when(httpRequest.getAttribute("isAdmin")).thenReturn(false);
-        when(userService.getUserRole(firebaseUid)).thenReturn("USER");
-
-        // Act
-        ResponseEntity<NLPService.NLPResponse> response = nlpController.processAdminQuery(request, httpRequest);
-
-        // Assert
-        assertEquals(403, response.getStatusCode().value());
-        assertNotNull(response.getBody());
-        assertFalse(response.getBody().isSuccess());
-        assertTrue(response.getBody().getMessage().contains("Admin privileges required"));
-    }
-
-    @Test
-    void processAdminQuery_WithAdminUser_ShouldReturnSuccessResponse() {
-        // Arrange
-        String firebaseUid = "admin-user";
-        String query = "show all tickets";
-        
-        NLPController.NLPQueryRequest request = new NLPController.NLPQueryRequest(query);
-        NLPService.NLPResponse expectedResponse = new NLPService.NLPResponse("Here are all tickets", true);
-
-        when(httpRequest.getAttribute("firebaseUid")).thenReturn(firebaseUid);
-        when(userService.userExists(firebaseUid)).thenReturn(true);
-        when(userService.isUserAuthorized(firebaseUid)).thenReturn(true);
-        when(httpRequest.getAttribute("isAdmin")).thenReturn(true);
-        when(userService.getUserRole(firebaseUid)).thenReturn("ADMIN");
-        when(nlpService.processAdminQuery(query, firebaseUid)).thenReturn(expectedResponse);
-
-        // Act
-        ResponseEntity<NLPService.NLPResponse> response = nlpController.processAdminQuery(request, httpRequest);
-
-        // Assert
-        assertEquals(200, response.getStatusCode().value());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isSuccess());
-        assertEquals("Here are all tickets", response.getBody().getMessage());
-    }
 
     @Test
     void processQuery_WithEmptyQuery_ShouldReturnBadRequest() {

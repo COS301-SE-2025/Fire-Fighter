@@ -1,9 +1,10 @@
+package com.apex.firefighter.service.nlp;
+
 import com.apex.firefighter.config.NLPConfig;
-import com.apex.firefighter.service.nlp.EntityExtractionService;
-import com.apex.firefighter.service.nlp.IntentRecognitionService;
-import com.apex.firefighter.service.nlp.QueryProcessingService;
 import com.apex.firefighter.model.Ticket;
+import com.apex.firefighter.model.User;
 import com.apex.firefighter.service.ticket.TicketService;
+import com.apex.firefighter.service.UserService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,9 @@ public class EntityExtractionServiceTest {
     @Mock
     private TicketService ticketService;
 
+    @Mock
+    private UserService userService;
+
     @InjectMocks
     private EntityExtractionService entityExtractionService;
 
@@ -44,7 +48,10 @@ public class EntityExtractionServiceTest {
         // Mock NLPConfig with lenient stubbing to avoid unnecessary stubbing errors
         lenient().when(nlpConfig.getEntityConfidenceThreshold()).thenReturn(0.6);
         lenient().when(nlpConfig.isDebugEnabled()).thenReturn(false); // Disable debug to avoid console spam
-        
+
+        // Mock UserService to return empty list of users to avoid NullPointerException
+        lenient().when(userService.getAuthorizedUsers()).thenReturn(new ArrayList<>());
+
         // Reset ENTITY_PATTERNS
         ReflectionTestUtils.invokeMethod(entityExtractionService, "initializeEntityPatterns");
     }
@@ -152,6 +159,12 @@ public class EntityExtractionServiceTest {
         entities.setEmergencyTypes(new ArrayList<>()); // Initialize emergency types list
         entities.setNumbers(new ArrayList<>()); // Initialize numbers list
         entities.setTimeExpressions(new ArrayList<>()); // Initialize time expressions list
+        entities.setDurations(new ArrayList<>()); // Initialize durations list
+        entities.setPhones(new ArrayList<>()); // Initialize phones list
+        entities.setDescriptions(new ArrayList<>()); // Initialize descriptions list
+        entities.setPriorities(new ArrayList<>()); // Initialize priorities list
+        entities.setLocations(new ArrayList<>()); // Initialize locations list
+        entities.setEmails(new ArrayList<>()); // Initialize emails list
         entities.setAllEntities(Map.of(
             EntityExtractionService.EntityType.TICKET_ID, entities.getTicketIds(),
             EntityExtractionService.EntityType.STATUS, entities.getStatuses(),

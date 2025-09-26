@@ -1,3 +1,5 @@
+package com.apex.firefighter.service.nlp;
+
 import com.apex.firefighter.service.nlp.EntityExtractionService;
 import com.apex.firefighter.service.nlp.IntentRecognitionService;
 import com.apex.firefighter.service.nlp.QueryProcessingService;

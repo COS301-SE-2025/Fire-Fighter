@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -44,6 +45,9 @@ class GmailEmailServiceTest {
 
     @BeforeEach
     void setUp() {
+        // Enable Gmail service for testing
+        ReflectionTestUtils.setField(gmailEmailService, "gmailServiceEnabled", true);
+
         testUser = new User();
         testUser.setUserId("test-user-123");
         testUser.setUsername("testuser");
