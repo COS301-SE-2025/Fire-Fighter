@@ -16,14 +16,17 @@ public class AnomalyNotificationService {
     private final GmailEmailService emailService;
     private final UserRepository userRepository;
     private final AnomalyDetectionService anomalyDetectionService;
+    private final UserAnomalyNotificationService userAnomalyNotificationService;
 
     @Autowired
     public AnomalyNotificationService(GmailEmailService emailService, 
                                     UserRepository userRepository,
-                                    AnomalyDetectionService anomalyDetectionService) {
+                                    AnomalyDetectionService anomalyDetectionService,
+                                    UserAnomalyNotificationService userAnomalyNotificationService) {
         this.emailService = emailService;
         this.userRepository = userRepository;
         this.anomalyDetectionService = anomalyDetectionService;
+        this.userAnomalyNotificationService = userAnomalyNotificationService;
     }
 
     /**
@@ -46,6 +49,9 @@ public class AnomalyNotificationService {
 
             String riskLevel = determineRiskLevel(anomalyType);
             System.out.println("🚨 ANOMALY NOTIFICATION: " + anomalyType + " detected (" + riskLevel + " risk) - sending notifications to " + adminUsers.size() + " admin(s)");
+            
+            // Create notification for the user to see in frontend
+            userAnomalyNotificationService.notifyUserOfAnomaly(user, anomalyType, anomalyDetails);
             
             // Send notification to each admin
             for (User admin : adminUsers) {
