@@ -1,0 +1,13 @@
+username,password,email,firstName,lastName,emergencyType
+testuser1,password123,testuser1@firefighter.com,John,Smith,fire
+testuser2,password123,testuser2@firefighter.com,Jane,Doe,medical
+testuser3,password123,testuser3@firefighter.com,Mike,Johnson,rescue
+testuser4,password123,testuser4@firefighter.com,Sarah,Wilson,hazmat
+testuser5,password123,testuser5@firefighter.com,David,Brown,fire
+testuser6,password123,testuser6@firefighter.com,Lisa,Davis,medical
+testuser7,password123,testuser7@firefighter.com,Tom,Miller,rescue
+testuser8,password123,testuser8@firefighter.com,Amy,Garcia,fire
+testuser9,password123,testuser9@firefighter.com,Chris,Martinez,medical
+testuser10,password123,testuser10@firefighter.com,Emma,Anderson,hazmat
+admin1,adminpass123,admin1@firefighter.com,Admin,User,fire
+admin2,adminpass123,admin2@firefighter.com,Super,Admin,medical
