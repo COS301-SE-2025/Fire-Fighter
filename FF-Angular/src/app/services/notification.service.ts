@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, catchError, tap, map, take, interval, switchMap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
+import { AnomalyNotificationService } from './anomaly-notification.service';
+import { AnomalyToastService } from './anomaly-toast.service';
 
 export interface Notification {
   id: number;
@@ -26,7 +28,9 @@ export class NotificationService {
 
   constructor(
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
+    private anomalyNotificationService: AnomalyNotificationService,
+    private anomalyToastService: AnomalyToastService
   ) {
     // Load notifications from backend on service initialization
     this.loadNotifications();
@@ -75,6 +79,42 @@ export class NotificationService {
       }
 
       this.notifications.next(notifications);
+      
+      // Also check for anomaly notifications
+      this.checkAnomalyNotifications();
+    });
+  }
+
+  /**
+   * Check for anomaly notifications and show toasts
+   */
+  private checkAnomalyNotifications(): void {
+    // Check for anomaly notifications
+    this.anomalyNotificationService.getUnreadNotifications().pipe(
+      catchError(error => {
+        console.error('Error fetching anomaly notifications:', error);
+        return of([]);
+      })
+    ).subscribe(anomalyNotifications => {
+      anomalyNotifications.forEach(notification => {
+        this.anomalyToastService.showAnomalyToast(notification.anomalyType);
+        // Mark as read after showing
+        this.anomalyNotificationService.markAsRead(notification.id).subscribe();
+      });
+    });
+
+    // Check for group change notifications
+    this.anomalyNotificationService.getGroupChangeNotifications().pipe(
+      catchError(error => {
+        console.error('Error fetching group change notifications:', error);
+        return of([]);
+      })
+    ).subscribe(groupChangeNotifications => {
+      groupChangeNotifications.forEach(notification => {
+        this.anomalyToastService.showGroupChangeToast(notification.securityLevel);
+        // Mark as read after showing
+        this.anomalyNotificationService.markGroupChangeAsRead(notification.id).subscribe();
+      });
     });
   }
 
@@ -110,6 +150,8 @@ export class NotificationService {
         )
         .subscribe(notifications => {
           this.notifications.next(notifications);
+          // Also check for anomaly notifications on initial load
+          this.checkAnomalyNotifications();
         });
     });
   }
