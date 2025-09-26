@@ -3,6 +3,7 @@ package com.apex.firefighter.service;
 import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -20,6 +21,9 @@ public class GmailEmailService {
 
     @Autowired
     private JavaMailSender mailSender;
+
+    @Value("${gmail.service.enabled:true}")
+    private boolean gmailServiceEnabled;
 
     public String exportTicketsToCsv(List<Ticket> tickets) {
         StringBuilder sb = new StringBuilder();
@@ -41,7 +45,37 @@ public class GmailEmailService {
         return value == null ? "" : value.toString().replaceAll(",", " ");
     }
 
+    /**
+     * Check if Gmail service is enabled
+     * @return true if Gmail service is enabled, false otherwise
+     */
+    private boolean isEmailServiceEnabled() {
+        return gmailServiceEnabled;
+    }
+
+    /**
+     * Log when email sending is disabled
+     * @param emailType The type of email that would have been sent
+     * @param recipient The intended recipient
+     */
+    private void logEmailDisabled(String emailType, String recipient) {
+        System.out.println("📧 EMAIL SERVICE DISABLED: Skipping " + emailType + " email to " + recipient);
+    }
+
+    /**
+     * Public method to check if Gmail service is enabled
+     * @return true if Gmail service is enabled, false otherwise
+     */
+    public boolean isGmailServiceEnabled() {
+        return gmailServiceEnabled;
+    }
+
     public void sendTicketsCsv(String recipientEmail, String csvContent, User user) throws MessagingException {
+        if (!isEmailServiceEnabled()) {
+            logEmailDisabled("CSV Export", recipientEmail);
+            return;
+        }
+        
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -230,6 +264,11 @@ public class GmailEmailService {
      * Send ticket creation notification email
      */
     public void sendTicketCreationEmail(String recipientEmail, Ticket ticket, User user) throws MessagingException {
+        if (!isEmailServiceEnabled()) {
+            logEmailDisabled("Ticket Creation", recipientEmail);
+            return;
+        }
+        
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -253,6 +292,11 @@ public class GmailEmailService {
      * Send ticket completion notification email
      */
     public void sendTicketCompletionEmail(String recipientEmail, Ticket ticket, User user) throws MessagingException {
+        if (!isEmailServiceEnabled()) {
+            logEmailDisabled("Ticket Completion", recipientEmail);
+            return;
+        }
+        
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -276,6 +320,11 @@ public class GmailEmailService {
      * Send ticket revocation notification email
      */
     public void sendTicketRevocationEmail(String recipientEmail, Ticket ticket, User user, String reason) throws MessagingException {
+        if (!isEmailServiceEnabled()) {
+            logEmailDisabled("Ticket Revocation", recipientEmail);
+            return;
+        }
+        
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -299,6 +348,11 @@ public class GmailEmailService {
      * Send five-minute warning notification email
      */
     public void sendFiveMinuteWarningEmail(String recipientEmail, Ticket ticket, User user) throws MessagingException {
+        if (!isEmailServiceEnabled()) {
+            logEmailDisabled("Five Minute Warning", recipientEmail);
+            return;
+        }
+        
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -692,6 +746,11 @@ public class GmailEmailService {
      * Send suspicious group change notification email to all admins
      */
     public void sendSuspiciousGroupChangeNotificationEmail(String recipientEmail, User user, String ticketId, String oldGroup, String newGroup, String reason, String suspicionLevel) throws MessagingException {
+        if (!isEmailServiceEnabled()) {
+            logEmailDisabled("Suspicious Group Change", recipientEmail);
+            return;
+        }
+        
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -790,6 +849,11 @@ public class GmailEmailService {
      * Send anomaly detection notification email to admins
      */
     public void sendAnomalyDetectionNotificationEmail(String recipientEmail, User user, Ticket ticket, String anomalyType, String anomalyDetails, String riskLevel) throws MessagingException {
+        if (!isEmailServiceEnabled()) {
+            logEmailDisabled("Anomaly Detection", recipientEmail);
+            return;
+        }
+        
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
