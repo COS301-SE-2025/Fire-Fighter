@@ -1,0 +1,105 @@
+/* Anomaly Toast Styles for Ionic */
+.anomaly-toast {
+  --background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  --color: white;
+  --border-color: #c44569;
+  --border-width: 4px;
+  --border-style: solid;
+  --border-radius: 8px;
+  --box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.anomaly-toast .toast-wrapper {
+  border-left: 4px solid var(--border-color);
+}
+
+.anomaly-toast .toast-header {
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 4px;
+}
+
+.anomaly-toast .toast-message {
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+/* Group Change Toast Styles */
+.group-change-toast {
+  --border-radius: 8px;
+  --box-shadow: 0 4px 12px rgba(72, 52, 212, 0.3);
+}
+
+.group-change-toast .toast-wrapper {
+  border-left: 4px solid var(--border-color);
+}
+
+.group-change-toast .toast-header {
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-bottom: 4px;
+}
+
+.group-change-toast .toast-message {
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+/* High security level specific styling */
+.group-change-toast.high-security {
+  --background: linear-gradient(135deg, #e74c3c, #c0392b);
+  --color: white;
+  --border-color: #a93226;
+}
+
+/* Medium security level specific styling */
+.group-change-toast.medium-security {
+  --background: linear-gradient(135deg, #f39c12, #e67e22);
+  --color: white;
+  --border-color: #d68910;
+}
+
+/* Low security level styling */
+.group-change-toast.low-security {
+  --background: linear-gradient(135deg, #27ae60, #2ecc71);
+  --color: white;
+  --border-color: #229954;
+}
+
+/* Animation for toast entrance */
+.anomaly-toast,
+.group-change-toast {
+  animation: slideInFromTop 0.3s ease-out;
+}
+
+@keyframes slideInFromTop {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Enhanced styling for better visibility */
+.anomaly-toast ion-button,
+.group-change-toast ion-button {
+  --color: white;
+  font-weight: bold;
+}
+
+.anomaly-toast ion-button:hover,
+.group-change-toast ion-button:hover {
+  opacity: 0.8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .anomaly-toast,
+  .group-change-toast {
+    margin: 10px;
+    --width: calc(100% - 20px);
+  }
+}
