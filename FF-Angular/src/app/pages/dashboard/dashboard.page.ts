@@ -47,6 +47,9 @@ export class DashboardPage implements OnInit, OnDestroy {
   unreadNotificationsCount = 0;
   adminAccessDeniedMessage: string | null = null;
   private notificationSubscription?: Subscription;
+  private userSubscription?: Subscription;
+  private ticketCreatedSubscription?: Subscription;
+  private currentUserUid: string | null = null;
 
   // Add a public usernames map for template access
   public usernames: { [userId: string]: string } = {};
@@ -95,9 +98,20 @@ export class DashboardPage implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.loadTickets();
     this.subscribeToNotifications();
     this.checkForAdminAccessError();
+    this.subscribeToTicketCreation();
+
+    // Subscribe to user changes and load tickets when user is available
+    this.userSubscription = this.authService.user$.subscribe(user => {
+      if (user) {
+        this.currentUserUid = user.uid;
+        this.loadTickets();
+      } else {
+        this.currentUserUid = null;
+        this.tickets = [];
+      }
+    });
   }
 
   checkForAdminAccessError() {
@@ -116,17 +130,74 @@ export class DashboardPage implements OnInit, OnDestroy {
     if (this.notificationSubscription) {
       this.notificationSubscription.unsubscribe();
     }
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
+    if (this.ticketCreatedSubscription) {
+      this.ticketCreatedSubscription.unsubscribe();
+    }
   }
 
   subscribeToNotifications() {
+    let previousNotificationCount = 0;
+
     this.notificationSubscription = this.notificationService.getNotifications()
       .subscribe(notifications => {
         this.unreadNotificationsCount = notifications.filter(n => !n.read).length;
+
+        // Check for new ticket creation notifications to auto-refresh dashboard
+        if (notifications.length > previousNotificationCount && previousNotificationCount > 0) {
+          // Look for new ticket_created notifications
+          const newNotifications = notifications.slice(0, notifications.length - previousNotificationCount);
+          const hasNewTicketNotification = newNotifications.some(notification =>
+            notification.type === 'ticket_created' ||
+            notification.message.includes('has been created') ||
+            notification.title.includes('New Ticket Created')
+          );
+
+          if (hasNewTicketNotification) {
+            console.log('🎫 New ticket detected, refreshing dashboard content...');
+            // Refresh tickets without showing loading spinner for better UX
+            this.refreshTicketsQuietly();
+          }
+        }
+
+        previousNotificationCount = notifications.length;
       });
+  }
+
+  subscribeToTicketCreation() {
+    // Subscribe to immediate ticket creation events for instant dashboard refresh
+    this.ticketCreatedSubscription = this.ticketService.ticketCreated$.subscribe(newTicket => {
+      console.log('🚀 Immediate ticket creation detected, refreshing dashboard content...');
+      // Only refresh if the ticket belongs to the current user or if user is admin
+      const isAdmin = this.authService.isCurrentUserAdmin();
+      if (isAdmin || newTicket.userId === this.currentUserUid) {
+        this.refreshTicketsQuietly();
+      }
+    });
   }
 
   loadTickets() {
     this.isLoading = true;
+    this.error = null;
+    this.loadTicketsInternal(true);
+  }
+
+  /**
+   * Refresh tickets quietly without showing loading spinner
+   */
+  refreshTicketsQuietly() {
+    this.loadTicketsInternal(false);
+  }
+
+  /**
+   * Internal method to load tickets with optional loading indicator
+   */
+  private loadTicketsInternal(showLoading: boolean = true) {
+    if (showLoading) {
+      this.isLoading = true;
+    }
     this.error = null;
 
     // Check if user is admin to determine which tickets to load
@@ -140,7 +211,11 @@ export class DashboardPage implements OnInit, OnDestroy {
             this.error = 'Failed to load tickets. Please try again later.';
             return of([]);
           }),
-          finalize(() => this.isLoading = false)
+          finalize(() => {
+            if (showLoading) {
+              this.isLoading = false;
+            }
+          })
         )
         .subscribe(adminTickets => {
           // Convert AdminTicket to Ticket format and get last 6
@@ -149,21 +224,36 @@ export class DashboardPage implements OnInit, OnDestroy {
         });
     } else {
       // Regular user: Load only their tickets (last 6)
-      this.ticketService.getTickets()
-        .pipe(
-          catchError(err => {
-            this.error = 'Failed to load tickets. Please try again later.';
-            return of([]);
-          }),
-          finalize(() => this.isLoading = false)
-        )
-        .subscribe(tickets => {
-          // Get last 6 tickets for the user, sorted by date created (newest first)
-          const sortedTickets = tickets
-            .sort((a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime())
-            .slice(0, 6);
-          this.processTickets(sortedTickets);
-        });
+      if (this.currentUserUid) {
+        this.ticketService.getTickets()
+          .pipe(
+            catchError(err => {
+              this.error = 'Failed to load tickets. Please try again later.';
+              return of([]);
+            }),
+            finalize(() => {
+              if (showLoading) {
+                this.isLoading = false;
+              }
+            })
+          )
+          .subscribe(tickets => {
+            // Filter tickets for current user only using user.uid
+            const userTickets = tickets.filter(ticket => ticket.userId === this.currentUserUid);
+
+            // Get last 6 tickets for the user, sorted by date created (newest first)
+            const sortedTickets = userTickets
+              .sort((a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime())
+              .slice(0, 6);
+            this.processTickets(sortedTickets);
+          });
+      } else {
+        // No user found, clear tickets and stop loading
+        this.tickets = [];
+        if (showLoading) {
+          this.isLoading = false;
+        }
+      }
     }
   }
 
@@ -278,22 +368,10 @@ export class DashboardPage implements OnInit, OnDestroy {
   get recentActivities(): Activity[] {
     const activities: Activity[] = [];
     const isAdmin = this.authService.isCurrentUserAdmin();
-    const currentUser = this.authService.getCurrentUserProfile();
 
-    // Filter tickets based on user role
-    let ticketsToShow: Ticket[] = [];
-
-    if (isAdmin) {
-      // Admin: Show all tickets (already loaded from admin service)
-      ticketsToShow = this.tickets.slice(0, 6);
-    } else {
-      // Regular user: Only show their own tickets
-      if (currentUser) {
-        ticketsToShow = this.tickets
-          .filter(ticket => ticket.userId === currentUser.userId || ticket.userId === currentUser.email)
-          .slice(0, 6);
-      }
-    }
+    // For regular users, tickets are already filtered in loadTickets()
+    // For admins, show all tickets (already loaded from admin service)
+    const ticketsToShow = this.tickets.slice(0, 6);
 
     // Generate activities from filtered tickets
     ticketsToShow.forEach(ticket => {
