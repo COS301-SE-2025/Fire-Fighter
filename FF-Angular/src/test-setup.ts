@@ -163,6 +163,7 @@ export const mockChatbotService = {
   sendMessage: jasmine.createSpy('sendMessage').and.returnValue(of({ response: 'Test response' })),
   isAdminQuery: jasmine.createSpy('isAdminQuery').and.returnValue(false),
   checkHealth: jasmine.createSpy('checkHealth').and.returnValue(of({ available: true })),
+  getHealth: jasmine.createSpy('getHealth').and.returnValue(of({ available: true })), // Add missing method
 };
 
 // Mock ApiConfigService for tests
