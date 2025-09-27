@@ -186,6 +186,61 @@ pipeline {
             }
         }
 
+        stage('E2E Tests') {
+            steps {
+                dir('FF-Angular') {
+                    script {
+                        try {
+                            echo "🚀 Starting Angular development server for E2E tests..."
+                            sh 'npm start &'
+
+                            echo "⏳ Waiting for server to be ready..."
+                            sh '''
+                                for i in {1..30}; do
+                                    if curl -f http://localhost:4200 >/dev/null 2>&1; then
+                                        echo "✅ Server is ready!"
+                                        break
+                                    fi
+                                    echo "Waiting for server... ($i/30)"
+                                    sleep 2
+                                done
+                            '''
+
+                            echo "🧪 Running E2E tests..."
+                            sh 'npm run e2e:headless'
+
+                        } catch (Exception e) {
+                            echo "❌ E2E tests failed: ${e.getMessage()}"
+                            throw e
+                        } finally {
+                            echo "🧹 Cleaning up Angular dev server..."
+                            sh 'pkill -f "ng serve" || true'
+                            sh 'pkill -f "node.*ng serve" || true'
+                        }
+                    }
+                }
+            }
+            post {
+                always {
+                    dir('FF-Angular') {
+                        // Archive Cypress test artifacts
+                        archiveArtifacts artifacts: 'cypress/screenshots/**/*', allowEmptyArchive: true
+                        archiveArtifacts artifacts: 'cypress/videos/**/*', allowEmptyArchive: true
+
+                        // Clean up any remaining processes
+                        sh 'pkill -f "ng serve" || true'
+                        sh 'pkill -f "node.*ng serve" || true'
+                    }
+                }
+                success {
+                    echo "✅ All E2E tests passed successfully!"
+                }
+                failure {
+                    echo "❌ E2E tests failed - check archived screenshots and videos for details"
+                }
+            }
+        }
+
         stage('Build') {
             steps {
                 script {
@@ -269,12 +324,15 @@ pipeline {
             echo "✅ Build completed successfully!"
             echo "📦 JAR file: target/firefighter-platform-0.0.1-SNAPSHOT.jar"
             echo "🌐 Frontend build: www/"
+            echo "🧪 Unit tests: ✅ Passed"
+            echo "🔗 Integration tests: ✅ Passed"
+            echo "🎯 E2E tests: ✅ Passed"
             echo "🐳 Ready for Portainer deployment!"
 
             // Update GitHub status to success
             script {
                 updateGitHubStatus('success', 'Fire-Fighter build completed successfully', 'jenkins/build')
-                updateGitHubStatus('success', 'All tests passed', 'jenkins/tests')
+                updateGitHubStatus('success', 'All tests passed (Unit + Integration + E2E)', 'jenkins/tests')
             }
         }
         failure {

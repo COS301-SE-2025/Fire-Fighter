@@ -61,10 +61,37 @@ create_directories() {
     print_success "Directories created and permissions set"
 }
 
+# Install E2E testing dependencies
+install_e2e_dependencies() {
+    print_status "Installing E2E testing dependencies..."
+
+    # Install Chrome for Cypress
+    if ! command -v google-chrome &> /dev/null; then
+        print_status "Installing Google Chrome..."
+        wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
+        echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list
+        apt-get update
+        apt-get install -y google-chrome-stable
+    else
+        print_success "Google Chrome already installed"
+    fi
+
+    # Install Xvfb for headless display
+    if ! command -v xvfb-run &> /dev/null; then
+        print_status "Installing Xvfb for headless display..."
+        apt-get install -y xvfb
+    else
+        print_success "Xvfb already installed"
+    fi
+
+    # Install additional dependencies for Cypress
+    apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+}
+
 # Generate environment file
 create_env_file() {
     print_status "Creating environment configuration..."
-    
+
     cat > .env << EOF
 # Jenkins Configuration
 JENKINS_AGENT_SECRET=your-agent-secret-here
@@ -83,8 +110,13 @@ JWT_SECRET=your-jwt-secret-key-here
 SONAR_JDBC_URL=jdbc:postgresql://sonar-db:5432/sonar
 SONAR_JDBC_USERNAME=sonar
 SONAR_JDBC_PASSWORD=sonar_password
+
+# E2E Testing Configuration
+CYPRESS_baseUrl=http://localhost:4200
+CYPRESS_video=false
+CYPRESS_screenshotOnRunFailure=true
 EOF
-    
+
     print_warning "Please edit .env file with your actual configuration values"
 }
 
@@ -153,9 +185,10 @@ show_next_steps() {
 main() {
     echo "=== Fire-Fighter Jenkins Setup ==="
     echo
-    
+
     check_docker
     create_directories
+    install_e2e_dependencies
     create_env_file
     start_services
     show_next_steps
