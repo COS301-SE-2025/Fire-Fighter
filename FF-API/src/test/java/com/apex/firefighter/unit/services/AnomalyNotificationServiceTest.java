@@ -97,7 +97,9 @@ class AnomalyNotificationServiceTest {
         verify(emailService, times(2)).sendAnomalyDetectionNotificationEmail(
             anyString(), eq(testUser), eq(testTicket), eq(anomalyType), eq(anomalyDetails), eq("MEDIUM"));
         verify(emailService).sendAnomalyDetectionNotificationEmail(
-            "admin2@example.com", testUser, testTicket, anomalyType, anomalyDetails, "LOW");
+            "admin1@example.com", testUser, testTicket, anomalyType, anomalyDetails, "MEDIUM");
+        verify(emailService).sendAnomalyDetectionNotificationEmail(
+            "admin2@example.com", testUser, testTicket, anomalyType, anomalyDetails, "MEDIUM");
     }
 
 
