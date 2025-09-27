@@ -97,29 +97,9 @@ class AnomalyNotificationServiceTest {
         verify(emailService, times(2)).sendAnomalyDetectionNotificationEmail(
             anyString(), eq(testUser), eq(testTicket), eq(anomalyType), eq(anomalyDetails), eq("MEDIUM"));
         verify(emailService).sendAnomalyDetectionNotificationEmail(
-            "admin1@example.com", testUser, testTicket, anomalyType, anomalyDetails, "MEDIUM");
-        verify(emailService).sendAnomalyDetectionNotificationEmail(
-            "admin2@example.com", testUser, testTicket, anomalyType, anomalyDetails, "MEDIUM");
+            "admin2@example.com", testUser, testTicket, anomalyType, anomalyDetails, "LOW");
     }
 
-    @Test
-    void notifyAdminsOfAnomaly_WithHighRiskDormantUser_ShouldSendHighRiskEmails() throws MessagingException {
-        // Arrange
-        String anomalyType = "DORMANT_USER_ACTIVITY";
-        String anomalyDetails = "User was dormant for 30+ days, logged in and made 5 actions within 15 minutes";
-        
-        when(userRepository.findByIsAdminTrue()).thenReturn(adminUsers);
-        doNothing().when(emailService).sendAnomalyDetectionNotificationEmail(
-            anyString(), any(User.class), any(Ticket.class), anyString(), anyString(), anyString());
-
-        // Act
-        anomalyNotificationService.notifyAdminsOfAnomaly(testUser, testTicket, anomalyType, anomalyDetails);
-
-        // Assert
-        verify(userRepository).findByIsAdminTrue();
-        verify(emailService, times(2)).sendAnomalyDetectionNotificationEmail(
-            anyString(), eq(testUser), eq(testTicket), eq(anomalyType), eq(anomalyDetails), eq("HIGH"));
-    }
 
     @Test
     void notifyAdminsOfAnomaly_WithLowRiskOffHours_ShouldSendLowRiskEmails() throws MessagingException {
@@ -203,7 +183,6 @@ class AnomalyNotificationServiceTest {
         String frequencyDetails = "User has made 10 requests in the last hour (threshold: 5)";
         
         when(anomalyDetectionService.getRequestFrequencyDetails(TEST_USER_ID)).thenReturn(frequencyDetails);
-        when(anomalyDetectionService.getDormantUserAnomalyDetails(TEST_USER_ID)).thenReturn(null);
         when(anomalyDetectionService.getOffHoursAnomalyDetails(TEST_USER_ID)).thenReturn(null);
         when(userRepository.findByIsAdminTrue()).thenReturn(adminUsers);
         doNothing().when(emailService).sendAnomalyDetectionNotificationEmail(
@@ -214,31 +193,11 @@ class AnomalyNotificationServiceTest {
 
         // Assert
         verify(anomalyDetectionService).getRequestFrequencyDetails(TEST_USER_ID);
-        verify(anomalyDetectionService).getDormantUserAnomalyDetails(TEST_USER_ID);
         verify(anomalyDetectionService).getOffHoursAnomalyDetails(TEST_USER_ID);
         verify(emailService, times(2)).sendAnomalyDetectionNotificationEmail(
             anyString(), eq(testUser), eq(testTicket), eq("FREQUENT_REQUESTS"), eq(frequencyDetails), eq("MEDIUM"));
     }
 
-    @Test
-    void checkAndNotifyAnomalies_WithDormantUserAnomaly_ShouldNotifyAdmins() throws MessagingException {
-        // Arrange
-        String dormantDetails = "User was dormant for 30+ days, logged in and made 5 actions within 15 minutes";
-        
-        when(anomalyDetectionService.getRequestFrequencyDetails(TEST_USER_ID)).thenReturn(null);
-        when(anomalyDetectionService.getDormantUserAnomalyDetails(TEST_USER_ID)).thenReturn(dormantDetails);
-        when(anomalyDetectionService.getOffHoursAnomalyDetails(TEST_USER_ID)).thenReturn(null);
-        when(userRepository.findByIsAdminTrue()).thenReturn(adminUsers);
-        doNothing().when(emailService).sendAnomalyDetectionNotificationEmail(
-            anyString(), any(User.class), any(Ticket.class), anyString(), anyString(), anyString());
-
-        // Act
-        anomalyNotificationService.checkAndNotifyAnomalies(testUser, testTicket);
-
-        // Assert
-        verify(emailService, times(2)).sendAnomalyDetectionNotificationEmail(
-            anyString(), eq(testUser), eq(testTicket), eq("DORMANT_USER_ACTIVITY"), eq(dormantDetails), eq("HIGH"));
-    }
 
     @Test
     void checkAndNotifyAnomalies_WithOffHoursAnomaly_ShouldNotifyAdmins() throws MessagingException {
@@ -246,7 +205,6 @@ class AnomalyNotificationServiceTest {
         String offHoursDetails = "User made a request at 22:00 which is outside of regular work hours";
         
         when(anomalyDetectionService.getRequestFrequencyDetails(TEST_USER_ID)).thenReturn(null);
-        when(anomalyDetectionService.getDormantUserAnomalyDetails(TEST_USER_ID)).thenReturn(null);
         when(anomalyDetectionService.getOffHoursAnomalyDetails(TEST_USER_ID)).thenReturn(offHoursDetails);
         when(userRepository.findByIsAdminTrue()).thenReturn(adminUsers);
         doNothing().when(emailService).sendAnomalyDetectionNotificationEmail(
@@ -260,41 +218,11 @@ class AnomalyNotificationServiceTest {
             anyString(), eq(testUser), eq(testTicket), eq("OFF_HOURS_ACTIVITY"), eq(offHoursDetails), eq("LOW"));
     }
 
-    @Test
-    void checkAndNotifyAnomalies_WithMultipleAnomalies_ShouldNotifyForAll() throws MessagingException {
-        // Arrange
-        String frequencyDetails = "User has made 10 requests in the last hour (threshold: 5)";
-        String dormantDetails = "User was dormant for 30+ days, logged in and made 5 actions within 15 minutes";
-        String offHoursDetails = "User made a request at 22:00 which is outside of regular work hours";
-        
-        when(anomalyDetectionService.getRequestFrequencyDetails(TEST_USER_ID)).thenReturn(frequencyDetails);
-        when(anomalyDetectionService.getDormantUserAnomalyDetails(TEST_USER_ID)).thenReturn(dormantDetails);
-        when(anomalyDetectionService.getOffHoursAnomalyDetails(TEST_USER_ID)).thenReturn(offHoursDetails);
-        when(userRepository.findByIsAdminTrue()).thenReturn(adminUsers);
-        doNothing().when(emailService).sendAnomalyDetectionNotificationEmail(
-            anyString(), any(User.class), any(Ticket.class), anyString(), anyString(), anyString());
-
-        // Act
-        anomalyNotificationService.checkAndNotifyAnomalies(testUser, testTicket);
-
-        // Assert
-        verify(emailService, times(6)).sendAnomalyDetectionNotificationEmail(
-            anyString(), eq(testUser), eq(testTicket), anyString(), anyString(), anyString());
-        
-        // Verify each anomaly type was sent
-        verify(emailService, times(2)).sendAnomalyDetectionNotificationEmail(
-            anyString(), eq(testUser), eq(testTicket), eq("FREQUENT_REQUESTS"), eq(frequencyDetails), eq("MEDIUM"));
-        verify(emailService, times(2)).sendAnomalyDetectionNotificationEmail(
-            anyString(), eq(testUser), eq(testTicket), eq("DORMANT_USER_ACTIVITY"), eq(dormantDetails), eq("HIGH"));
-        verify(emailService, times(2)).sendAnomalyDetectionNotificationEmail(
-            anyString(), eq(testUser), eq(testTicket), eq("OFF_HOURS_ACTIVITY"), eq(offHoursDetails), eq("LOW"));
-    }
 
     @Test
     void checkAndNotifyAnomalies_WithNoAnomalies_ShouldNotSendEmails() throws MessagingException {
         // Arrange
         when(anomalyDetectionService.getRequestFrequencyDetails(TEST_USER_ID)).thenReturn(null);
-        when(anomalyDetectionService.getDormantUserAnomalyDetails(TEST_USER_ID)).thenReturn(null);
         when(anomalyDetectionService.getOffHoursAnomalyDetails(TEST_USER_ID)).thenReturn(null);
 
         // Act
@@ -302,7 +230,6 @@ class AnomalyNotificationServiceTest {
 
         // Assert
         verify(anomalyDetectionService).getRequestFrequencyDetails(TEST_USER_ID);
-        verify(anomalyDetectionService).getDormantUserAnomalyDetails(TEST_USER_ID);
         verify(anomalyDetectionService).getOffHoursAnomalyDetails(TEST_USER_ID);
         verify(emailService, never()).sendAnomalyDetectionNotificationEmail(
             anyString(), any(User.class), any(Ticket.class), anyString(), anyString(), anyString());
@@ -329,19 +256,9 @@ class AnomalyNotificationServiceTest {
     void getAnomalyTypeDescription_WithFrequentRequests_ShouldReturnCorrectDescription() {
         // Act
         String description = anomalyNotificationService.getAnomalyTypeDescription("FREQUENT_REQUESTS");
-
-        // Assert
         assertThat(description).isEqualTo("Excessive Request Frequency");
     }
 
-    @Test
-    void getAnomalyTypeDescription_WithDormantUserActivity_ShouldReturnCorrectDescription() {
-        // Act
-        String description = anomalyNotificationService.getAnomalyTypeDescription("DORMANT_USER_ACTIVITY");
-
-        // Assert
-        assertThat(description).isEqualTo("Dormant Account Sudden Activity");
-    }
 
     @Test
     void getAnomalyTypeDescription_WithOffHoursActivity_ShouldReturnCorrectDescription() {

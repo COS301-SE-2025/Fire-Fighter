@@ -815,23 +815,6 @@ class GmailEmailServiceTest {
         verify(mailSender).send(mimeMessage);
     }
 
-    @Test
-    void sendAnomalyDetectionNotificationEmail_WithHighRiskDormantUser_ShouldSendEmailSuccessfully() throws MessagingException {
-        // Arrange
-        String anomalyType = "DORMANT_USER_ACTIVITY";
-        String anomalyDetails = "User was dormant for 30+ days, logged in at 2024-01-15T10:30:00 and made 5 actions within 15 minutes";
-        String riskLevel = "HIGH";
-        
-        when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
-        doNothing().when(mailSender).send(any(MimeMessage.class));
-
-        // Act
-        gmailEmailService.sendAnomalyDetectionNotificationEmail(TEST_EMAIL, testUser, testTicket, anomalyType, anomalyDetails, riskLevel);
-
-        // Assert
-        verify(mailSender).createMimeMessage();
-        verify(mailSender).send(mimeMessage);
-    }
 
     @Test
     void sendAnomalyDetectionNotificationEmail_WithLowRiskOffHours_ShouldSendEmailSuccessfully() throws MessagingException {

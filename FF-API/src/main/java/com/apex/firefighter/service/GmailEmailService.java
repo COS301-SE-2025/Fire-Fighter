@@ -950,7 +950,6 @@ public class GmailEmailService {
         
         return switch (anomalyType) {
             case "FREQUENT_REQUESTS" -> "Excessive Request Frequency";
-            case "DORMANT_USER_ACTIVITY" -> "Dormant Account Sudden Activity";
             case "OFF_HOURS_ACTIVITY" -> "Off-Hours System Access";
             default -> "Unknown Anomaly Type";
         };
@@ -967,10 +966,6 @@ public class GmailEmailService {
         }
         
         String specificNotice = switch (anomalyType) {
-            case "DORMANT_USER_ACTIVITY" -> 
-                "A previously dormant user account has suddenly become active and performed rapid actions. " +
-                "This pattern is highly indicative of account compromise or unauthorized access. " +
-                "<strong>Immediately verify the user's identity and investigate potential security breach.</strong>";
             
             case "FREQUENT_REQUESTS" -> 
                 "A user has exceeded normal request frequency thresholds, which may indicate automated attacks, " +

@@ -69,52 +69,18 @@ class AnomalyDetectionServiceTest {
             .thenReturn(6L) // Exceeds MAX_REQUESTS_PER_HOUR (5)
             .thenReturn(10L); // For daily check
 
-        when(accessLogRepository.findLoginEventsByUserSince(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(Collections.emptyList());
 
         // Act
         boolean result = anomalyDetectionService.checkForAnomalousTicketCreation(TEST_USER_ID);
-
         // Assert
         assertThat(result).isTrue();
         verify(ticketRepository, times(2)).countTicketsByUserSince(eq(TEST_USER_ID), any(LocalDateTime.class));
     }
 
     @Test
-    void checkForAnomalousTicketCreation_WithDormantUserAnomaly_ShouldReturnTrue() {
+    void checkForAnomalousTicketCreation_WithNoRecentLogin_ShouldReturnFalse() {
         // Arrange
-        // No frequent request anomaly
-        when(ticketRepository.countTicketsByUserSince(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(2L) // Below threshold
-            .thenReturn(5L); // Below threshold
-
-        // Dormant user anomaly setup
-        when(accessLogRepository.findLoginEventsByUserSince(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(Arrays.asList(testAccessLog)) // Recent login
-            .thenReturn(Collections.emptyList()); // No old logins
-
-        when(accessSessionRepository.findByUserIdBeforeDate(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(Collections.emptyList()); // No old sessions
-
-        when(accessLogRepository.countActionsByUserSince(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(3L); // Actions after login
-
-        // Act
-        boolean result = anomalyDetectionService.checkForAnomalousTicketCreation(TEST_USER_ID);
-
-        // Assert
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    void checkForAnomalousTicketCreation_WithNoAnomalies_ShouldReturnFalse() {
-        // Arrange
-        when(ticketRepository.countTicketsByUserSince(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(2L) // Below threshold
-            .thenReturn(5L); // Below threshold
-
-        when(accessLogRepository.findLoginEventsByUserSince(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(Collections.emptyList()); // No recent login
+ // No recent login
 
         // Act
         boolean result = anomalyDetectionService.checkForAnomalousTicketCreation(TEST_USER_ID);
@@ -186,79 +152,6 @@ class AnomalyDetectionServiceTest {
         assertThat(result).contains("5 requests in the last hour");
     }
 
-    // ==================== DORMANT USER ANOMALY TESTS ====================
-
-    @Test
-    void getDormantUserAnomalyDetails_WithDormantUserAnomaly_ShouldReturnDetails() {
-        // Arrange
-        when(accessLogRepository.findLoginEventsByUserSince(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(Arrays.asList(testAccessLog)) // Recent login
-            .thenReturn(Collections.emptyList()); // No old logins
-
-        when(accessSessionRepository.findByUserIdBeforeDate(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(Collections.emptyList()); // No old sessions
-
-        when(accessLogRepository.countActionsByUserSince(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(3L); // Actions after login
-
-        // Act
-        String result = anomalyDetectionService.getDormantUserAnomalyDetails(TEST_USER_ID);
-
-        // Assert
-        assertThat(result).isNotNull();
-        assertThat(result).contains("User was dormant for 5+ days");
-        assertThat(result).contains("made 3 actions within 15 minutes");
-    }
-
-    @Test
-    void getDormantUserAnomalyDetails_WithNoRecentLogin_ShouldReturnNull() {
-        // Arrange
-        when(accessLogRepository.findLoginEventsByUserSince(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(Collections.emptyList()); // No recent login
-
-        // Act
-        String result = anomalyDetectionService.getDormantUserAnomalyDetails(TEST_USER_ID);
-
-        // Assert
-        assertThat(result).isNull();
-    }
-
-    @Test
-    void getDormantUserAnomalyDetails_WithActiveUser_ShouldReturnNull() {
-        // Arrange
-        when(accessLogRepository.findLoginEventsByUserSince(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(Arrays.asList(testAccessLog)) // Recent login
-            .thenReturn(Arrays.asList(testAccessLog)); // Has old logins (not dormant)
-
-        when(accessSessionRepository.findByUserIdBeforeDate(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(Arrays.asList(testAccessSession)); // Has old sessions (not dormant)
-
-        // Act
-        String result = anomalyDetectionService.getDormantUserAnomalyDetails(TEST_USER_ID);
-
-        // Assert
-        assertThat(result).isNull();
-    }
-
-    @Test
-    void getDormantUserAnomalyDetails_WithNoActionsAfterLogin_ShouldReturnNull() {
-        // Arrange
-        when(accessLogRepository.findLoginEventsByUserSince(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(Arrays.asList(testAccessLog)) // Recent login
-            .thenReturn(Collections.emptyList()); // No old logins
-
-        when(accessSessionRepository.findByUserIdBeforeDate(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(Collections.emptyList()); // No old sessions
-
-        when(accessLogRepository.countActionsByUserSince(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(0L); // No actions after login
-
-        // Act
-        String result = anomalyDetectionService.getDormantUserAnomalyDetails(TEST_USER_ID);
-
-        // Assert
-        assertThat(result).isNull();
-    }
 
     // ==================== OFF-HOURS ANOMALY TESTS ====================
 
@@ -441,33 +334,6 @@ class AnomalyDetectionServiceTest {
         assertThat(result).contains("6 requests in the last hour");
     }
 
-    @Test
-    void getFrequencyAnomalyDetails_WithDormantUserAnomaly_ShouldReturnDormantDetails() {
-        // Arrange
-        // No frequent request anomaly
-        when(ticketRepository.countTicketsByUserSince(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(2L) // Below threshold
-            .thenReturn(5L);
-
-        // Dormant user anomaly
-        when(accessLogRepository.findLoginEventsByUserSince(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(Arrays.asList(testAccessLog))
-            .thenReturn(Collections.emptyList());
-
-        when(accessSessionRepository.findByUserIdBeforeDate(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(Collections.emptyList());
-
-        when(accessLogRepository.countActionsByUserSince(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(3L);
-
-        // Act
-        String result = anomalyDetectionService.getFrequencyAnomalyDetails(TEST_USER_ID);
-
-        // Assert
-        assertThat(result).isNotNull();
-        assertThat(result).startsWith("Dormant User Anomaly:");
-        assertThat(result).contains("User was dormant for 5+ days");
-    }
 
     @Test
     void getFrequencyAnomalyDetails_WithNoAnomalies_ShouldReturnNull() {
@@ -476,8 +342,7 @@ class AnomalyDetectionServiceTest {
             .thenReturn(2L) // Below threshold
             .thenReturn(5L);
 
-        when(accessLogRepository.findLoginEventsByUserSince(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(Collections.emptyList()); // No recent login
+ // No recent login
 
         // Act
         String result = anomalyDetectionService.getFrequencyAnomalyDetails(TEST_USER_ID);
@@ -494,8 +359,6 @@ class AnomalyDetectionServiceTest {
         when(ticketRepository.countTicketsByUserSince(eq(null), any(LocalDateTime.class)))
             .thenReturn(0L);
 
-        when(accessLogRepository.findLoginEventsByUserSince(eq(null), any(LocalDateTime.class)))
-            .thenReturn(Collections.emptyList());
 
         // Act
         boolean result = anomalyDetectionService.checkForAnomalousTicketCreation(null);
@@ -511,8 +374,6 @@ class AnomalyDetectionServiceTest {
         when(ticketRepository.countTicketsByUserSince(eq(emptyUserId), any(LocalDateTime.class)))
             .thenReturn(0L);
 
-        when(accessLogRepository.findLoginEventsByUserSince(eq(emptyUserId), any(LocalDateTime.class)))
-            .thenReturn(Collections.emptyList());
 
         // Act
         boolean result = anomalyDetectionService.checkForAnomalousTicketCreation(emptyUserId);
@@ -582,8 +443,6 @@ class AnomalyDetectionServiceTest {
             .thenReturn(2L) // Below hourly threshold for getFrequencyAnomalyDetails -> getRequestFrequencyDetails
             .thenReturn(10L); // Below daily threshold for getFrequencyAnomalyDetails -> getRequestFrequencyDetails
 
-        when(accessLogRepository.findLoginEventsByUserSince(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(Collections.emptyList());
 
         LocalDateTime workingHours = LocalDateTime.of(2023, 6, 15, 10, 0); // Thursday 10 AM
 
@@ -593,7 +452,6 @@ class AnomalyDetectionServiceTest {
             // Act
             boolean hasTicketAnomaly = anomalyDetectionService.checkForAnomalousTicketCreation(TEST_USER_ID);
             String frequencyDetails = anomalyDetectionService.getRequestFrequencyDetails(TEST_USER_ID);
-            String dormantDetails = anomalyDetectionService.getDormantUserAnomalyDetails(TEST_USER_ID);
             boolean hasOffHoursAnomaly = anomalyDetectionService.isOffHoursAnomaly(TEST_USER_ID);
             String offHoursDetails = anomalyDetectionService.getOffHoursAnomalyDetails(TEST_USER_ID);
             String combinedDetails = anomalyDetectionService.getFrequencyAnomalyDetails(TEST_USER_ID);
@@ -601,7 +459,6 @@ class AnomalyDetectionServiceTest {
             // Assert
             assertThat(hasTicketAnomaly).isFalse();
             assertThat(frequencyDetails).isNull();
-            assertThat(dormantDetails).isNull();
             assertThat(hasOffHoursAnomaly).isFalse();
             assertThat(offHoursDetails).isNull();
             assertThat(combinedDetails).isNull();
