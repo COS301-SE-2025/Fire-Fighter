@@ -38,13 +38,6 @@ public interface AccessLogRepository extends JpaRepository<AccessLog, Long> {
     // Find logs by session ID
     List<AccessLog> findBySessionIdOrderByTimestampDesc(Long sessionId);
     
-    // Find login events for a user within a time period (for dormant user detection)
-    @Query("SELECT al FROM AccessLog al WHERE al.user.userId = :userId AND al.action = 'LOGIN' AND al.timestamp >= :since ORDER BY al.timestamp DESC")
-    List<AccessLog> findLoginEventsByUserSince(@Param("userId") String userId, @Param("since") LocalDateTime since);
-    
-    // Count actions by user within a time period (for dormant user detection)
-    @Query("SELECT COUNT(al) FROM AccessLog al WHERE al.user.userId = :userId AND al.timestamp >= :since")
-    long countActionsByUserSince(@Param("userId") String userId, @Param("since") LocalDateTime since);
     
     // Find most recent login for a user
     @Query("SELECT al FROM AccessLog al WHERE al.user.userId = :userId AND al.action = 'LOGIN' ORDER BY al.timestamp DESC")

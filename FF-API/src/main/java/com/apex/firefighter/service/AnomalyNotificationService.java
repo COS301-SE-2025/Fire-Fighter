@@ -91,11 +91,6 @@ public class AnomalyNotificationService {
                 notifyAdminsOfAnomaly(user, ticket, "FREQUENT_REQUESTS", frequencyDetails);
             }
             
-            // Check for dormant user anomaly
-            String dormantDetails = anomalyDetectionService.getDormantUserAnomalyDetails(userId);
-            if (dormantDetails != null) {
-                notifyAdminsOfAnomaly(user, ticket, "DORMANT_USER_ACTIVITY", dormantDetails);
-            }
             
             // Check for off-hours anomaly
             String offHoursDetails = anomalyDetectionService.getOffHoursAnomalyDetails(userId);
@@ -117,7 +112,6 @@ public class AnomalyNotificationService {
      */
     private String determineRiskLevel(String anomalyType) {
         return switch (anomalyType) {
-            case "DORMANT_USER_ACTIVITY" -> "HIGH";     // Account takeover risk
             case "FREQUENT_REQUESTS" -> "MEDIUM";       // Potential abuse or automation
             case "OFF_HOURS_ACTIVITY" -> "LOW";         // Unusual but not necessarily malicious
             default -> "MEDIUM";
@@ -137,7 +131,6 @@ public class AnomalyNotificationService {
         
         return switch (anomalyType) {
             case "FREQUENT_REQUESTS" -> "Excessive Request Frequency";
-            case "DORMANT_USER_ACTIVITY" -> "Dormant Account Sudden Activity";
             case "OFF_HOURS_ACTIVITY" -> "Off-Hours System Access";
             default -> "Unknown Anomaly Type";
         };
