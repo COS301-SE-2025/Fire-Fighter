@@ -108,6 +108,7 @@ export const mockAuthService = {
   getUserProfileById: jasmine.createSpy('getUserProfileById').and.returnValue(of({ username: 'Test User', email: 'test@example.com' })),
   isCurrentUserAdmin: jasmine.createSpy('isCurrentUserAdmin').and.returnValue(false), // Return boolean directly, not Observable
   getCurrentUserProfile: jasmine.createSpy('getCurrentUserProfile').and.returnValue(of({ username: 'Test User', email: 'test@example.com' })),
+  getAllUsersAsAdmin: jasmine.createSpy('getAllUsersAsAdmin').and.returnValue(of([])), // Add missing method
 };
 
 // Mock TicketService for tests
@@ -166,9 +167,14 @@ export const mockChatbotService = {
 
 // Mock ApiConfigService for tests
 export const mockApiConfigService = {
-  getApiUrl: jasmine.createSpy('getApiUrl').and.returnValue('http://localhost:8080/api'),
-  setApiUrl: jasmine.createSpy('setApiUrl'),
-  resetToLocalhost: jasmine.createSpy('resetToLocalhost'),
+  getCurrentApiUrl: jasmine.createSpy('getCurrentApiUrl').and.returnValue(of('http://localhost:8080/api')),
+  getCurrentApiUrlSync: jasmine.createSpy('getCurrentApiUrlSync').and.returnValue('http://localhost:8080/api'),
+  switchToFallback: jasmine.createSpy('switchToFallback'),
+  switchToPrimary: jasmine.createSpy('switchToPrimary'),
+  isUsingFallbackApi: jasmine.createSpy('isUsingFallbackApi').and.returnValue(false),
+  getPrimaryApiUrl: jasmine.createSpy('getPrimaryApiUrl').and.returnValue('http://localhost:8080/api'),
+  getFallbackApiUrl: jasmine.createSpy('getFallbackApiUrl').and.returnValue('http://localhost:8080/api'),
+  reset: jasmine.createSpy('reset'),
 };
 
 // Mock HealthMonitorService for tests
