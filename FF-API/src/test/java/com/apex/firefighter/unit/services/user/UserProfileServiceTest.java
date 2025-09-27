@@ -33,11 +33,14 @@ class UserProfileServiceTest {
     private UserProfileService userProfileService;
 
     private User testUser;
+    private User adminUser;
     private final String FIREBASE_UID = "test-firebase-uid";
+    private final String ADMIN_FIREBASE_UID = "admin-firebase-uid";
     private final String USERNAME = "testuser";
     private final String EMAIL = "test@example.com";
     private final String DEPARTMENT = "IT";
     private final String CONTACT_NUMBER = "123-456-7890";
+    private final String DOLIBARR_ID = "dolibarr-123";
 
     @BeforeEach
     void setUp() {
@@ -48,6 +51,15 @@ class UserProfileServiceTest {
         testUser.setDepartment(DEPARTMENT);
         testUser.setContactNumber(CONTACT_NUMBER);
         testUser.setIsAuthorized(true);
+        testUser.setDolibarrId(DOLIBARR_ID);
+
+        adminUser = new User();
+        adminUser.setUserId(ADMIN_FIREBASE_UID);
+        adminUser.setUsername("admin");
+        adminUser.setEmail("admin@example.com");
+        adminUser.setDepartment("Admin");
+        adminUser.setIsAdmin(true);
+        adminUser.setIsAuthorized(true);
     }
 
     // ==================== GET USER WITH ROLES TESTS ====================
@@ -662,5 +674,249 @@ class UserProfileServiceTest {
 
         verify(userRepository).existsByEmail(EMAIL);
         verify(userRepository).existsByUsername(USERNAME);
+    }
+
+    // ==================== ADMIN DOLIBARR UID MANAGEMENT TESTS ====================
+
+    @Test
+    void updateUserDolibarrIdAsAdmin_WithValidAdmin_ShouldUpdateDolibarrId() {
+        // Arrange
+        String newDolibarrId = "new-dolibarr-456";
+        when(userRepository.findByUserId(ADMIN_FIREBASE_UID)).thenReturn(Optional.of(adminUser));
+        when(userRepository.findByUserId(FIREBASE_UID)).thenReturn(Optional.of(testUser));
+        when(userRepository.save(any(User.class))).thenReturn(testUser);
+
+        // Act
+        User result = userProfileService.updateUserDolibarrIdAsAdmin(ADMIN_FIREBASE_UID, FIREBASE_UID, newDolibarrId);
+
+        // Assert
+        assertThat(result).isEqualTo(testUser);
+        verify(userRepository).findByUserId(ADMIN_FIREBASE_UID);
+        verify(userRepository).findByUserId(FIREBASE_UID);
+        verify(userRepository).save(testUser);
+    }
+
+    @Test
+    void updateUserDolibarrIdAsAdmin_WithNonExistentAdmin_ShouldThrowException() {
+        // Arrange
+        when(userRepository.findByUserId(ADMIN_FIREBASE_UID)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> userProfileService.updateUserDolibarrIdAsAdmin(ADMIN_FIREBASE_UID, FIREBASE_UID, DOLIBARR_ID))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessage("Admin user not found with Firebase UID: " + ADMIN_FIREBASE_UID);
+
+        verify(userRepository).findByUserId(ADMIN_FIREBASE_UID);
+        verify(userRepository, never()).findByUserId(FIREBASE_UID);
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void updateUserDolibarrIdAsAdmin_WithNonAdminUser_ShouldThrowSecurityException() {
+        // Arrange
+        User nonAdminUser = new User();
+        nonAdminUser.setUserId(ADMIN_FIREBASE_UID);
+        nonAdminUser.setIsAdmin(false);
+        when(userRepository.findByUserId(ADMIN_FIREBASE_UID)).thenReturn(Optional.of(nonAdminUser));
+
+        // Act & Assert
+        assertThatThrownBy(() -> userProfileService.updateUserDolibarrIdAsAdmin(ADMIN_FIREBASE_UID, FIREBASE_UID, DOLIBARR_ID))
+            .isInstanceOf(SecurityException.class)
+            .hasMessage("Administrator privileges required to manage Dolibarr UIDs");
+
+        verify(userRepository).findByUserId(ADMIN_FIREBASE_UID);
+        verify(userRepository, never()).findByUserId(FIREBASE_UID);
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void updateUserDolibarrIdAsAdmin_WithNonExistentTargetUser_ShouldThrowException() {
+        // Arrange
+        when(userRepository.findByUserId(ADMIN_FIREBASE_UID)).thenReturn(Optional.of(adminUser));
+        when(userRepository.findByUserId(FIREBASE_UID)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> userProfileService.updateUserDolibarrIdAsAdmin(ADMIN_FIREBASE_UID, FIREBASE_UID, DOLIBARR_ID))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessage("Target user not found with Firebase UID: " + FIREBASE_UID);
+
+        verify(userRepository).findByUserId(ADMIN_FIREBASE_UID);
+        verify(userRepository).findByUserId(FIREBASE_UID);
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void getUserDolibarrIdAsAdmin_WithValidAdmin_ShouldReturnDolibarrId() {
+        // Arrange
+        when(userRepository.findByUserId(ADMIN_FIREBASE_UID)).thenReturn(Optional.of(adminUser));
+        when(userRepository.findByUserId(FIREBASE_UID)).thenReturn(Optional.of(testUser));
+
+        // Act
+        String result = userProfileService.getUserDolibarrIdAsAdmin(ADMIN_FIREBASE_UID, FIREBASE_UID);
+
+        // Assert
+        assertThat(result).isEqualTo(DOLIBARR_ID);
+        verify(userRepository).findByUserId(ADMIN_FIREBASE_UID);
+        verify(userRepository).findByUserId(FIREBASE_UID);
+    }
+
+    @Test
+    void getUserDolibarrIdAsAdmin_WithNonExistentAdmin_ShouldThrowException() {
+        // Arrange
+        when(userRepository.findByUserId(ADMIN_FIREBASE_UID)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> userProfileService.getUserDolibarrIdAsAdmin(ADMIN_FIREBASE_UID, FIREBASE_UID))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessage("Admin user not found with Firebase UID: " + ADMIN_FIREBASE_UID);
+
+        verify(userRepository).findByUserId(ADMIN_FIREBASE_UID);
+        verify(userRepository, never()).findByUserId(FIREBASE_UID);
+    }
+
+    @Test
+    void getUserDolibarrIdAsAdmin_WithNonAdminUser_ShouldThrowSecurityException() {
+        // Arrange
+        User nonAdminUser = new User();
+        nonAdminUser.setUserId(ADMIN_FIREBASE_UID);
+        nonAdminUser.setIsAdmin(false);
+        when(userRepository.findByUserId(ADMIN_FIREBASE_UID)).thenReturn(Optional.of(nonAdminUser));
+
+        // Act & Assert
+        assertThatThrownBy(() -> userProfileService.getUserDolibarrIdAsAdmin(ADMIN_FIREBASE_UID, FIREBASE_UID))
+            .isInstanceOf(SecurityException.class)
+            .hasMessage("Administrator privileges required to access Dolibarr UIDs");
+
+        verify(userRepository).findByUserId(ADMIN_FIREBASE_UID);
+        verify(userRepository, never()).findByUserId(FIREBASE_UID);
+    }
+
+    @Test
+    void getUserDolibarrIdAsAdmin_WithNonExistentTargetUser_ShouldThrowException() {
+        // Arrange
+        when(userRepository.findByUserId(ADMIN_FIREBASE_UID)).thenReturn(Optional.of(adminUser));
+        when(userRepository.findByUserId(FIREBASE_UID)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> userProfileService.getUserDolibarrIdAsAdmin(ADMIN_FIREBASE_UID, FIREBASE_UID))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessage("Target user not found with Firebase UID: " + FIREBASE_UID);
+
+        verify(userRepository).findByUserId(ADMIN_FIREBASE_UID);
+        verify(userRepository).findByUserId(FIREBASE_UID);
+    }
+
+    @Test
+    void getAllUsersAsAdmin_WithValidAdmin_ShouldReturnUsersAndStatistics() {
+        // Arrange
+        User normalUser = new User();
+        normalUser.setIsAdmin(false);
+        List<User> allUsers = Arrays.asList(adminUser, normalUser);
+        
+        when(userRepository.findByUserId(ADMIN_FIREBASE_UID)).thenReturn(Optional.of(adminUser));
+        when(userRepository.findAll()).thenReturn(allUsers);
+
+        // Act
+        java.util.Map<String, Object> result = userProfileService.getAllUsersAsAdmin(ADMIN_FIREBASE_UID);
+
+        // Assert
+        assertThat(result).containsKey("users");
+        assertThat(result).containsKey("statistics");
+        
+        @SuppressWarnings("unchecked")
+        List<User> users = (List<User>) result.get("users");
+        assertThat(users).hasSize(2);
+        
+        @SuppressWarnings("unchecked")
+        java.util.Map<String, Object> statistics = (java.util.Map<String, Object>) result.get("statistics");
+        assertThat(statistics.get("totalUsers")).isEqualTo(2);
+        assertThat(statistics.get("adminUsers")).isEqualTo(1L);
+        assertThat(statistics.get("normalUsers")).isEqualTo(1L);
+        
+        verify(userRepository).findByUserId(ADMIN_FIREBASE_UID);
+        verify(userRepository).findAll();
+    }
+
+    @Test
+    void getAllUsersAsAdmin_WithNonExistentAdmin_ShouldThrowException() {
+        // Arrange
+        when(userRepository.findByUserId(ADMIN_FIREBASE_UID)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> userProfileService.getAllUsersAsAdmin(ADMIN_FIREBASE_UID))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessage("Admin user not found with Firebase UID: " + ADMIN_FIREBASE_UID);
+
+        verify(userRepository).findByUserId(ADMIN_FIREBASE_UID);
+        verify(userRepository, never()).findAll();
+    }
+
+    @Test
+    void getAllUsersAsAdmin_WithNonAdminUser_ShouldThrowSecurityException() {
+        // Arrange
+        User nonAdminUser = new User();
+        nonAdminUser.setUserId(ADMIN_FIREBASE_UID);
+        nonAdminUser.setIsAdmin(false);
+        when(userRepository.findByUserId(ADMIN_FIREBASE_UID)).thenReturn(Optional.of(nonAdminUser));
+
+        // Act & Assert
+        assertThatThrownBy(() -> userProfileService.getAllUsersAsAdmin(ADMIN_FIREBASE_UID))
+            .isInstanceOf(SecurityException.class)
+            .hasMessage("Administrator privileges required to access all users");
+
+        verify(userRepository).findByUserId(ADMIN_FIREBASE_UID);
+        verify(userRepository, never()).findAll();
+    }
+
+    @Test
+    void getAllUsersAsAdmin_WithEmptyUserList_ShouldReturnEmptyStatistics() {
+        // Arrange
+        when(userRepository.findByUserId(ADMIN_FIREBASE_UID)).thenReturn(Optional.of(adminUser));
+        when(userRepository.findAll()).thenReturn(Collections.emptyList());
+
+        // Act
+        java.util.Map<String, Object> result = userProfileService.getAllUsersAsAdmin(ADMIN_FIREBASE_UID);
+
+        // Assert
+        @SuppressWarnings("unchecked")
+        List<User> users = (List<User>) result.get("users");
+        assertThat(users).isEmpty();
+        
+        @SuppressWarnings("unchecked")
+        java.util.Map<String, Object> statistics = (java.util.Map<String, Object>) result.get("statistics");
+        assertThat(statistics.get("totalUsers")).isEqualTo(0);
+        assertThat(statistics.get("adminUsers")).isEqualTo(0L);
+        assertThat(statistics.get("normalUsers")).isEqualTo(0L);
+        
+        verify(userRepository).findByUserId(ADMIN_FIREBASE_UID);
+        verify(userRepository).findAll();
+    }
+
+    // ==================== ADMIN OPERATIONS INTEGRATION TESTS ====================
+
+    @Test
+    void adminOperations_FullWorkflow_ShouldWorkCorrectly() {
+        // Arrange
+        String newDolibarrId = "new-dolibarr-789";
+        when(userRepository.findByUserId(ADMIN_FIREBASE_UID)).thenReturn(Optional.of(adminUser));
+        when(userRepository.findByUserId(FIREBASE_UID)).thenReturn(Optional.of(testUser));
+        when(userRepository.save(any(User.class))).thenReturn(testUser);
+        when(userRepository.findAll()).thenReturn(Arrays.asList(adminUser, testUser));
+
+        // Act
+        String originalDolibarrId = userProfileService.getUserDolibarrIdAsAdmin(ADMIN_FIREBASE_UID, FIREBASE_UID);
+        User updatedUser = userProfileService.updateUserDolibarrIdAsAdmin(ADMIN_FIREBASE_UID, FIREBASE_UID, newDolibarrId);
+        java.util.Map<String, Object> allUsersData = userProfileService.getAllUsersAsAdmin(ADMIN_FIREBASE_UID);
+
+        // Assert
+        assertThat(originalDolibarrId).isEqualTo(DOLIBARR_ID);
+        assertThat(updatedUser).isEqualTo(testUser);
+        assertThat(allUsersData).containsKey("users");
+        assertThat(allUsersData).containsKey("statistics");
+
+        verify(userRepository, times(3)).findByUserId(ADMIN_FIREBASE_UID); // Called 3 times
+        verify(userRepository, times(2)).findByUserId(FIREBASE_UID); // Called 2 times
+        verify(userRepository).save(testUser);
+        verify(userRepository).findAll();
     }
 }

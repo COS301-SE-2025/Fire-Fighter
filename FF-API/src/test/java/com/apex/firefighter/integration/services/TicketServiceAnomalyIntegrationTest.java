@@ -64,6 +64,10 @@ class TicketServiceAnomalyIntegrationTest {
 
         // Assert
         assertThat(result).isNotNull();
+        
+        // Wait a short time for async operations to complete
+        Thread.sleep(500);
+        
         verify(anomalyNotificationService).checkAndNotifyAnomalies(testUser, savedTicket);
     }
 
@@ -97,6 +101,10 @@ class TicketServiceAnomalyIntegrationTest {
 
         // Assert
         assertThat(result).isNotNull();
+        
+        // Wait a short time for async operations to complete
+        Thread.sleep(500);
+        
         verify(anomalyNotificationService).checkAndNotifyAnomalies(testUser, savedTicket);
     }
 }

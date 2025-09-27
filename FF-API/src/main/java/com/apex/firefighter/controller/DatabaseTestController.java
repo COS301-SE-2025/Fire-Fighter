@@ -54,8 +54,12 @@ public class DatabaseTestController {
             @RequestParam Integer testNumber,
             @RequestParam Boolean isActive) {
         
-        ConnectionTest test = testService.createTestEntry(testName, testValue, testNumber, isActive);
-        return ResponseEntity.ok(test);
+        try {
+            ConnectionTest test = testService.createTestEntry(testName, testValue, testNumber, isActive);
+            return ResponseEntity.ok(test);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     /**
@@ -64,8 +68,12 @@ public class DatabaseTestController {
      */
     @GetMapping("/all")
     public ResponseEntity<List<ConnectionTest>> getAllTests() {
-        List<ConnectionTest> tests = testService.getAllTests();
-        return ResponseEntity.ok(tests);
+        try {
+            List<ConnectionTest> tests = testService.getAllTests();
+            return ResponseEntity.ok(tests);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     /**
