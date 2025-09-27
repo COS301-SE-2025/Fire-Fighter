@@ -1,7 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ChatPage } from './chat.page';
-import { testProviders, mockAuthService } from '../../../test-setup';
+import { testProviders, mockAuthService, mockChatbotService, mockApiConfigService } from '../../../test-setup';
 import { AuthService } from '../../services/auth.service';
+import { ChatbotService } from '../../services/chatbot.service';
+import { ApiConfigService } from '../../services/api-config.service';
 
 describe('ChatPage', () => {
   let component: ChatPage;
@@ -12,7 +14,9 @@ describe('ChatPage', () => {
       imports: [ChatPage],
       providers: [
         ...testProviders,
-        { provide: AuthService, useValue: mockAuthService }
+        { provide: AuthService, useValue: mockAuthService },
+        { provide: ChatbotService, useValue: mockChatbotService },
+        { provide: ApiConfigService, useValue: mockApiConfigService }
       ]
     }).compileComponents();
 

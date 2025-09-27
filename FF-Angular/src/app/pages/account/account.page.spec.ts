@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AccountPage } from './account.page';
-import { testProviders, mockAuthService } from '../../../test-setup';
+import { testProviders, mockAuthService, mockLanguageService } from '../../../test-setup';
 import { AuthService } from '../../services/auth.service';
+import { LanguageService } from '../../services/language.service';
 
 describe('AccountPage', () => {
   let component: AccountPage;
@@ -12,7 +13,8 @@ describe('AccountPage', () => {
       imports: [AccountPage],
       providers: [
         ...testProviders,
-        { provide: AuthService, useValue: mockAuthService }
+        { provide: AuthService, useValue: mockAuthService },
+        { provide: LanguageService, useValue: mockLanguageService }
       ]
     }).compileComponents();
 

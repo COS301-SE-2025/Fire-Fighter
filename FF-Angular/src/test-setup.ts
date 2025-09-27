@@ -106,7 +106,7 @@ export const mockAuthService = {
   logout: jasmine.createSpy('logout'),
   navigateToDashboard: jasmine.createSpy('navigateToDashboard'),
   getUserProfileById: jasmine.createSpy('getUserProfileById').and.returnValue(of({ username: 'Test User', email: 'test@example.com' })),
-  isCurrentUserAdmin: jasmine.createSpy('isCurrentUserAdmin').and.returnValue(of(false)),
+  isCurrentUserAdmin: jasmine.createSpy('isCurrentUserAdmin').and.returnValue(false), // Return boolean directly, not Observable
   getCurrentUserProfile: jasmine.createSpy('getCurrentUserProfile').and.returnValue(of({ username: 'Test User', email: 'test@example.com' })),
 };
 
@@ -115,6 +115,7 @@ export const mockTicketService = {
   getTickets: jasmine.createSpy('getTickets').and.returnValue(of([])),
   createTicket: jasmine.createSpy('createTicket').and.returnValue(of({})),
   updateTicket: jasmine.createSpy('updateTicket').and.returnValue(of({})),
+  ticketCreated$: of(null), // Add the missing observable
 };
 
 // Mock NotificationService for tests
@@ -130,4 +131,62 @@ export const mockThemeService = {
   setTheme: jasmine.createSpy('setTheme'),
   getCurrentTheme: jasmine.createSpy('getCurrentTheme').and.returnValue(false),
   setStatusBarDark: jasmine.createSpy('setStatusBarDark'),
-}; 
+};
+
+// Mock LanguageService for tests
+export const mockLanguageService = {
+  currentLanguage$: of('en'),
+  availableLanguages: [
+    { code: 'en', name: 'English (UK)' },
+    { code: 'de', name: 'Deutsch (German)' }
+  ],
+  setLanguage: jasmine.createSpy('setLanguage'),
+  getCurrentLanguage: jasmine.createSpy('getCurrentLanguage').and.returnValue('en'),
+  getCurrentLanguageObject: jasmine.createSpy('getCurrentLanguageObject').and.returnValue({ code: 'en', name: 'English (UK)' }),
+  getLanguageByCode: jasmine.createSpy('getLanguageByCode').and.returnValue({ code: 'en', name: 'English (UK)' }),
+  getTranslation: jasmine.createSpy('getTranslation').and.returnValue(of('Test Translation')),
+  getInstantTranslation: jasmine.createSpy('getInstantTranslation').and.returnValue('Test Translation'),
+};
+
+// Mock HealthService for tests
+export const mockHealthService = {
+  healthStatus$: of({ isHealthy: true, lastCheck: new Date() }),
+  startMonitoring: jasmine.createSpy('startMonitoring'),
+  stopMonitoring: jasmine.createSpy('stopMonitoring'),
+  checkHealth: jasmine.createSpy('checkHealth').and.returnValue(of({ isHealthy: true, lastCheck: new Date() })),
+};
+
+// Mock ChatbotService for tests
+export const mockChatbotService = {
+  getSuggestions: jasmine.createSpy('getSuggestions').and.returnValue(of({ available: true, suggestedQueries: [] })),
+  sendMessage: jasmine.createSpy('sendMessage').and.returnValue(of({ response: 'Test response' })),
+  isAdminQuery: jasmine.createSpy('isAdminQuery').and.returnValue(false),
+  checkHealth: jasmine.createSpy('checkHealth').and.returnValue(of({ available: true })),
+};
+
+// Mock ApiConfigService for tests
+export const mockApiConfigService = {
+  getApiUrl: jasmine.createSpy('getApiUrl').and.returnValue('http://localhost:8080/api'),
+  setApiUrl: jasmine.createSpy('setApiUrl'),
+  resetToLocalhost: jasmine.createSpy('resetToLocalhost'),
+};
+
+// Mock HealthMonitorService for tests
+export const mockHealthMonitorService = {
+  startMonitoring: jasmine.createSpy('startMonitoring'),
+  stopMonitoring: jasmine.createSpy('stopMonitoring'),
+};
+
+// Mock AppLoadingService for tests
+export const mockAppLoadingService = {
+  setLoadingTimeout: jasmine.createSpy('setLoadingTimeout'),
+  initializeApp: jasmine.createSpy('initializeApp').and.returnValue(Promise.resolve()),
+  loadingState$: of({ isLoading: false, message: '', progress: 100 }),
+  getCurrentState: jasmine.createSpy('getCurrentState').and.returnValue({ isLoading: false, message: '', progress: 100 }),
+};
+
+// Mock TokenMonitoringService for tests
+export const mockTokenMonitoringService = {
+  startMonitoring: jasmine.createSpy('startMonitoring'),
+  stopMonitoring: jasmine.createSpy('stopMonitoring'),
+};
