@@ -215,7 +215,6 @@ class NLPServiceIntegrationTest {
         String query = "unintelligible query xyz abc";
         String userId = "user123";
         
-        when(userService.getUserRole(userId)).thenReturn("USER");
         when(intentRecognitionService.recognizeIntent(query)).thenReturn(null);
 
         // Act
@@ -227,8 +226,8 @@ class NLPServiceIntegrationTest {
         assertThat(response.getMessage()).contains("Could not understand query");
         
         // Verify pipeline stopped at intent recognition
-        verify(userService).getUserRole(userId);
         verify(intentRecognitionService).recognizeIntent(query);
+        verify(userService, never()).getUserRole(anyString()); // Should not be called since intent recognition failed
         verify(entityExtractionService, never()).extractEntities(any());
         verify(queryProcessingService, never()).processQuery(any(), any(), any(), anyBoolean());
         verify(responseGenerationService, never()).generateResponse(any());

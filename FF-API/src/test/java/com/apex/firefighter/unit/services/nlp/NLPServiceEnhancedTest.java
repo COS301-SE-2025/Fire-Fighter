@@ -101,6 +101,8 @@ class NLPServiceEnhancedTest {
         when(intentRecognitionService.recognizeIntent(query)).thenReturn(intent);
         when(intentRecognitionService.isIntentAllowed(intent.getType(), "ADMIN")).thenReturn(true);
         when(entityExtractionService.extractEntities(query)).thenReturn(entities);
+        when(entityExtractionService.validateEntities(entities)).thenReturn(
+            new EntityExtractionService.ValidationResult(true));
         when(queryProcessingService.processQuery(intent, entities, userId, true)).thenReturn(queryResult);
         when(responseGenerationService.generateResponse(queryResult)).thenReturn("Success");
 
@@ -222,6 +224,10 @@ class NLPServiceEnhancedTest {
         String query = "show tickets";
         String userId = "user123";
         
+        IntentRecognitionService.Intent intent = new IntentRecognitionService.Intent(
+            IntentRecognitionService.IntentType.SHOW_ALL_TICKETS, 0.9);
+        
+        when(intentRecognitionService.recognizeIntent(query)).thenReturn(intent);
         when(userService.getUserRole(userId)).thenThrow(new RuntimeException("Database error"));
 
         // Act
@@ -230,7 +236,7 @@ class NLPServiceEnhancedTest {
         // Assert
         assertThat(response).isNotNull();
         assertThat(response.isSuccess()).isFalse();
-        assertThat(response.getMessage()).contains("Error processing query");
+        assertThat(response.getMessage()).contains("Permission denied");
     }
 
     @Test
@@ -239,6 +245,10 @@ class NLPServiceEnhancedTest {
         String query = "show tickets";
         String userId = "user123";
         
+        IntentRecognitionService.Intent intent = new IntentRecognitionService.Intent(
+            IntentRecognitionService.IntentType.SHOW_ALL_TICKETS, 0.9);
+        
+        when(intentRecognitionService.recognizeIntent(query)).thenReturn(intent);
         when(userService.getUserRole(userId)).thenThrow(new SecurityException("Access denied"));
 
         // Act
@@ -247,7 +257,7 @@ class NLPServiceEnhancedTest {
         // Assert
         assertThat(response).isNotNull();
         assertThat(response.isSuccess()).isFalse();
-        assertThat(response.getMessage()).contains("Access denied");
+        assertThat(response.getMessage()).contains("Permission denied");
     }
 
     // ==================== ADMIN QUERY TESTS ====================

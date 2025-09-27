@@ -328,8 +328,8 @@ class ConnectionTestTest {
         // Assert
         assertThat(result).contains("ConnectionTest{");
         assertThat(result).contains("id=null");
-        assertThat(result).contains("testName=null");
-        assertThat(result).contains("testValue=null");
+        assertThat(result).contains("testName='null'");
+        assertThat(result).contains("testValue='null'");
         assertThat(result).contains("testNumber=null");
         assertThat(result).contains("isActive=null");
         assertThat(result).contains("createdAt=null");

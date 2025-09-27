@@ -4,6 +4,7 @@ import com.apex.firefighter.config.TestConfig;
 import com.apex.firefighter.controller.UserController;
 import com.apex.firefighter.model.User;
 import com.apex.firefighter.service.UserService;
+import com.apex.firefighter.service.auth.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,9 @@ class UserControllerTest {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private JwtService jwtService;
 
     @Autowired
     private ObjectMapper objectMapper;
