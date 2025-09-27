@@ -37,29 +37,15 @@
         <div class="p-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer">
-              <div class="text-sm font-medium text-gray-900 dark:text-white">Firefighter Role Request Guide</div>
+            <div (click)="openRequestGuideModal()" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer">
+              <div class="text-sm font-medium text-gray-900 dark:text-white">FireFighter Role Request Guide</div>
               <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
               </svg>
             </div>
 
-            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer">
+            <div (click)="openWorkflowModal()" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer">
               <div class="text-sm font-medium text-gray-900 dark:text-white">Emergency Access Workflow</div>
-              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-              </svg>
-            </div>
-
-            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer">
-              <div class="text-sm font-medium text-gray-900 dark:text-white">Critical System Failure Response</div>
-              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-              </svg>
-            </div>
-
-            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer">
-              <div class="text-sm font-medium text-gray-900 dark:text-white">Escalation Procedures</div>
               <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
               </svg>
@@ -75,7 +61,7 @@
             <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
             </svg>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">System Documentation</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">System Guidance</h3>
           </div>
         </div>
         <div class="p-4">
@@ -88,66 +74,8 @@
               </svg>
             </a>
 
-            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer">
-              <div class="text-sm font-medium text-gray-900 dark:text-white">Role Permissions Matrix</div>
-              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-              </svg>
-            </div>
-
-            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer">
-              <div class="text-sm font-medium text-gray-900 dark:text-white">Audit Log Guidelines</div>
-              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-              </svg>
-            </div>
-
-            <a href="assets/docs/security-policies.pdf" target="_blank" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer">
-              <div class="text-sm font-medium text-gray-900 dark:text-white">Security Policies</div>
-              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-              </svg>
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Video Tutorials Card -->
-      <div class="mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50">
-        <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-          <div class="flex items-center space-x-3">
-            <svg class="w-6 h-6 text-green-600 dark:text-green-400" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z"></path>
-            </svg>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Video Tutorials</h3>
-          </div>
-        </div>
-        <div class="p-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
-            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer">
-              <div class="text-sm font-medium text-gray-900 dark:text-white">Requesting Emergency Access</div>
-              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-              </svg>
-            </div>
-
-            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer">
-              <div class="text-sm font-medium text-gray-900 dark:text-white">Understanding FireFighter Privileges</div>
-              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-              </svg>
-            </div>
-
-            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer">
-              <div class="text-sm font-medium text-gray-900 dark:text-white">Using the Dashboard</div>
-              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-              </svg>
-            </div>
-
-            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer">
-              <div class="text-sm font-medium text-gray-900 dark:text-white">Audit Trail Review</div>
+            <div (click)="openErpIntegrationModal()" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer">
+              <div class="text-sm font-medium text-gray-900 dark:text-white">ERP Integration Management</div>
               <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
               </svg>
@@ -168,32 +96,18 @@
         </div>
         <div class="p-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
-            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer">
-              <div class="text-sm font-medium text-gray-900 dark:text-white">Role Activation Process</div>
+
+            <div (click)="openEmergencyExtensionsModal()" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer">
+              <div class="text-sm font-medium text-gray-900 dark:text-white">Emergency Extensions</div>
               <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
               </svg>
             </div>
 
-            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer">
-              <div class="text-sm font-medium text-gray-900 dark:text-white">Time-bound Access Rules</div>
+            <div (click)="openEmailNotificationsModal()" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer">
+              <div class="text-sm font-medium text-gray-900 dark:text-white">Email Notifications</div>
               <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-              </svg>
-            </div>
-
-            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer">
-              <div class="text-sm font-medium text-gray-900 dark:text-white">Request Approval Workflow</div>
-              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-              </svg>
-            </div>
-
-            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 cursor-pointer">
-              <div class="text-sm font-medium text-gray-900 dark:text-white">Auto-revocation Settings</div>
-              <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
               </svg>
             </div>
           </div>
@@ -210,7 +124,7 @@
           <div class="p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">How long does FireFighter access last?</h3>
             <p class="text-gray-600 dark:text-gray-400 mb-3">
-              Firefighter access is time-bound and typically expires after 4-8 hours, depending on the emergency type. Access is automatically revoked when the issue is resolved.
+              Firefighter access is time-bound and expires after the set amount of time when the request is made. Access is automatically revoked when the issue is resolved.
             </p>
           </div>
         </div>
@@ -303,12 +217,12 @@
         <!-- Modal body -->
         <div class="p-6 max-h-96 overflow-y-auto">
           
-          <!-- Version 2.2.0 -->
+          <!-- Version 3.0.0 -->
           <div class="mb-8">
             <div class="flex items-center justify-between mb-4">
               <div class="flex items-center space-x-3">
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
-                  v2.2.0
+                  v3.0.0
                 </span>
                 <span class="text-sm text-gray-500 dark:text-gray-400">Current Version</span>
               </div>
@@ -316,65 +230,110 @@
             </div>
             <div class="space-y-4">
               <div>
-                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">New Features</h4>
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Major Features</h4>
                 <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                   <li class="flex items-start space-x-2">
                     <span class="text-blue-500 mt-1">•</span>
-                    <span><strong>Comprehensive Notification System</strong> - Real-time in-app notifications for ticket lifecycle events with read/unread status tracking</span>
+                    <span><strong>Dolibarr ERP Integration</strong> - Complete integration with Dolibarr ERP system for seamless emergency access management and user group synchronization</span>
                   </li>
                   <li class="flex items-start space-x-2">
                     <span class="text-blue-500 mt-1">•</span>
-                    <span><strong>Email Notification Service</strong> - Automated email notifications sent to users for ticket updates, approvals, and status changes</span>
+                    <span><strong>Ada Natural Language Processor</strong> - Advanced NLP service allowing users to query tickets using natural language for improved user experience</span>
                   </li>
                   <li class="flex items-start space-x-2">
                     <span class="text-blue-500 mt-1">•</span>
-                    <span><strong>Notification Management API</strong> - RESTful endpoints for creating, reading, updating, and deleting notifications with user-specific filtering</span>
+                    <span><strong>Anomaly Detection System</strong> - Intelligent monitoring system to detect unusual access patterns and potential security threats</span>
                   </li>
                   <li class="flex items-start space-x-2">
                     <span class="text-blue-500 mt-1">•</span>
-                    <span><strong>Professional Email Templates</strong> - BMW-styled HTML email templates for ticket exports and notifications with responsive design</span>
+                    <span><strong>Dolibarr UID Management</strong> - Administrator-only functionality for managing user account linking between FireFighter and Dolibarr systems</span>
                   </li>
                 </ul>
               </div>
               <div>
-                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Improvements</h4>
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Security Enhancements</h4>
                 <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                   <li class="flex items-start space-x-2">
                     <span class="text-green-500 mt-1">•</span>
-                    <span>Enhanced database schema with dedicated notifications table and optimized queries</span>
+                    <span><strong>JWT Token Authentication</strong> - Enhanced security with JSON Web Token implementation for secure session management</span>
                   </li>
                   <li class="flex items-start space-x-2">
                     <span class="text-green-500 mt-1">•</span>
-                    <span>Improved Gmail integration service with better error handling and delivery confirmation</span>
+                    <span><strong>Advanced Session Management</strong> - Improved session handling with automatic token refresh and secure logout procedures</span>
                   </li>
                   <li class="flex items-start space-x-2">
                     <span class="text-green-500 mt-1">•</span>
-                    <span>Comprehensive test coverage for notification services with unit and integration tests</span>
-                  </li>
-                  <li class="flex items-start space-x-2">
-                    <span class="text-green-500 mt-1">•</span>
-                    <span>Enhanced Swagger documentation for all notification endpoints with detailed examples</span>
-                  </li>
-                  <li class="flex items-start space-x-2">
-                    <span class="text-green-500 mt-1">•</span>
-                    <span>Modified settings page for notifications with auto-saving and enhanced preference management</span>
+                    <span>Enhanced access control mechanisms for ERP integration endpoints</span>
                   </li>
                 </ul>
               </div>
               <div>
-                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Bug Fixes</h4>
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Internationalization</h4>
                 <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                   <li class="flex items-start space-x-2">
-                    <span class="text-red-500 mt-1">•</span>
-                    <span>Fixed time remaining for tickets on dashboard displaying incorrect duration calculations</span>
+                    <span class="text-purple-500 mt-1">•</span>
+                    <span><strong>German Language Support</strong> - Comprehensive German translations for most application pages (work-in-progress)</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-purple-500 mt-1">•</span>
+                    <span>Enhanced language switching functionality with persistent user preferences</span>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">User Experience Improvements</h4>
+                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                  <li class="flex items-start space-x-2">
+                    <span class="text-green-500 mt-1">•</span>
+                    <span>Redesigned Help Center with comprehensive guidance modals and streamlined navigation</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-green-500 mt-1">•</span>
+                    <span>Enhanced request workflow documentation with step-by-step guides</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-green-500 mt-1">•</span>
+                    <span>Improved ERP integration management interface for administrators</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-green-500 mt-1">•</span>
+                    <span>Enhanced email notification management with detailed user controls</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Version 2.2.0 -->
+          <div class="mb-8 pb-8 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center space-x-3">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                  v2.2.0
+                </span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">Previous Release</span>
+              </div>
+              <span class="text-sm text-gray-500 dark:text-gray-400">Notification System Update</span>
+            </div>
+            <div class="space-y-3">
+              <div>
+                <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Key Features</h4>
+                <ul class="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                  <li class="flex items-start space-x-2">
+                    <span class="text-blue-500 mt-1">•</span>
+                    <span>Comprehensive notification system with real-time in-app and email notifications</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-blue-500 mt-1">•</span>
+                    <span>Professional BMW-styled email templates for ticket exports and notifications</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-green-500 mt-1">•</span>
+                    <span>Enhanced database schema and improved Gmail integration service</span>
                   </li>
                   <li class="flex items-start space-x-2">
                     <span class="text-red-500 mt-1">•</span>
-                    <span>Resolved page refreshing issues in ticket service and request page for better data consistency</span>
-                  </li>
-                  <li class="flex items-start space-x-2">
-                    <span class="text-red-500 mt-1">•</span>
-                    <span>Fixed notification page mobile responsiveness issues with improved layout and spacing</span>
+                    <span>Fixed dashboard time calculations and mobile responsiveness issues</span>
                   </li>
                 </ul>
               </div>
@@ -390,61 +349,31 @@
                 </span>
                 <span class="text-sm text-gray-500 dark:text-gray-400">Previous Version</span>
               </div>
-              <span class="text-sm text-gray-500 dark:text-gray-400">Previous Release</span>
+              <span class="text-sm text-gray-500 dark:text-gray-400">AI Integration Update</span>
             </div>
-            <div class="space-y-4">
+            <div class="space-y-3">
               <div>
-                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">New Features</h4>
-                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Key Features</h4>
+                <ul class="space-y-1 text-sm text-gray-600 dark:text-gray-400">
                   <li class="flex items-start space-x-2">
                     <span class="text-blue-500 mt-1">•</span>
-                    <span><strong>Gemini Chatbot Integration (Beta)</strong> - AI-powered assistant for emergency access guidance and support</span>
-                  </li>
-                  <li class="flex items-start space-x-2">
-                    <span class="text-blue-500 mt-1">•</span>
-                    <span><strong>Email Ticket Log Export</strong> - Export ticket data directly to email with CSV attachments</span>
+                    <span>Gemini Chatbot Integration (Beta) for emergency access guidance</span>
                   </li>
                   <li class="flex items-start space-x-2">
                     <span class="text-blue-500 mt-1">•</span>
-                    <span><strong>Service Down Page</strong> - Professional BMW-inspired page for service outages with retry functionality</span>
+                    <span>Email ticket log export functionality with CSV attachments</span>
                   </li>
-                </ul>
-              </div>
-              <div>
-                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Improvements</h4>
-                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                   <li class="flex items-start space-x-2">
-                    <span class="text-green-500 mt-1">•</span>
-                    <span>Enhanced pull-to-refresh styling with modern spinner and improved theming</span>
+                    <span class="text-blue-500 mt-1">•</span>
+                    <span>Professional service down page with retry functionality</span>
                   </li>
                   <li class="flex items-start space-x-2">
                     <span class="text-green-500 mt-1">•</span>
-                    <span>Improved notification banners with smooth animations and better mobile compatibility</span>
-                  </li>
-                  <li class="flex items-start space-x-2">
-                    <span class="text-green-500 mt-1">•</span>
-                    <span>Better icon consistency in recent activities panel with appropriate checkmarks for completed tickets</span>
-                  </li>
-                  <li class="flex items-start space-x-2">
-                    <span class="text-green-500 mt-1">•</span>
-                    <span>Enhanced admin panel with smooth expand/collapse animations for ticket details</span>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Bug Fixes</h4>
-                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                  <li class="flex items-start space-x-2">
-                    <span class="text-red-500 mt-1">•</span>
-                    <span>Fixed closing animation bug in admin panel details buttons</span>
+                    <span>Enhanced UI animations and improved mobile compatibility</span>
                   </li>
                   <li class="flex items-start space-x-2">
                     <span class="text-red-500 mt-1">•</span>
-                    <span>Improved dark mode compatibility across all components</span>
-                  </li>
-                  <li class="flex items-start space-x-2">
-                    <span class="text-red-500 mt-1">•</span>
-                    <span>Enhanced connection error handling with automatic service down page redirection</span>
+                    <span>Fixed admin panel animations and dark mode compatibility issues</span>
                   </li>
                 </ul>
               </div>
@@ -460,57 +389,31 @@
                 </span>
                 <span class="text-sm text-gray-500 dark:text-gray-400">Previous Version</span>
               </div>
-              <span class="text-sm text-gray-500 dark:text-gray-400">Development Build</span>
+              <span class="text-sm text-gray-500 dark:text-gray-400">UI Enhancement Update</span>
             </div>
-            <div class="space-y-4">
+            <div class="space-y-3">
               <div>
-                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">New Features</h4>
-                <ul class="space-y-2 text-gray-600 dark:text-gray-400">
+                <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Key Features</h4>
+                <ul class="space-y-1 text-sm text-gray-600 dark:text-gray-400">
                   <li class="flex items-start space-x-2">
                     <span class="text-green-500 mt-1">•</span>
-                    <span>Redesigned Help Centre with comprehensive documentation sections</span>
+                    <span>Redesigned Help Centre with comprehensive documentation</span>
                   </li>
                   <li class="flex items-start space-x-2">
                     <span class="text-green-500 mt-1">•</span>
-                    <span>Enhanced Settings page with push notification controls</span>
-                  </li>
-                  <li class="flex items-start space-x-2">
-                    <span class="text-green-500 mt-1">•</span>
-                    <span>Centralised version management system</span>
-                  </li>
-                  <li class="flex items-start space-x-2">
-                    <span class="text-green-500 mt-1">•</span>
-                    <span>Improved navigation with help and settings integration</span>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Improvements</h4>
-                <ul class="space-y-2 text-gray-600 dark:text-gray-400">
-                  <li class="flex items-start space-x-2">
-                    <span class="text-blue-500 mt-1">•</span>
-                    <span>Enhanced dark mode support across all components</span>
+                    <span>Enhanced Settings page with notification controls</span>
                   </li>
                   <li class="flex items-start space-x-2">
                     <span class="text-blue-500 mt-1">•</span>
-                    <span>Improved responsive design for mobile devices</span>
+                    <span>Improved dark mode support and responsive design</span>
                   </li>
                   <li class="flex items-start space-x-2">
                     <span class="text-blue-500 mt-1">•</span>
                     <span>FlowBite component integration for consistent UI styling</span>
                   </li>
-                </ul>
-              </div>
-              <div>
-                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Bug Fixes</h4>
-                <ul class="space-y-2 text-gray-600 dark:text-gray-400">
                   <li class="flex items-start space-x-2">
                     <span class="text-orange-500 mt-1">•</span>
-                    <span>Fixed routing issues with authentication guards</span>
-                  </li>
-                  <li class="flex items-start space-x-2">
-                    <span class="text-orange-500 mt-1">•</span>
-                    <span>Resolved component import errors in navigation</span>
+                    <span>Fixed routing and authentication guard issues</span>
                   </li>
                 </ul>
               </div>
@@ -526,77 +429,25 @@
                 </span>
                 <span class="text-sm text-gray-500 dark:text-gray-400">Initial Release</span>
               </div>
-              <span class="text-sm text-gray-500 dark:text-gray-400">Development Build</span>
+              <span class="text-sm text-gray-500 dark:text-gray-400">Foundation Build</span>
             </div>
-            <div class="space-y-4">
-              <div>
-                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Basic Features</h4>
-                <ul class="space-y-2 text-gray-600 dark:text-gray-400">
-                  <li class="flex items-start space-x-2">
-                    <span class="text-gray-500 mt-1">•</span>
-                    <span>Basic ticket creation functionality</span>
-                  </li>
-                  <li class="flex items-start space-x-2">
-                    <span class="text-gray-500 mt-1">•</span>
-                    <span>Minimal dashboard with basic ticket display</span>
-                  </li>
-                  <li class="flex items-start space-x-2">
-                    <span class="text-gray-500 mt-1">•</span>
-                    <span>Basic notification system</span>
-                  </li>
-                  <li class="flex items-start space-x-2">
-                    <span class="text-gray-500 mt-1">•</span>
-                    <span>User authentication framework</span>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Development Notes</h4>
-                <ul class="space-y-2 text-gray-600 dark:text-gray-400">
-                  <li class="flex items-start space-x-2">
-                    <span class="text-yellow-500 mt-1">•</span>
-                    <span>All data was mocked for development purposes</span>
-                  </li>
-                  <li class="flex items-start space-x-2">
-                    <span class="text-yellow-500 mt-1">•</span>
-                    <span>No backend integration</span>
-                  </li>
-                  <li class="flex items-start space-x-2">
-                    <span class="text-yellow-500 mt-1">•</span>
-                    <span>Limited functionality and testing only</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- Development Roadmap -->
-          <div class="mb-4">
-            <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Development Roadmap</h4>
             <div class="space-y-3">
-              <div class="flex items-center space-x-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
-                  ✓ Completed
-                </span>
-                <span class="text-sm text-gray-700 dark:text-gray-300">Comprehensive notification system with email integration</span>
-              </div>
-              <div class="flex items-center space-x-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300">
-                  Upcoming
-                </span>
-                <span class="text-sm text-gray-700 dark:text-gray-300">Real-time WebSocket notifications and push notifications for mobile</span>
-              </div>
-              <div class="flex items-center space-x-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300">
-                  Planned
-                </span>
-                <span class="text-sm text-gray-700 dark:text-gray-300">Advanced reporting and analytics dashboard with notification metrics</span>
-              </div>
-              <div class="flex items-center space-x-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
-                  Future
-                </span>
-                <span class="text-sm text-gray-700 dark:text-gray-300">Integration with external monitoring systems and SMS notifications</span>
+              <div>
+                <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Core Features</h4>
+                <ul class="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                  <li class="flex items-start space-x-2">
+                    <span class="text-gray-500 mt-1">•</span>
+                    <span>Basic emergency access request functionality</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-gray-500 mt-1">•</span>
+                    <span>Simple dashboard and user authentication framework</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-yellow-500 mt-1">•</span>
+                    <span>Initial development build with mocked data and limited functionality</span>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
@@ -611,6 +462,879 @@
           <button (click)="closeReleaseNotesModal()" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800 rounded-lg transition-colors duration-200">
             Close
           </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Request Guide Modal -->
+  <div *ngIf="isRequestGuideModalOpen" class="fixed inset-0 z-50 overflow-y-auto" (click)="closeRequestGuideModal()">
+    <!-- Background overlay -->
+    <div [@modalBackdrop]="requestGuideModalAnimationState" class="fixed inset-0 bg-black bg-opacity-50"></div>
+
+    <!-- Modal panel -->
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div [@modalPanel]="requestGuideModalAnimationState" (click)="$event.stopPropagation()" class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+
+        <!-- Modal header -->
+        <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-white">FireFighter Role Request Guide</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Step-by-step instructions for creating emergency access requests</p>
+            </div>
+          </div>
+          <button (click)="closeRequestGuideModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Modal body -->
+        <div class="p-6 max-h-96 overflow-y-auto">
+
+          <!-- Introduction -->
+          <div class="mb-6">
+            <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+              Follow these steps to create a FireFighter emergency access request. This process ensures proper documentation and approval workflow for elevated privileges.
+            </p>
+          </div>
+
+          <!-- Steps -->
+          <div class="space-y-6">
+
+            <!-- Step 1 -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                <span class="text-sm font-semibold text-red-600 dark:text-red-400">1</span>
+              </div>
+              <div class="flex-1">
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Navigate to Requests Page</h4>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-3">
+                  Go to the <strong>Requests</strong> page using the navigation menu. This is where you can view all your previous requests and create new ones.
+                </p>
+              </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                <span class="text-sm font-semibold text-red-600 dark:text-red-400">2</span>
+              </div>
+              <div class="flex-1">
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Click the "+" Button</h4>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-3">
+                  Look for the red <strong>"+"</strong> button on the requests page and click it to open the request creation modal.
+                </p>
+              </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                <span class="text-sm font-semibold text-red-600 dark:text-red-400">3</span>
+              </div>
+              <div class="flex-1">
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Fill in Required Information</h4>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-3">
+                  Complete all the required fields in the request form:
+                </p>
+                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400 ml-4">
+                  <li class="flex items-start space-x-2">
+                    <span class="text-red-500 mt-1">•</span>
+                    <span><strong>Request Date:</strong> The date when you need the emergency access (automatically set to today)</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-red-500 mt-1">•</span>
+                    <span><strong>Emergency Type:</strong> Select from HR Emergency, Financial Emergency, Management Emergency, or Logistics Emergency</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-red-500 mt-1">•</span>
+                    <span><strong>Reason:</strong> Provide a detailed explanation of why you need emergency access (required field)</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-red-500 mt-1">•</span>
+                    <span><strong>Emergency Contact:</strong> Your contact number (can be auto-filled from your profile)</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-red-500 mt-1">•</span>
+                    <span><strong>Duration:</strong> Set the access duration between 15 minutes and 2 hours using the +/- buttons</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                <span class="text-sm font-semibold text-red-600 dark:text-red-400">4</span>
+              </div>
+              <div class="flex-1">
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Submit Your Request</h4>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-3">
+                  Once all required fields are completed, click the <strong>"Submit Request"</strong> button. Your request will be sent for approval and you'll receive notifications about status updates.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Important Notes -->
+          <div class="mt-6 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+            <div class="flex items-start space-x-3">
+              <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+              <div>
+                <h5 class="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-1">Important Notes</h5>
+                <ul class="text-xs text-amber-700 dark:text-amber-400 space-y-1">
+                  <li>• Emergency access requests require approval before activation</li>
+                  <li>• Access is time-bound and expires after the set duration</li>
+                  <li>• Provide detailed justification to expedite approval process</li>
+                  <li>• You'll receive notifications about request status changes</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Emergency Access Workflow Modal -->
+  <div *ngIf="isWorkflowModalOpen" class="fixed inset-0 z-50 overflow-y-auto" (click)="closeWorkflowModal()">
+    <!-- Background overlay -->
+    <div [@modalBackdrop]="workflowModalAnimationState" class="fixed inset-0 bg-black bg-opacity-50"></div>
+
+    <!-- Modal panel -->
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div [@modalPanel]="workflowModalAnimationState" (click)="$event.stopPropagation()" class="relative w-full max-w-3xl bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+
+        <!-- Modal header -->
+        <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Emergency Access Workflow</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Complete workflow from request to ERP system access</p>
+            </div>
+          </div>
+          <button (click)="closeWorkflowModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Modal body -->
+        <div class="p-6 max-h-96 overflow-y-auto">
+
+          <!-- Introduction -->
+          <div class="mb-6">
+            <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+              This workflow guides you through the complete process of requesting emergency access in FireFighter and then using that access in the integrated ERP system to perform your required actions.
+            </p>
+          </div>
+
+          <!-- Workflow Steps -->
+          <div class="space-y-6">
+
+            <!-- Phase 1 Header -->
+            <div class="border-l-4 border-red-500 pl-4 mb-4">
+              <h4 class="text-lg font-semibold text-gray-900 dark:text-white">Phase 1: Request Emergency Access</h4>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Submit your emergency access request through FireFighter</p>
+            </div>
+
+            <!-- Step 1 -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                <span class="text-sm font-semibold text-red-600 dark:text-red-400">1</span>
+              </div>
+              <div class="flex-1">
+                <h5 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Create Emergency Access Request</h5>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                  Navigate to the <strong>Requests</strong> page and click the <strong>"+"</strong> button to create a new emergency access request. Fill in all required information including emergency type, detailed reason, and access duration.
+                </p>
+                <div class="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                  💡 <strong>Tip:</strong> Provide detailed justification to expedite the approval process
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                <span class="text-sm font-semibold text-red-600 dark:text-red-400">2</span>
+              </div>
+              <div class="flex-1">
+                <h5 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Wait for Approval</h5>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                  Your request will be reviewed by the appropriate approvers. You'll receive notifications about status changes. Monitor your notifications and the requests page for updates.
+                </p>
+                <div class="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                  📧 <strong>Note:</strong> Email notifications will be sent for all status updates
+                </div>
+              </div>
+            </div>
+
+            <!-- Phase 2 Header -->
+            <div class="border-l-4 border-blue-500 pl-4 mb-4 mt-8">
+              <h4 class="text-lg font-semibold text-gray-900 dark:text-white">Phase 2: Access Activation & ERP Usage</h4>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Use your approved access in the ERP system</p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">3</span>
+              </div>
+              <div class="flex-1">
+                <h5 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Access Granted Notification</h5>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                  Once approved, you'll receive a notification that your emergency access has been activated. Your elevated privileges are now active in the integrated ERP system.
+                </p>
+                <div class="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-2 rounded border border-amber-200 dark:border-amber-800">
+                  ⏰ <strong>Time Sensitive:</strong> Your access timer starts immediately upon approval
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">4</span>
+              </div>
+              <div class="flex-1">
+                <h5 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Navigate to ERP System</h5>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                  Access the integrated ERP system using your normal login credentials. Your account now has the elevated privileges corresponding to your approved emergency type:
+                </p>
+                <ul class="space-y-1 text-sm text-gray-600 dark:text-gray-400 ml-4 mb-2">
+                  <li class="flex items-start space-x-2">
+                    <span class="text-blue-500 mt-1">•</span>
+                    <span><strong>HR Emergency:</strong> Access to HR module and user management</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-blue-500 mt-1">•</span>
+                    <span><strong>Financial Emergency:</strong> Access to financial modules and reporting</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-blue-500 mt-1">•</span>
+                    <span><strong>Management Emergency:</strong> Access to management dashboards and controls</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-blue-500 mt-1">•</span>
+                    <span><strong>Logistics Emergency:</strong> Access to logistics and supply chain modules</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">5</span>
+              </div>
+              <div class="flex-1">
+                <h5 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Perform Required Actions</h5>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                  Complete your emergency tasks within the ERP system efficiently. All actions performed with elevated privileges are automatically logged for audit purposes.
+                </p>
+                <div class="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                  📝 <strong>Audit Trail:</strong> All elevated actions are automatically tracked and recorded
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 6 -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                <span class="text-sm font-semibold text-green-600 dark:text-green-400">6</span>
+              </div>
+              <div class="flex-1">
+                <h5 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Access Expiration</h5>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                  Your elevated access will automatically expire after the specified duration. You'll receive notifications before expiration and when access is revoked.
+                </p>
+                <div class="text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 p-2 rounded border border-green-200 dark:border-green-800">
+                  ✅ <strong>Automatic Cleanup:</strong> No manual action required - access is automatically revoked
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Best Practices -->
+          <div class="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div class="flex items-start space-x-3">
+              <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <div>
+                <h5 class="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">Best Practices</h5>
+                <ul class="text-xs text-blue-700 dark:text-blue-400 space-y-1">
+                  <li>• Complete your emergency tasks as quickly as possible</li>
+                  <li>• Monitor the remaining time on your access in the FireFighter dashboard</li>
+                  <li>• Document any actions taken for future reference</li>
+                  <li>• Log out of the ERP system when finished to ensure security</li>
+                  <li>• Contact support if you need additional time before expiration</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ERP Integration Management Modal -->
+  <div *ngIf="isErpIntegrationModalOpen" class="fixed inset-0 z-50 overflow-y-auto" (click)="closeErpIntegrationModal()">
+    <!-- Background overlay -->
+    <div [@modalBackdrop]="erpIntegrationModalAnimationState" class="fixed inset-0 bg-black bg-opacity-50"></div>
+
+    <!-- Modal panel -->
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div [@modalPanel]="erpIntegrationModalAnimationState" (click)="$event.stopPropagation()" class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+
+        <!-- Modal header -->
+        <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-white">ERP Integration Management</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Account linking and user group management</p>
+            </div>
+          </div>
+          <button (click)="closeErpIntegrationModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Modal body -->
+        <div class="p-6 max-h-96 overflow-y-auto">
+
+          <!-- Introduction -->
+          <div class="mb-6">
+            <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+              FireFighter integrates with your organization's ERP system to provide emergency access management. This integration requires proper account linking and user group configuration to function correctly.
+            </p>
+          </div>
+
+          <!-- User Permissions Section -->
+          <div class="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+            <div class="flex items-start space-x-3">
+              <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+              <div>
+                <h4 class="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-2">User Permission Restrictions</h4>
+                <p class="text-sm text-amber-700 dark:text-amber-400">
+                  <strong>Normal users do not have permission to manage their ERP User ID</strong> in FireFighter. This is a security measure to ensure proper account linking and prevent unauthorized access.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Account Linking Process -->
+          <div class="space-y-6">
+
+            <!-- Section Header -->
+            <div class="border-l-4 border-purple-500 pl-4 mb-4">
+              <h4 class="text-lg font-semibold text-gray-900 dark:text-white">Account Linking Process</h4>
+              <p class="text-sm text-gray-600 dark:text-gray-400">How to get your FireFighter and ERP accounts properly linked</p>
+            </div>
+
+            <!-- Step 1 -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
+                <span class="text-sm font-semibold text-purple-600 dark:text-purple-400">1</span>
+              </div>
+              <div class="flex-1">
+                <h5 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Contact FireFighter Administrator</h5>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                  Reach out to your organization's FireFighter administrator to request ERP account linking. Provide them with your ERP username/ID and any relevant department information.
+                </p>
+                <div class="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                  💡 <strong>Tip:</strong> Have your ERP username and department information ready when contacting the administrator
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
+                <span class="text-sm font-semibold text-purple-600 dark:text-purple-400">2</span>
+              </div>
+              <div class="flex-1">
+                <h5 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Administrator Links Accounts</h5>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                  The administrator will link your FireFighter account to your ERP user ID in the system. This creates the connection needed for emergency access management.
+                </p>
+                <div class="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 p-2 rounded border border-blue-200 dark:border-blue-800">
+                  🔗 <strong>Secure Process:</strong> Only administrators can perform account linking for security reasons
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
+                <span class="text-sm font-semibold text-purple-600 dark:text-purple-400">3</span>
+              </div>
+              <div class="flex-1">
+                <h5 class="text-base font-semibold text-gray-900 dark:text-white mb-2">User Group Assignment</h5>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                  The administrator will ensure you are added to the relevant user group in the ERP system based on your role and emergency access requirements:
+                </p>
+                <ul class="space-y-1 text-sm text-gray-600 dark:text-gray-400 ml-4 mb-2">
+                  <li class="flex items-start space-x-2">
+                    <span class="text-purple-500 mt-1">•</span>
+                    <span><strong>Financials Group:</strong> For financial emergency access</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-purple-500 mt-1">•</span>
+                    <span><strong>HR Group:</strong> For human resources emergency access</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-purple-500 mt-1">•</span>
+                    <span><strong>Logistics Group:</strong> For logistics and supply chain emergency access</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-purple-500 mt-1">•</span>
+                    <span><strong>Manager Group:</strong> For management-level emergency access</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                <span class="text-sm font-semibold text-green-600 dark:text-green-400">4</span>
+              </div>
+              <div class="flex-1">
+                <h5 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Verification & Testing</h5>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                  Once the linking is complete, the administrator will verify that your account integration is working correctly. You can then begin using FireFighter to request emergency access.
+                </p>
+                <div class="text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 p-2 rounded border border-green-200 dark:border-green-800">
+                  ✅ <strong>Ready to Use:</strong> Your FireFighter account is now properly integrated with the ERP system
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Important Information -->
+          <div class="mt-8 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+            <div class="flex items-start space-x-3">
+              <svg class="w-5 h-5 text-gray-600 dark:text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <div>
+                <h5 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">Important Notes</h5>
+                <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                  <li>• Account linking is a one-time setup process performed by administrators</li>
+                  <li>• Your ERP username must match exactly for proper integration</li>
+                  <li>• User group assignments determine which emergency access types you can request</li>
+                  <li>• Contact your administrator if you experience any integration issues</li>
+                  <li>• Changes to your ERP account may require re-linking by an administrator</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Emergency Extensions Modal -->
+  <div *ngIf="isEmergencyExtensionsModalOpen" class="fixed inset-0 z-50 overflow-y-auto" (click)="closeEmergencyExtensionsModal()">
+    <!-- Background overlay -->
+    <div [@modalBackdrop]="emergencyExtensionsModalAnimationState" class="fixed inset-0 bg-black bg-opacity-50"></div>
+
+    <!-- Modal panel -->
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div [@modalPanel]="emergencyExtensionsModalAnimationState" (click)="$event.stopPropagation()" class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+
+        <!-- Modal header -->
+        <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Emergency Extensions</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400">How to request additional time for emergency access</p>
+            </div>
+          </div>
+          <button (click)="closeEmergencyExtensionsModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Modal body -->
+        <div class="p-6 max-h-96 overflow-y-auto">
+
+          <!-- Introduction -->
+          <div class="mb-6">
+            <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+              If you need additional time beyond your current emergency access duration, you can request an extension by creating a new request. This process ensures proper documentation and approval for extended access periods.
+            </p>
+          </div>
+
+          <!-- Extension Process -->
+          <div class="space-y-6">
+
+            <!-- Section Header -->
+            <div class="border-l-4 border-orange-500 pl-4 mb-4">
+              <h4 class="text-lg font-semibold text-gray-900 dark:text-white">Extension Request Process</h4>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Follow these steps to request additional emergency access time</p>
+            </div>
+
+            <!-- Step 1 -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center">
+                <span class="text-sm font-semibold text-orange-600 dark:text-orange-400">1</span>
+              </div>
+              <div class="flex-1">
+                <h5 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Create a New Request</h5>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                  Navigate to the <strong>Requests</strong> page and create a new emergency access request using the same emergency type as your current/previous request.
+                </p>
+                <div class="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                  💡 <strong>Important:</strong> Use the same emergency type to maintain consistency with your original request
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center">
+                <span class="text-sm font-semibold text-orange-600 dark:text-orange-400">2</span>
+              </div>
+              <div class="flex-1">
+                <h5 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Update the Reason Field</h5>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                  In the reason field, provide an updated explanation that includes:
+                </p>
+                <ul class="space-y-1 text-sm text-gray-600 dark:text-gray-400 ml-4 mb-2">
+                  <li class="flex items-start space-x-2">
+                    <span class="text-orange-500 mt-1">•</span>
+                    <span>Reference to your previous request (if applicable)</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-orange-500 mt-1">•</span>
+                    <span>Why additional time is needed</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-orange-500 mt-1">•</span>
+                    <span>Current progress on the emergency situation</span>
+                  </li>
+                  <li class="flex items-start space-x-2">
+                    <span class="text-orange-500 mt-1">•</span>
+                    <span>Estimated time needed to complete the work</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center">
+                <span class="text-sm font-semibold text-orange-600 dark:text-orange-400">3</span>
+              </div>
+              <div class="flex-1">
+                <h5 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Set Appropriate Duration</h5>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                  Choose the minimum duration needed to complete your emergency tasks. Remember that access duration is limited to between 15 minutes and 2 hours per request.
+                </p>
+                <div class="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 p-2 rounded border border-blue-200 dark:border-blue-800">
+                  ⏰ <strong>Timing Tip:</strong> Submit your extension request before your current access expires for seamless continuation
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                <span class="text-sm font-semibold text-green-600 dark:text-green-400">4</span>
+              </div>
+              <div class="flex-1">
+                <h5 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Submit and Wait for Approval</h5>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                  Submit your extension request and wait for approval. The request will go through the same approval process as your initial request.
+                </p>
+                <div class="text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 p-2 rounded border border-green-200 dark:border-green-800">
+                  📧 <strong>Notifications:</strong> You'll receive email and in-app notifications about the approval status
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Important Warning -->
+          <div class="mt-8 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+            <div class="flex items-start space-x-3">
+              <svg class="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+              <div>
+                <h5 class="text-sm font-semibold text-red-800 dark:text-red-300 mb-2">⚠️ Multiple Request Warning</h5>
+                <p class="text-sm text-red-700 dark:text-red-400 mb-2">
+                  <strong>If you make too many extension requests, all administrators will be automatically notified.</strong> Excessive requests may trigger an investigation into your emergency access usage patterns.
+                </p>
+                <ul class="text-xs text-red-600 dark:text-red-400 space-y-1">
+                  <li>• Only request extensions when absolutely necessary</li>
+                  <li>• Provide detailed justification for each extension request</li>
+                  <li>• Plan your emergency tasks efficiently to minimize extension needs</li>
+                  <li>• Frequent extension requests may result in access restrictions</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Best Practices -->
+          <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+            <div class="flex items-start space-x-3">
+              <svg class="w-5 h-5 text-gray-600 dark:text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+              </svg>
+              <div>
+                <h5 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">Best Practices for Extensions</h5>
+                <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                  <li>• Request extensions proactively, not at the last minute</li>
+                  <li>• Be specific about why additional time is needed</li>
+                  <li>• Estimate time requirements accurately to avoid multiple extensions</li>
+                  <li>• Document your progress and remaining tasks clearly</li>
+                  <li>• Consider if the emergency can be resolved through alternative means</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Email Notifications Modal -->
+  <div *ngIf="isEmailNotificationsModalOpen" class="fixed inset-0 z-50 overflow-y-auto" (click)="closeEmailNotificationsModal()">
+    <!-- Background overlay -->
+    <div [@modalBackdrop]="emailNotificationsModalAnimationState" class="fixed inset-0 bg-black bg-opacity-50"></div>
+
+    <!-- Modal panel -->
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div [@modalPanel]="emailNotificationsModalAnimationState" (click)="$event.stopPropagation()" class="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+
+        <!-- Modal header -->
+        <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Email Notifications</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Types of email notifications and how to manage them</p>
+            </div>
+          </div>
+          <button (click)="closeEmailNotificationsModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Modal body -->
+        <div class="p-6 max-h-96 overflow-y-auto">
+
+          <!-- Introduction -->
+          <div class="mb-6">
+            <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+              FireFighter sends automated email notifications to keep you informed about your emergency access requests and status changes. You can customize which notifications you receive through your settings.
+            </p>
+          </div>
+
+          <!-- Notification Types -->
+          <div class="space-y-6">
+
+            <!-- Section Header -->
+            <div class="border-l-4 border-blue-500 pl-4 mb-4">
+              <h4 class="text-lg font-semibold text-gray-900 dark:text-white">Types of Email Notifications</h4>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Automated emails you'll receive during the emergency access lifecycle</p>
+            </div>
+
+            <!-- Request Submitted -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <h5 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Request Submitted</h5>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                  Confirmation email sent immediately when you submit a new emergency access request. Includes request details and tracking information.
+                </p>
+                <div class="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                  📧 <strong>Contains:</strong> Request ID, emergency type, requested duration, and submission timestamp
+                </div>
+              </div>
+            </div>
+
+            <!-- Request Approved -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <h5 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Request Approved</h5>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                  Notification when your emergency access request has been approved and activated. Your elevated privileges are now available in the ERP system.
+                </p>
+                <div class="text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 p-2 rounded border border-green-200 dark:border-green-800">
+                  ✅ <strong>Action Required:</strong> You can now access the ERP system with elevated privileges
+                </div>
+              </div>
+            </div>
+
+            <!-- Request Rejected -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <h5 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Request Rejected</h5>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                  Notification when your emergency access request has been denied. Includes reason for rejection and guidance for resubmission if applicable.
+                </p>
+                <div class="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded border border-red-200 dark:border-red-800">
+                  ❌ <strong>Contains:</strong> Rejection reason and recommendations for future requests
+                </div>
+              </div>
+            </div>
+
+            <!-- Access Expiring Soon -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <h5 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Access Expiring Soon</h5>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                  Warning email sent before your emergency access expires (typically 15 minutes before expiration). Allows time to request extensions if needed.
+                </p>
+                <div class="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-2 rounded border border-amber-200 dark:border-amber-800">
+                  ⏰ <strong>Timing:</strong> Sent 15 minutes before access expiration
+                </div>
+              </div>
+            </div>
+
+            <!-- Access Revoked -->
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0 w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L5.636 5.636"></path>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <h5 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Access Revoked</h5>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                  Confirmation when your emergency access has been automatically revoked due to expiration or manually terminated. Includes access duration summary.
+                </p>
+                <div class="text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                  🔒 <strong>Security:</strong> Confirms your elevated privileges have been removed
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Settings Information -->
+          <div class="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div class="flex items-start space-x-3">
+              <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              <div>
+                <h5 class="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">Managing Email Notifications</h5>
+                <p class="text-sm text-blue-700 dark:text-blue-400 mb-3">
+                  You can enable or disable email notifications for each type of event. Navigate to the <strong>Settings</strong> page and look for the <strong>"Delivery Methods"</strong> section to customize your preferences.
+                </p>
+                <div class="space-y-2">
+                  <div class="flex items-center space-x-2 text-xs text-blue-600 dark:text-blue-400">
+                    <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
+                    <span>Go to Settings → Delivery Methods</span>
+                  </div>
+                  <div class="flex items-center space-x-2 text-xs text-blue-600 dark:text-blue-400">
+                    <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
+                    <span>Toggle email notifications on/off for each event type</span>
+                  </div>
+                  <div class="flex items-center space-x-2 text-xs text-blue-600 dark:text-blue-400">
+                    <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
+                    <span>Changes are saved automatically</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Important Notes -->
+          <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+            <div class="flex items-start space-x-3">
+              <svg class="w-5 h-5 text-gray-600 dark:text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <div>
+                <h5 class="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">Important Notes</h5>
+                <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                  <li>• Email notifications are sent to your registered email address</li>
+                  <li>• Critical notifications (like access expiration warnings) are recommended to keep enabled</li>
+                  <li>• Email delivery may take a few minutes depending on your email provider</li>
+                  <li>• Check your spam/junk folder if you don't receive expected notifications</li>
+                  <li>• In-app notifications are always enabled regardless of email settings</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
         </div>
 
       </div>

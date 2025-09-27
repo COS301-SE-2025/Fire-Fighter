@@ -49,7 +49,17 @@ export class HelpPage implements OnInit {
 
   appVersion: string = '';
   isReleaseNotesModalOpen: boolean = false;
+  isRequestGuideModalOpen: boolean = false;
+  isWorkflowModalOpen: boolean = false;
+  isErpIntegrationModalOpen: boolean = false;
+  isEmergencyExtensionsModalOpen: boolean = false;
+  isEmailNotificationsModalOpen: boolean = false;
   modalAnimationState: string = 'hidden';
+  requestGuideModalAnimationState: string = 'hidden';
+  workflowModalAnimationState: string = 'hidden';
+  erpIntegrationModalAnimationState: string = 'hidden';
+  emergencyExtensionsModalAnimationState: string = 'hidden';
+  emailNotificationsModalAnimationState: string = 'hidden';
 
   constructor(private versionService: VersionService) { }
 
@@ -70,6 +80,86 @@ export class HelpPage implements OnInit {
     // Wait for animation to complete before hiding the modal
     setTimeout(() => {
       this.isReleaseNotesModalOpen = false;
+    }, 200);
+  }
+
+  openRequestGuideModal() {
+    this.isRequestGuideModalOpen = true;
+    // Small delay to ensure the modal is rendered before animating
+    setTimeout(() => {
+      this.requestGuideModalAnimationState = 'visible';
+    }, 10);
+  }
+
+  closeRequestGuideModal() {
+    this.requestGuideModalAnimationState = 'hidden';
+    // Wait for animation to complete before hiding the modal
+    setTimeout(() => {
+      this.isRequestGuideModalOpen = false;
+    }, 200);
+  }
+
+  openWorkflowModal() {
+    this.isWorkflowModalOpen = true;
+    // Small delay to ensure the modal is rendered before animating
+    setTimeout(() => {
+      this.workflowModalAnimationState = 'visible';
+    }, 10);
+  }
+
+  closeWorkflowModal() {
+    this.workflowModalAnimationState = 'hidden';
+    // Wait for animation to complete before hiding the modal
+    setTimeout(() => {
+      this.isWorkflowModalOpen = false;
+    }, 200);
+  }
+
+  openErpIntegrationModal() {
+    this.isErpIntegrationModalOpen = true;
+    // Small delay to ensure the modal is rendered before animating
+    setTimeout(() => {
+      this.erpIntegrationModalAnimationState = 'visible';
+    }, 10);
+  }
+
+  closeErpIntegrationModal() {
+    this.erpIntegrationModalAnimationState = 'hidden';
+    // Wait for animation to complete before hiding the modal
+    setTimeout(() => {
+      this.isErpIntegrationModalOpen = false;
+    }, 200);
+  }
+
+  openEmergencyExtensionsModal() {
+    this.isEmergencyExtensionsModalOpen = true;
+    // Small delay to ensure the modal is rendered before animating
+    setTimeout(() => {
+      this.emergencyExtensionsModalAnimationState = 'visible';
+    }, 10);
+  }
+
+  closeEmergencyExtensionsModal() {
+    this.emergencyExtensionsModalAnimationState = 'hidden';
+    // Wait for animation to complete before hiding the modal
+    setTimeout(() => {
+      this.isEmergencyExtensionsModalOpen = false;
+    }, 200);
+  }
+
+  openEmailNotificationsModal() {
+    this.isEmailNotificationsModalOpen = true;
+    // Small delay to ensure the modal is rendered before animating
+    setTimeout(() => {
+      this.emailNotificationsModalAnimationState = 'visible';
+    }, 10);
+  }
+
+  closeEmailNotificationsModal() {
+    this.emailNotificationsModalAnimationState = 'hidden';
+    // Wait for animation to complete before hiding the modal
+    setTimeout(() => {
+      this.isEmailNotificationsModalOpen = false;
     }, 200);
   }
 
