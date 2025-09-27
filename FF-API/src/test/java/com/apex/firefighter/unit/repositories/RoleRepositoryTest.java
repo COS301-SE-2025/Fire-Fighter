@@ -1,6 +1,7 @@
-package com.apex.firefighter.repository;
+package com.apex.firefighter.unit.repositories;
 
 import com.apex.firefighter.model.Role;
+import com.apex.firefighter.repository.RoleRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;

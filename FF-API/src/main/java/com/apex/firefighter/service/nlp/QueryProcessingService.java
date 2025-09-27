@@ -96,7 +96,15 @@ public class QueryProcessingService {
                 case SHOW_TICKETS:
                     return executeTicketQuery(TicketQueryType.USER_TICKETS,
                             buildQueryFilters(entities), userId, isAdmin);
-                
+
+                case SEARCH_TICKETS:
+                    return executeTicketQuery(TicketQueryType.SEARCH_TICKETS,
+                            buildQueryFilters(entities), userId, isAdmin);
+
+                case GET_TICKET_DETAILS:
+                    return executeTicketQuery(TicketQueryType.TICKET_DETAILS,
+                            buildQueryFilters(entities), userId, isAdmin);
+
                 case GET_SYSTEM_STATS:
                     return executeTicketQuery(TicketQueryType.SYSTEM_STATS,
                             buildQueryFilters(entities), userId, isAdmin);

@@ -1,6 +1,7 @@
-package com.apex.firefighter.controller;
+package com.apex.firefighter.unit.controllers;
 
 import com.apex.firefighter.config.TestConfig;
+import com.apex.firefighter.controller.UserPreferencesController;
 import com.apex.firefighter.model.UserPreferences;
 import com.apex.firefighter.service.UserPreferencesService;
 import com.fasterxml.jackson.databind.ObjectMapper;

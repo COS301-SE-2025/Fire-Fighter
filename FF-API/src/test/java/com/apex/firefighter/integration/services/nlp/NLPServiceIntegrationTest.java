@@ -337,6 +337,380 @@ class NLPServiceIntegrationTest {
         verify(entityExtractionService, never()).extractEntities(any());
     }
 
+    // ==================== MISSING NON-ADMIN FUNCTION INTEGRATION TESTS ====================
+
+    @Test
+    void processQuery_ShowTickets_CompleteUserWorkflow_ShouldWorkEndToEnd() {
+        // Arrange
+        String query = "show my tickets";
+        String userId = "user123";
+
+        IntentRecognitionService.Intent intent = new IntentRecognitionService.Intent(
+            IntentRecognitionService.IntentType.SHOW_TICKETS, 0.92, query);
+
+        EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
+        EntityExtractionService.ValidationResult validation = new EntityExtractionService.ValidationResult(true);
+
+        QueryProcessingService.QueryResult queryResult = new QueryProcessingService.QueryResult(
+            QueryProcessingService.QueryResultType.TICKET_LIST,
+            List.of("TICKET-001", "TICKET-002"), 2);
+
+        String expectedResponse = "Here are your tickets: TICKET-001, TICKET-002";
+
+        // Setup mocks
+        when(userService.getUserRole(userId)).thenReturn("USER");
+        when(intentRecognitionService.recognizeIntent(query)).thenReturn(intent);
+        when(intentRecognitionService.isIntentAllowed(intent.getType(), "USER")).thenReturn(true);
+        when(entityExtractionService.extractEntities(query)).thenReturn(entities);
+        when(entityExtractionService.validateEntities(entities)).thenReturn(validation);
+        when(queryProcessingService.processQuery(intent, entities, userId, false)).thenReturn(queryResult);
+        when(responseGenerationService.generateResponse(queryResult)).thenReturn(expectedResponse);
+
+        // Act
+        NLPService.NLPResponse response = nlpService.processQuery(query, userId);
+
+        // Assert
+        assertThat(response).isNotNull();
+        assertThat(response.isSuccess()).isTrue();
+        assertThat(response.getMessage()).isEqualTo(expectedResponse);
+
+        // Verify complete workflow
+        verify(userService).getUserRole(userId);
+        verify(intentRecognitionService).recognizeIntent(query);
+        verify(intentRecognitionService).isIntentAllowed(intent.getType(), "USER");
+        verify(entityExtractionService).extractEntities(query);
+        verify(entityExtractionService).validateEntities(entities);
+        verify(queryProcessingService).processQuery(intent, entities, userId, false);
+        verify(responseGenerationService).generateResponse(queryResult);
+    }
+
+    @Test
+    void processQuery_ShowRejectedTickets_CompleteUserWorkflow_ShouldWorkEndToEnd() {
+        // Arrange
+        String query = "show rejected tickets";
+        String userId = "user123";
+
+        IntentRecognitionService.Intent intent = new IntentRecognitionService.Intent(
+            IntentRecognitionService.IntentType.SHOW_REJECTED_TICKETS, 0.89, query);
+
+        EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
+        EntityExtractionService.ValidationResult validation = new EntityExtractionService.ValidationResult(true);
+
+        QueryProcessingService.QueryResult queryResult = new QueryProcessingService.QueryResult(
+            QueryProcessingService.QueryResultType.TICKET_LIST,
+            List.of("REJECTED-001", "REJECTED-002"), 2);
+
+        String expectedResponse = "Here are your rejected tickets: REJECTED-001, REJECTED-002";
+
+        // Setup mocks
+        when(userService.getUserRole(userId)).thenReturn("USER");
+        when(intentRecognitionService.recognizeIntent(query)).thenReturn(intent);
+        when(intentRecognitionService.isIntentAllowed(intent.getType(), "USER")).thenReturn(true);
+        when(entityExtractionService.extractEntities(query)).thenReturn(entities);
+        when(entityExtractionService.validateEntities(entities)).thenReturn(validation);
+        when(queryProcessingService.processQuery(intent, entities, userId, false)).thenReturn(queryResult);
+        when(responseGenerationService.generateResponse(queryResult)).thenReturn(expectedResponse);
+
+        // Act
+        NLPService.NLPResponse response = nlpService.processQuery(query, userId);
+
+        // Assert
+        assertThat(response).isNotNull();
+        assertThat(response.isSuccess()).isTrue();
+        assertThat(response.getMessage()).isEqualTo(expectedResponse);
+
+        // Verify complete workflow
+        verify(userService).getUserRole(userId);
+        verify(intentRecognitionService).recognizeIntent(query);
+        verify(intentRecognitionService).isIntentAllowed(intent.getType(), "USER");
+        verify(entityExtractionService).extractEntities(query);
+        verify(entityExtractionService).validateEntities(entities);
+        verify(queryProcessingService).processQuery(intent, entities, userId, false);
+        verify(responseGenerationService).generateResponse(queryResult);
+    }
+
+    @Test
+    void processQuery_SearchTickets_CompleteUserWorkflow_ShouldWorkEndToEnd() {
+        // Arrange
+        String query = "search for active hr-emergency tickets";
+        String userId = "user123";
+
+        IntentRecognitionService.Intent intent = new IntentRecognitionService.Intent(
+            IntentRecognitionService.IntentType.SEARCH_TICKETS, 0.91, query);
+
+        EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
+        Map<EntityExtractionService.EntityType, List<EntityExtractionService.Entity>> entityMap = new HashMap<>();
+        entityMap.put(EntityExtractionService.EntityType.STATUS,
+            List.of(new EntityExtractionService.Entity(EntityExtractionService.EntityType.STATUS, "active", 0, 6)));
+        entityMap.put(EntityExtractionService.EntityType.EMERGENCY_TYPE,
+            List.of(new EntityExtractionService.Entity(EntityExtractionService.EntityType.EMERGENCY_TYPE, "hr-emergency", 0, 12)));
+        entities.setAllEntities(entityMap);
+
+        EntityExtractionService.ValidationResult validation = new EntityExtractionService.ValidationResult(true);
+
+        QueryProcessingService.QueryResult queryResult = new QueryProcessingService.QueryResult(
+            QueryProcessingService.QueryResultType.TICKET_LIST,
+            List.of("HR-001", "HR-002"), 2);
+
+        String expectedResponse = "Found 2 tickets matching your search criteria";
+
+        // Setup mocks
+        when(userService.getUserRole(userId)).thenReturn("USER");
+        when(intentRecognitionService.recognizeIntent(query)).thenReturn(intent);
+        when(intentRecognitionService.isIntentAllowed(intent.getType(), "USER")).thenReturn(true);
+        when(entityExtractionService.extractEntities(query)).thenReturn(entities);
+        when(entityExtractionService.validateEntities(entities)).thenReturn(validation);
+        when(queryProcessingService.processQuery(intent, entities, userId, false)).thenReturn(queryResult);
+        when(responseGenerationService.generateResponse(queryResult)).thenReturn(expectedResponse);
+
+        // Act
+        NLPService.NLPResponse response = nlpService.processQuery(query, userId);
+
+        // Assert
+        assertThat(response).isNotNull();
+        assertThat(response.isSuccess()).isTrue();
+        assertThat(response.getMessage()).isEqualTo(expectedResponse);
+
+        // Verify complete workflow
+        verify(userService).getUserRole(userId);
+        verify(intentRecognitionService).recognizeIntent(query);
+        verify(intentRecognitionService).isIntentAllowed(intent.getType(), "USER");
+        verify(entityExtractionService).extractEntities(query);
+        verify(entityExtractionService).validateEntities(entities);
+        verify(queryProcessingService).processQuery(intent, entities, userId, false);
+        verify(responseGenerationService).generateResponse(queryResult);
+    }
+
+    @Test
+    void processQuery_GetTicketDetails_CompleteUserWorkflow_ShouldWorkEndToEnd() {
+        // Arrange
+        String query = "get details for ticket #123";
+        String userId = "user123";
+
+        IntentRecognitionService.Intent intent = new IntentRecognitionService.Intent(
+            IntentRecognitionService.IntentType.GET_TICKET_DETAILS, 0.94, query);
+
+        EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
+        Map<EntityExtractionService.EntityType, List<EntityExtractionService.Entity>> entityMap = new HashMap<>();
+        entityMap.put(EntityExtractionService.EntityType.TICKET_ID,
+            List.of(new EntityExtractionService.Entity(EntityExtractionService.EntityType.TICKET_ID, "#123", 0, 4)));
+        entities.setAllEntities(entityMap);
+
+        EntityExtractionService.ValidationResult validation = new EntityExtractionService.ValidationResult(true);
+
+        QueryProcessingService.QueryResult queryResult = new QueryProcessingService.QueryResult(
+            QueryProcessingService.QueryResultType.TICKET_DETAILS,
+            "Ticket details for #123", 1);
+
+        String expectedResponse = "Here are the details for ticket #123";
+
+        // Setup mocks
+        when(userService.getUserRole(userId)).thenReturn("USER");
+        when(intentRecognitionService.recognizeIntent(query)).thenReturn(intent);
+        when(intentRecognitionService.isIntentAllowed(intent.getType(), "USER")).thenReturn(true);
+        when(entityExtractionService.extractEntities(query)).thenReturn(entities);
+        when(entityExtractionService.validateEntities(entities)).thenReturn(validation);
+        when(queryProcessingService.processQuery(intent, entities, userId, false)).thenReturn(queryResult);
+        when(responseGenerationService.generateResponse(queryResult)).thenReturn(expectedResponse);
+
+        // Act
+        NLPService.NLPResponse response = nlpService.processQuery(query, userId);
+
+        // Assert
+        assertThat(response).isNotNull();
+        assertThat(response.isSuccess()).isTrue();
+        assertThat(response.getMessage()).isEqualTo(expectedResponse);
+
+        // Verify complete workflow
+        verify(userService).getUserRole(userId);
+        verify(intentRecognitionService).recognizeIntent(query);
+        verify(intentRecognitionService).isIntentAllowed(intent.getType(), "USER");
+        verify(entityExtractionService).extractEntities(query);
+        verify(entityExtractionService).validateEntities(entities);
+        verify(queryProcessingService).processQuery(intent, entities, userId, false);
+        verify(responseGenerationService).generateResponse(queryResult);
+    }
+
+    @Test
+    void processQuery_ShowRecentActivity_CompleteUserWorkflow_ShouldWorkEndToEnd() {
+        // Arrange
+        String query = "show recent activity";
+        String userId = "user123";
+
+        IntentRecognitionService.Intent intent = new IntentRecognitionService.Intent(
+            IntentRecognitionService.IntentType.SHOW_RECENT_ACTIVITY, 0.93, query);
+
+        EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
+        EntityExtractionService.ValidationResult validation = new EntityExtractionService.ValidationResult(true);
+
+        QueryProcessingService.QueryResult queryResult = new QueryProcessingService.QueryResult(
+            QueryProcessingService.QueryResultType.TICKET_LIST,
+            List.of("Recent activity data"), 1);
+
+        String expectedResponse = "📊 Recent Activity 📊\n\nHere are your recent tickets...";
+
+        // Setup mocks
+        when(userService.getUserRole(userId)).thenReturn("USER");
+        when(intentRecognitionService.recognizeIntent(query)).thenReturn(intent);
+        when(intentRecognitionService.isIntentAllowed(intent.getType(), "USER")).thenReturn(true);
+        when(entityExtractionService.extractEntities(query)).thenReturn(entities);
+        when(entityExtractionService.validateEntities(entities)).thenReturn(validation);
+        when(queryProcessingService.processQuery(intent, entities, userId, false)).thenReturn(queryResult);
+        when(responseGenerationService.generateResponse(queryResult)).thenReturn(expectedResponse);
+
+        // Act
+        NLPService.NLPResponse response = nlpService.processQuery(query, userId);
+
+        // Assert
+        assertThat(response).isNotNull();
+        assertThat(response.isSuccess()).isTrue();
+        assertThat(response.getMessage()).isEqualTo(expectedResponse);
+
+        // Verify complete workflow
+        verify(userService).getUserRole(userId);
+        verify(intentRecognitionService).recognizeIntent(query);
+        verify(intentRecognitionService).isIntentAllowed(intent.getType(), "USER");
+        verify(entityExtractionService).extractEntities(query);
+        verify(entityExtractionService).validateEntities(entities);
+        verify(queryProcessingService).processQuery(intent, entities, userId, false);
+        verify(responseGenerationService).generateResponse(queryResult);
+    }
+
+    @Test
+    void processQuery_ShowEmergencyTypes_CompleteUserWorkflow_ShouldWorkEndToEnd() {
+        // Arrange
+        String query = "show emergency types";
+        String userId = "user123";
+
+        IntentRecognitionService.Intent intent = new IntentRecognitionService.Intent(
+            IntentRecognitionService.IntentType.SHOW_EMERGENCY_TYPES, 0.96, query);
+
+        EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
+        EntityExtractionService.ValidationResult validation = new EntityExtractionService.ValidationResult(true);
+
+        QueryProcessingService.QueryResult queryResult = new QueryProcessingService.QueryResult(
+            QueryProcessingService.QueryResultType.HELP,
+            "Emergency types help content", 1);
+
+        String expectedResponse = "🚨 Available Emergency Types 🚨\n\n• hr-emergency\n• financial-emergency\n• management-emergency\n• logistics-emergency";
+
+        // Setup mocks
+        when(userService.getUserRole(userId)).thenReturn("USER");
+        when(intentRecognitionService.recognizeIntent(query)).thenReturn(intent);
+        when(intentRecognitionService.isIntentAllowed(intent.getType(), "USER")).thenReturn(true);
+        when(entityExtractionService.extractEntities(query)).thenReturn(entities);
+        when(entityExtractionService.validateEntities(entities)).thenReturn(validation);
+        when(queryProcessingService.processQuery(intent, entities, userId, false)).thenReturn(queryResult);
+        when(responseGenerationService.generateResponse(queryResult)).thenReturn(expectedResponse);
+
+        // Act
+        NLPService.NLPResponse response = nlpService.processQuery(query, userId);
+
+        // Assert
+        assertThat(response).isNotNull();
+        assertThat(response.isSuccess()).isTrue();
+        assertThat(response.getMessage()).isEqualTo(expectedResponse);
+
+        // Verify complete workflow
+        verify(userService).getUserRole(userId);
+        verify(intentRecognitionService).recognizeIntent(query);
+        verify(intentRecognitionService).isIntentAllowed(intent.getType(), "USER");
+        verify(entityExtractionService).extractEntities(query);
+        verify(entityExtractionService).validateEntities(entities);
+        verify(queryProcessingService).processQuery(intent, entities, userId, false);
+        verify(responseGenerationService).generateResponse(queryResult);
+    }
+
+    @Test
+    void processQuery_RequestEmergencyAccessHelp_CompleteUserWorkflow_ShouldWorkEndToEnd() {
+        // Arrange
+        String query = "how do I request emergency access";
+        String userId = "user123";
+
+        IntentRecognitionService.Intent intent = new IntentRecognitionService.Intent(
+            IntentRecognitionService.IntentType.REQUEST_EMERGENCY_ACCESS_HELP, 0.88, query);
+
+        EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
+        EntityExtractionService.ValidationResult validation = new EntityExtractionService.ValidationResult(true);
+
+        QueryProcessingService.QueryResult queryResult = new QueryProcessingService.QueryResult(
+            QueryProcessingService.QueryResultType.HELP,
+            "Emergency access help content", 1);
+
+        String expectedResponse = "🔐 Emergency Access Request Guide 🔐\n\nHow to Request Emergency Access:\n\n1. Create an Emergency Ticket...";
+
+        // Setup mocks
+        when(userService.getUserRole(userId)).thenReturn("USER");
+        when(intentRecognitionService.recognizeIntent(query)).thenReturn(intent);
+        when(intentRecognitionService.isIntentAllowed(intent.getType(), "USER")).thenReturn(true);
+        when(entityExtractionService.extractEntities(query)).thenReturn(entities);
+        when(entityExtractionService.validateEntities(entities)).thenReturn(validation);
+        when(queryProcessingService.processQuery(intent, entities, userId, false)).thenReturn(queryResult);
+        when(responseGenerationService.generateResponse(queryResult)).thenReturn(expectedResponse);
+
+        // Act
+        NLPService.NLPResponse response = nlpService.processQuery(query, userId);
+
+        // Assert
+        assertThat(response).isNotNull();
+        assertThat(response.isSuccess()).isTrue();
+        assertThat(response.getMessage()).isEqualTo(expectedResponse);
+
+        // Verify complete workflow
+        verify(userService).getUserRole(userId);
+        verify(intentRecognitionService).recognizeIntent(query);
+        verify(intentRecognitionService).isIntentAllowed(intent.getType(), "USER");
+        verify(entityExtractionService).extractEntities(query);
+        verify(entityExtractionService).validateEntities(entities);
+        verify(queryProcessingService).processQuery(intent, entities, userId, false);
+        verify(responseGenerationService).generateResponse(queryResult);
+    }
+
+    @Test
+    void processQuery_ShowMyAccessLevel_CompleteUserWorkflow_ShouldWorkEndToEnd() {
+        // Arrange
+        String query = "what is my access level";
+        String userId = "user123";
+
+        IntentRecognitionService.Intent intent = new IntentRecognitionService.Intent(
+            IntentRecognitionService.IntentType.SHOW_MY_ACCESS_LEVEL, 0.90, query);
+
+        EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
+        EntityExtractionService.ValidationResult validation = new EntityExtractionService.ValidationResult(true);
+
+        QueryProcessingService.QueryResult queryResult = new QueryProcessingService.QueryResult(
+            QueryProcessingService.QueryResultType.HELP,
+            "Access level information", 1);
+
+        String expectedResponse = "👤 Current Access Level 👤\n\nYour current access level: Standard User\n\nActive Emergency Tickets: None";
+
+        // Setup mocks
+        when(userService.getUserRole(userId)).thenReturn("USER");
+        when(intentRecognitionService.recognizeIntent(query)).thenReturn(intent);
+        when(intentRecognitionService.isIntentAllowed(intent.getType(), "USER")).thenReturn(true);
+        when(entityExtractionService.extractEntities(query)).thenReturn(entities);
+        when(entityExtractionService.validateEntities(entities)).thenReturn(validation);
+        when(queryProcessingService.processQuery(intent, entities, userId, false)).thenReturn(queryResult);
+        when(responseGenerationService.generateResponse(queryResult)).thenReturn(expectedResponse);
+
+        // Act
+        NLPService.NLPResponse response = nlpService.processQuery(query, userId);
+
+        // Assert
+        assertThat(response).isNotNull();
+        assertThat(response.isSuccess()).isTrue();
+        assertThat(response.getMessage()).isEqualTo(expectedResponse);
+
+        // Verify complete workflow
+        verify(userService).getUserRole(userId);
+        verify(intentRecognitionService).recognizeIntent(query);
+        verify(intentRecognitionService).isIntentAllowed(intent.getType(), "USER");
+        verify(entityExtractionService).extractEntities(query);
+        verify(entityExtractionService).validateEntities(entities);
+        verify(queryProcessingService).processQuery(intent, entities, userId, false);
+        verify(responseGenerationService).generateResponse(queryResult);
+    }
+
     // ==================== SERVICE AVAILABILITY INTEGRATION TESTS ====================
 
     @Test

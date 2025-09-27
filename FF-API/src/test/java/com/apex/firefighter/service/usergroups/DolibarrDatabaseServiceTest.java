@@ -1,4 +1,4 @@
-package com.apex.firefighter.unit.services;
+package com.apex.firefighter.service.usergroups;
 
 import com.apex.firefighter.service.DolibarrDatabaseService;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,6 +1,7 @@
-package com.apex.firefighter.controller;
+package com.apex.firefighter.unit.controllers;
 
 import com.apex.firefighter.config.TestConfig;
+import com.apex.firefighter.controller.NotificationController;
 import com.apex.firefighter.model.Notification;
 import com.apex.firefighter.service.NotificationService;
 import com.fasterxml.jackson.databind.ObjectMapper;

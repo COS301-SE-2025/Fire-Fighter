@@ -256,13 +256,233 @@ class QueryProcessingServiceTest {
         filters.put("ticketId", "123");
         when(ticketService.getTicketByTicketId("123")).thenReturn(Optional.of(ticket));
 
-        QueryProcessingService.QueryResult result = 
+        QueryProcessingService.QueryResult result =
             queryProcessingService.executeTicketQuery(
                 QueryProcessingService.TicketQueryType.TICKET_DETAILS,
                 filters, "user1", false);
 
         assertFalse(result.isSuccess());
         assertTrue(result.getMessage().contains("not allowed to view this ticket"));
+    }
+
+    // ==================== MISSING NON-ADMIN FUNCTION TESTS ====================
+
+    @Test
+    void testProcessQuery_ShowTickets_User() {
+        List<Ticket> userTickets = Arrays.asList(
+            new Ticket("1", "User ticket 1", "Active", "user1", "high", "0123456789"),
+            new Ticket("2", "User ticket 2", "Completed", "user1", "medium", "0123456789")
+        );
+        when(ticketService.getTicketsByUserId("user1")).thenReturn(userTickets);
+
+        IntentRecognitionService.Intent intent =
+            new IntentRecognitionService.Intent(IntentRecognitionService.IntentType.SHOW_TICKETS, 0.95);
+
+        QueryProcessingService.QueryResult result =
+            queryProcessingService.processQuery(intent, null, "user1", false);
+
+        assertTrue(result.isSuccess());
+        assertEquals(QueryProcessingService.QueryResultType.TICKET_LIST, result.getResultType());
+        assertEquals(userTickets, result.getData());
+        assertEquals(2, result.getRecordCount());
+    }
+
+    @Test
+    void testProcessQuery_ShowRejectedTickets_User() {
+        List<Ticket> userTickets = Arrays.asList(
+            new Ticket("1", "Rejected ticket 1", "Rejected", "user1", "high", "0123456789"),
+            new Ticket("2", "Active ticket", "Active", "user1", "medium", "0123456789"),
+            new Ticket("3", "Rejected ticket 2", "Rejected", "user1", "low", "0123456789")
+        );
+        when(ticketService.getTicketsByUserId("user1")).thenReturn(userTickets);
+
+        IntentRecognitionService.Intent intent =
+            new IntentRecognitionService.Intent(IntentRecognitionService.IntentType.SHOW_REJECTED_TICKETS, 0.95);
+
+        QueryProcessingService.QueryResult result =
+            queryProcessingService.processQuery(intent, null, "user1", false);
+
+        assertTrue(result.isSuccess());
+        assertEquals(QueryProcessingService.QueryResultType.TICKET_LIST, result.getResultType());
+        @SuppressWarnings("unchecked")
+        List<Ticket> resultTickets = (List<Ticket>) result.getData();
+        assertEquals(2, resultTickets.size());
+        assertTrue(resultTickets.stream().allMatch(t -> "Rejected".equals(t.getStatus())));
+    }
+
+    @Test
+    void testProcessQuery_SearchTickets_User() {
+        List<Ticket> userTickets = Arrays.asList(
+            new Ticket("1", "HR emergency ticket", "Active", "user1", "high", "0123456789"),
+            new Ticket("2", "Financial emergency", "Completed", "user1", "medium", "0123456789"),
+            new Ticket("3", "Logistics issue", "Active", "user1", "low", "0123456789")
+        );
+        userTickets.get(0).setEmergencyType("hr-emergency");
+        userTickets.get(1).setEmergencyType("financial-emergency");
+        userTickets.get(2).setEmergencyType("logistics-emergency");
+
+        when(ticketService.getTicketsByUserId("user1")).thenReturn(userTickets);
+
+        IntentRecognitionService.Intent intent =
+            new IntentRecognitionService.Intent(IntentRecognitionService.IntentType.SEARCH_TICKETS, 0.95);
+
+        QueryProcessingService.QueryResult result =
+            queryProcessingService.processQuery(intent, null, "user1", false);
+
+        assertTrue(result.isSuccess());
+        assertEquals(QueryProcessingService.QueryResultType.TICKET_LIST, result.getResultType());
+        assertEquals(3, result.getRecordCount());
+    }
+
+    @Test
+    void testProcessQuery_GetTicketDetails_UserOwnsTicket() {
+        Ticket ticket = new Ticket("123", "Test ticket details", "Active", "user1", "high", "0123456789");
+        when(ticketService.getTicketByTicketId("123")).thenReturn(Optional.of(ticket));
+
+        EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
+        EntityExtractionService.Entity ticketEntity = new EntityExtractionService.Entity(
+            EntityExtractionService.EntityType.TICKET_ID, "123", 0, 3);
+        ticketEntity.setNormalizedValue("123");
+        entities.setTicketIds(Arrays.asList(ticketEntity));
+
+        IntentRecognitionService.Intent intent =
+            new IntentRecognitionService.Intent(IntentRecognitionService.IntentType.GET_TICKET_DETAILS, 0.95);
+
+        QueryProcessingService.QueryResult result =
+            queryProcessingService.processQuery(intent, entities, "user1", false);
+
+        assertTrue(result.isSuccess());
+        assertEquals(QueryProcessingService.QueryResultType.TICKET_DETAILS, result.getResultType());
+        assertEquals(ticket, result.getData());
+        assertEquals(1, result.getRecordCount());
+    }
+
+    @Test
+    void testProcessQuery_GetTicketDetails_UserDoesNotOwnTicket() {
+        Ticket ticket = new Ticket("123", "Test ticket details", "Active", "other-user", "high", "0123456789");
+        when(ticketService.getTicketByTicketId("123")).thenReturn(Optional.of(ticket));
+
+        EntityExtractionService.ExtractedEntities entities = new EntityExtractionService.ExtractedEntities();
+        EntityExtractionService.Entity ticketEntity = new EntityExtractionService.Entity(
+            EntityExtractionService.EntityType.TICKET_ID, "123", 0, 3);
+        ticketEntity.setNormalizedValue("123");
+        entities.setTicketIds(Arrays.asList(ticketEntity));
+
+        IntentRecognitionService.Intent intent =
+            new IntentRecognitionService.Intent(IntentRecognitionService.IntentType.GET_TICKET_DETAILS, 0.95);
+
+        QueryProcessingService.QueryResult result =
+            queryProcessingService.processQuery(intent, entities, "user1", false);
+
+        assertFalse(result.isSuccess());
+        assertTrue(result.getMessage().contains("not allowed to view this ticket"));
+    }
+
+    @Test
+    void testProcessQuery_ShowRecentActivity_User() {
+        List<Ticket> userTickets = Arrays.asList(
+            new Ticket("1", "Recent ticket 1", "Active", "user1", "high", "0123456789"),
+            new Ticket("2", "Recent ticket 2", "Completed", "user1", "medium", "0123456789")
+        );
+        when(ticketService.getTicketsByUserId("user1")).thenReturn(userTickets);
+
+        IntentRecognitionService.Intent intent =
+            new IntentRecognitionService.Intent(IntentRecognitionService.IntentType.SHOW_RECENT_ACTIVITY, 0.95);
+
+        QueryProcessingService.QueryResult result =
+            queryProcessingService.processQuery(intent, null, "user1", false);
+
+        assertTrue(result.isSuccess());
+        assertEquals(QueryProcessingService.QueryResultType.TICKET_LIST, result.getResultType());
+        assertTrue(result.getMessage().contains("Recent Activity"));
+    }
+
+    @Test
+    void testProcessQuery_ShowRecentActivity_NoTickets() {
+        when(ticketService.getTicketsByUserId("user1")).thenReturn(Arrays.asList());
+
+        IntentRecognitionService.Intent intent =
+            new IntentRecognitionService.Intent(IntentRecognitionService.IntentType.SHOW_RECENT_ACTIVITY, 0.95);
+
+        QueryProcessingService.QueryResult result =
+            queryProcessingService.processQuery(intent, null, "user1", false);
+
+        assertTrue(result.isSuccess());
+        assertEquals(QueryProcessingService.QueryResultType.TICKET_LIST, result.getResultType());
+        assertTrue(result.getMessage().contains("No recent activity found"));
+    }
+
+    @Test
+    void testProcessQuery_ShowEmergencyTypes() {
+        IntentRecognitionService.Intent intent =
+            new IntentRecognitionService.Intent(IntentRecognitionService.IntentType.SHOW_EMERGENCY_TYPES, 0.95);
+
+        QueryProcessingService.QueryResult result =
+            queryProcessingService.processQuery(intent, null, "user1", false);
+
+        assertTrue(result.isSuccess());
+        assertEquals(QueryProcessingService.QueryResultType.HELP, result.getResultType());
+        assertTrue(result.getMessage().contains("Available Emergency Types"));
+        assertTrue(result.getMessage().contains("hr-emergency"));
+        assertTrue(result.getMessage().contains("financial-emergency"));
+        assertTrue(result.getMessage().contains("management-emergency"));
+        assertTrue(result.getMessage().contains("logistics-emergency"));
+    }
+
+    @Test
+    void testProcessQuery_RequestEmergencyAccessHelp() {
+        IntentRecognitionService.Intent intent =
+            new IntentRecognitionService.Intent(IntentRecognitionService.IntentType.REQUEST_EMERGENCY_ACCESS_HELP, 0.95);
+
+        QueryProcessingService.QueryResult result =
+            queryProcessingService.processQuery(intent, null, "user1", false);
+
+        assertTrue(result.isSuccess());
+        assertEquals(QueryProcessingService.QueryResultType.HELP, result.getResultType());
+        assertTrue(result.getMessage().contains("Emergency Access Request Guide"));
+        assertTrue(result.getMessage().contains("How to Request Emergency Access"));
+        assertTrue(result.getMessage().contains("Create [emergency-type] ticket"));
+    }
+
+    @Test
+    void testProcessQuery_ShowMyAccessLevel_WithActiveTickets() {
+        List<Ticket> activeTickets = Arrays.asList(
+            new Ticket("1", "HR emergency", "Active", "user1", "high", "0123456789"),
+            new Ticket("2", "Financial emergency", "Active", "user1", "medium", "0123456789")
+        );
+        activeTickets.get(0).setEmergencyType("hr-emergency");
+        activeTickets.get(1).setEmergencyType("financial-emergency");
+
+        when(ticketService.getTicketsByUserId("user1")).thenReturn(activeTickets);
+
+        IntentRecognitionService.Intent intent =
+            new IntentRecognitionService.Intent(IntentRecognitionService.IntentType.SHOW_MY_ACCESS_LEVEL, 0.95);
+
+        QueryProcessingService.QueryResult result =
+            queryProcessingService.processQuery(intent, null, "user1", false);
+
+        assertTrue(result.isSuccess());
+        assertEquals(QueryProcessingService.QueryResultType.HELP, result.getResultType());
+        assertTrue(result.getMessage().contains("Your Current Access Level"));
+        assertTrue(result.getMessage().contains("Active Emergency Access"));
+    }
+
+    @Test
+    void testProcessQuery_ShowMyAccessLevel_NoActiveTickets() {
+        when(ticketService.getTicketsByUserId("user1")).thenReturn(Arrays.asList());
+
+        IntentRecognitionService.Intent intent =
+            new IntentRecognitionService.Intent(IntentRecognitionService.IntentType.SHOW_MY_ACCESS_LEVEL, 0.95);
+
+        QueryProcessingService.QueryResult result =
+            queryProcessingService.processQuery(intent, null, "user1", false);
+
+        System.out.println("DEBUG ShowMyAccessLevel_NoActiveTickets response: " + result.getMessage());
+
+        assertTrue(result.isSuccess());
+        assertEquals(QueryProcessingService.QueryResultType.HELP, result.getResultType());
+        assertTrue(result.getMessage().contains("Your Current Access Level"));
+        assertTrue(result.getMessage().contains("no active emergency tickets"));
     }
 
     @Test

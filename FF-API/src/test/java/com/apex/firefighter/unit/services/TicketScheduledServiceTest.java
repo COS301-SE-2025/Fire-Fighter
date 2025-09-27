@@ -1,4 +1,4 @@
-package com.apex.firefighter.service;
+package com.apex.firefighter.unit.services;
 
 import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.repository.TicketRepository;

@@ -1,6 +1,7 @@
-package com.apex.firefighter.repository;
+package com.apex.firefighter.unit.repositories;
 
 import com.apex.firefighter.model.User;
+import com.apex.firefighter.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
