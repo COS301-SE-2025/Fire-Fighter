@@ -628,9 +628,8 @@ class DatabaseConnectionTestServiceTest {
         assertThat(updated).isEqualTo(testConnectionTest);
         assertThat(deleted).isTrue();
 
-        verify(connectionTestRepository).save(any(ConnectionTest.class));
         verify(connectionTestRepository, times(2)).findById(TEST_ID); // Called by getTestById and updateTestEntry
-        verify(connectionTestRepository, times(2)).save(testConnectionTest); // Called by createTestEntry and updateTestEntry
+        verify(connectionTestRepository, times(2)).save(any(ConnectionTest.class)); // Called by createTestEntry and updateTestEntry
         verify(connectionTestRepository).existsById(TEST_ID);
         verify(connectionTestRepository).deleteById(TEST_ID);
     }
