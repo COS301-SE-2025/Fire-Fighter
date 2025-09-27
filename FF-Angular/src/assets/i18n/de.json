@@ -183,17 +183,21 @@
       "NO_ACTIVITY": "Keine aktuellen Aktivitäten",
       "NO_ACTIVITY_DESC": "Systemereignisse und -aktionen werden hier angezeigt"
     },
-    "MONTHLY_STATS": {
-      "TITLE": "Monatsstatistiken",
-      "SUBTITLE": "Leistungsübersicht",
-      "TOTAL_REQUESTS": "Gesamtanfragen",
-      "APPROVAL_RATE": "Genehmigungsrate",
-      "CRITICAL_ISSUES": "Kritische Probleme",
-      "SUCCESS_RATE": "Erfolgsrate",
-      "VS_LAST_MONTH": "vs. letzter Monat",
-      "APPROVED_REQUESTS": "genehmigte Anfragen",
-      "THIS_MONTH": "diesen Monat",
-      "RESOLVED": "gelöst"
+    "EMERGENCY_STATS": {
+      "TITLE": "Notfall-Reaktionsstatistiken",
+      "SUBTITLE": "Echtzeit-Systemleistung",
+      "MOST_COMMON_TYPE": "Häufigster Notfall",
+      "SYSTEM_HEALTH": "System-Gesundheitswert",
+      "AVG_RESPONSE_TIME": "Durchschn. Dauer",
+      "COMPLETION_RATE": "Abschlussrate",
+      "TYPE": "Typ",
+      "HEALTH": "Gesundheit",
+      "MINUTES": "min",
+      "SUCCESS": "Erfolg",
+      "EMERGENCY_TYPE": "Notfalltyp",
+      "OVERALL_HEALTH": "Gesamtsystemgesundheit",
+      "RESPONSE_TIME": "durchschnittliche angeforderte Dauer",
+      "COMPLETED": "aller Tickets abgeschlossen"
     },
     "ACTIVITY_STATUS": {
       "ACTIVE": "aktiv",
