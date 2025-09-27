@@ -3,6 +3,7 @@ package com.apex.firefighter.unit.controllers;
 import com.apex.firefighter.controller.DatabaseTestController;
 import com.apex.firefighter.model.ConnectionTest;
 import com.apex.firefighter.service.user.DatabaseConnectionTestService;
+import com.apex.firefighter.service.auth.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +24,11 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(DatabaseTestController.class)
+@WebMvcTest(controllers = DatabaseTestController.class, 
+    excludeAutoConfiguration = {
+        org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+        org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
+    })
 class DatabaseTestControllerTest {
 
     @Autowired
@@ -31,6 +36,9 @@ class DatabaseTestControllerTest {
 
     @MockBean
     private DatabaseConnectionTestService testService;
+
+    @MockBean
+    private JwtService jwtService;
 
     @Autowired
     private ObjectMapper objectMapper;

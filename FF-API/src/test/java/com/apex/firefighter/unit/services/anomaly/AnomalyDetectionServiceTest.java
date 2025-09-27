@@ -556,8 +556,10 @@ class AnomalyDetectionServiceTest {
     void fullAnomalyCheck_WithMultipleAnomalies_ShouldDetectAll() {
         // Arrange - Frequent request anomaly
         when(ticketRepository.countTicketsByUserSince(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(6L) // Exceeds hourly threshold
-            .thenReturn(25L); // Exceeds daily threshold
+            .thenReturn(6L) // First call: hourly check in checkForAnomalousTicketCreation
+            .thenReturn(25L) // Second call: daily check in checkForAnomalousTicketCreation
+            .thenReturn(6L) // Third call: hourly check in getRequestFrequencyDetails
+            .thenReturn(25L); // Fourth call: daily check in getRequestFrequencyDetails
 
         // Act
         boolean hasAnomaly = anomalyDetectionService.checkForAnomalousTicketCreation(TEST_USER_ID);
@@ -573,8 +575,12 @@ class AnomalyDetectionServiceTest {
     void allAnomalyMethods_WithNormalBehavior_ShouldReturnNoAnomalies() {
         // Arrange - Normal behavior
         when(ticketRepository.countTicketsByUserSince(eq(TEST_USER_ID), any(LocalDateTime.class)))
-            .thenReturn(2L) // Below thresholds
-            .thenReturn(10L);
+            .thenReturn(2L) // Below hourly threshold (5) - checkForAnomalousTicketCreation
+            .thenReturn(10L) // Below daily threshold (20) - checkForAnomalousTicketCreation
+            .thenReturn(2L) // Below hourly threshold for getRequestFrequencyDetails
+            .thenReturn(10L) // Below daily threshold for getRequestFrequencyDetails
+            .thenReturn(2L) // Below hourly threshold for getFrequencyAnomalyDetails -> getRequestFrequencyDetails
+            .thenReturn(10L); // Below daily threshold for getFrequencyAnomalyDetails -> getRequestFrequencyDetails
 
         when(accessLogRepository.findLoginEventsByUserSince(eq(TEST_USER_ID), any(LocalDateTime.class)))
             .thenReturn(Collections.emptyList());

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -203,7 +204,7 @@ public class AnomalyDetectionService {
         
         // Check for previous activity before the dormant threshold period
         List<AccessSession> previousSessions = accessSessionRepository.findByUserIdBeforeDate(userId, dormantThreshold);
-        List<AccessLog> previousLogins = accessLogRepository.findLoginEventsByUserSince(userId, dormantThreshold);
+        List<AccessLog> previousLogins = new ArrayList<>(accessLogRepository.findLoginEventsByUserSince(userId, dormantThreshold));
         previousLogins.removeIf(log -> log.getTimestamp().isAfter(dormantThreshold));
         
         boolean wasDormant = previousSessions.isEmpty() && previousLogins.isEmpty();
