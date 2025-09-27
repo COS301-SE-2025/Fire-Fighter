@@ -17,6 +17,7 @@ export interface Ticket {
   emergencyContact?: string;
   duration: number; // Duration in minutes
   fiveMinuteWarningSent?: boolean; // Tracks if 5-minute warning notification was sent
+  dateCompleted?: Date; // Date when ticket was completed/resolved
 }
 
 @Injectable({
