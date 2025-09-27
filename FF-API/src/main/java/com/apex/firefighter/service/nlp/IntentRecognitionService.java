@@ -535,7 +535,6 @@ public class IntentRecognitionService {
             IntentType.SEARCH_TICKETS,
             IntentType.GET_TICKET_DETAILS,
             IntentType.CREATE_TICKET,
-            IntentType.UPDATE_TICKET_STATUS,
             IntentType.CLOSE_TICKET,
             IntentType.GET_HELP,
             IntentType.SHOW_CAPABILITIES,

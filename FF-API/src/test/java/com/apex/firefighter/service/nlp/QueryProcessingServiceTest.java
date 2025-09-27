@@ -288,8 +288,8 @@ class QueryProcessingServiceTest {
         // Set all entities
         entities.setAllEntities(entityMap);
 
-        Ticket createdTicket = new Ticket("new-id", "office fire", "Active", "user1", "high", "0123456789");
-        when(ticketService.createTicket(anyString(), anyString(), anyString(), anyString(), anyInt()))
+        Ticket createdTicket = new Ticket("new-id", "office fire", "Active", "user1", "hr-emergency", "0123456789");
+        when(ticketService.createTicket(anyString(), anyString(), anyString(), any(), anyInt()))
             .thenReturn(createdTicket);
 
         QueryProcessingService.QueryResult result = 

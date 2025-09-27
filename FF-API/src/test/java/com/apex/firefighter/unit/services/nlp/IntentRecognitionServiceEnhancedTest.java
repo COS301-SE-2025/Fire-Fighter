@@ -8,6 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -23,10 +24,13 @@ class IntentRecognitionServiceEnhancedTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         intentRecognitionService = new IntentRecognitionService();
-        intentRecognitionService.setNlpConfig(nlpConfig);
+        
+        // Use ReflectionTestUtils to inject the mocked NLPConfig
+        ReflectionTestUtils.setField(intentRecognitionService, "nlpConfig", nlpConfig);
         
         // Mock default behavior
         when(nlpConfig.isDebugEnabled()).thenReturn(false);
+        when(nlpConfig.getIntentConfidenceThreshold()).thenReturn(0.7);
     }
 
     // ==================== TICKET CREATION INTENT TESTS ====================
