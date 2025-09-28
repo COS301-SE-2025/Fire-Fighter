@@ -216,18 +216,49 @@ pipeline {
                             '''
 
                             echo "🚀 Starting Angular development server for E2E tests..."
-                            sh 'npm start &'
+                            sh '''
+                                # Kill any existing Angular servers
+                                pkill -f "ng serve" || true
+                                pkill -f "node.*ng serve" || true
+                                sleep 2
+
+                                # Start Angular dev server in background
+                                nohup npm start > angular-server.log 2>&1 &
+                                SERVER_PID=$!
+                                echo "Started Angular server with PID: $SERVER_PID"
+                                echo $SERVER_PID > angular-server.pid
+                            '''
 
                             echo "⏳ Waiting for server to be ready..."
                             sh '''
-                                for i in {1..30}; do
+                                echo "Checking server availability..."
+                                for i in {1..60}; do
                                     if curl -f http://localhost:4200 >/dev/null 2>&1; then
-                                        echo "✅ Server is ready!"
+                                        echo "✅ Server is ready at http://localhost:4200"
+                                        curl -s http://localhost:4200 | head -n 5
                                         break
                                     fi
-                                    echo "Waiting for server... ($i/30)"
-                                    sleep 2
+                                    echo "Attempt $i/60: Waiting for server..."
+                                    sleep 3
+
+                                    # Check if server process is still running
+                                    if [ -f angular-server.pid ]; then
+                                        SERVER_PID=$(cat angular-server.pid)
+                                        if ! ps -p $SERVER_PID > /dev/null 2>&1; then
+                                            echo "❌ Angular server process died. Check logs:"
+                                            cat angular-server.log || echo "No log file found"
+                                            exit 1
+                                        fi
+                                    fi
                                 done
+
+                                # Final check
+                                if ! curl -f http://localhost:4200 >/dev/null 2>&1; then
+                                    echo "❌ Server failed to start after 3 minutes"
+                                    echo "Server logs:"
+                                    cat angular-server.log || echo "No log file found"
+                                    exit 1
+                                fi
                             '''
 
                             echo "🧪 Running E2E tests..."
@@ -238,8 +269,25 @@ pipeline {
                             throw e
                         } finally {
                             echo "🧹 Cleaning up Angular dev server..."
-                            sh 'pkill -f "ng serve" || true'
-                            sh 'pkill -f "node.*ng serve" || true'
+                            sh '''
+                                # Kill server using PID if available
+                                if [ -f angular-server.pid ]; then
+                                    SERVER_PID=$(cat angular-server.pid)
+                                    echo "Killing Angular server with PID: $SERVER_PID"
+                                    kill $SERVER_PID || true
+                                    rm -f angular-server.pid
+                                fi
+
+                                # Fallback: kill by process name
+                                pkill -f "ng serve" || true
+                                pkill -f "node.*ng serve" || true
+
+                                # Clean up log file
+                                rm -f angular-server.log || true
+
+                                # Wait a moment for processes to terminate
+                                sleep 2
+                            '''
                         }
                     }
                 }
@@ -251,9 +299,13 @@ pipeline {
                         archiveArtifacts artifacts: 'cypress/screenshots/**/*', allowEmptyArchive: true
                         archiveArtifacts artifacts: 'cypress/videos/**/*', allowEmptyArchive: true
 
-                        // Clean up any remaining processes
-                        sh 'pkill -f "ng serve" || true'
-                        sh 'pkill -f "node.*ng serve" || true'
+                        // Clean up any remaining processes and files
+                        sh '''
+                            pkill -f "ng serve" || true
+                            pkill -f "node.*ng serve" || true
+                            rm -f angular-server.pid || true
+                            rm -f angular-server.log || true
+                        '''
                     }
                 }
                 success {
