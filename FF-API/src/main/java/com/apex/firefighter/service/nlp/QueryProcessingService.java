@@ -1,0 +1,1146 @@
+package com.apex.firefighter.service.nlp;
+
+import com.apex.firefighter.config.NLPConfig;
+import com.apex.firefighter.model.Ticket;
+import com.apex.firefighter.model.User;
+import com.apex.firefighter.service.ticket.TicketService;
+import com.apex.firefighter.service.GmailEmailService;
+import com.apex.firefighter.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * Service responsible for processing natural language queries and converting them
+ * into database operations and business logic execution.
+ */
+@Service
+public class QueryProcessingService {
+
+    @Autowired
+    private TicketService ticketService;
+
+    @Autowired
+    private NLPConfig nlpConfig;
+
+    @Autowired
+    private IntentRecognitionService intentRecognitionService;
+
+    @Autowired
+    private GmailEmailService gmailEmailService;
+
+    @Autowired
+    private UserService userService;
+
+    // Setter methods for testing
+    public void setTicketService(TicketService ticketService) {
+        this.ticketService = ticketService;
+    }
+
+    public void setNlpConfig(NLPConfig nlpConfig) {
+        this.nlpConfig = nlpConfig;
+    }
+
+    public void setIntentRecognitionService(IntentRecognitionService intentRecognitionService) {
+        this.intentRecognitionService = intentRecognitionService;
+    }
+
+    /**
+     * Process a query based on recognized intent and extracted entities
+     * 
+     * @param intent The recognized intent from the query
+     * @param entities The extracted entities from the query
+     * @param userId The user making the query
+     * @param isAdmin Whether the user has admin privileges
+     * @return QueryResult containing the processed data and metadata
+     */
+    public QueryResult processQuery(IntentRecognitionService.Intent intent, 
+                                   EntityExtractionService.ExtractedEntities entities, 
+                                   String userId, 
+                                   boolean isAdmin) {
+        // Empty or unknown intent
+        if (intent == null || intent.getType() == IntentRecognitionService.IntentType.UNKNOWN) {
+            return new QueryResult(false, "Invalid or unknown intent", null, QueryResultType.ERROR);
+        }
+        // Check if user has permission to perform the query
+        if (!intentRecognitionService.isIntentAllowed(intent.getType(), isAdmin ? "ADMIN" : "USER")) {
+            return new QueryResult(false, "Permission denied for intent: " + intent.getType().getCode(), null, QueryResultType.ERROR); 
+        }
+
+        // Check if query is within max length
+        if (intent.getOriginalQuery() != null && intent.getOriginalQuery().length() > nlpConfig.getMaxQueryLength()) {
+            return new QueryResult(false, "Query exceeds maximum length of " + nlpConfig.getMaxQueryLength() + " characters.", null, QueryResultType.ERROR);
+        }
+
+        try {
+            System.out.println("🔵 QUERY PROCESSING: Processing intent: " + intent.getType());
+            switch (intent.getType()) {
+                // ----------- Ticket Queries -----------
+                case SHOW_ACTIVE_TICKETS:
+                    return executeTicketQuery(TicketQueryType.ACTIVE_TICKETS,
+                            buildQueryFilters(entities), userId, isAdmin);
+
+                case SHOW_COMPLETED_TICKETS:
+                    return executeTicketQuery(TicketQueryType.COMPLETED_TICKETS,
+                            buildQueryFilters(entities), userId, isAdmin);
+
+                case SHOW_REJECTED_TICKETS:
+                    return executeTicketQuery(TicketQueryType.REJECTED_TICKETS,
+                            buildQueryFilters(entities), userId, isAdmin);
+
+                case SHOW_ALL_TICKETS:
+                case SHOW_TICKETS:
+                    return executeTicketQuery(TicketQueryType.USER_TICKETS,
+                            buildQueryFilters(entities), userId, isAdmin);
+
+                case SEARCH_TICKETS:
+                    return executeTicketQuery(TicketQueryType.SEARCH_TICKETS,
+                            buildQueryFilters(entities), userId, isAdmin);
+
+                case GET_TICKET_DETAILS:
+                    return executeTicketQuery(TicketQueryType.TICKET_DETAILS,
+                            buildQueryFilters(entities), userId, isAdmin);
+
+                case GET_SYSTEM_STATS:
+                    return executeTicketQuery(TicketQueryType.SYSTEM_STATS,
+                            buildQueryFilters(entities), userId, isAdmin);
+
+                case EXPORT_TICKETS:
+                    return executeTicketQuery(TicketQueryType.EXPORT_DATA,
+                            buildQueryFilters(entities), userId, isAdmin);
+                
+                // ----------- Ticket Operations -----------
+                case CREATE_TICKET:
+                    return executeTicketOperation(TicketOperation.CREATE_TICKET,
+                            entities, userId, isAdmin, intent.getOriginalQuery());
+
+                case CLOSE_TICKET:
+                    return executeTicketOperation(TicketOperation.CLOSE_TICKET,
+                            entities, userId, isAdmin, intent.getOriginalQuery());
+
+                case UPDATE_TICKET_STATUS:
+                    return executeTicketOperation(TicketOperation.UPDATE_TICKET_STATUS,
+                            entities, userId, isAdmin, intent.getOriginalQuery());
+
+                case ASSIGN_TICKET:
+                    return executeTicketOperation(TicketOperation.ASSIGN_TICKET,
+                            entities, userId, isAdmin, intent.getOriginalQuery());
+
+                // case ADD_COMMENT:
+                //     return executeTicketOperation(TicketOperation.ADD_COMMENT,
+                //             entities, userId, isAdmin);
+
+                // case UPDATE_PRIORITY:
+                //     return executeTicketOperation(TicketOperation.UPDATE_PRIORITY,
+                //             entities, userId, isAdmin);
+
+                // ----------- Information and Help -----------
+                case GET_HELP:
+                    return generateHelpResponse();
+
+                case SHOW_CAPABILITIES:
+                    return generateCapabilitiesResponse();
+
+                case SHOW_RECENT_ACTIVITY:
+                    return generateRecentActivityResponse(userId, isAdmin);
+
+                case SHOW_EMERGENCY_TYPES:
+                    return generateEmergencyTypesResponse();
+
+                case REQUEST_EMERGENCY_ACCESS_HELP:
+                    return generateEmergencyAccessHelpResponse();
+
+                case SHOW_MY_ACCESS_LEVEL:
+                    return generateMyAccessLevelResponse(userId);
+
+                // ----------- Fallback -----------
+                default:
+                    System.out.println("❌ QUERY PROCESSING: Unsupported intent reached default case: " + intent.getType().getCode());
+                    return new QueryResult(false, "Unsupported intent: " + intent.getType().getCode(), null, QueryResultType.ERROR);
+            }
+        } catch (Exception e) {
+            QueryResult qr = new QueryResult(false, "Error processing query: " + e.getMessage(), null, QueryResultType.ERROR);
+            if (qr.getErrors() == null) {
+                qr.setErrors(new ArrayList<>());
+            }
+            qr.getErrors().add(e.getMessage());
+            return qr;
+        }
+    }
+
+    /**
+     * Execute a ticket query operation
+     * 
+     * @param queryType The type of ticket query to execute
+     * @param filters The filters to apply to the query
+     * @param userId The user making the query
+     * @param isAdmin Whether the user has admin privileges
+     * @return QueryResult containing the ticket data
+     */
+    public QueryResult executeTicketQuery(TicketQueryType queryType,
+                                     Map<String, Object> filters,
+                                     String userId,
+                                     boolean isAdmin) {
+        try {
+            if (filters == null) filters = new HashMap<>();
+            final String filterTicketId   = (String) filters.get("ticketId");
+            final String filterStatusRaw  = (String) filters.get("status");
+            final String filterUserId     = (String) filters.getOrDefault("userId", userId);
+            final String filterEmergency  = (String) filters.get("emergencyType");
+
+            switch (queryType) {
+                case TICKET_DETAILS: {
+                    if (filterTicketId == null || filterTicketId.isEmpty()) {
+                        return new QueryResult(false, "Missing ticketId for TICKET_DETAILS.");
+                    }
+                    Optional<Ticket> opt = ticketService.getTicketByTicketId(filterTicketId);
+                    if (opt.isEmpty()) {
+                        return new QueryResult(false, "Ticket not found: " + filterTicketId);
+                    }
+                    Ticket t = opt.get();
+                    if (!isAdmin && !userId.equals(t.getUserId())) {
+                        return new QueryResult(false, "You are not allowed to view this ticket.");
+                    }
+                    return new QueryResult(QueryResultType.TICKET_DETAILS, t, 1);
+                }
+
+                case USER_TICKETS: {
+                    // If admin and a userId filter is present, show that user's tickets; otherwise:
+                    List<Ticket> tickets = ticketService.getTicketsByUserId(filterUserId);
+                    return new QueryResult(QueryResultType.TICKET_LIST, tickets, tickets.size());
+                }
+
+                case ACTIVE_TICKETS: {
+                    if (isAdmin) {
+                        List<Ticket> tickets = ticketService.getTicketsByStatus("Active");
+                        return new QueryResult(QueryResultType.TICKET_LIST, tickets, tickets.size());
+                    } else {
+                        List<Ticket> mine = ticketService.getTicketsByUserId(userId);
+                        List<Ticket> active = filterByStatuses(mine, "Active");
+                        return new QueryResult(QueryResultType.TICKET_LIST, active, active.size());
+                    }
+                }
+
+                case COMPLETED_TICKETS: {
+                    if (isAdmin) {
+                        List<Ticket> completed = ticketService.getTicketsByStatus("Completed");
+                        List<Ticket> closed    = ticketService.getTicketsByStatus("Closed");
+                        List<Ticket> all = new ArrayList<>(completed);
+                        all.addAll(closed);
+                        return new QueryResult(QueryResultType.TICKET_LIST, all, all.size());
+                    } else {
+                        List<Ticket> mine = ticketService.getTicketsByUserId(userId);
+                        List<Ticket> done = filterByStatuses(mine, "Completed", "Closed");
+                        return new QueryResult(QueryResultType.TICKET_LIST, done, done.size());
+                    }
+                }
+
+                case REJECTED_TICKETS: {
+                    if (isAdmin) {
+                        List<Ticket> rejected = ticketService.getTicketsByStatus("Rejected");
+                        return new QueryResult(QueryResultType.TICKET_LIST, rejected, rejected.size());
+                    } else {
+                        List<Ticket> mine = ticketService.getTicketsByUserId(userId);
+                        List<Ticket> rejected = filterByStatuses(mine, "Rejected");
+                        return new QueryResult(QueryResultType.TICKET_LIST, rejected, rejected.size());
+                    }
+                }
+
+                case SEARCH_TICKETS: {
+                    // Start from scope (admin = all, user = own)
+                    List<Ticket> base = isAdmin ? ticketService.getAllTickets()
+                                                : ticketService.getTicketsByUserId(userId);
+
+                    String normStatus = normalizeStatus(filterStatusRaw); // map "open"->Active, etc.
+
+                    List<Ticket> out = base.stream()
+                        .filter(t -> filterTicketId == null || filterTicketId.equals(t.getTicketId()))
+                        .filter(t -> normStatus == null || normStatus.equalsIgnoreCase(t.getStatus())
+                                || (normStatus.equals("CompletedOrClosed")
+                                    && ("Completed".equalsIgnoreCase(t.getStatus())
+                                        || "Closed".equalsIgnoreCase(t.getStatus()))))
+                        .filter(t -> filterEmergency == null || equalsIgnoreCaseSafe(t.getEmergencyType(), filterEmergency))
+                        .collect(java.util.stream.Collectors.toList());
+
+                    return new QueryResult(QueryResultType.TICKET_LIST, out, out.size());
+                }
+
+                case SYSTEM_STATS: {
+                    Map<String, Object> stats = new HashMap<>();
+                    if (isAdmin) {
+                        int total      = ticketService.getAllTickets().size();
+                        int active     = ticketService.getTicketsByStatus("Active").size();
+                        int completed  = ticketService.getTicketsByStatus("Completed").size();
+                        int closed     = ticketService.getTicketsByStatus("Closed").size();
+                        int rejected   = ticketService.getTicketsByStatus("Rejected").size();
+
+                        stats.put("scope", "system");
+                        stats.put("totalTickets", total);
+                        stats.put("active", active);
+                        stats.put("completed", completed);
+                        stats.put("closed", closed);
+                        stats.put("rejected", rejected);
+                    } else {
+                        List<Ticket> mine = ticketService.getTicketsByUserId(userId);
+                        stats.put("scope", "user");
+                        stats.put("totalTickets", mine.size());
+                        stats.put("active", countByStatus(mine, "Active"));
+                        stats.put("completed", countByStatus(mine, "Completed"));
+                        stats.put("closed", countByStatus(mine, "Closed"));
+                        stats.put("rejected", countByStatus(mine, "Rejected"));
+                    }
+                    return new QueryResult(QueryResultType.STATISTICS, stats, 1);
+                }
+
+                case EXPORT_DATA: {
+                    System.out.println("🔵 EXPORT: Starting ticket export process for user: " + userId);
+
+                    try {
+                        // Get user information for email
+                        Optional<User> userOpt = userService.getUserWithRoles(userId);
+                        if (!userOpt.isPresent()) {
+                            System.out.println("❌ EXPORT: User not found: " + userId);
+                            return new QueryResult(false, "User not found for export request");
+                        }
+
+                        User user = userOpt.get();
+                        String userEmail = user.getEmail();
+                        if (userEmail == null || userEmail.trim().isEmpty()) {
+                            System.out.println("❌ EXPORT: User email not found for: " + userId);
+                            return new QueryResult(false, "User email not found. Cannot send export.");
+                        }
+
+                        System.out.println("🔵 EXPORT: User email found: " + userEmail);
+
+                        // Extract date range from filters if provided
+                        final LocalDateTime startDate = filters.containsKey("startDate") ?
+                            (LocalDateTime) filters.get("startDate") : null;
+                        final LocalDateTime endDate = filters.containsKey("endDate") ?
+                            (LocalDateTime) filters.get("endDate") : null;
+
+                        if (startDate != null) {
+                            System.out.println("🔵 EXPORT: Start date filter: " + startDate);
+                        }
+                        if (endDate != null) {
+                            System.out.println("🔵 EXPORT: End date filter: " + endDate);
+                        }
+
+                        // Get tickets based on date range filtering (similar to TicketController)
+                        List<Ticket> tickets;
+                        if (startDate != null && endDate != null) {
+                            System.out.println("🔵 EXPORT: Filtering tickets by date range: " + startDate + " to " + endDate);
+                            tickets = ticketService.getAllTickets().stream()
+                                    .filter(ticket -> ticket.getDateCreated().isAfter(startDate) && ticket.getDateCreated().isBefore(endDate))
+                                    .collect(Collectors.toList());
+                            System.out.println("🔵 EXPORT: Retrieved " + tickets.size() + " tickets with date range filter");
+                        } else if (startDate != null) {
+                            System.out.println("🔵 EXPORT: Filtering tickets from start date: " + startDate);
+                            tickets = ticketService.getAllTickets().stream()
+                                    .filter(ticket -> ticket.getDateCreated().isAfter(startDate))
+                                    .collect(Collectors.toList());
+                            System.out.println("🔵 EXPORT: Retrieved " + tickets.size() + " tickets from start date");
+                        } else if (endDate != null) {
+                            System.out.println("🔵 EXPORT: Filtering tickets until end date: " + endDate);
+                            tickets = ticketService.getAllTickets().stream()
+                                    .filter(ticket -> ticket.getDateCreated().isBefore(endDate))
+                                    .collect(Collectors.toList());
+                            System.out.println("🔵 EXPORT: Retrieved " + tickets.size() + " tickets until end date");
+                        } else {
+                            tickets = ticketService.getAllTickets();
+                            System.out.println("🔵 EXPORT: Retrieved " + tickets.size() + " tickets (all tickets)");
+                        }
+
+                        // Generate CSV
+                        String csvContent = gmailEmailService.exportTicketsToCsv(tickets);
+                        System.out.println("🔵 EXPORT: Generated CSV content, length: " + csvContent.length() + " characters");
+
+                        // Send email with CSV attachment
+                        gmailEmailService.sendTicketsCsv(userEmail, csvContent, user);
+                        System.out.println("✅ EXPORT: Email sent successfully to: " + userEmail);
+
+                        // Create success message
+                        String dateRangeInfo = (startDate != null || endDate != null) ? " (filtered by date range)" : "";
+                        String successMessage = "Tickets exported and emailed successfully to " + userEmail + dateRangeInfo;
+
+                        // Return success result
+                        Map<String, Object> exportData = new HashMap<>();
+                        exportData.put("email", userEmail);
+                        exportData.put("ticketCount", tickets.size());
+                        exportData.put("hasDateFilter", startDate != null || endDate != null);
+
+                        return new QueryResult(true, successMessage, exportData, QueryResultType.INFORMATION);
+
+                    } catch (Exception e) {
+                        System.out.println("❌ EXPORT: Export failed with error: " + e.getMessage());
+                        e.printStackTrace();
+                        return new QueryResult(false, "Export failed: " + e.getMessage());
+                    }
+                }
+
+                default:
+                    return new QueryResult(false, "Unsupported query type: " + queryType.getCode());
+            }
+
+        } catch (Exception e) {
+            if (nlpConfig.isDebugEnabled()) {
+                System.out.println("Debug: Error executing query: " + e.getMessage());
+            }
+            return new QueryResult(false, "Error while executing query: " + e.getMessage(), null, QueryResultType.ERROR);
+        }
+    }
+
+
+    /**
+     * Execute a ticket management operation
+     * 
+     * @param operation The management operation to execute
+     * @param entities 
+     * @param userId The user performing the operation
+     * @param isAdmin Whether the user has admin privileges
+     * @return QueryResult containing the operation result
+     */
+    public QueryResult executeTicketOperation(TicketOperation operation,
+                                          EntityExtractionService.ExtractedEntities entities,
+                                          String userId,
+                                          boolean isAdmin,
+                                          String originalQuery) {
+        try {
+            // Permission gate
+            if (!validateUserOperation(operation, entities, userId, isAdmin)) {
+                return new QueryResult(false, "You are not allowed to perform this operation.");
+            }
+
+            switch (operation) {
+                case CREATE_TICKET: {
+                    // Extract and validate required information
+                    String description = extractDescriptionFromEntities(entities);
+
+                    // If no description found in entities, try to extract from the original query
+                    if ((description == null || description.trim().isEmpty()) && originalQuery != null) {
+                        description = extractDescriptionFromQuery(originalQuery);
+                    }
+
+                    String durationStr = firstNormalized(entities, EntityExtractionService.EntityType.DURATION);
+                    Integer duration = parseIntegerSafe(durationStr);
+                    String emergencyType = firstNormalized(entities, EntityExtractionService.EntityType.EMERGENCY_TYPE);
+
+                    // Debug: Show extracted values for validation
+                    System.out.println("🔵 CREATE_TICKET: Extracted values:");
+                    System.out.println("  - Description: '" + description + "'");
+                    System.out.println("  - Duration String: '" + durationStr + "'");
+                    System.out.println("  - Duration Parsed: " + duration);
+                    System.out.println("  - Emergency Type: '" + emergencyType + "'");
+
+                    // Validate required fields
+                    List<String> missingFields = new ArrayList<>();
+
+                    if (description == null || description.trim().isEmpty()) {
+                        missingFields.add("reason/description for the emergency");
+                    }
+
+                    if (duration == null) {
+                        missingFields.add("duration (15-120 minutes)");
+                    } else if (duration < 15 || duration > 120) {
+                        return new QueryResult(false, "Duration must be between 15 and 120 minutes. You specified: " + duration + " minutes.");
+                    }
+
+                    // Emergency type is REQUIRED - determines ERP usergroup assignment
+                    if (emergencyType == null || emergencyType.trim().isEmpty()) {
+                        missingFields.add("emergency type (hr-emergency, financial-emergency, management-emergency, or logistics-emergency)");
+                    } else {
+                        // Validate emergency type is one of the allowed values
+                        String[] validTypes = {"hr-emergency", "financial-emergency", "management-emergency", "logistics-emergency"};
+                        boolean isValidType = false;
+                        for (String validType : validTypes) {
+                            if (validType.equals(emergencyType.toLowerCase().trim())) {
+                                isValidType = true;
+                                break;
+                            }
+                        }
+                        if (!isValidType) {
+                            return new QueryResult(false, "Invalid emergency type: '" + emergencyType + "'. Must be one of: hr-emergency, financial-emergency, management-emergency, logistics-emergency");
+                        }
+                    }
+
+                    // If required fields are missing, provide helpful guidance
+                    if (!missingFields.isEmpty()) {
+                        String guidance = "To create an emergency ticket, I need the following information: " +
+                                        String.join(", ", missingFields) + ". " +
+                                        "Example: 'create hr-emergency ticket for office fire, duration 30 minutes, contact 555-1234'";
+                        return new QueryResult(false, guidance);
+                    }
+
+                    // Extract optional fields
+                    String emergencyContact = firstNormalized(entities, EntityExtractionService.EntityType.PHONE);
+
+                    // Create the ticket with validated information
+                    Ticket created = ticketService.createTicket(
+                            description.trim(), userId, emergencyType, emergencyContact, duration);
+                    return new QueryResult(QueryResultType.OPERATION_RESULT, created, 1);
+                }
+
+                case UPDATE_TICKET_STATUS: {
+                    String ticketId = firstNormalized(entities, EntityExtractionService.EntityType.TICKET_ID);
+                    String status   = firstNormalized(entities, EntityExtractionService.EntityType.STATUS);
+                    if (ticketId == null || status == null) {
+                        return new QueryResult(false, "Missing ticketId or status.");
+                    }
+                    if (!isAdmin) {
+                        Optional<Ticket> t = ticketService.getTicketByTicketId(ticketId);
+                        if (t.isEmpty() || !userId.equals(t.get().getUserId())) {
+                            return new QueryResult(false, "You can only update your own tickets.");
+                        }
+                    }
+                    Ticket updated = ticketService.updateTicketStatus(ticketId,
+                            normalizeStatusForWrite(status));
+                    return new QueryResult(QueryResultType.OPERATION_RESULT, updated, 1);
+                }
+
+                case CLOSE_TICKET: {
+                    String ticketId = firstNormalized(entities, EntityExtractionService.EntityType.TICKET_ID);
+                    if (ticketId == null) {
+                        return new QueryResult(false, "Missing ticketId.");
+                    }
+                    if (!isAdmin) {
+                        Optional<Ticket> t = ticketService.getTicketByTicketId(ticketId);
+                        if (t.isEmpty() || !userId.equals(t.get().getUserId())) {
+                            return new QueryResult(false, "You can only close your own tickets.");
+                        }
+                    }
+                    Ticket updated = ticketService.updateTicketStatus(ticketId, "Completed");
+                    return new QueryResult(QueryResultType.OPERATION_RESULT, updated, 1);
+                }
+
+                case ASSIGN_TICKET:
+                case ADD_COMMENT:
+                case UPDATE_PRIORITY:
+                    return new QueryResult(false, "Operation not supported: " + operation);
+
+                default:
+                    return new QueryResult(false, "Unsupported operation: " + operation);
+            }
+
+        } catch (Exception e) {
+            return new QueryResult(false, "Error while executing operation: " + e.getMessage());
+        }
+    }
+
+
+    /* ----------------------- helpers ----------------------- */
+
+    private List<Ticket> filterByStatuses(List<Ticket> tickets, String... statuses) {
+        if (tickets == null || tickets.isEmpty() || statuses == null || statuses.length == 0) return Collections.emptyList();
+        java.util.Set<String> set = new java.util.HashSet<>();
+        for (String s : statuses) set.add(s);
+        return tickets.stream().filter(t -> set.contains(t.getStatus())).collect(java.util.stream.Collectors.toList());
+    }
+
+    private int countByStatus(List<Ticket> tickets, String status) {
+        if (tickets == null) return 0;
+        int c = 0;
+        for (Ticket t : tickets) if (status.equalsIgnoreCase(t.getStatus())) c++;
+        return c;
+    }
+
+    private String normalizeStatus(String status) {
+        if (status == null) return null;
+        String s = status.trim().toLowerCase();
+        if (s.equals("open") || s.equals("active")) return "Active";
+        if (s.equals("done") || s.equals("completed")) return "CompletedOrClosed"; // query mode: treat both
+        if (s.equals("closed")) return "CompletedOrClosed";
+        if (s.equals("rejected") || s.equals("revoked")) return "Rejected";
+        // fall back to capitalized as-is for exact match attempts
+        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
+    }
+
+    private String normalizeStatusForWrite(String status) {
+        if (status == null) return null;
+        String s = status.trim().toLowerCase();
+        if (s.equals("open") || s.equals("active")) return "Active";
+        if (s.equals("done") || s.equals("complete") || s.equals("completed")) return "Completed";
+        if (s.equals("closed") || s.equals("close")) return "Closed";
+        if (s.equals("rejected") || s.equals("revoked")) return "Rejected";
+        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
+    }
+
+    private boolean equalsIgnoreCaseSafe(String a, String b) {
+        return a == null ? b == null : a.equalsIgnoreCase(b);
+    }
+
+    private Integer parseIntegerSafe(String s) {
+        if (s == null) return null;
+        try {
+            // Extract just the numbers from the string (for cases like "15 minutes")
+            String numbersOnly = s.replaceAll("[^0-9]", "");
+            return numbersOnly.isEmpty() ? null : Integer.parseInt(numbersOnly);
+        }
+        catch (NumberFormatException nfe) { return null; }
+    }
+
+    private String firstNormalized(EntityExtractionService.ExtractedEntities entities,
+                                EntityExtractionService.EntityType type) {
+        if (entities == null) return null;
+        Map<EntityExtractionService.EntityType, List<EntityExtractionService.Entity>> all = entities.getAllEntities();
+        if (all != null) {
+            List<EntityExtractionService.Entity> list = all.get(type);
+            if (list != null && !list.isEmpty()) {
+                String v = list.get(0).getNormalizedValue();
+                return (v == null || v.isEmpty()) ? list.get(0).getValue() : v;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Extract description from the original query text for ticket creation
+     * This is a fallback when entity extraction doesn't capture the description properly
+     */
+    private String extractDescriptionFromQuery(String originalQuery) {
+        if (originalQuery == null || originalQuery.trim().isEmpty()) {
+            return null;
+        }
+
+        String query = originalQuery.toLowerCase().trim();
+
+        // Remove common ticket creation phrases to extract the actual description
+        // Order matters - more specific patterns first
+        String[] prefixesToRemove = {
+            "create hr-emergency ticket for", "create financial-emergency ticket for",
+            "create management-emergency ticket for", "create logistics-emergency ticket for",
+            "new hr-emergency ticket for", "new financial-emergency ticket for",
+            "new management-emergency ticket for", "new logistics-emergency ticket for",
+            "create emergency ticket for", "new emergency ticket for",
+            "create ticket for", "new ticket for",
+            "hr-emergency ticket for", "financial-emergency ticket for",
+            "management-emergency ticket for", "logistics-emergency ticket for",
+            "emergency ticket for", "ticket for"
+        };
+
+        String description = query;
+        System.out.println("🔵 DESCRIPTION FALLBACK: Original query: '" + query + "'");
+
+        for (String prefix : prefixesToRemove) {
+            if (description.startsWith(prefix)) {
+                description = description.substring(prefix.length()).trim();
+                System.out.println("🔵 DESCRIPTION FALLBACK: After removing prefix '" + prefix + "': '" + description + "'");
+                break;
+            }
+        }
+
+        // Remove trailing information (duration, contact, etc.)
+        String[] suffixesToRemove = {
+            ", duration", " duration", ", contact", " contact", ", phone", " phone"
+        };
+
+        for (String suffix : suffixesToRemove) {
+            int index = description.indexOf(suffix);
+            if (index > 0) {
+                description = description.substring(0, index).trim();
+                System.out.println("🔵 DESCRIPTION FALLBACK: After removing suffix '" + suffix + "': '" + description + "'");
+                break;
+            }
+        }
+
+        // If we removed everything or it's too short, return null
+        if (description.isEmpty() || description.length() < 3) {
+            System.out.println("🔵 DESCRIPTION FALLBACK: Description too short or empty, returning null");
+            return null;
+        }
+
+        // Clean up and return
+        System.out.println("🔵 DESCRIPTION FALLBACK: Final description: '" + description.trim() + "'");
+        return description.trim();
+    }
+
+
+
+    /**
+     * Extract description text from entities or fall back to extracting from query text
+     *
+     * @param entities The extracted entities
+     * @return Description text or null if not found
+     */
+    private String extractDescriptionFromEntities(EntityExtractionService.ExtractedEntities entities) {
+        if (entities == null || entities.getAllEntities() == null) {
+            return null;
+        }
+
+        // First try to get description from DESCRIPTION entity type
+        String description = firstNormalized(entities, EntityExtractionService.EntityType.DESCRIPTION);
+        System.out.println("🔵 DESCRIPTION EXTRACTION: From entities: '" + description + "'");
+        if (description != null && !description.trim().isEmpty()) {
+            return description.trim();
+        }
+
+        // Fallback: Check for general text/number entities that might contain description
+        List<EntityExtractionService.Entity> numbers = entities.getAllEntities().get(EntityExtractionService.EntityType.NUMBER);
+        if (numbers != null && !numbers.isEmpty()) {
+            // Look for non-numeric text in "number" entities (often contains description text)
+            for (EntityExtractionService.Entity entity : numbers) {
+                String value = entity.getValue();
+                if (value != null && !value.trim().isEmpty() && !isNumeric(value)) {
+                    description = value.trim();
+                    break;
+                }
+            }
+        }
+
+        // If no description found, try to extract from location or other text fields
+        if (description == null || description.isEmpty()) {
+            List<EntityExtractionService.Entity> locations = entities.getAllEntities().get(EntityExtractionService.EntityType.LOCATION);
+            if (locations != null && !locations.isEmpty()) {
+                description = locations.get(0).getValue();
+            }
+        }
+
+        System.out.println("🔵 DESCRIPTION EXTRACTION: No description found in entities, returning null");
+        return description;
+    }
+
+    /**
+     * Check if a string is purely numeric
+     */
+    private boolean isNumeric(String str) {
+        if (str == null || str.trim().isEmpty()) return false;
+        try {
+            Double.parseDouble(str.trim());
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+
+    /**
+     * Build query filters from extracted entities
+     * 
+     * @param entities The extracted entities
+     * @return Map of filter criteria
+     */
+    public Map<String, Object> buildQueryFilters(EntityExtractionService.ExtractedEntities entities) {
+        Map<String, Object> filters = new HashMap<>();
+
+            if (entities == null || entities.getAllEntities() == null) {
+                return filters;
+            }
+
+            for (EntityExtractionService.Entity entity : entities.getAllEntities().values().stream().flatMap(List::stream).toList()) {
+            switch (entity.getType()) {
+                case TICKET_ID:
+                    filters.put("ticketId", entity.getNormalizedValue());
+                    break;
+
+                case STATUS:
+                    filters.put("status", entity.getNormalizedValue().toLowerCase());
+                    break;
+
+                case USER_NAME:
+                    filters.put("assigned", entity.getNormalizedValue());
+                    break;
+
+                case PRIORITY:
+                    filters.put("priority", entity.getNormalizedValue().toLowerCase());
+                    break;
+
+                case DATE:
+                    filters.put("date", entity.getNormalizedValue());
+                    break;
+
+                case TIME:
+                    filters.put("time", entity.getNormalizedValue());
+                    break;
+
+                case DURATION:
+                    filters.put("duration", entity.getNormalizedValue());
+                    break; 
+                
+                case EMERGENCY_TYPE:
+                    filters.put("emergencyType", entity.getNormalizedValue());
+                    break;
+
+                case NUMBER:
+                    filters.put("number", entity.getNormalizedValue());
+                    break;
+
+                case LOCATION:
+                    filters.put("location", entity.getNormalizedValue());
+                    break;
+
+                default:
+                    // skip unknown or unneeded entity types
+                    break;
+            }
+        }
+
+        return filters;
+    }
+
+    /**
+     * Validate if a user can perform a specific operation
+     * 
+     * @param operation The operation to validate
+     * @param entities The extracted entities relevant to the operation
+     * @param userId The user attempting the operation
+     * @param isAdmin Whether the user has admin privileges
+     * @return true if operation is allowed, false otherwise
+     */
+    public boolean validateUserOperation(TicketOperation operation, EntityExtractionService.ExtractedEntities entities, String userId, boolean isAdmin) {
+        // Admin can do everything
+        if (isAdmin) {
+            return true;
+        }
+
+        switch (operation) {
+            case CREATE_TICKET:
+            // Any user can create a ticket
+            return true;
+
+            case ADD_COMMENT:
+            case UPDATE_TICKET_STATUS:
+            case CLOSE_TICKET:
+            case UPDATE_PRIORITY:
+                if (entities != null && entities.getAllEntities() != null) {
+                    for (EntityExtractionService.Entity entity : entities.getAllEntities().values().stream().flatMap(List::stream).toList()) {
+                        if (entity.getType() == EntityExtractionService.EntityType.TICKET_ID) {
+                            String ticketId = entity.getNormalizedValue();
+                            if (ticketId != null) {
+                                Optional<Ticket> ticketOpt = ticketService.getTicketByTicketId(ticketId);
+                                if (ticketOpt.isPresent()) {
+                                    Ticket ticket = ticketOpt.get();
+                                    // Only allow if the ticket belongs to the current user
+                                    if (ticket.getUserId().equals(userId)) {
+                                        return true;
+                                    } else {
+                                        return false; // ticket belongs to someone else
+                                    }
+                                } else {
+                                    return false; // no such ticket
+                                }
+                            }
+                        }
+                    }
+                }
+                // If no ticket ID found in entities, deny access
+                return false;
+
+            case ASSIGN_TICKET:
+                // Only admins can reassign tickets
+                return false;
+
+            default:
+                // Unknown/unsupported operation → reject
+                return false;
+        }
+    }
+
+    /**
+     * Generate help response for users
+     */
+    private QueryResult generateHelpResponse() {
+        String helpMessage = "🔥 **FireFighter Emergency Management Help** 🔥\n\n" +
+            "**Available Commands:**\n" +
+            "• `Show my active tickets` - View your current active tickets\n" +
+            "• `Show recent activity` - See latest system activity\n" +
+            "• `Create [emergency-type] ticket for [description]` - Create new emergency ticket\n" +
+            "• `What emergency types are available?` - List available emergency types\n" +
+            "• `How do I request emergency access?` - Get help with emergency access\n" +
+            "• `What elevated access do I currently have?` - Check your current permissions\n\n" +
+            "**Emergency Types:** HR, Financial, Management, Logistics\n\n" +
+            "**Example:** `Create hr-emergency ticket for employee leave, duration 30 minutes, contact 0123456789`";
+
+        return new QueryResult(true, helpMessage, helpMessage, QueryResultType.HELP);
+    }
+
+    /**
+     * Generate capabilities response
+     */
+    private QueryResult generateCapabilitiesResponse() {
+        String capabilitiesMessage = "🤖 **Ada Capabilities** 🤖\n\n" +
+            "I can help you with:\n" +
+            "• **Ticket Management** - Create, view, and manage emergency tickets\n" +
+            "• **Emergency Access** - Guide you through emergency access procedures\n" +
+            "• **System Information** - Show emergency types, recent activity, and your access level\n" +
+            "• **Natural Language Processing** - Understand your requests in plain English\n\n" +
+            "Just ask me in natural language, and I'll help you manage your FireFighter emergency tickets!";
+
+        return new QueryResult(true, capabilitiesMessage, capabilitiesMessage, QueryResultType.HELP);
+    }
+
+    /**
+     * Generate recent activity response
+     */
+    private QueryResult generateRecentActivityResponse(String userId, boolean isAdmin) {
+        try {
+            // Get recent tickets for the user (or all if admin)
+            List<Ticket> recentTickets;
+            if (isAdmin) {
+                recentTickets = ticketService.getAllTickets().stream()
+                    .sorted((t1, t2) -> t2.getDateCreated().compareTo(t1.getDateCreated()))
+                    .limit(5)
+                    .collect(java.util.stream.Collectors.toList());
+            } else {
+                recentTickets = ticketService.getTicketsByUserId(userId).stream()
+                    .sorted((t1, t2) -> t2.getDateCreated().compareTo(t1.getDateCreated()))
+                    .limit(5)
+                    .collect(java.util.stream.Collectors.toList());
+            }
+
+            if (recentTickets.isEmpty()) {
+                return new QueryResult(true, "No recent activity found.", "No recent tickets or activity.", QueryResultType.TICKET_LIST);
+            }
+
+            StringBuilder activityMessage = new StringBuilder("📊 **Recent Activity** 📊\n\n");
+            for (Ticket ticket : recentTickets) {
+                activityMessage.append("• **[").append(ticket.getTicketId()).append("]** ")
+                    .append(ticket.getStatus()).append(" - ")
+                    .append(ticket.getDescription())
+                    .append(" (").append(ticket.getEmergencyType()).append(")\n");
+            }
+
+            return new QueryResult(true, activityMessage.toString(), recentTickets, QueryResultType.TICKET_LIST);
+        } catch (Exception e) {
+            return new QueryResult(false, "Error retrieving recent activity: " + e.getMessage(), null, QueryResultType.ERROR);
+        }
+    }
+
+    /**
+     * Generate emergency types response
+     */
+    private QueryResult generateEmergencyTypesResponse() {
+        String emergencyTypesMessage = "🚨 **Available Emergency Types** 🚨\n\n" +
+            "• **HR Emergency** - Human resources related emergencies\n" +
+            "  - Employee incidents, workplace safety, urgent HR matters\n" +
+            "  - Example: `Create hr-emergency ticket for employee leave`\n\n" +
+            "• **Financial Emergency** - Financial and budget related emergencies\n" +
+            "  - Budget issues, payment problems, financial crises\n" +
+            "  - Example: `Create financial-emergency ticket for budget overrun`\n\n" +
+            "• **Management Emergency** - Management and operational emergencies\n" +
+            "  - Leadership decisions, operational crises, strategic issues\n" +
+            "  - Example: `Create management-emergency ticket for system outage`\n\n" +
+            "• **Logistics Emergency** - Supply chain and logistics emergencies\n" +
+            "  - Supply issues, delivery problems, resource shortages\n" +
+            "  - Example: `Create logistics-emergency ticket for supply shortage`";
+
+        return new QueryResult(true, emergencyTypesMessage, emergencyTypesMessage, QueryResultType.HELP);
+    }
+
+    /**
+     * Generate emergency access help response
+     */
+    private QueryResult generateEmergencyAccessHelpResponse() {
+        String accessHelpMessage = "🔐 **Emergency Access Request Guide** 🔐\n\n" +
+            "**How to Request Emergency Access:**\n\n" +
+            "1. **Create an Emergency Ticket**\n" +
+            "   - Use: `Create [emergency-type] ticket for [reason]`\n" +
+            "   - Include duration and contact information\n\n" +
+            "2. **Emergency Types Grant Different Access:**\n" +
+            "   - **HR Emergency** → HR Group Access\n" +
+            "   - **Financial Emergency** → Financial Group Access\n" +
+            "   - **Management Emergency** → Manager Group Access\n" +
+            "   - **Logistics Emergency** → Logistics Group Access\n\n" +
+            "3. **Access is Automatically Granted**\n" +
+            "   - Once your ticket is created, you're automatically added to the appropriate group\n" +
+            "   - Access is temporary and tied to your emergency ticket\n\n" +
+            "4. **Example Request:**\n" +
+            "   `Create hr-emergency ticket for employee incident, duration 60 minutes, contact 0123456789`\n\n" +
+            "**Need immediate help?** Contact your system administrator.";
+
+        return new QueryResult(true, accessHelpMessage, accessHelpMessage, QueryResultType.HELP);
+    }
+
+    /**
+     * Generate user access level response
+     */
+    private QueryResult generateMyAccessLevelResponse(String userId) {
+        try {
+            // Get user's current tickets to determine access level
+            List<Ticket> userTickets = ticketService.getTicketsByUserId(userId);
+            List<Ticket> activeTickets = userTickets.stream()
+                .filter(t -> "Active".equals(t.getStatus()))
+                .collect(java.util.stream.Collectors.toList());
+
+            StringBuilder accessMessage = new StringBuilder("👤 **Your Current Access Level** 👤\n\n");
+
+            if (activeTickets.isEmpty()) {
+                accessMessage.append("**Standard User Access**\n")
+                    .append("• Create and view your own tickets\n")
+                    .append("• Request emergency access through ticket creation\n\n")
+                    .append("**No Active Emergency Access**\n")
+                    .append("You currently have no active emergency tickets granting elevated access.");
+            } else {
+                accessMessage.append("**Standard User Access** + **Emergency Access**\n\n");
+                accessMessage.append("**Active Emergency Access:**\n");
+
+                for (Ticket ticket : activeTickets) {
+                    String emergencyType = ticket.getEmergencyType();
+                    String groupAccess = getGroupAccessForEmergencyType(emergencyType);
+                    accessMessage.append("• **[").append(ticket.getTicketId()).append("]** ")
+                        .append(emergencyType).append(" → ").append(groupAccess).append("\n");
+                }
+
+                accessMessage.append("\n**This grants you temporary elevated permissions for the duration of your emergency tickets.**");
+            }
+
+            return new QueryResult(true, accessMessage.toString(), activeTickets, QueryResultType.HELP);
+        } catch (Exception e) {
+            return new QueryResult(false, "Error retrieving access level: " + e.getMessage(), null, QueryResultType.ERROR);
+        }
+    }
+
+    /**
+     * Helper method to map emergency types to group access
+     */
+    private String getGroupAccessForEmergencyType(String emergencyType) {
+        if (emergencyType == null) return "Unknown Access";
+
+        switch (emergencyType.toLowerCase()) {
+            case "hr-emergency":
+                return "HR Group Access";
+            case "financial-emergency":
+                return "Financial Group Access";
+            case "management-emergency":
+                return "Manager Group Access";
+            case "logistics-emergency":
+                return "Logistics Group Access";
+            default:
+                return "Standard Access";
+        }
+    }
+
+    /**
+     * Result of query processing
+     */
+    public static class QueryResult {
+        private boolean success;
+        private String message;
+        private Object data;
+        private QueryResultType resultType;
+        private int recordCount;
+        private Map<String, Object> metadata;
+        private List<String> errors;
+        private List<String> warnings;
+
+        public QueryResult() {}
+
+        public QueryResult(boolean success, String message) {
+            this.success = success;
+            this.message = message;
+        }
+
+        public QueryResult(boolean success, String message, Object data, QueryResultType resultType) {
+            this.success = success;
+            this.message = message;
+            this.data = data;
+            this.resultType = resultType;
+        }
+
+        public QueryResult(QueryResultType resultType, Object data, int recordCount) {
+            this.success = true;
+            this.resultType = resultType;
+            this.data = data;
+            this.recordCount = recordCount;
+        }
+
+        // Getters and setters
+        public boolean isSuccess() { return success; }
+        public void setSuccess(boolean success) { this.success = success; }
+        
+        public String getMessage() { return message; }
+        public void setMessage(String message) { this.message = message; }
+        
+        public Object getData() { return data; }
+        public void setData(Object data) { this.data = data; }
+        
+        public QueryResultType getResultType() { return resultType; }
+        public void setResultType(QueryResultType resultType) { this.resultType = resultType; }
+        
+        public int getRecordCount() { return recordCount; }
+        public void setRecordCount(int recordCount) { this.recordCount = recordCount; }
+        
+        public Map<String, Object> getMetadata() { return metadata; }
+        public void setMetadata(Map<String, Object> metadata) { this.metadata = metadata; }
+        
+        public List<String> getErrors() { return errors; }
+        public void setErrors(List<String> errors) { this.errors = errors; }
+        
+        public List<String> getWarnings() { return warnings; }
+        public void setWarnings(List<String> warnings) { this.warnings = warnings; }
+
+    }
+
+    /**
+     * Types of ticket queries that can be executed
+     */
+    public enum TicketQueryType {
+        USER_TICKETS("user_tickets", "Get tickets for a specific user"),
+        ACTIVE_TICKETS("active_tickets", "Get all active tickets"),
+        COMPLETED_TICKETS("completed_tickets", "Get completed tickets"),
+        REJECTED_TICKETS("rejected_tickets", "Get rejected tickets"),
+        SEARCH_TICKETS("search_tickets", "Search tickets by criteria"),
+        TICKET_DETAILS("ticket_details", "Get details of specific ticket"),
+        SYSTEM_STATS("system_stats", "Get system statistics"),
+        EXPORT_DATA("export_data", "Export ticket data");
+
+        private final String code;
+        private final String description;
+
+        TicketQueryType(String code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        public String getCode() { return code; }
+        public String getDescription() { return description; }
+    }
+
+    /**
+     * Types of ticket operations that can be executed
+     */
+    public enum TicketOperation {
+        UPDATE_TICKET_STATUS("update_status", "Update ticket status"),
+        ASSIGN_TICKET("assign_ticket", "Assign ticket to user"),
+        CREATE_TICKET("create_ticket", "Create new ticket"),
+        CLOSE_TICKET("close_ticket", "Close existing ticket"),
+        ADD_COMMENT("add_comment", "Add comment to ticket"),
+        UPDATE_PRIORITY("update_priority", "Update ticket priority");
+
+        private final String code;
+        private final String description;
+
+        TicketOperation(String code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        public String getCode() { return code; }
+        public String getDescription() { return description; }
+    }
+
+    /**
+     * Types of query results
+     */
+    public enum QueryResultType {
+        TICKET_LIST("ticket_list", "List of tickets"),
+        TICKET_DETAILS("ticket_details", "Single ticket details"),
+        OPERATION_RESULT("operation_result", "Result of an operation"),
+        STATISTICS("statistics", "Statistical data"),
+        ERROR("error", "Error result"),
+        HELP("help", "Help information"),
+        INFORMATION("information", "General information");
+
+        private final String code;
+        private final String description;
+
+        QueryResultType(String code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        public String getCode() { return code; }
+        public String getDescription() { return description; }
+    }
+}

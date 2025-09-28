@@ -819,9 +819,11 @@ export class AdminPage implements OnInit {
     alert('Contact Requester for request ' + id + ' (stub)');
   }
 
-  navigateToMetrics() {
-    console.log('Navigate to metrics page');
-    this.router.navigate(['/metrics']);
+
+
+  navigateToManageUsers() {
+    console.log('Navigate to manage users page');
+    this.router.navigate(['/user-management']);
   }
 
   ngOnInit() {

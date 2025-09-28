@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -70,6 +71,18 @@ public class UserService {
      */
     public boolean hasRole(String firebaseUid, String roleName) {
         return authorizationService.hasRole(firebaseUid, roleName);
+    }
+
+    /**
+     * Get user role by Firebase UID
+     */
+    public String getUserRole(String firebaseUid) {
+        Optional<User> userOpt = getUserByFirebaseUid(firebaseUid);
+        if (userOpt.isPresent()) {
+            String role = userOpt.get().getRole();
+            return role != null ? role : "USER"; // Default to USER if no role set
+        }
+        return "GUEST"; // Default for non-existent users
     }
 
     /**
@@ -173,5 +186,34 @@ public class UserService {
      */
     public long getAuthorizedUserCount() {
         return userProfileService.getAuthorizedUserCount();
+    }
+
+    // REMOVED: User self-management Dolibarr UID methods
+    // These methods have been removed for security reasons.
+    // Only administrators can now manage Dolibarr UIDs through admin-only service methods.
+
+    /**
+     * ADMIN-ONLY DOLIBARR UID MANAGEMENT
+     */
+
+    /**
+     * Update user Dolibarr ID as admin - Delegates to UserProfileService with admin check
+     */
+    public User updateUserDolibarrIdAsAdmin(String adminFirebaseUid, String targetFirebaseUid, String dolibarrId) {
+        return userProfileService.updateUserDolibarrIdAsAdmin(adminFirebaseUid, targetFirebaseUid, dolibarrId);
+    }
+
+    /**
+     * Get user Dolibarr ID as admin - Delegates to UserProfileService with admin check
+     */
+    public String getUserDolibarrIdAsAdmin(String adminFirebaseUid, String targetFirebaseUid) {
+        return userProfileService.getUserDolibarrIdAsAdmin(adminFirebaseUid, targetFirebaseUid);
+    }
+
+    /**
+     * Get all users as admin - Delegates to UserProfileService with admin check
+     */
+    public Map<String, Object> getAllUsersAsAdmin(String adminFirebaseUid) {
+        return userProfileService.getAllUsersAsAdmin(adminFirebaseUid);
     }
 } 

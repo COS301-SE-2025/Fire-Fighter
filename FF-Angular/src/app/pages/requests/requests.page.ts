@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 import { ToastController } from '@ionic/angular';
+import { TranslateModule } from '@ngx-translate/core';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { TicketService, Ticket } from '../../services/ticket.service';
 import { calculateTimeAgo } from '../../services/mock-ticket-database';
@@ -11,6 +12,7 @@ import { of } from 'rxjs';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
+import { LanguageService } from '../../services/language.service';
 
 @Component({
   selector: 'app-requests',
@@ -21,7 +23,7 @@ import { NotificationService } from '../../services/notification.service';
     IonContent,
     IonRefresher,
     IonRefresherContent,
-    CommonModule, FormsModule, NavbarComponent
+    CommonModule, FormsModule, NavbarComponent, TranslateModule
   ],
   animations: [
     trigger('modalBackdrop', [
@@ -94,6 +96,12 @@ export class RequestsPage implements OnInit {
   // Add calculateTimeAgo function
   calculateTimeAgo = calculateTimeAgo;
 
+  // Method to translate status values
+  getTranslatedStatus(status: string): string {
+    const statusKey = `REQUESTS.STATUS.${status.toUpperCase()}`;
+    return this.languageService.getInstantTranslation(statusKey);
+  }
+
   // Duration validation and utility methods
   getTotalDurationMinutes(): number {
     return this.newTicket.duration;
@@ -107,10 +115,10 @@ export class RequestsPage implements OnInit {
   getDurationErrorMessage(): string {
     const totalMinutes = this.getTotalDurationMinutes();
     if (totalMinutes < 15) {
-      return 'Duration must be at least 15 minutes';
+      return this.languageService.getInstantTranslation('REQUESTS.MODAL.DURATION.ERROR_MIN');
     }
     if (totalMinutes > 120) {
-      return 'Duration cannot exceed 2 hours';
+      return this.languageService.getInstantTranslation('REQUESTS.MODAL.DURATION.ERROR_MAX');
     }
     return '';
   }
@@ -143,7 +151,8 @@ export class RequestsPage implements OnInit {
     private toastController: ToastController,
     private ticketService: TicketService,
     private authService: AuthService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private languageService: LanguageService
   ) {}
 
   ngOnInit() {

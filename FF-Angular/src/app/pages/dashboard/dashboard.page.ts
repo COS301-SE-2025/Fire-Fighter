@@ -47,6 +47,9 @@ export class DashboardPage implements OnInit, OnDestroy {
   unreadNotificationsCount = 0;
   adminAccessDeniedMessage: string | null = null;
   private notificationSubscription?: Subscription;
+  private userSubscription?: Subscription;
+  private ticketCreatedSubscription?: Subscription;
+  private currentUserUid: string | null = null;
 
   // Add a public usernames map for template access
   public usernames: { [userId: string]: string } = {};
@@ -95,9 +98,20 @@ export class DashboardPage implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.loadTickets();
     this.subscribeToNotifications();
     this.checkForAdminAccessError();
+    this.subscribeToTicketCreation();
+
+    // Subscribe to user changes and load tickets when user is available
+    this.userSubscription = this.authService.user$.subscribe(user => {
+      if (user) {
+        this.currentUserUid = user.uid;
+        this.loadTickets();
+      } else {
+        this.currentUserUid = null;
+        this.tickets = [];
+      }
+    });
   }
 
   checkForAdminAccessError() {
@@ -116,17 +130,74 @@ export class DashboardPage implements OnInit, OnDestroy {
     if (this.notificationSubscription) {
       this.notificationSubscription.unsubscribe();
     }
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
+    if (this.ticketCreatedSubscription) {
+      this.ticketCreatedSubscription.unsubscribe();
+    }
   }
 
   subscribeToNotifications() {
+    let previousNotificationCount = 0;
+
     this.notificationSubscription = this.notificationService.getNotifications()
       .subscribe(notifications => {
         this.unreadNotificationsCount = notifications.filter(n => !n.read).length;
+
+        // Check for new ticket creation notifications to auto-refresh dashboard
+        if (notifications.length > previousNotificationCount && previousNotificationCount > 0) {
+          // Look for new ticket_created notifications
+          const newNotifications = notifications.slice(0, notifications.length - previousNotificationCount);
+          const hasNewTicketNotification = newNotifications.some(notification =>
+            notification.type === 'ticket_created' ||
+            notification.message.includes('has been created') ||
+            notification.title.includes('New Ticket Created')
+          );
+
+          if (hasNewTicketNotification) {
+            console.log('🎫 New ticket detected, refreshing dashboard content...');
+            // Refresh tickets without showing loading spinner for better UX
+            this.refreshTicketsQuietly();
+          }
+        }
+
+        previousNotificationCount = notifications.length;
       });
+  }
+
+  subscribeToTicketCreation() {
+    // Subscribe to immediate ticket creation events for instant dashboard refresh
+    this.ticketCreatedSubscription = this.ticketService.ticketCreated$.subscribe(newTicket => {
+      console.log('🚀 Immediate ticket creation detected, refreshing dashboard content...');
+      // Only refresh if the ticket belongs to the current user or if user is admin
+      const isAdmin = this.authService.isCurrentUserAdmin();
+      if (isAdmin || newTicket.userId === this.currentUserUid) {
+        this.refreshTicketsQuietly();
+      }
+    });
   }
 
   loadTickets() {
     this.isLoading = true;
+    this.error = null;
+    this.loadTicketsInternal(true);
+  }
+
+  /**
+   * Refresh tickets quietly without showing loading spinner
+   */
+  refreshTicketsQuietly() {
+    this.loadTicketsInternal(false);
+  }
+
+  /**
+   * Internal method to load tickets with optional loading indicator
+   */
+  private loadTicketsInternal(showLoading: boolean = true) {
+    if (showLoading) {
+      this.isLoading = true;
+    }
     this.error = null;
 
     // Check if user is admin to determine which tickets to load
@@ -140,7 +211,11 @@ export class DashboardPage implements OnInit, OnDestroy {
             this.error = 'Failed to load tickets. Please try again later.';
             return of([]);
           }),
-          finalize(() => this.isLoading = false)
+          finalize(() => {
+            if (showLoading) {
+              this.isLoading = false;
+            }
+          })
         )
         .subscribe(adminTickets => {
           // Convert AdminTicket to Ticket format and get last 6
@@ -149,21 +224,36 @@ export class DashboardPage implements OnInit, OnDestroy {
         });
     } else {
       // Regular user: Load only their tickets (last 6)
-      this.ticketService.getTickets()
-        .pipe(
-          catchError(err => {
-            this.error = 'Failed to load tickets. Please try again later.';
-            return of([]);
-          }),
-          finalize(() => this.isLoading = false)
-        )
-        .subscribe(tickets => {
-          // Get last 6 tickets for the user, sorted by date created (newest first)
-          const sortedTickets = tickets
-            .sort((a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime())
-            .slice(0, 6);
-          this.processTickets(sortedTickets);
-        });
+      if (this.currentUserUid) {
+        this.ticketService.getTickets()
+          .pipe(
+            catchError(err => {
+              this.error = 'Failed to load tickets. Please try again later.';
+              return of([]);
+            }),
+            finalize(() => {
+              if (showLoading) {
+                this.isLoading = false;
+              }
+            })
+          )
+          .subscribe(tickets => {
+            // Filter tickets for current user only using user.uid
+            const userTickets = tickets.filter(ticket => ticket.userId === this.currentUserUid);
+
+            // Get last 6 tickets for the user, sorted by date created (newest first)
+            const sortedTickets = userTickets
+              .sort((a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime())
+              .slice(0, 6);
+            this.processTickets(sortedTickets);
+          });
+      } else {
+        // No user found, clear tickets and stop loading
+        this.tickets = [];
+        if (showLoading) {
+          this.isLoading = false;
+        }
+      }
     }
   }
 
@@ -223,77 +313,92 @@ export class DashboardPage implements OnInit, OnDestroy {
     return this.tickets.filter(t => t.status === 'Active').slice(0, 3);
   }
 
-  // Monthly Statistics Properties
-  get currentMonthName(): string {
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 
-                   'July', 'August', 'September', 'October', 'November', 'December'];
-    return months[new Date().getMonth()];
+  // Emergency Response Statistics Properties
+  get emergencyTypeBreakdown(): { [key: string]: number } {
+    const breakdown: { [key: string]: number } = {
+      'hr-emergency': 0,
+      'financial-emergency': 0,
+      'management-emergency': 0,
+      'logistics-emergency': 0
+    };
+
+    this.tickets.forEach(ticket => {
+      if (ticket.emergencyType && breakdown.hasOwnProperty(ticket.emergencyType)) {
+        breakdown[ticket.emergencyType]++;
+      }
+    });
+
+    return breakdown;
   }
 
-  get monthlyGrowthPercentage(): number {
-    // Simulate growth percentage based on current ticket count
-    return Math.max(5, Math.min(25, Math.floor(this.totalTicketsCount * 2.3)));
+  get mostCommonEmergencyType(): string {
+    const breakdown = this.emergencyTypeBreakdown;
+    const maxType = Object.keys(breakdown).reduce((a, b) =>
+      breakdown[a] > breakdown[b] ? a : b
+    );
+
+    // Convert to display format
+    const typeMap: { [key: string]: string } = {
+      'hr-emergency': 'HR',
+      'financial-emergency': 'Financial',
+      'management-emergency': 'Management',
+      'logistics-emergency': 'Logistics'
+    };
+
+    return typeMap[maxType] || 'N/A';
   }
 
-  get approvalRate(): number {
-    const completedTickets = this.tickets.filter(t => t.status === 'Completed').length;
-    const totalProcessed = this.tickets.filter(t => t.status !== 'Active').length;
-    
-    if (totalProcessed === 0) return 95.5; // Default value if no processed tickets
-    
-    const rate = (completedTickets / totalProcessed) * 100;
-    return Math.round(rate * 10) / 10; // Round to 1 decimal place
+  get averageResponseTime(): number {
+    // Calculate average duration of all requested tickets
+    if (this.tickets.length === 0) return 0;
+
+    const totalDuration = this.tickets.reduce((sum, ticket) => sum + ticket.duration, 0);
+    return Math.round(totalDuration / this.tickets.length);
   }
 
-  get approvalRateGrowth(): number {
-    return 2.1; // Simulated growth percentage
-  }
-
-  get criticalIssuesCount(): number {
-    // Count rejected tickets as critical issues
-    const rejectedCount = this.tickets.filter(t => t.status === 'Rejected').length;
-    return Math.max(1, rejectedCount * 3); // Multiply for more realistic numbers
-  }
-
-  get criticalIssuesChange(): number {
-    return 3; // Simulated change number
-  }
-
-  get successRate(): number {
-    const completedTickets = this.tickets.filter(t => t.status === 'Completed').length;
+  get systemHealthScore(): number {
     const totalTickets = this.tickets.length;
-    
-    if (totalTickets === 0) return 98.7; // Default value if no tickets
-    
-    const rate = (completedTickets / totalTickets) * 100;
-    const adjustedRate = Math.max(85, rate); // Ensure minimum 85% success rate
-    return Math.round(adjustedRate * 10) / 10; // Round to 1 decimal place
+    if (totalTickets === 0) return 100;
+
+    const activeTickets = this.tickets.filter(t => t.status === 'Active').length;
+    const rejectedTickets = this.tickets.filter(t => t.status === 'Rejected').length;
+
+    // Calculate health score: 100% - (active tickets weight + rejected tickets weight)
+    const activeWeight = (activeTickets / totalTickets) * 30; // Active tickets reduce health by up to 30%
+    const rejectedWeight = (rejectedTickets / totalTickets) * 20; // Rejected tickets reduce health by up to 20%
+
+    const healthScore = Math.max(50, 100 - activeWeight - rejectedWeight);
+    return Math.round(healthScore);
   }
 
-  get successRateGrowth(): number {
-    return 0.3; // Simulated growth percentage
+  get completionRate(): number {
+    // Calculate percentage of tickets that are completed (not revoked) out of all tickets
+    if (this.tickets.length === 0) return 0;
+
+    const completedTickets = this.tickets.filter(t => t.status === 'Completed').length;
+    const rate = (completedTickets / this.tickets.length) * 100;
+    return Math.round(rate * 10) / 10;
+  }
+
+  get currentMonthTickets(): number {
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+
+    return this.tickets.filter(ticket => {
+      const ticketDate = new Date(ticket.dateCreated);
+      return ticketDate.getMonth() === currentMonth &&
+             ticketDate.getFullYear() === currentYear;
+    }).length;
   }
 
   // Generate recent activities from tickets
   get recentActivities(): Activity[] {
     const activities: Activity[] = [];
     const isAdmin = this.authService.isCurrentUserAdmin();
-    const currentUser = this.authService.getCurrentUserProfile();
 
-    // Filter tickets based on user role
-    let ticketsToShow: Ticket[] = [];
-
-    if (isAdmin) {
-      // Admin: Show all tickets (already loaded from admin service)
-      ticketsToShow = this.tickets.slice(0, 6);
-    } else {
-      // Regular user: Only show their own tickets
-      if (currentUser) {
-        ticketsToShow = this.tickets
-          .filter(ticket => ticket.userId === currentUser.userId || ticket.userId === currentUser.email)
-          .slice(0, 6);
-      }
-    }
+    // For regular users, tickets are already filtered in loadTickets()
+    // For admins, show all tickets (already loaded from admin service)
+    const ticketsToShow = this.tickets.slice(0, 6);
 
     // Generate activities from filtered tickets
     ticketsToShow.forEach(ticket => {

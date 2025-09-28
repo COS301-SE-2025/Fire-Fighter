@@ -54,6 +54,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     System.out.println("🔒 JWT FILTER: Processing as custom JWT token");
                     // Handle custom JWT token
                     try {
+                        // Check expiration first to provide specific error message
+                        if (jwtService.isTokenExpired(token)) {
+                            System.out.println("🔒 JWT FILTER: ❌ Token expired");
+                            sendTokenExpiredResponse(response);
+                            return;
+                        }
+
                         String firebaseUid = jwtService.extractFirebaseUid(token);
                         Boolean isAdmin = jwtService.extractIsAdmin(token);
                         
@@ -78,11 +85,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             System.out.println("🔒 JWT FILTER: ✅ User: " + firebaseUid + ", Admin: " + isAdmin);
                         } else {
                             System.out.println("🔒 JWT FILTER: ❌ Custom JWT token validation failed");
-                            System.out.println("🔒 JWT FILTER: ❌ FirebaseUid: " + firebaseUid + ", Token valid: " + (firebaseUid != null ? jwtService.validateToken(token, firebaseUid) : "false"));
+                            System.out.println("🔒 JWT FILTER: ❌ Token invalid for user: " + firebaseUid);
+                            sendInvalidTokenResponse(response);
+                            return;
                         }
                     } catch (Exception ex) {
                         System.out.println("🔒 JWT FILTER: Custom JWT token validation error: " + ex.getMessage());
                         logger.warn("Custom JWT token validation failed: " + ex.getMessage());
+
+                        // Check if it's an expired token exception
+                        if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("expired")) {
+                            sendTokenExpiredResponse(response);
+                            return;
+                        } else {
+                            sendInvalidTokenResponse(response);
+                            return;
+                        }
                     }
                 } else {
                     System.out.println("🔒 JWT FILTER: Processing as Firebase ID token");
@@ -122,4 +140,42 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+
+    //Send standardized token expired response
+    private void sendTokenExpiredResponse(HttpServletResponse response) throws IOException {
+        
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        
+        String jsonResponse = "{"
+            + "\"error\": \"TOKEN_EXPIRED\","
+            + "\"message\": \"Your session has expired. Please log in again.\","
+            + "\"timestamp\": \"" + java.time.Instant.now().toString() + "\","
+            + "\"requiresReauth\": true"
+            + "}";
+            
+        response.getWriter().write(jsonResponse);
+        response.getWriter().flush();
+    }
+
+    //Send standardized invalid token response
+    private void sendInvalidTokenResponse(HttpServletResponse response) throws IOException {
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        
+        String jsonResponse = "{"
+            + "\"error\": \"INVALID_TOKEN\","
+            + "\"message\": \"Invalid authentication token. Please log in again.\","
+            + "\"timestamp\": \"" + java.time.Instant.now().toString() + "\","
+            + "\"requiresReauth\": true"
+            + "}";
+            
+        response.getWriter().write(jsonResponse);
+        response.getWriter().flush();
+    }
+
+    
 }

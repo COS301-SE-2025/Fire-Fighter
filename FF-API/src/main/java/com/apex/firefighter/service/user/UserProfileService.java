@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -150,4 +152,135 @@ public class UserProfileService {
     public long getAuthorizedUserCount() {
         return userRepository.findByIsAuthorizedTrue().size();
     }
-} 
+
+    // REMOVED: User self-management Dolibarr UID methods
+    // These methods have been removed for security reasons.
+    // Only administrators can now manage Dolibarr UIDs through admin-only service methods.
+
+    /**
+     * ADMIN-ONLY DOLIBARR UID MANAGEMENT
+     */
+
+    /**
+     * Update user Dolibarr ID as admin with proper authorization checks
+     */
+    public User updateUserDolibarrIdAsAdmin(String adminFirebaseUid, String targetFirebaseUid, String dolibarrId) {
+        System.out.println("🔵 ADMIN UPDATE DOLIBARR ID: Admin " + adminFirebaseUid + " updating Dolibarr ID for " + targetFirebaseUid);
+
+        // First, verify that the requesting user is an admin
+        Optional<User> adminUserOpt = userRepository.findByUserId(adminFirebaseUid);
+        if (adminUserOpt.isEmpty()) {
+            System.err.println("❌ ADMIN UPDATE DOLIBARR ID: Admin user not found - " + adminFirebaseUid);
+            throw new RuntimeException("Admin user not found with Firebase UID: " + adminFirebaseUid);
+        }
+
+        User adminUser = adminUserOpt.get();
+        if (!adminUser.isAdmin()) {
+            System.err.println("❌ ADMIN UPDATE DOLIBARR ID: User is not an admin - " + adminFirebaseUid);
+            throw new SecurityException("Administrator privileges required to manage Dolibarr UIDs");
+        }
+
+        // Now find and update the target user
+        Optional<User> targetUserOpt = userRepository.findByUserId(targetFirebaseUid);
+        if (targetUserOpt.isEmpty()) {
+            System.err.println("❌ ADMIN UPDATE DOLIBARR ID: Target user not found - " + targetFirebaseUid);
+            throw new RuntimeException("Target user not found with Firebase UID: " + targetFirebaseUid);
+        }
+
+        User targetUser = targetUserOpt.get();
+        String oldDolibarrId = targetUser.getDolibarrId();
+        targetUser.setDolibarrId(dolibarrId);
+
+        User updatedUser = userRepository.save(targetUser);
+
+        System.out.println("✅ ADMIN DOLIBARR ID UPDATED:");
+        System.out.println("  Admin: " + adminUser.getUsername() + " (" + adminFirebaseUid + ")");
+        System.out.println("  Target User: " + targetUser.getUsername() + " (" + targetFirebaseUid + ")");
+        System.out.println("  Old Dolibarr ID: " + oldDolibarrId);
+        System.out.println("  New Dolibarr ID: " + dolibarrId);
+
+        return updatedUser;
+    }
+
+    /**
+     * Get user Dolibarr ID as admin with proper authorization checks
+     */
+    public String getUserDolibarrIdAsAdmin(String adminFirebaseUid, String targetFirebaseUid) {
+        System.out.println("🔵 ADMIN GET DOLIBARR ID: Admin " + adminFirebaseUid + " fetching Dolibarr ID for " + targetFirebaseUid);
+
+        // First, verify that the requesting user is an admin
+        Optional<User> adminUserOpt = userRepository.findByUserId(adminFirebaseUid);
+        if (adminUserOpt.isEmpty()) {
+            System.err.println("❌ ADMIN GET DOLIBARR ID: Admin user not found - " + adminFirebaseUid);
+            throw new RuntimeException("Admin user not found with Firebase UID: " + adminFirebaseUid);
+        }
+
+        User adminUser = adminUserOpt.get();
+        if (!adminUser.isAdmin()) {
+            System.err.println("❌ ADMIN GET DOLIBARR ID: User is not an admin - " + adminFirebaseUid);
+            throw new SecurityException("Administrator privileges required to access Dolibarr UIDs");
+        }
+
+        // Now find the target user
+        Optional<User> targetUserOpt = userRepository.findByUserId(targetFirebaseUid);
+        if (targetUserOpt.isEmpty()) {
+            System.err.println("❌ ADMIN GET DOLIBARR ID: Target user not found - " + targetFirebaseUid);
+            throw new RuntimeException("Target user not found with Firebase UID: " + targetFirebaseUid);
+        }
+
+        User targetUser = targetUserOpt.get();
+        String dolibarrId = targetUser.getDolibarrId();
+
+        System.out.println("✅ ADMIN DOLIBARR ID RETRIEVED:");
+        System.out.println("  Admin: " + adminUser.getUsername() + " (" + adminFirebaseUid + ")");
+        System.out.println("  Target User: " + targetUser.getUsername() + " (" + targetFirebaseUid + ")");
+        System.out.println("  Dolibarr ID: " + dolibarrId);
+
+        return dolibarrId;
+    }
+
+    /**
+     * Get all users as admin with statistics
+     * Only administrators can access this endpoint
+     */
+    public Map<String, Object> getAllUsersAsAdmin(String adminFirebaseUid) {
+        System.out.println("🔵 ADMIN GET ALL USERS: Admin " + adminFirebaseUid + " requesting all users");
+
+        // Verify admin user exists and has admin privileges
+        Optional<User> adminUserOpt = userRepository.findByUserId(adminFirebaseUid);
+        if (adminUserOpt.isEmpty()) {
+            System.err.println("❌ ADMIN GET ALL USERS: Admin user not found - " + adminFirebaseUid);
+            throw new RuntimeException("Admin user not found with Firebase UID: " + adminFirebaseUid);
+        }
+
+        User adminUser = adminUserOpt.get();
+        if (!adminUser.isAdmin()) {
+            System.err.println("❌ ADMIN GET ALL USERS: User is not an admin - " + adminFirebaseUid);
+            throw new SecurityException("Administrator privileges required to access all users");
+        }
+
+        // Get all users
+        List<User> allUsers = userRepository.findAll();
+
+        // Calculate statistics
+        long normalUsers = allUsers.stream().filter(user -> !user.isAdmin()).count();
+        long adminUsers = allUsers.stream().filter(User::isAdmin).count();
+
+        // Create response with users and statistics
+        Map<String, Object> response = new HashMap<>();
+        response.put("users", allUsers);
+        response.put("statistics", Map.of(
+            "normalUsers", normalUsers,
+            "adminUsers", adminUsers,
+            "totalUsers", allUsers.size()
+        ));
+
+        System.out.println("✅ ADMIN ALL USERS RETRIEVED:");
+        System.out.println("  Admin: " + adminUser.getUsername() + " (" + adminFirebaseUid + ")");
+        System.out.println("  Total Users: " + allUsers.size());
+        System.out.println("  Normal Users: " + normalUsers);
+        System.out.println("  Admin Users: " + adminUsers);
+
+        return response;
+    }
+}

@@ -3,6 +3,7 @@ package com.apex.firefighter.service;
 import com.apex.firefighter.model.Ticket;
 import com.apex.firefighter.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -20,6 +21,9 @@ public class GmailEmailService {
 
     @Autowired
     private JavaMailSender mailSender;
+
+    @Value("${gmail.service.enabled:true}")
+    private boolean gmailServiceEnabled;
 
     public String exportTicketsToCsv(List<Ticket> tickets) {
         StringBuilder sb = new StringBuilder();
@@ -41,7 +45,37 @@ public class GmailEmailService {
         return value == null ? "" : value.toString().replaceAll(",", " ");
     }
 
+    /**
+     * Check if Gmail service is enabled
+     * @return true if Gmail service is enabled, false otherwise
+     */
+    private boolean isEmailServiceEnabled() {
+        return gmailServiceEnabled;
+    }
+
+    /**
+     * Log when email sending is disabled
+     * @param emailType The type of email that would have been sent
+     * @param recipient The intended recipient
+     */
+    private void logEmailDisabled(String emailType, String recipient) {
+        System.out.println("📧 EMAIL SERVICE DISABLED: Skipping " + emailType + " email to " + recipient);
+    }
+
+    /**
+     * Public method to check if Gmail service is enabled
+     * @return true if Gmail service is enabled, false otherwise
+     */
+    public boolean isGmailServiceEnabled() {
+        return gmailServiceEnabled;
+    }
+
     public void sendTicketsCsv(String recipientEmail, String csvContent, User user) throws MessagingException {
+        if (!isEmailServiceEnabled()) {
+            logEmailDisabled("CSV Export", recipientEmail);
+            return;
+        }
+        
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -230,6 +264,11 @@ public class GmailEmailService {
      * Send ticket creation notification email
      */
     public void sendTicketCreationEmail(String recipientEmail, Ticket ticket, User user) throws MessagingException {
+        if (!isEmailServiceEnabled()) {
+            logEmailDisabled("Ticket Creation", recipientEmail);
+            return;
+        }
+        
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -253,6 +292,11 @@ public class GmailEmailService {
      * Send ticket completion notification email
      */
     public void sendTicketCompletionEmail(String recipientEmail, Ticket ticket, User user) throws MessagingException {
+        if (!isEmailServiceEnabled()) {
+            logEmailDisabled("Ticket Completion", recipientEmail);
+            return;
+        }
+        
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -276,6 +320,11 @@ public class GmailEmailService {
      * Send ticket revocation notification email
      */
     public void sendTicketRevocationEmail(String recipientEmail, Ticket ticket, User user, String reason) throws MessagingException {
+        if (!isEmailServiceEnabled()) {
+            logEmailDisabled("Ticket Revocation", recipientEmail);
+            return;
+        }
+        
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -299,6 +348,11 @@ public class GmailEmailService {
      * Send five-minute warning notification email
      */
     public void sendFiveMinuteWarningEmail(String recipientEmail, Ticket ticket, User user) throws MessagingException {
+        if (!isEmailServiceEnabled()) {
+            logEmailDisabled("Five Minute Warning", recipientEmail);
+            return;
+        }
+        
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -686,6 +740,264 @@ public class GmailEmailService {
         html.append("</p>");
         html.append("</div>");
         return html.toString();
+    }
+
+    /**
+     * Send suspicious group change notification email to all admins
+     */
+    public void sendSuspiciousGroupChangeNotificationEmail(String recipientEmail, User user, String ticketId, String oldGroup, String newGroup, String reason, String suspicionLevel) throws MessagingException {
+        if (!isEmailServiceEnabled()) {
+            logEmailDisabled("Suspicious Group Change", recipientEmail);
+            return;
+        }
+        
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(recipientEmail);
+            helper.setSubject("FireFighter Platform - Group Change Alert (" + suspicionLevel + " Risk data): " + user.getUsername());
+
+            String htmlContent = createSuspiciousGroupChangeEmailContent(user, ticketId, oldGroup, newGroup, reason, suspicionLevel);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+            System.out.println("Group change notification email sent successfully to " + recipientEmail + " for user " + user.getUsername());
+
+        } catch (Exception e) {
+            System.err.println("Group change notification email failed: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * Creates professional HTML email content for suspicious group change notification
+     */
+    private String createSuspiciousGroupChangeEmailContent(User user, String ticketId, String oldGroup, String newGroup, String reason, String suspicionLevel) {
+        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm"));
+
+        StringBuilder html = new StringBuilder();
+        html.append(getEmailHeader("User Group Change Alert"));
+        html.append("<div class=\"email-container\">");
+        html.append("<div class=\"header\">");
+        html.append("<h1>FireFighter Platform</h1>");
+        html.append("<p class=\"subtitle\">Emergency Response Management System</p>");
+        html.append("</div>");
+        html.append("<div class=\"content\">");
+
+        html.append("<div class=\"greeting\">SECURITY ALERT - Administrator Notification,</div>");
+        html.append("<p><strong>ACTIVITY DETECTED:</strong> A user group change has been detected in the Dolibarr ERP system following ticket creation.</p>");
+        html.append("<p><strong>Risk Level: <span style=\"color: " + getRiskLevelColor(suspicionLevel) + "; font-weight: bold;\">" + suspicionLevel + "</span></strong></p>");
+        
+        html.append("<div class=\"info-box\">");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">User: </span>");
+        html.append("<span class=\"info-value\">").append(user.getUsername()).append(" (").append(user.getEmail()).append(")</span>");
+        html.append("</div>");
+        if (user.getDolibarrId() != null) {
+            html.append("<div class=\"info-item\">");
+            html.append("<span class=\"info-label\">Dolibarr ID: </span>");
+            html.append("<span class=\"info-value\">").append(user.getDolibarrId()).append("</span>");
+            html.append("</div>");
+        }
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Department: </span>");
+        html.append("<span class=\"info-value\">").append(user.getDepartment() != null ? user.getDepartment() : "N/A").append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Related Ticket: </span>");
+        html.append("<span class=\"info-value\">").append(ticketId).append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Previous Group: </span>");
+        html.append("<span class=\"info-value\">").append(oldGroup != null ? oldGroup : "None").append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">New Group: </span>");
+        html.append("<span class=\"info-value\">").append(newGroup).append("</span>");
+        html.append("</div>");
+        if (reason != null && !reason.trim().isEmpty()) {
+            html.append("<div class=\"info-item\">");
+            html.append("<span class=\"info-label\">Reason: </span>");
+            html.append("<span class=\"info-value\">").append(reason).append("</span>");
+            html.append("</div>");
+        }
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Change Time: </span>");
+        html.append("<span class=\"info-value\">").append(currentDateTime).append("</span>");
+        html.append("</div>");
+        html.append("</div>");
+        
+        html.append("<div class=\"security-notice\">");
+        html.append("<strong>⚠️ POTENTIAL ACTION REQUIRED:</strong> This group change has been flagged as suspicious due to security sensitivity. ");
+        html.append("Risk Level: <strong>" + suspicionLevel + "</strong>. ");
+        html.append("Please immediately verify that this change is legitimate and authorized. ");
+        html.append("Review the associated ticket, contact the user directly, and investigate any unauthorized access. ");
+        html.append("If this change appears suspicious or unauthorized, take immediate security measures.");
+        html.append("</div>");
+        
+        html.append("</div>");
+        html.append(getEmailFooter(currentDateTime));
+        html.append("</div>");
+        html.append("</body>");
+        html.append("</html>");
+
+        return html.toString();
+    }
+
+    /**
+     * Send anomaly detection notification email to admins
+     */
+    public void sendAnomalyDetectionNotificationEmail(String recipientEmail, User user, Ticket ticket, String anomalyType, String anomalyDetails, String riskLevel) throws MessagingException {
+        if (!isEmailServiceEnabled()) {
+            logEmailDisabled("Anomaly Detection", recipientEmail);
+            return;
+        }
+        
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(recipientEmail);
+            helper.setSubject("FireFighter Platform - ANOMALY DETECTED (" + riskLevel + " Risk): " + getAnomalyTypeDescription(anomalyType));
+
+            String htmlContent = createAnomalyDetectionEmailContent(user, ticket, anomalyType, anomalyDetails, riskLevel);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+            System.out.println("Anomaly detection email sent successfully to " + recipientEmail + " for user " + user.getUsername());
+
+        } catch (Exception e) {
+            System.err.println("Anomaly detection email failed: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * Creates professional HTML email content for anomaly detection notification
+     */
+    private String createAnomalyDetectionEmailContent(User user, Ticket ticket, String anomalyType, String anomalyDetails, String riskLevel) {
+        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm"));
+        String ticketDateTime = ticket.getDateCreated().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm"));
+
+        StringBuilder html = new StringBuilder();
+        html.append(getEmailHeader("Anomaly Detection Alert"));
+        html.append("<div class=\"email-container\">");
+        html.append("<div class=\"header\">");
+        html.append("<h1>FireFighter Platform</h1>");
+        html.append("<p class=\"subtitle\">Emergency Response Management System</p>");
+        html.append("</div>");
+        html.append("<div class=\"content\">");
+
+        html.append("<div class=\"greeting\"> SECURITY ALERT - Anomalous Behavior Detected,</div>");
+        html.append("<p><strong>ANOMALY DETECTED:</strong> Potentially suspicious user behavior has been identified in the emergency response system.</p>");
+        html.append("<p><strong>Anomaly Type: ").append(getAnomalyTypeDescription(anomalyType)).append("</strong></p>");
+        html.append("<p><strong>Risk Level: <span style=\"color: " + getRiskLevelColor(riskLevel) + "; font-weight: bold;\">" + riskLevel + "</span></strong></p>");
+        
+        html.append("<div class=\"info-box\">");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">User: </span>");
+        html.append("<span class=\"info-value\">").append(user.getUsername()).append(" (").append(user.getEmail()).append(")</span>");
+        html.append("</div>");
+        if (user.getDepartment() != null) {
+            html.append("<div class=\"info-item\">");
+            html.append("<span class=\"info-label\">Department: </span>");
+            html.append("<span class=\"info-value\">").append(user.getDepartment()).append("</span>");
+            html.append("</div>");
+        }
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Related Ticket: </span>");
+        html.append("<span class=\"info-value\">").append(ticket.getTicketId()).append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Emergency Type: </span>");
+        html.append("<span class=\"info-value\">").append(ticket.getEmergencyType()).append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Ticket Created: </span>");
+        html.append("<span class=\"info-value\">").append(ticketDateTime).append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Anomaly Details: </span>");
+        html.append("<span class=\"info-value\">").append(anomalyDetails).append("</span>");
+        html.append("</div>");
+        html.append("<div class=\"info-item\">");
+        html.append("<span class=\"info-label\">Detection Time: </span>");
+        html.append("<span class=\"info-value\">").append(currentDateTime).append("</span>");
+        html.append("</div>");
+        html.append("</div>");
+        
+        html.append("<div class=\"security-notice\">");
+        html.append(getSecurityNoticeForAnomalyType(anomalyType, riskLevel));
+        html.append("</div>");
+        
+        html.append("</div>");
+        html.append(getEmailFooter(currentDateTime));
+        html.append("</div>");
+        html.append("</body>");
+        html.append("</html>");
+
+        return html.toString();
+    }
+
+    /**
+     * Get human-readable description for anomaly types
+     */
+    private String getAnomalyTypeDescription(String anomalyType) {
+        if (anomalyType == null) {
+            return "Unknown Anomaly Type";
+        }
+        
+        return switch (anomalyType) {
+            case "FREQUENT_REQUESTS" -> "Excessive Request Frequency";
+            case "OFF_HOURS_ACTIVITY" -> "Off-Hours System Access";
+            default -> "Unknown Anomaly Type";
+        };
+    }
+
+    /**
+     * Get appropriate security notice based on anomaly type and risk level
+     */
+    private String getSecurityNoticeForAnomalyType(String anomalyType, String riskLevel) {
+        String baseNotice = "<strong>⚠️ IMMEDIATE ACTION REQUIRED:</strong> ";
+        
+        if (anomalyType == null) {
+            anomalyType = "UNKNOWN";
+        }
+        
+        String specificNotice = switch (anomalyType) {
+            
+            case "FREQUENT_REQUESTS" -> 
+                "A user has exceeded normal request frequency thresholds, which may indicate automated attacks, " +
+                "system abuse, or compromised credentials being used for malicious purposes. " +
+                "<strong>Review the user's recent activity and consider temporary access restrictions.</strong>";
+            
+            case "OFF_HOURS_ACTIVITY" -> 
+                "System access has been detected outside of normal business hours. While this may be legitimate " +
+                "emergency response activity, it should be verified to ensure authorized use. " +
+                "<strong>Confirm with the user that this access was intentional and authorized.</strong>";
+            
+            default -> 
+                "Anomalous behavior has been detected that deviates from normal usage patterns. " +
+                "<strong>Please investigate this activity immediately to ensure system security.</strong>";
+        };
+
+        String actionGuidance = " Risk Level: <strong>" + riskLevel + "</strong>. " +
+            "Contact the user directly, review system logs, and take appropriate security measures based on your findings.";
+
+        return baseNotice + specificNotice + actionGuidance;
+    }
+
+    /**
+     * Get color code for risk level display
+     */
+    private String getRiskLevelColor(String suspicionLevel) {
+        return switch (suspicionLevel) {
+            case "HIGH" -> "#dc3545"; // Red
+            case "MEDIUM" -> "#fd7e14"; // Orange
+            case "LOW" -> "#ffc107"; // Yellow
+            default -> "#6c757d"; // Gray
+        };
     }
 
 }

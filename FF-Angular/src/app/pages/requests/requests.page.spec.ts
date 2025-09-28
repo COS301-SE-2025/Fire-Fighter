@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RequestsPage } from './requests.page';
-import { testProviders, mockTicketService, mockAuthService } from '../../../test-setup';
+import { testProviders, mockTicketService, mockAuthService, mockLanguageService } from '../../../test-setup';
 import { TicketService } from '../../services/ticket.service';
 import { AuthService } from '../../services/auth.service';
+import { LanguageService } from '../../services/language.service';
 import { ToastController } from '@ionic/angular';
 
 describe('RequestsPage', () => {
@@ -22,6 +23,7 @@ describe('RequestsPage', () => {
         ...testProviders,
         { provide: TicketService, useValue: mockTicketService },
         { provide: AuthService, useValue: mockAuthService },
+        { provide: LanguageService, useValue: mockLanguageService },
         { provide: ToastController, useValue: mockToastController }
       ]
     }).compileComponents();

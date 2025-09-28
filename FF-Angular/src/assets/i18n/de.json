@@ -23,7 +23,7 @@
     "HELP": "Hilfe",
     "SETTINGS": "Einstellungen",
     "ADMIN": "Admin-Konsole",
-    "CHAT": "Gemini",
+    "CHAT": "Ada",
     "LOGIN": "Anmelden",
     "REGISTER": "Registrieren",
     "LOGOUT": "Abmelden"
@@ -42,7 +42,7 @@
     "NAVIGATION": {
       "DASHBOARD": "Dashboard",
       "MY_REQUESTS": "Meine Anfragen",
-      "GEMINI": "Gemini",
+      "GEMINI": "Ada",
       "ADMIN_CONSOLE": "Admin-Konsole",
       "NOTIFICATIONS": "Benachrichtigungen"
     },
@@ -174,8 +174,8 @@
       "NOTIFICATIONS_DESC": "Ausstehende Warnungen anzeigen",
       "AUDIT_LOGS": "Audit-Protokolle",
       "AUDIT_LOGS_DESC": "Aktivitätsprotokolle überprüfen",
-      "GEMINI": "Gemini",
-      "GEMINI_DESC": "KI-Assistenten fragen"
+      "ADA": "Ada",
+      "ADA_DESC": "Tickets abfragen und verwalten"
     },
     "RECENT_ACTIVITY": {
       "TITLE": "Letzte Aktivitäten",
@@ -183,17 +183,21 @@
       "NO_ACTIVITY": "Keine aktuellen Aktivitäten",
       "NO_ACTIVITY_DESC": "Systemereignisse und -aktionen werden hier angezeigt"
     },
-    "MONTHLY_STATS": {
-      "TITLE": "Monatsstatistiken",
-      "SUBTITLE": "Leistungsübersicht",
-      "TOTAL_REQUESTS": "Gesamtanfragen",
-      "APPROVAL_RATE": "Genehmigungsrate",
-      "CRITICAL_ISSUES": "Kritische Probleme",
-      "SUCCESS_RATE": "Erfolgsrate",
-      "VS_LAST_MONTH": "vs. letzter Monat",
-      "APPROVED_REQUESTS": "genehmigte Anfragen",
-      "THIS_MONTH": "diesen Monat",
-      "RESOLVED": "gelöst"
+    "EMERGENCY_STATS": {
+      "TITLE": "Notfall-Reaktionsstatistiken",
+      "SUBTITLE": "Echtzeit-Systemleistung",
+      "MOST_COMMON_TYPE": "Häufigster Notfall",
+      "SYSTEM_HEALTH": "System-Gesundheitswert",
+      "AVG_RESPONSE_TIME": "Durchschn. Dauer",
+      "COMPLETION_RATE": "Abschlussrate",
+      "TYPE": "Typ",
+      "HEALTH": "Gesundheit",
+      "MINUTES": "min",
+      "SUCCESS": "Erfolg",
+      "EMERGENCY_TYPE": "Notfalltyp",
+      "OVERALL_HEALTH": "Gesamtsystemgesundheit",
+      "RESPONSE_TIME": "durchschnittliche angeforderte Dauer",
+      "COMPLETED": "aller Tickets abgeschlossen"
     },
     "ACTIVITY_STATUS": {
       "ACTIVE": "aktiv",
@@ -203,23 +207,219 @@
     }
   },
   "REQUESTS": {
-    "TITLE": "Anfragen",
+    "TITLE": "Notfall-Anfragen",
+    "SUBTITLE": "Verwalten Sie Ihre FireFighter-Notfall-Zugriffsanfragen und -sitzungen",
     "NEW_REQUEST": "Neue Anfrage",
     "MY_REQUESTS": "Meine Anfragen",
     "ALL_REQUESTS": "Alle Anfragen",
+    "STATS": {
+      "TOTAL": "Gesamt",
+      "ACTIVE": "Aktiv",
+      "COMPLETED": "Abgeschlossen",
+      "REJECTED": "Abgelehnt"
+    },
+    "SEARCH": {
+      "PLACEHOLDER": "Nach Ticket-ID oder Grund suchen...",
+      "LABEL": "Anfragen durchsuchen",
+      "NO_RESULTS": "Versuchen Sie, Ihre Suchkriterien anzupassen",
+      "FIRST_REQUEST": "Erstellen Sie Ihre erste Notfall-Zugriffsanfrage, um zu beginnen"
+    },
+    "FILTERS": {
+      "ALL": "Alle",
+      "ACTIVE": "Aktiv",
+      "COMPLETED": "Abgeschlossen",
+      "REJECTED": "Abgelehnt"
+    },
     "STATUS": {
       "PENDING": "Ausstehend",
       "APPROVED": "Genehmigt",
       "REJECTED": "Abgelehnt",
       "IN_PROGRESS": "In Bearbeitung",
-      "COMPLETED": "Abgeschlossen"
+      "COMPLETED": "Abgeschlossen",
+      "ACTIVE": "Aktiv",
+      "CLOSED": "Geschlossen"
+    },
+    "LOADING": "Anfragen werden geladen...",
+    "ERROR": "Fehler!",
+    "NO_REQUESTS": {
+      "TITLE": "Keine Anfragen gefunden",
+      "CREATE_BUTTON": "Neue Anfrage erstellen"
+    },
+    "CARD": {
+      "REQUESTED": "Angefordert",
+      "REASON": "Grund",
+      "REQUEST_DATE": "Anfragedatum",
+      "REVOKE_ACCESS": "Zugriff widerrufen",
+      "VIEW_DETAILS": "Details anzeigen"
+    },
+    "MODAL": {
+      "TITLE": "Notfall-Anfrage erstellen",
+      "SUBTITLE": "Eine neue FireFighter-Notfall-Zugriffsanfrage einreichen",
+      "CLOSE": "Modal schließen",
+      "REQUEST_DATE": {
+        "LABEL": "Anfragedatum",
+        "REQUIRED": "*"
+      },
+      "EMERGENCY_TYPE": {
+        "LABEL": "Notfall-Typ",
+        "PLACEHOLDER": "Notfall-Typ auswählen",
+        "HR": "HR / Personalwesen-Notfall",
+        "FINANCIAL": "Finanz- / Zahlungsnotfall",
+        "MANAGEMENT": "Management- / Admin-Notfall",
+        "LOGISTICS": "Logistik- / Liefernotfall"
+      },
+      "REASON": {
+        "LABEL": "Grund für Notfall-Zugriff",
+        "PLACEHOLDER": "Bitte geben Sie eine detaillierte Erklärung der Notfallsituation und warum sofortiger Zugriff erforderlich ist. Geben Sie spezifische Systeme, Benutzer oder betroffene Daten an...",
+        "HELP": "Seien Sie spezifisch über die Art des Notfalls und die Systeme, die Zugriff benötigen.",
+        "REQUIRED": "*"
+      },
+      "CONTACT": {
+        "LABEL": "Notfall-Kontakt",
+        "PLACEHOLDER": "Telefonnummer oder E-Mail für dringenden Kontakt",
+        "AUTO_FILLED": "(Automatisch aus Profil ausgefüllt)",
+        "USE_SAVED": "Gespeicherte verwenden",
+        "HELP_NO_SAVED": "Sie können eine Kontaktnummer in Ihren Kontoeinstellungen hinzufügen, um dieses Feld automatisch auszufüllen.",
+        "HELP_AUTO_FILLED": "Kontaktnummer automatisch aus Ihrem Profil ausgefüllt. Sie können sie bei Bedarf bearbeiten.",
+        "HELP_SAVED_AVAILABLE": "Ihre gespeicherte Kontaktnummer ({{contactNumber}}) ist verfügbar. Klicken Sie auf \"Gespeicherte verwenden\", um sie auszufüllen."
+      },
+      "DURATION": {
+        "LABEL": "Zugriffsdauer (Minuten)",
+        "REQUIRED": "*",
+        "HELP": "Verwenden Sie die +/- Tasten, um die Dauer anzupassen. Bereich: 15-120 Minuten in 15-Minuten-Schritten.",
+        "MIN_SUFFIX": "Min",
+        "ERROR_MIN": "Die Dauer muss mindestens 15 Minuten betragen",
+        "ERROR_MAX": "Die Dauer darf 2 Stunden nicht überschreiten"
+      },
+      "WARNING": {
+        "TITLE": "Notfall-Zugriff Hinweis:",
+        "DURATION": "Die Notfall-Zugriffsdauer kann von 15 Minuten bis 2 Stunden gewählt werden",
+        "LOGGED": "Alle Aktivitäten werden protokolliert und auditiert",
+        "MISUSE": "Missbrauch kann zu disziplinarischen Maßnahmen führen"
+      },
+      "BUTTONS": {
+        "CANCEL": "Abbrechen",
+        "SUBMIT": "Notfall-Anfrage einreichen",
+        "SUBMITTING": "Wird eingereicht..."
+      }
+    },
+    "FOOTER": {
+      "NEW_EMERGENCY_REQUEST": "Neue Notfall-Anfrage"
+    },
+    "TOAST": {
+      "ACCESS_REVOKED": "Zugriff für Ticket {{ticketId}} wurde widerrufen"
     }
   },
   "NOTIFICATIONS": {
     "TITLE": "Benachrichtigungen",
-    "MARK_ALL_READ": "Alle als gelesen markieren",
-    "NO_NOTIFICATIONS": "Keine Benachrichtigungen",
-    "CLEAR_ALL": "Alle löschen"
+    "SUBTITLE": "Bleiben Sie über die Aktivitäten des FireFighter-Notfallsystems informiert",
+    "LOADING": "Laden...",
+    "PULL_TO_REFRESH": "Laden...",
+    "STATS": {
+      "TOTAL": "Gesamt",
+      "UNREAD": "Ungelesen",
+      "EMERGENCY": "Notfall"
+    },
+    "ACTIONS": {
+      "MARK_ALL_READ": "Als gelesen markieren",
+      "CLEAR_READ": "Gelesene löschen"
+    },
+    "LIST": {
+      "HEADER": "Letzte Aktivitäten",
+      "COUNT_SINGLE": "Benachrichtigung",
+      "COUNT_PLURAL": "Benachrichtigungen"
+    },
+    "EMPTY_STATE": {
+      "TITLE": "Keine Benachrichtigungen",
+      "MESSAGE": "Sie sind auf dem neuesten Stand! Neue Benachrichtigungen werden hier angezeigt."
+    },
+    "ITEM": {
+      "VIEW_DETAILS": "Details anzeigen →",
+      "MARK_AS_READ": "Als gelesen markieren",
+      "DELETE_TOOLTIP": "Benachrichtigung löschen"
+    },
+    "TIME_AGO": {
+      "JUST_NOW": "gerade eben",
+      "MINUTE_SINGULAR": "vor einer Minute",
+      "MINUTE_PLURAL": "vor {{count}} Minuten",
+      "HOUR_SINGULAR": "vor einer Stunde",
+      "HOUR_PLURAL": "vor {{count}} Stunden",
+      "DAY_SINGULAR": "vor einem Tag",
+      "DAY_PLURAL": "vor {{count}} Tagen"
+    },
+    "DELETE_MODAL": {
+      "TITLE_SINGLE": "Benachrichtigung löschen",
+      "TITLE_MULTIPLE": "Gelesene Benachrichtigungen löschen",
+      "MESSAGE_SINGLE": "Sind Sie sicher, dass Sie diese Benachrichtigung löschen möchten?",
+      "MESSAGE_MULTIPLE": "Sind Sie sicher, dass Sie alle gelesenen Benachrichtigungen löschen möchten?",
+      "WARNING": "Diese Aktion kann nicht rückgängig gemacht werden.",
+      "CANCEL": "Abbrechen",
+      "CONFIRM": "Bestätigen",
+      "DELETING": "Wird gelöscht..."
+    }
+  },
+  "USER_MANAGEMENT": {
+    "TITLE": "Benutzerverwaltung",
+    "SUBTITLE": "Benutzerkonten, Rollen und Berechtigungen verwalten",
+    "LOADING": "Laden...",
+    "STATS": {
+      "NORMAL_USERS": "Normale Benutzer",
+      "NORMAL_USERS_DESC": "Standard-Benutzerkonten",
+      "ADMIN_USERS": "Admin-Benutzer",
+      "ADMIN_USERS_DESC": "Mit Admin-Berechtigungen"
+    },
+    "TABLE": {
+      "TITLE": "Alle Benutzer",
+      "SUBTITLE": "Benutzerkonten und Berechtigungen verwalten",
+      "SEARCH_PLACEHOLDER": "Benutzer suchen...",
+      "FILTER_ALL": "Alle Benutzer",
+      "FILTER_ADMIN": "Admins",
+      "HEADERS": {
+        "USER": "Benutzer",
+        "ROLE": "Rolle",
+        "DOLIBARR_ID": "Dolibarr-ID",
+        "LAST_LOGIN": "Letzte Anmeldung",
+        "ACTIONS": "Aktionen"
+      }
+    },
+    "ROLES": {
+      "ADMIN": "Admin",
+      "USER": "Benutzer"
+    },
+    "DOLIBARR": {
+      "NOT_SET": "Nicht gesetzt",
+      "LABEL": "Dolibarr-ID"
+    },
+    "ACTIONS": {
+      "ACTIONS": "Aktionen",
+      "VIEW_ACTIONS": "Aktionen anzeigen",
+      "MANAGE_USER": "Benutzer verwalten",
+      "USER_MANAGEMENT_ACTIONS": "Benutzerverwaltungsaktionen",
+      "MANAGE_DOLIBARR_ID": "Dolibarr-ID verwalten",
+      "UPDATE_INTEGRATION_SETTINGS": "Integrationseinstellungen aktualisieren",
+      "MANAGE_ACTIONS_FOR": "Aktionen verwalten für"
+    },
+    "MOBILE": {
+      "USER_COUNT": "Benutzer"
+    },
+    "EMPTY_STATE": {
+      "TITLE": "Keine Benutzer gefunden",
+      "MESSAGE": "Versuchen Sie, Ihre Such- oder Filterkriterien anzupassen."
+    },
+    "MODAL": {
+      "EDIT_DOLIBARR_ID": "Dolibarr-ID bearbeiten",
+      "SET_DOLIBARR_ID": "Dolibarr-ID festlegen",
+      "MANAGING_FOR": "Dolibarr-ID verwalten für",
+      "CLOSE_MODAL": "Modal schließen",
+      "DOLIBARR_USER_ID": "Dolibarr-Benutzer-ID",
+      "PLACEHOLDER": "Dolibarr-Benutzer-ID eingeben (z.B. DOL123456)",
+      "HELP_TEXT": "Geben Sie die eindeutige Dolibarr-Benutzerkennung ein (alphanumerische Zeichen, Unterstriche und Bindestriche erlaubt)",
+      "ERROR_TEXT": "Bitte geben Sie eine gültige Dolibarr-ID ein (nur alphanumerische Zeichen, Unterstriche und Bindestriche)",
+      "CANCEL": "Abbrechen",
+      "UPDATE": "Aktualisieren",
+      "SET": "Festlegen",
+      "SAVING": "Wird gespeichert..."
+    }
   },
   "ACCOUNT": {
     "TITLE": "Konto",
@@ -253,5 +453,101 @@
     "NOT_FOUND": "Ressource nicht gefunden",
     "SERVER_ERROR": "Interner Serverfehler",
     "UNKNOWN_ERROR": "Ein unbekannter Fehler ist aufgetreten"
+  },
+  "ACCOUNT": {
+    "TITLE": "Kontoeinstellungen",
+    "SUBTITLE": "Verwalten Sie Ihr FireFighter-Notfallzugriffsprofil und Ihre Einstellungen",
+    "LOADING": "Wird geladen...",
+    "PROFILE": {
+      "VERIFIED": "Verifiziert",
+      "MEMBER_SINCE": "Mitglied seit",
+      "LAST_ACTIVE": "Zuletzt aktiv",
+      "JUST_NOW": "Gerade eben",
+      "HOURS_AGO": "Stunde her",
+      "HOURS_AGO_PLURAL": "Stunden her",
+      "DAYS_AGO": "Tag her",
+      "DAYS_AGO_PLURAL": "Tage her",
+      "UNKNOWN": "Unbekannt",
+      "FIREFIGHTER_USER": "FireFighter-Benutzer"
+    },
+    "ROLES": {
+      "ADMINISTRATOR": "Administrator",
+      "USER": "Benutzer"
+    },
+    "CONTACT": {
+      "NO_CONTACT_NUMBER": "Keine Kontaktnummer hinzugefügt",
+      "EDIT": "Bearbeiten",
+      "ADD": "Hinzufügen"
+    },
+    "SECURITY": {
+      "TITLE": "Sicherheitsinformationen",
+      "EMAIL_VERIFICATION": {
+        "TITLE": "E-Mail-Verifizierung",
+        "DESCRIPTION": "Ihre E-Mail-Adresse ist verifiziert",
+        "STATUS": "Verifiziert"
+      },
+      "ACCOUNT_SECURITY": {
+        "TITLE": "Kontosicherheit",
+        "DESCRIPTION": "Starker Passwortschutz",
+        "STATUS": "Sicher"
+      },
+      "EMERGENCY_ACCESS": {
+        "TITLE": "Notfallzugriff",
+        "DESCRIPTION": "FireFighter-Berechtigungen aktiviert",
+        "STATUS": "Aktiv"
+      }
+    },
+    "QUICK_ACTIONS": {
+      "TITLE": "Schnellaktionen",
+      "DASHBOARD": {
+        "TITLE": "Zum Dashboard",
+        "DESCRIPTION": "Notfallanfragen und Systemstatus anzeigen"
+      },
+      "REQUESTS": {
+        "TITLE": "Notfall-Anfragen",
+        "DESCRIPTION": "Zugangsanfragen einreichen oder verwalten"
+      },
+      "NOTIFICATIONS": {
+        "TITLE": "Benachrichtigungen",
+        "DESCRIPTION": "Warnungen und Systemnachrichten anzeigen"
+      }
+    },
+    "MANAGEMENT": {
+      "TITLE": "Kontoverwaltung",
+      "SIGN_OUT": {
+        "TITLE": "Abmelden",
+        "DESCRIPTION": "Sicher von Ihrem FireFighter-Konto abmelden",
+        "BUTTON": "Abmelden"
+      }
+    },
+    "CONTACT_MODAL": {
+      "EDIT_TITLE": "Kontaktnummer bearbeiten",
+      "ADD_TITLE": "Kontaktnummer hinzufügen",
+      "DESCRIPTION": "Diese wird für Notfall-Ticket-Benachrichtigungen verwendet",
+      "CLOSE_MODAL": "Modal schließen",
+      "LABEL": "Kontaktnummer",
+      "PLACEHOLDER": "10-stellige Telefonnummer eingeben (z.B. 0123456789)",
+      "HELP_TEXT": "Geben Sie eine 10-stellige Telefonnummer ein (nur Zahlen, keine Leerzeichen oder Sonderzeichen)",
+      "ERROR_TEXT": "Bitte geben Sie genau 10 Ziffern ein (nur 0-9)",
+      "INFO": {
+        "TITLE": "Verwendung der Kontaktnummer:",
+        "ITEM_1": "Wird beim Erstellen von Notfall-Tickets automatisch ausgefüllt",
+        "ITEM_2": "Wird für dringende Benachrichtigungen und Kontaktzwecke verwendet",
+        "ITEM_3": "Muss genau 10 Ziffern haben (lokales Format)",
+        "ITEM_4": "Sie können dies jederzeit in Ihren Kontoeinstellungen aktualisieren"
+      },
+      "CANCEL": "Abbrechen",
+      "UPDATE": "Aktualisieren",
+      "ADD": "Hinzufügen",
+      "CONTACT_NUMBER": "Kontaktnummer",
+      "SAVING": "Wird gespeichert..."
+    },
+    "TOAST": {
+      "USER_NOT_FOUND": "Benutzer nicht gefunden. Bitte melden Sie sich erneut an.",
+      "INVALID_PHONE": "Bitte geben Sie eine gültige 10-stellige Telefonnummer ein.",
+      "UPDATE_SUCCESS": "Kontaktnummer erfolgreich aktualisiert!",
+      "UPDATE_FAILED": "Kontaktnummer konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.",
+      "SERVICE_UNAVAILABLE": "Service ist vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut."
+    }
   }
 }

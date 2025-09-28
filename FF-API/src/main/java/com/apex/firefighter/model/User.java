@@ -40,6 +40,9 @@ public class User {
     @Column(name = "contact_number", nullable = true)
     private String contactNumber;
 
+    @Column(name = "dolibarr_id", nullable = true)
+    private String dolibarrId;
+
     // Simple role relationship - commented out complex role system for now
     // @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     // private Set<UserRole> userRoles = new HashSet<>();
@@ -141,6 +144,14 @@ public class User {
         this.contactNumber = contactNumber;
     }
 
+    public String getDolibarrId() {
+        return dolibarrId;
+    }
+
+    public void setDolibarrId(String dolibarrId) {
+        this.dolibarrId = dolibarrId;
+    }
+
     // Complex role methods commented out - using simple role column instead
     /*
     public Set<UserRole> getUserRoles() {
@@ -199,6 +210,7 @@ public class User {
                 ", lastLogin=" + lastLogin +
                 ", role='" + role + '\'' +
                 ", contactNumber='" + contactNumber + '\'' +
+                ", dolibarrId='" + dolibarrId + '\'' +
                 '}';
     }
 }

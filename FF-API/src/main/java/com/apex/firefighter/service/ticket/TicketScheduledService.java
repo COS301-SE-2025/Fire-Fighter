@@ -1,8 +1,11 @@
 package com.apex.firefighter.service.ticket;
 
 import com.apex.firefighter.model.Ticket;
+import com.apex.firefighter.model.User;
 import com.apex.firefighter.repository.TicketRepository;
+import com.apex.firefighter.repository.UserRepository;
 import com.apex.firefighter.service.NotificationService;
+import com.apex.firefighter.service.DolibarrUserGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -11,17 +14,22 @@ import jakarta.annotation.PostConstruct;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TicketScheduledService {
 
     private final TicketRepository ticketRepository;
     private final NotificationService notificationService;
+    private final DolibarrUserGroupService dolibarrUserGroupService;
+    private final UserRepository userRepository;
 
     @Autowired
-    public TicketScheduledService(TicketRepository ticketRepository, NotificationService notificationService) {
+    public TicketScheduledService(TicketRepository ticketRepository, NotificationService notificationService, DolibarrUserGroupService dolibarrUserGroupService, UserRepository userRepository) {
         this.ticketRepository = ticketRepository;
         this.notificationService = notificationService;
+        this.dolibarrUserGroupService = dolibarrUserGroupService;
+        this.userRepository = userRepository;
     }
 
     @PostConstruct
@@ -92,7 +100,7 @@ public class TicketScheduledService {
 
         } catch (Exception e) {
             System.err.println("Error sending five-minute warnings: " + e.getMessage());
-            throw e; // Re-throw to trigger transaction rollback
+            // Log error but don't re-throw to allow graceful handling
         }
     }
 
@@ -128,6 +136,23 @@ public class TicketScheduledService {
                         System.err.println("⚠️ NOTIFICATION FAILED: Could not create ticket completion notification: " + e.getMessage());
                     }
 
+                    // Remove user from firefighter group when ticket is automatically closed
+                    try {
+                        Optional<User> user = userRepository.findById(ticket.getUserId());
+                        if (user.isPresent()) {
+                            // Use emergency type for group allocation if available, otherwise fall back to description
+                            String allocationText = (ticket.getEmergencyType() != null && !ticket.getEmergencyType().isEmpty())
+                                ? ticket.getEmergencyType() + " " + ticket.getDescription()
+                                : ticket.getDescription();
+                            dolibarrUserGroupService.removeUserFromGroup(user.get().getDolibarrId(), allocationText);
+                            System.out.println("✅ AUTO-CLOSE: Successfully removed user " + ticket.getUserId() + " from firefighter group for ticket: " + ticket.getTicketId());
+                        } else {
+                            System.err.println("⚠️ AUTO-CLOSE: User not found with ID: " + ticket.getUserId());
+                        }
+                    } catch (Exception e) {
+                        System.err.println("⚠️ AUTO-CLOSE: Failed to remove user from firefighter group for ticket: " + ticket.getTicketId() + " - " + e.getMessage());
+                    }
+
                     closedCount++;
                     System.out.println("Closed expired ticket: " + ticket.getTicketId());
                 }
@@ -139,7 +164,7 @@ public class TicketScheduledService {
             
         } catch (Exception e) {
             System.err.println("Error closing expired tickets: " + e.getMessage());
-            throw e; // Re-throw to trigger transaction rollback
+            // Log error but don't re-throw to allow graceful handling
         }
     }
 } 

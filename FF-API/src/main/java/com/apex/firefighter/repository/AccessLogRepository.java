@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -36,4 +37,9 @@ public interface AccessLogRepository extends JpaRepository<AccessLog, Long> {
     
     // Find logs by session ID
     List<AccessLog> findBySessionIdOrderByTimestampDesc(Long sessionId);
+    
+    
+    // Find most recent login for a user
+    @Query("SELECT al FROM AccessLog al WHERE al.user.userId = :userId AND al.action = 'LOGIN' ORDER BY al.timestamp DESC")
+    List<AccessLog> findMostRecentLoginByUser(@Param("userId") String userId);
 }

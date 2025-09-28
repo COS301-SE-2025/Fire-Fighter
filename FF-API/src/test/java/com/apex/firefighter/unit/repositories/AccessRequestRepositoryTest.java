@@ -1,8 +1,10 @@
-package com.apex.firefighter.repository;
+package com.apex.firefighter.unit.repositories;
 
 import com.apex.firefighter.model.AccessRequest;
 import com.apex.firefighter.model.User;
 import com.apex.firefighter.model.AccessRequest.RequestStatus;
+import com.apex.firefighter.repository.AccessRequestRepository;
+import com.apex.firefighter.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;

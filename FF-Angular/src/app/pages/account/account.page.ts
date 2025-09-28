@@ -10,13 +10,15 @@ import { Observable, Subscription } from 'rxjs';
 import { User } from 'firebase/auth';
 import { ToastController } from '@ionic/angular';
 import { trigger, state, style, transition, animate } from '@angular/animations';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../services/language.service';
 
 @Component({
   selector: 'app-account',
   templateUrl: './account.page.html',
   styleUrls: ['./account.page.scss'],
   standalone: true,
-  imports: [IonContent, CommonModule, FormsModule, RouterModule, NavbarComponent],
+  imports: [IonContent, CommonModule, FormsModule, RouterModule, NavbarComponent, TranslateModule],
   animations: [
     trigger('modalBackdrop', [
       state('hidden', style({
@@ -62,10 +64,13 @@ export class AccountPage implements OnInit, OnDestroy {
   isUpdatingContact = false;
   contactModalAnimationState = 'hidden';
 
+
+
   constructor(
     private authService: AuthService,
     private router: Router,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private languageService: LanguageService
   ) {
     this.user$ = this.authService.user$;
     this.isAdmin$ = this.authService.isAdmin$;
@@ -94,20 +99,30 @@ export class AccountPage implements OnInit, OnDestroy {
     return this.authService.isCurrentUserAdmin() ? 'Administrator' : 'User';
   }
 
+  // Get translated user role
+  getTranslatedRole(): string {
+    const isAdmin = this.authService.isCurrentUserAdmin();
+    return isAdmin ?
+      this.languageService.getInstantTranslation('ACCOUNT.ROLES.ADMINISTRATOR') :
+      this.languageService.getInstantTranslation('ACCOUNT.ROLES.USER');
+  }
+
   // Get user display name safely
   getUserDisplayName(user: User | null): string {
-    if (!user) return 'FireFighter User';
-    
+    const fallbackName = this.languageService.getInstantTranslation('ACCOUNT.PROFILE.FIREFIGHTER_USER');
+
+    if (!user) return fallbackName;
+
     if (user.displayName) {
       return user.displayName;
     }
-    
+
     if (user.email) {
       const emailParts = user.email.split('@');
-      return emailParts.length > 0 ? emailParts[0] : 'FireFighter User';
+      return emailParts.length > 0 ? emailParts[0] : fallbackName;
     }
-    
-    return 'FireFighter User';
+
+    return fallbackName;
   }
 
   // Get user initials for avatar fallback
@@ -133,31 +148,38 @@ export class AccountPage implements OnInit, OnDestroy {
 
   // Format join date
   getJoinDate(user: User | null): string {
-    if (!user?.metadata?.creationTime) return 'Unknown';
-    
+    if (!user?.metadata?.creationTime) {
+      return this.languageService.getInstantTranslation('ACCOUNT.PROFILE.UNKNOWN');
+    }
+
     const date = new Date(user.metadata.creationTime);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    const locale = this.languageService.getCurrentLanguage() === 'de' ? 'de-DE' : 'en-US';
+    return date.toLocaleDateString(locale, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
   }
 
   // Format last sign in
   getLastSignIn(user: User | null): string {
-    if (!user?.metadata?.lastSignInTime) return 'Unknown';
-    
+    if (!user?.metadata?.lastSignInTime) {
+      return this.languageService.getInstantTranslation('ACCOUNT.PROFILE.UNKNOWN');
+    }
+
     const date = new Date(user.metadata.lastSignInTime);
     const now = new Date();
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
+
     if (diffInHours < 1) {
-      return 'Just now';
+      return this.languageService.getInstantTranslation('ACCOUNT.PROFILE.JUST_NOW');
     } else if (diffInHours < 24) {
-      return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+      const hoursKey = diffInHours === 1 ? 'ACCOUNT.PROFILE.HOURS_AGO' : 'ACCOUNT.PROFILE.HOURS_AGO_PLURAL';
+      return `${diffInHours} ${this.languageService.getInstantTranslation(hoursKey)}`;
     } else {
       const diffInDays = Math.floor(diffInHours / 24);
-      return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+      const daysKey = diffInDays === 1 ? 'ACCOUNT.PROFILE.DAYS_AGO' : 'ACCOUNT.PROFILE.DAYS_AGO_PLURAL';
+      return `${diffInDays} ${this.languageService.getInstantTranslation(daysKey)}`;
     }
   }
 
@@ -228,13 +250,15 @@ export class AccountPage implements OnInit, OnDestroy {
 
   async saveContactNumber() {
     if (!this.userProfile?.userId) {
-      await this.presentToast('User not found. Please try logging in again.', 'danger');
+      const message = this.languageService.getInstantTranslation('ACCOUNT.TOAST.USER_NOT_FOUND');
+      await this.presentToast(message, 'danger');
       return;
     }
 
     // Validate contact number
     if (!this.isValidContactNumber()) {
-      await this.presentToast('Please enter a valid 10-digit phone number.', 'warning');
+      const message = this.languageService.getInstantTranslation('ACCOUNT.TOAST.INVALID_PHONE');
+      await this.presentToast(message, 'warning');
       return;
     }
 
@@ -258,14 +282,15 @@ export class AccountPage implements OnInit, OnDestroy {
           this.editingContactNumber = '';
         }, 150);
 
-        await this.presentToast('Contact number updated successfully!', 'success');
+        const successMessage = this.languageService.getInstantTranslation('ACCOUNT.TOAST.UPDATE_SUCCESS');
+        await this.presentToast(successMessage, 'success');
       }
     } catch (error: any) {
       console.error('Failed to update contact number:', error);
 
-      let errorMessage = 'Failed to update contact number. Please try again.';
+      let errorMessage = this.languageService.getInstantTranslation('ACCOUNT.TOAST.UPDATE_FAILED');
       if (error.message === 'Service temporarily unavailable') {
-        errorMessage = 'Service is temporarily unavailable. Please try again later.';
+        errorMessage = this.languageService.getInstantTranslation('ACCOUNT.TOAST.SERVICE_UNAVAILABLE');
       }
 
       await this.presentToast(errorMessage, 'danger');
@@ -283,4 +308,6 @@ export class AccountPage implements OnInit, OnDestroy {
     });
     await toast.present();
   }
+
+
 }

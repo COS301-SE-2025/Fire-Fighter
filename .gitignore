@@ -234,6 +234,33 @@ id_ed25519*
 *.old
 
 # ===================================
+# JMETER LOAD TESTING
+# ===================================
+
+# JMeter installation directory (large binary files)
+jmeter-testing/apache-jmeter-*/
+
+# JMeter test result files (can be large and regenerated)
+jmeter-testing/ff-api-tests/reports/
+jmeter-testing/ff-api-tests/reports/*.jtl
+jmeter-testing/ff-api-tests/reports/*.html
+jmeter-testing/ff-api-tests/reports/**/
+
+# JMeter log files
+jmeter-testing/ff-api-tests/logs/
+jmeter-testing/ff-api-tests/*.log
+
+# JMeter temporary files
+jmeter-testing/ff-api-tests/tmp/
+jmeter-testing/ff-api-tests/temp/
+
+# Keep test plans, scripts, and documentation
+!jmeter-testing/ff-api-tests/test-plans/
+!jmeter-testing/ff-api-tests/scripts/
+!jmeter-testing/ff-api-tests/test-data/
+!jmeter-testing/ff-api-tests/*.md
+
+# ===================================
 # CUSTOM PROJECT IGNORES
 # ===================================
 

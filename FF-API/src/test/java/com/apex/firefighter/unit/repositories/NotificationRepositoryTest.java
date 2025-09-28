@@ -1,6 +1,7 @@
-package com.apex.firefighter.repository;
+package com.apex.firefighter.unit.repositories;
 
 import com.apex.firefighter.model.Notification;
+import com.apex.firefighter.repository.NotificationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

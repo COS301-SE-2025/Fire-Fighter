@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,4 +33,5 @@ public interface AccessSessionRepository extends JpaRepository<AccessSession, Lo
     
     // Find session by session token
     Optional<AccessSession> findBySessionToken(String sessionToken);
+    
 }

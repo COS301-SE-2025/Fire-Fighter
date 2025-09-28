@@ -8,7 +8,7 @@
           <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
           <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
         </svg>
-        <span class="sr-only">Loading...</span>
+        <span class="sr-only">{{ 'COMMON.LOADING' | translate }}</span>
       </div>
     </ion-refresher-content>
   </ion-refresher>
@@ -25,10 +25,10 @@
         </div>
         <div class="flex-1 min-w-0">
           <h1 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
-            Emergency Requests
+            {{ 'REQUESTS.TITLE' | translate }}
           </h1>
           <p class="text-sm text-gray-500 dark:text-gray-400">
-            Manage your FireFighter emergency access requests and sessions
+            {{ 'REQUESTS.SUBTITLE' | translate }}
           </p>
         </div>
       </div>
@@ -46,7 +46,7 @@
             </svg>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total</p>
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ 'REQUESTS.STATS.TOTAL' | translate }}</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ tickets.length }}</p>
           </div>
         </div>
@@ -61,7 +61,7 @@
             </svg>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active</p>
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ 'REQUESTS.STATS.ACTIVE' | translate }}</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ activeTicketsCount }}</p>
           </div>
         </div>
@@ -76,7 +76,7 @@
             </svg>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Completed</p>
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ 'REQUESTS.STATS.COMPLETED' | translate }}</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ completedTicketsCount }}</p>
           </div>
         </div>
@@ -91,7 +91,7 @@
             </svg>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Rejected</p>
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ 'REQUESTS.STATS.REJECTED' | translate }}</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ rejectedTicketsCount }}</p>
           </div>
         </div>
@@ -105,7 +105,7 @@
           
           <!-- Search Bar -->
           <div class="flex-1 lg:max-w-md">
-            <label for="search" class="sr-only">Search requests</label>
+            <label for="search" class="sr-only">{{ 'REQUESTS.SEARCH.LABEL' | translate }}</label>
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -116,7 +116,7 @@
                 id="search"
                 type="text"
                 [(ngModel)]="searchQuery"
-                placeholder="Search by ticket ID or reason..."
+                [placeholder]="'REQUESTS.SEARCH.PLACEHOLDER' | translate"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-red-500 dark:focus:border-red-500"
               />
             </div>
@@ -132,7 +132,7 @@
               }"
               (click)="filter = 'all'"
             >
-              All
+              {{ 'REQUESTS.FILTERS.ALL' | translate }}
             </button>
             <button
               class="px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200"
@@ -142,7 +142,7 @@
               }"
               (click)="filter = 'active'"
             >
-              Active
+              {{ 'REQUESTS.FILTERS.ACTIVE' | translate }}
             </button>
             <button
               class="px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200"
@@ -152,7 +152,7 @@
               }"
               (click)="filter = 'completed'"
             >
-              Completed
+              {{ 'REQUESTS.FILTERS.COMPLETED' | translate }}
             </button>
             <button
               class="px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200"
@@ -162,7 +162,7 @@
               }"
               (click)="filter = 'rejected'"
             >
-              Rejected
+              {{ 'REQUESTS.FILTERS.REJECTED' | translate }}
             </button>
           </div>
         </div>
@@ -171,7 +171,7 @@
       <!-- Loading State -->
       <div *ngIf="isLoading" class="flex justify-center items-center py-12">
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-        <span class="ml-2 text-sm text-gray-500 dark:text-gray-400">Loading requests...</span>
+        <span class="ml-2 text-sm text-gray-500 dark:text-gray-400">{{ 'REQUESTS.LOADING' | translate }}</span>
       </div>
 
       <!-- Error Message -->
@@ -181,7 +181,7 @@
             <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
           </svg>
           <div>
-            <span class="font-medium">Error!</span> {{ error }}
+            <span class="font-medium">{{ 'REQUESTS.ERROR' | translate }}</span> {{ error }}
           </div>
         </div>
       </div>
@@ -191,9 +191,9 @@
         <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
         </svg>
-        <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">No requests found</h3>
+        <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">{{ 'REQUESTS.NO_REQUESTS.TITLE' | translate }}</h3>
         <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-          {{ searchQuery ? 'Try adjusting your search criteria' : 'Create your first emergency access request to get started' }}
+          {{ searchQuery ? ('REQUESTS.SEARCH.NO_RESULTS' | translate) : ('REQUESTS.SEARCH.FIRST_REQUEST' | translate) }}
         </p>
         <div class="mt-6" *ngIf="!searchQuery">
           <button
@@ -203,7 +203,7 @@
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
             </svg>
-            Create New Request
+            {{ 'REQUESTS.NO_REQUESTS.CREATE_BUTTON' | translate }}
           </button>
         </div>
       </div>
@@ -257,42 +257,26 @@
                  }"
                  class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
                >
-                 {{ ticket.status }}
+                 {{ getTranslatedStatus(ticket.status) }}
                </span>
              </div>
              
              <!-- Time -->
              <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
-               Requested {{ calculateTimeAgo(ticket.dateCreated) }}
+               {{ 'REQUESTS.CARD.REQUESTED' | translate }} {{ calculateTimeAgo(ticket.dateCreated) }}
              </p>
-             
+
              <!-- Details -->
              <div class="space-y-2 mb-4">
                <p class="text-sm text-gray-600 dark:text-gray-300">
-                 <span class="font-medium">Reason:</span> {{ ticket.reason }}
+                 <span class="font-medium">{{ 'REQUESTS.CARD.REASON' | translate }}:</span> {{ ticket.reason }}
                </p>
                <p class="text-sm text-gray-500 dark:text-gray-400">
-                 <span class="font-medium">Request Date:</span> {{ ticket.requestDate | date }}
+                 <span class="font-medium">{{ 'REQUESTS.CARD.REQUEST_DATE' | translate }}:</span> {{ ticket.requestDate | date }}
                </p>
              </div>
              
-             <!-- Actions - Full width buttons on mobile -->
-             <div class="flex flex-col space-y-2">
-               <button
-                 *ngIf="ticket.status === 'Active'"
-                 class="w-full inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 focus:ring-4 focus:ring-red-300 dark:bg-red-900/50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/70 transition-colors duration-200"
-               >
-                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                 </svg>
-                 Revoke Access
-               </button>
-               <button
-                 class="w-full inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors duration-200"
-               >
-                 View Details
-               </button>
-             </div>
+
            </div>
 
            <!-- Desktop Layout: Side by side -->
@@ -343,11 +327,11 @@
                          }"
                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap"
                        >
-                         {{ ticket.status }}
+                         {{ getTranslatedStatus(ticket.status) }}
                        </span>
                      </div>
                      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                       Requested {{ calculateTimeAgo(ticket.dateCreated) }}
+                       {{ 'REQUESTS.CARD.REQUESTED' | translate }} {{ calculateTimeAgo(ticket.dateCreated) }}
                      </p>
                    </div>
                  </div>
@@ -355,31 +339,15 @@
                  <!-- Reason -->
                  <div class="mt-3">
                    <p class="text-sm text-gray-600 dark:text-gray-300">
-                     <span class="font-medium">Reason:</span> {{ ticket.reason }}
+                     <span class="font-medium">{{ 'REQUESTS.CARD.REASON' | translate }}:</span> {{ ticket.reason }}
                    </p>
                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                     <span class="font-medium">Request Date:</span> {{ ticket.requestDate | date }}
+                     <span class="font-medium">{{ 'REQUESTS.CARD.REQUEST_DATE' | translate }}:</span> {{ ticket.requestDate | date }}
                    </p>
                  </div>
                </div>
 
-               <!-- Actions -->
-               <div class="flex items-center space-x-2 ml-6 flex-shrink-0">
-                 <button
-                   *ngIf="ticket.status === 'Active'"
-                   class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 focus:ring-4 focus:ring-red-300 dark:bg-red-900/50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/70 transition-colors duration-200 whitespace-nowrap"
-                 >
-                   <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                   </svg>
-                   Revoke Access
-                 </button>
-                 <button
-                   class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors duration-200 whitespace-nowrap"
-                 >
-                   View Details
-                 </button>
-               </div>
+
              </div>
            </div>
          </div>
@@ -398,8 +366,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
           </svg>
           <div *ngIf="isLoading" class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-          <span *ngIf="!isLoading">New Emergency Request</span>
-          <span *ngIf="isLoading">Loading...</span>
+          <span *ngIf="!isLoading">{{ 'REQUESTS.FOOTER.NEW_EMERGENCY_REQUEST' | translate }}</span>
+          <span *ngIf="isLoading">{{ 'COMMON.LOADING' | translate }}</span>
         </button>
       </div>
     </div>
@@ -423,10 +391,10 @@
               </div>
               <div>
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="modal-title">
-                  Create Emergency Request
+                  {{ 'REQUESTS.MODAL.TITLE' | translate }}
                 </h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                  Submit a new FireFighter emergency access request
+                  {{ 'REQUESTS.MODAL.SUBTITLE' | translate }}
                 </p>
               </div>
             </div>
@@ -438,7 +406,7 @@
               <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
               </svg>
-              <span class="sr-only">Close modal</span>
+              <span class="sr-only">{{ 'REQUESTS.MODAL.CLOSE' | translate }}</span>
             </button>
           </div>
 
@@ -448,8 +416,8 @@
             <!-- Request Date Field -->
             <div>
               <label for="request-date" class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                Request Date
-                <span class="text-red-500">*</span>
+                {{ 'REQUESTS.MODAL.REQUEST_DATE.LABEL' | translate }}
+                <span class="text-red-500">{{ 'REQUESTS.MODAL.REQUEST_DATE.REQUIRED' | translate }}</span>
               </label>
               <input
                 id="request-date"
@@ -465,7 +433,7 @@
             <!-- Emergency Type Selection -->
             <div>
               <label for="emergency-type" class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                Emergency Type
+                {{ 'REQUESTS.MODAL.EMERGENCY_TYPE.LABEL' | translate }}
               </label>
               <select
                 id="emergency-type"
@@ -474,42 +442,40 @@
                 [disabled]="isLoading"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-red-500 dark:focus:border-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <option value="">Select emergency type</option>
-                <option value="critical-system-failure">Critical System Failure</option>
-                <option value="security-incident">Security Incident</option>
-                <option value="data-recovery">Data Recovery</option>
-                <option value="network-outage">Network Outage</option>
-                <option value="user-lockout">User Lockout</option>
-                <option value="other">Other Emergency</option>
+                <option value="">{{ 'REQUESTS.MODAL.EMERGENCY_TYPE.PLACEHOLDER' | translate }}</option>
+                <option value="hr-emergency">{{ 'REQUESTS.MODAL.EMERGENCY_TYPE.HR' | translate }}</option>
+                <option value="financial-emergency">{{ 'REQUESTS.MODAL.EMERGENCY_TYPE.FINANCIAL' | translate }}</option>
+                <option value="management-emergency">{{ 'REQUESTS.MODAL.EMERGENCY_TYPE.MANAGEMENT' | translate }}</option>
+                <option value="logistics-emergency">{{ 'REQUESTS.MODAL.EMERGENCY_TYPE.LOGISTICS' | translate }}</option>
               </select>
             </div>
 
             <!-- Reason Field -->
             <div>
               <label for="reason" class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                Reason for Emergency Access
-                <span class="text-red-500">*</span>
+                {{ 'REQUESTS.MODAL.REASON.LABEL' | translate }}
+                <span class="text-red-500">{{ 'REQUESTS.MODAL.REASON.REQUIRED' | translate }}</span>
               </label>
               <textarea
                 id="reason"
                 [(ngModel)]="newTicket.reason"
                 name="reason"
-                placeholder="Please provide a detailed explanation of the emergency situation and why immediate access is required. Include specific systems, users, or data affected..."
+                [placeholder]="'REQUESTS.MODAL.REASON.PLACEHOLDER' | translate"
                 required
                 [disabled]="isLoading"
                 rows="4"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-red-500 dark:focus:border-red-500 disabled:opacity-50 disabled:cursor-not-allowed resize-none"
               ></textarea>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Be specific about the nature of the emergency and systems requiring access.
+                {{ 'REQUESTS.MODAL.REASON.HELP' | translate }}
               </p>
             </div>
 
             <!-- Emergency Contact -->
             <div>
               <label for="contact" class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                Emergency Contact
-                <span *ngIf="newTicket.emergencyContact && userProfile?.contactNumber === newTicket.emergencyContact" class="text-xs text-green-600 dark:text-green-400 font-normal ml-1">(Auto-filled from profile)</span>
+                {{ 'REQUESTS.MODAL.CONTACT.LABEL' | translate }}
+                <span *ngIf="newTicket.emergencyContact && userProfile?.contactNumber === newTicket.emergencyContact" class="text-xs text-green-600 dark:text-green-400 font-normal ml-1">{{ 'REQUESTS.MODAL.CONTACT.AUTO_FILLED' | translate }}</span>
               </label>
               <div class="relative">
                 <input
@@ -517,7 +483,7 @@
                   type="text"
                   [(ngModel)]="newTicket.emergencyContact"
                   name="emergencyContact"
-                  placeholder="Phone number or email for urgent contact"
+                  [placeholder]="'REQUESTS.MODAL.CONTACT.PLACEHOLDER' | translate"
                   [disabled]="isLoading"
                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 pr-20 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-red-500 dark:focus:border-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
@@ -528,21 +494,21 @@
                   [disabled]="isLoading"
                   class="absolute inset-y-0 right-0 flex items-center px-3 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Use Saved
+                  {{ 'REQUESTS.MODAL.CONTACT.USE_SAVED' | translate }}
                 </button>
               </div>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                <span *ngIf="!userProfile?.contactNumber">You can add a contact number in your account settings to auto-fill this field.</span>
-                <span *ngIf="userProfile?.contactNumber && newTicket.emergencyContact === userProfile.contactNumber">Contact number auto-filled from your profile. You can edit it if needed.</span>
-                <span *ngIf="userProfile?.contactNumber && newTicket.emergencyContact !== userProfile.contactNumber">Your saved contact number ({{ userProfile.contactNumber }}) is available. Click "Use Saved" to fill it.</span>
+                <span *ngIf="!userProfile?.contactNumber">{{ 'REQUESTS.MODAL.CONTACT.HELP_NO_SAVED' | translate }}</span>
+                <span *ngIf="userProfile?.contactNumber && newTicket.emergencyContact === userProfile.contactNumber">{{ 'REQUESTS.MODAL.CONTACT.HELP_AUTO_FILLED' | translate }}</span>
+                <span *ngIf="userProfile?.contactNumber && newTicket.emergencyContact !== userProfile.contactNumber">{{ 'REQUESTS.MODAL.CONTACT.HELP_SAVED_AVAILABLE' | translate: {contactNumber: userProfile.contactNumber} }}</span>
               </p>
             </div>
 
             <!-- Duration Selector -->
             <div>
               <label for="duration-counter" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                Access Duration (minutes)
-                <span class="text-red-500">*</span>
+                {{ 'REQUESTS.MODAL.DURATION.LABEL' | translate }}
+                <span class="text-red-500">{{ 'REQUESTS.MODAL.DURATION.REQUIRED' | translate }}</span>
               </label>
               
               <!-- Duration Display -->
@@ -557,7 +523,7 @@
                     </span>
                   </div>
                   <span class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ newTicket.duration }} min
+                    {{ newTicket.duration }} {{ 'REQUESTS.MODAL.DURATION.MIN_SUFFIX' | translate }}
                   </span>
                 </div>
               </div>
@@ -598,7 +564,7 @@
               </div>
               
               <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                Use the +/- buttons to adjust duration. Range: 15-120 minutes in 15-minute increments.
+                {{ 'REQUESTS.MODAL.DURATION.HELP' | translate }}
               </p>
             </div>
 
@@ -608,11 +574,11 @@
                 <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
               </svg>
               <div>
-                <span class="font-medium">Emergency Access Notice:</span>
+                <span class="font-medium">{{ 'REQUESTS.MODAL.WARNING.TITLE' | translate }}</span>
                 <ul class="mt-1 space-y-1 list-disc list-inside">
-                  <li>Emergency access duration can be selected from 15 minutes to 2 hours</li>
-                  <li>All activities are logged and audited</li>
-                  <li>Misuse may result in disciplinary action</li>
+                  <li>{{ 'REQUESTS.MODAL.WARNING.DURATION' | translate }}</li>
+                  <li>{{ 'REQUESTS.MODAL.WARNING.LOGGED' | translate }}</li>
+                  <li>{{ 'REQUESTS.MODAL.WARNING.MISUSE' | translate }}</li>
                 </ul>
               </div>
             </div>
@@ -625,7 +591,7 @@
                 [disabled]="isLoading"
                 class="py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Cancel
+                {{ 'REQUESTS.MODAL.BUTTONS.CANCEL' | translate }}
               </button>
               <button
                 type="submit"
@@ -636,8 +602,8 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
                 </svg>
                 <div *ngIf="isLoading" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                <span *ngIf="!isLoading">Submit Emergency Request</span>
-                <span *ngIf="isLoading">Submitting...</span>
+                <span *ngIf="!isLoading">{{ 'REQUESTS.MODAL.BUTTONS.SUBMIT' | translate }}</span>
+                <span *ngIf="isLoading">{{ 'REQUESTS.MODAL.BUTTONS.SUBMITTING' | translate }}</span>
               </button>
             </div>
 
@@ -652,7 +618,7 @@
       class="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded shadow-lg
              dark:bg-blue-500"
     >
-      Access for ticket INC-1234 has been revoked
+      {{ 'REQUESTS.TOAST.ACCESS_REVOKED' | translate: {ticketId: 'INC-1234'} }}
     </div>
   </div>
 </ion-content>

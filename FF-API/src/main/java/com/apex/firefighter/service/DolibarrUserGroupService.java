@@ -1,99 +1,140 @@
 package com.apex.firefighter.service;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import com.apex.firefighter.model.User;
+import com.apex.firefighter.repository.UserRepository;
+
+import java.sql.SQLException;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.http.*;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.springframework.stereotype.Service;
 
 @Service
-@ConditionalOnProperty(name = "dolibarr.enabled", havingValue = "true", matchIfMissing = false)
 public class DolibarrUserGroupService {
-    private final RestTemplate restTemplate;
-    private final String dolibarrBaseUrl;
-    private final String apiKey;
-    private final Long firefighterGroupId;
+    private final DolibarrDatabaseService dolibarrDatabaseService;
+    private final DolibarrGroupAllocater groupAllocater;
+    private final GroupChangeNotificationService notificationService;
+    private final UserRepository userRepository;
 
-    public DolibarrUserGroupService(
-            /* RestTemplate restTemplate, */
-            @Value("${dolibarr.api.base-url}") String dolibarrBaseUrl,
-            @Value("${dolibarr.api.key}") String apiKey,
-            @Value("${dolibarr.ff.group.id}") Long firefighterGroupId) {
-        this.restTemplate = new RestTemplate()/* restTemplate */;
-        this.dolibarrBaseUrl = dolibarrBaseUrl;
-        this.apiKey = apiKey;
-        this.firefighterGroupId = firefighterGroupId;
+    public DolibarrUserGroupService(DolibarrDatabaseService dolibarrDatabaseService, 
+                                  DolibarrGroupAllocater groupAllocater,
+                                  GroupChangeNotificationService notificationService,
+                                  UserRepository userRepository) {
+        this.dolibarrDatabaseService = dolibarrDatabaseService;
+        this.groupAllocater = groupAllocater;
+        this.notificationService = notificationService;
+        this.userRepository = userRepository;
+        System.out.println("✅ DolibarrUserGroupService initialized with notification support");
     }
 
-    public void addUserToGroup(Long userId) {
-        String url = dolibarrBaseUrl + "/users/" + userId + "/setGroup/" + firefighterGroupId;
+    /**
+     * Adds a user to the firefighter group using direct database access.
+     * This method uses the DolibarrDatabaseService to directly insert the user-group
+     * association into the llx_usergroup_user table in the Dolibarr database.
+     * The entity ID is set to 1 as requested.
+     *
+     * @param userId The Dolibarr user ID
+     * @param description The emergency description that determines the group
+     * @throws SQLException if database operation fails
+     */
+    public void addUserToGroup(String userId, String description) throws SQLException {
+        addUserToGroup(userId, description, null);
+    }
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("DOLAPIKEY", apiKey);
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+    /**
+     * Adds a user to the firefighter group and sends notifications to admins
+     * 
+     * @param userId The Dolibarr user ID
+     * @param description The emergency description that determines the group
+     * @param ticketId The ticket ID that triggered this group change (for notifications)
+     * @throws SQLException if database operation fails
+     */
+    public void addUserToGroup(String userId, String description, String ticketId) throws SQLException {
+        try {
+            Integer firefighterGroupId = groupAllocater.allocateByDescription(description);
+            System.out.println("🔵 DOLIBARR SERVICE: Starting to add user " + userId + " to firefighter group " + firefighterGroupId);
 
-        HttpEntity<Void> request = new HttpEntity<>(headers);
+            dolibarrDatabaseService.addUserToFirefighterGroup(userId, firefighterGroupId);
+            System.out.println("✅ DOLIBARR SERVICE: Successfully added user " + userId + " to firefighter group using database method");
 
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new RuntimeException("Failed to add user to group: " + response.getStatusCode());
+            // Send notification to admins if ticketId is provided
+            if (ticketId != null) {
+                notifyAdminsOfGroupChange(userId, ticketId, null, firefighterGroupId, description);
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ DOLIBARR SERVICE: Failed to add user " + userId + " to firefighter group: " + e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            System.err.println("❌ DOLIBARR SERVICE: Unexpected error adding user " + userId + " to firefighter group: " + e.getMessage());
+            throw new RuntimeException("Failed to add user to firefighter group", e);
         }
     }
 
-    public void removeUserFromGroup(Long userId) throws IOException, InterruptedException{
-        ObjectMapper mapper = new ObjectMapper();
-        
-        String getURL = dolibarrBaseUrl + "/users/" + userId + "/groups";
+    /**
+     * Removes a user from the firefighter group using direct database access.
+     * This method uses the DolibarrDatabaseService to directly delete the user-group
+     * association from the llx_usergroup_user table in the Dolibarr database.
+     *
+     * @param userId The Dolibarr user ID
+     * @param description The emergency description that determines the group
+     * @throws SQLException if database operation fails
+     */
+    public void removeUserFromGroup(String userId, String description) throws SQLException {
+        removeUserFromGroup(userId, description, null);
+    }
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("DOLAPIKEY", apiKey);
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+    /**
+     * Removes a user from the firefighter group and sends notifications to admins
+     * 
+     * @param userId The Dolibarr user ID
+     * @param description The emergency description that determines the group
+     * @param ticketId The ticket ID that triggered this group change (for notifications)
+     * @throws SQLException if database operation fails
+     */
+    public void removeUserFromGroup(String userId, String description, String ticketId) throws SQLException {
+        try {
+            Integer firefighterGroupId = groupAllocater.allocateByDescription(description);
+            dolibarrDatabaseService.removeUserFromFirefighterGroup(userId, firefighterGroupId);
+            System.out.println("✅ DOLIBARR SERVICE: Successfully removed user " + userId + " from firefighter group " + firefighterGroupId);
 
-        HttpEntity<Void> request = new HttpEntity<>(headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(getURL, HttpMethod.GET, request, String.class);
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new RuntimeException("Failed to fetch user groups: " + response.getStatusCode());
-        }
-
-        List<Map<String, Object>> groups = mapper.readValue(
-            response.getBody(),
-            new TypeReference<List<Map<String, Object>>>() {}
-        );
-
-        List<Integer> groupIds = new ArrayList<>();
-        for (Map<String, Object> group : groups) {
-            if (group.get("id").equals(firefighterGroupId)) {
-                continue; // Skip the firefighter group
+            // Send notification to admins if ticketId is provided
+            if (ticketId != null) {
+                notifyAdminsOfGroupChange(userId, ticketId, firefighterGroupId, null, "Group removed - " + description);
             }
-            Object idValue = group.get("id");
-            if (idValue instanceof Number) {
-                groupIds.add(((Number) idValue).intValue());
-            }
+        } catch (SQLException e) {
+            System.err.println("❌ DOLIBARR SERVICE: Failed to remove user " + userId + " from firefighter group: " + e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            System.err.println("❌ DOLIBARR SERVICE: Unexpected error removing user " + userId + " from firefighter group: " + e.getMessage());
+            throw new RuntimeException("Failed to remove user from firefighter group", e);
         }
+    }
 
-        String groupsExlFF = mapper.writeValueAsString(Map.of("groups", groupIds));
+    /**
+     * Helper method to notify admins of group changes
+     * 
+     * @param dolibarrUserId The Dolibarr user ID
+     * @param ticketId The ticket that triggered the change
+     * @param oldGroupId The previous group ID (null if no previous group)
+     * @param newGroupId The new group ID (null if group was removed)
+     * @param reason The reason for the change
+     */
+    private void notifyAdminsOfGroupChange(String dolibarrUserId, String ticketId, Integer oldGroupId, Integer newGroupId, String reason) {
+        try {
+            // Find the user by Dolibarr ID
+            Optional<User> userOpt = userRepository.findAll().stream()
+                .filter(user -> dolibarrUserId.equals(user.getDolibarrId()))
+                .findFirst();
 
-        String putURL = dolibarrBaseUrl + "/users/" + userId + "?fetch_child=groups";
-        HttpHeaders putHeaders = new HttpHeaders();
-        putHeaders.set("DOLAPIKEY", apiKey);
-        putHeaders.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<String> putRequest = new HttpEntity<>(groupsExlFF, putHeaders);
-
-        ResponseEntity<String> putResponse = restTemplate.exchange(putURL, HttpMethod.PUT, putRequest, String.class);
-        if (!putResponse.getStatusCode().is2xxSuccessful()) {
-            throw new RuntimeException("Failed to remove user from group: " + putResponse.getStatusCode());
+            if (userOpt.isPresent()) {
+                User user = userOpt.get();
+                notificationService.notifyAdminsOfGroupChangeById(user, ticketId, oldGroupId, newGroupId, reason);
+            } else {
+                System.err.println("⚠️ DOLIBARR SERVICE: Could not find user with Dolibarr ID " + dolibarrUserId + " for notification");
+            }
+        } catch (Exception e) {
+            System.err.println("❌ DOLIBARR SERVICE: Failed to send group change notification: " + e.getMessage());
+            // Don't throw the exception as this is a notification failure, not a core operation failure
         }
     }
 

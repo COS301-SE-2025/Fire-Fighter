@@ -1,5 +1,7 @@
-package com.apex.firefighter.controller;
+package com.apex.firefighter.unit.controllers;
 
+import com.apex.firefighter.config.TestConfig;
+import com.apex.firefighter.controller.NotificationController;
 import com.apex.firefighter.model.Notification;
 import com.apex.firefighter.service.NotificationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,8 +10,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -25,6 +29,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(NotificationController.class)
+@Import(TestConfig.class)
+@ActiveProfiles("test")
 class NotificationControllerTest {
 
     @Autowired

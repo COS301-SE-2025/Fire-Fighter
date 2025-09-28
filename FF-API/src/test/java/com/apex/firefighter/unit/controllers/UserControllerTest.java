@@ -1,24 +1,27 @@
-package com.apex.firefighter.controller;
+package com.apex.firefighter.unit.controllers;
 
+import com.apex.firefighter.config.TestConfig;
+import com.apex.firefighter.controller.UserController;
 import com.apex.firefighter.model.User;
 import com.apex.firefighter.service.UserService;
+import com.apex.firefighter.service.auth.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -27,6 +30,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
+@Import(TestConfig.class)
+@ActiveProfiles("test")
 class UserControllerTest {
 
     @Autowired
@@ -34,6 +39,9 @@ class UserControllerTest {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private JwtService jwtService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -662,6 +670,101 @@ class UserControllerTest {
                 .andExpect(status().isOk());
 
         verify(userService).verifyOrCreateUser(TEST_USER_ID, "", TEST_EMAIL, null);
+    }
+
+    // REMOVED: Old Dolibarr ID self-management tests
+    // These tests have been removed as the functionality is now admin-only
+
+    // Admin-Only Dolibarr ID Management Tests
+
+    @Test
+    @WithMockUser(username = TEST_USER_ID)
+    void updateUserDolibarrIdAsAdmin_WithValidData_ShouldReturnUpdatedUser() throws Exception {
+        String targetUserId = "target-user-123";
+        String dolibarrId = "DOL123456";
+        testUser.setDolibarrId(dolibarrId);
+
+        when(userService.updateUserDolibarrIdAsAdmin(TEST_USER_ID, targetUserId, dolibarrId))
+                .thenReturn(testUser);
+
+        mockMvc.perform(put(BASE_URL + "/" + targetUserId + "/admin/dolibarr-id")
+                .param("dolibarrId", dolibarrId)
+                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dolibarrId").value(dolibarrId));
+
+        verify(userService).updateUserDolibarrIdAsAdmin(TEST_USER_ID, targetUserId, dolibarrId);
+    }
+
+    @Test
+    @WithMockUser(username = TEST_USER_ID)
+    void updateUserDolibarrIdAsAdmin_WithoutAdminPrivileges_ShouldReturnForbidden() throws Exception {
+        String targetUserId = "target-user-123";
+        String dolibarrId = "DOL123456";
+
+        when(userService.updateUserDolibarrIdAsAdmin(TEST_USER_ID, targetUserId, dolibarrId))
+                .thenThrow(new SecurityException("Administrator privileges required to manage Dolibarr UIDs"));
+
+        mockMvc.perform(put(BASE_URL + "/" + targetUserId + "/admin/dolibarr-id")
+                .param("dolibarrId", dolibarrId)
+                .with(csrf()))
+                .andExpect(status().isForbidden());
+
+        verify(userService).updateUserDolibarrIdAsAdmin(TEST_USER_ID, targetUserId, dolibarrId);
+    }
+
+    @Test
+    @WithMockUser(username = TEST_USER_ID)
+    void getUserDolibarrIdAsAdmin_WithValidData_ShouldReturnDolibarrId() throws Exception {
+        String targetUserId = "target-user-123";
+        String dolibarrId = "DOL123456";
+
+        when(userService.getUserDolibarrIdAsAdmin(TEST_USER_ID, targetUserId))
+                .thenReturn(dolibarrId);
+
+        mockMvc.perform(get(BASE_URL + "/" + targetUserId + "/admin/dolibarr-id"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dolibarrId").value(dolibarrId))
+                .andExpect(jsonPath("$.firebaseUid").value(targetUserId));
+
+        verify(userService).getUserDolibarrIdAsAdmin(TEST_USER_ID, targetUserId);
+    }
+
+    @Test
+    @WithMockUser(username = TEST_USER_ID)
+    void getUserDolibarrIdAsAdmin_WithoutAdminPrivileges_ShouldReturnForbidden() throws Exception {
+        String targetUserId = "target-user-123";
+
+        when(userService.getUserDolibarrIdAsAdmin(TEST_USER_ID, targetUserId))
+                .thenThrow(new SecurityException("Administrator privileges required to access Dolibarr UIDs"));
+
+        mockMvc.perform(get(BASE_URL + "/" + targetUserId + "/admin/dolibarr-id"))
+                .andExpect(status().isForbidden());
+
+        verify(userService).getUserDolibarrIdAsAdmin(TEST_USER_ID, targetUserId);
+    }
+
+    @Test
+    void updateUserDolibarrIdAsAdmin_WithoutAuthentication_ShouldReturnUnauthorized() throws Exception {
+        String targetUserId = "target-user-123";
+        String dolibarrId = "DOL123456";
+
+        mockMvc.perform(put(BASE_URL + "/" + targetUserId + "/admin/dolibarr-id")
+                .param("dolibarrId", dolibarrId)
+                .with(csrf()))
+                .andExpect(status().isUnauthorized());
+
+        verify(userService, never()).updateUserDolibarrIdAsAdmin(any(), any(), any());
+    }
+
+    @Test
+    void getUserDolibarrIdAsAdmin_WithoutAuthentication_ShouldReturnUnauthorized() throws Exception {
+        String targetUserId = "target-user-123";
+
+        mockMvc.perform(get(BASE_URL + "/" + targetUserId + "/admin/dolibarr-id"))
+                .andExpect(status().isUnauthorized());
+
+        verify(userService, never()).getUserDolibarrIdAsAdmin(any(), any());
     }
 
 }

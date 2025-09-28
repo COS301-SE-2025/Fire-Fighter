@@ -14,7 +14,7 @@ public class TicketCreateRequest {
     @Schema(description = "User ID who created the ticket", example = "user123")
     private String userId;
 
-    @Schema(description = "Type of emergency", example = "FIRE", allowableValues = {"FIRE", "MEDICAL", "RESCUE", "HAZMAT"})
+    @Schema(description = "Type of emergency", example = "hr-emergency", allowableValues = {"hr-emergency", "financial-emergency", "management-emergency", "logistics-emergency"})
     private String emergencyType;
 
     @Schema(description = "Emergency contact information", example = "+1-555-0123")

@@ -14,16 +14,24 @@ export interface ChatbotResponse {
   userRole?: string;
   timestamp: string;
   formattedTimestamp?: string;
+  queryType?: string;
 }
 
 export interface ChatbotCapabilities {
-  capabilities: string[];
-  userRole: string;
+  available: boolean;
+  adminAccess: boolean;
+  accessLevel: string;
+  supportedIntents: string[];
+  supportedEntities: string[];
+  userRole?: string;
 }
 
 export interface ChatbotSuggestions {
-  suggestions: string[];
+  available: boolean;
   userRole: string;
+  suggestedQueries: string[];
+  examples: string[];
+  quickActions: string[];
 }
 
 export interface ChatbotHealth {
@@ -31,18 +39,20 @@ export interface ChatbotHealth {
   version?: string;
   timestamp: string;
   service?: string;
-  services?: {
-    geminiAI: string;
-    ticketQuery: string;
-    database: string;
+  components?: {
+    intentRecognition: string;
+    entityExtraction: string;
+    queryProcessing: string;
+    responseGeneration: string;
   };
+  error?: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatbotService {
-  private apiUrl = `${environment.apiUrl}/chatbot`;
+  private apiUrl = `${environment.apiUrl}/nlp`;
 
   constructor(private http: HttpClient) {}
 
@@ -71,15 +81,15 @@ export class ChatbotService {
 
   /**
    * Send an admin query to the chatbot
-   * Endpoint: POST /api/chatbot/admin/query
+   * Endpoint: POST /api/nlp/admin/query
    */
   sendAdminQuery(query: string): Observable<ChatbotResponse> {
     console.log('🤖 CHATBOT SERVICE: Sending admin query:', query);
     console.log('🤖 CHATBOT SERVICE: API URL:', `${this.apiUrl}/admin/query`);
-    
+
     const payload: ChatbotQuery = { query };
     console.log('🤖 CHATBOT SERVICE: Admin payload:', payload);
-    
+
     return this.http.post<ChatbotResponse>(`${this.apiUrl}/admin/query`, payload).pipe(
       map(response => {
         console.log('🤖 CHATBOT SERVICE: Admin success response:', response);
@@ -94,20 +104,35 @@ export class ChatbotService {
 
   /**
    * Get user capabilities based on their role
-   * Endpoint: GET /api/chatbot/capabilities
+   * Endpoint: GET /api/nlp/capabilities/{userId}
    */
   getCapabilities(): Observable<ChatbotCapabilities> {
-    return this.http.get<ChatbotCapabilities>(`${this.apiUrl}/capabilities`).pipe(
+    return this.http.get<any>(`${this.apiUrl}/capabilities/current`).pipe(
+      map(response => ({
+        available: response.available || false,
+        adminAccess: response.adminAccess || false,
+        accessLevel: response.accessLevel || 'USER',
+        supportedIntents: response.supportedIntents || [],
+        supportedEntities: response.supportedEntities || [],
+        userRole: response.userRole || 'USER'
+      })),
       catchError(this.handleError)
     );
   }
 
   /**
    * Get suggested queries for the user
-   * Endpoint: GET /api/chatbot/suggestions
+   * Endpoint: GET /api/nlp/suggestions/{userId}
    */
   getSuggestions(): Observable<ChatbotSuggestions> {
-    return this.http.get<ChatbotSuggestions>(`${this.apiUrl}/suggestions`).pipe(
+    return this.http.get<any>(`${this.apiUrl}/suggestions/current`).pipe(
+      map(response => ({
+        available: response.available || false,
+        userRole: response.userRole || 'USER',
+        suggestedQueries: response.suggestedQueries || [],
+        examples: response.examples || [],
+        quickActions: response.quickActions || []
+      })),
       catchError(this.handleError)
     );
   }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, tap, map } from 'rxjs';
+import { Observable, of, tap, map, Subject } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { mockTicketDb } from './mock-ticket-database';
 import { NotificationService } from './notification.service';
@@ -17,6 +17,7 @@ export interface Ticket {
   emergencyContact?: string;
   duration: number; // Duration in minutes
   fiveMinuteWarningSent?: boolean; // Tracks if 5-minute warning notification was sent
+  dateCompleted?: Date; // Date when ticket was completed/resolved
 }
 
 @Injectable({
@@ -25,6 +26,10 @@ export interface Ticket {
 export class TicketService {
   private apiUrl = `${environment.apiUrl}/tickets`;
   private useMockDatabase = false; // Set to false when using real API
+
+  // Subject to emit events when tickets are created
+  private ticketCreatedSubject = new Subject<Ticket>();
+  public ticketCreated$ = this.ticketCreatedSubject.asObservable();
 
   constructor(
     private http: HttpClient,
@@ -73,6 +78,9 @@ export class TicketService {
       const createTicket$ = of(mockTicketDb.createTicket(ticketData));
       return createTicket$.pipe(
         tap(ticket => {
+          // Emit ticket created event for immediate dashboard refresh
+          this.ticketCreatedSubject.next(ticket);
+
           this.notificationService.addNotification({
             type: 'ticket_created',
             title: 'New Ticket Created',
@@ -105,6 +113,9 @@ export class TicketService {
       return this.http.post<any>(this.apiUrl, backendTicketData).pipe(
         map(ticket => this.mapBackendTicketToFrontend(ticket)),
         tap(ticket => {
+          // Emit ticket created event for immediate dashboard refresh
+          this.ticketCreatedSubject.next(ticket);
+
           // Force refresh notifications to get the backend-created notification
           setTimeout(() => {
             this.notificationService.forceRefresh();
