@@ -1,5 +1,6 @@
 package com.apex.firefighter.service;
 
+import com.apex.firefighter.config.DoliGroupConfig;
 import com.apex.firefighter.model.User;
 import com.apex.firefighter.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,17 +8,20 @@ import org.springframework.stereotype.Service;
 
 import jakarta.mail.MessagingException;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class GroupChangeNotificationService {
 
     private final GmailEmailService emailService;
     private final UserRepository userRepository;
+    private final DoliGroupConfig doliGroupConfig;
 
     @Autowired
-    public GroupChangeNotificationService(GmailEmailService emailService, UserRepository userRepository) {
+    public GroupChangeNotificationService(GmailEmailService emailService, UserRepository userRepository, DoliGroupConfig doliGroupConfig) {
         this.emailService = emailService;
         this.userRepository = userRepository;
+        this.doliGroupConfig = doliGroupConfig;
     }
 
     /**
@@ -105,15 +109,21 @@ public class GroupChangeNotificationService {
             return null;
         }
         
-        // Map group IDs to human-readable names
-        // These mappings should match the configuration in DoliGroupConfig
-        return switch (groupId) {
-            case 1 -> "HR Emergency Group";
-            case 2 -> "Financial Emergency Group";
-            case 3 -> "Management Emergency Group";
-            case 4 -> "Logistics Emergency Group";
-            default -> "Group ID: " + groupId;
-        };
+        // Get the configured group IDs from DoliGroupConfig
+        Map<String, Integer> groups = doliGroupConfig.getGroups();
+        
+        // Map group IDs to human-readable names using actual configured values
+        if (groupId.equals(groups.get("hr"))) {
+            return "HR Emergency Group";
+        } else if (groupId.equals(groups.get("financials"))) {
+            return "Financial Emergency Group";
+        } else if (groupId.equals(groups.get("fmanager"))) {
+            return "Management Emergency Group";
+        } else if (groupId.equals(groups.get("logistics"))) {
+            return "Logistics Emergency Group";
+        } else {
+            return "Group ID: " + groupId;
+        }
     }
 
     /**

@@ -756,7 +756,7 @@ public class GmailEmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setTo(recipientEmail);
-            helper.setSubject("FireFighter Platform - Group Change Alert (" + suspicionLevel + " Risk data): " + user.getUsername());
+            helper.setSubject("FireFighter Platform - Group Change Alert (" + suspicionLevel + " Risk Data): " + user.getUsername());
 
             String htmlContent = createSuspiciousGroupChangeEmailContent(user, ticketId, oldGroup, newGroup, reason, suspicionLevel);
             helper.setText(htmlContent, true);
@@ -814,7 +814,7 @@ public class GmailEmailService {
         html.append("</div>");
         html.append("<div class=\"info-item\">");
         html.append("<span class=\"info-label\">New Group: </span>");
-        html.append("<span class=\"info-value\">").append(newGroup).append("</span>");
+        html.append("<span class=\"info-value\">").append(newGroup != null ? newGroup : "None").append("</span>");
         html.append("</div>");
         if (reason != null && !reason.trim().isEmpty()) {
             html.append("<div class=\"info-item\">");
