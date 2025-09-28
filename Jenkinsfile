@@ -218,45 +218,79 @@ pipeline {
                             echo "🚀 Starting Angular development server for E2E tests..."
                             sh '''
                                 # Kill any existing Angular servers
+                                echo "Cleaning up any existing servers..."
                                 pkill -f "ng serve" || true
                                 pkill -f "node.*ng serve" || true
-                                sleep 2
+                                sleep 3
+
+                                # Check if port 4200 is free
+                                if netstat -tuln | grep :4200 >/dev/null 2>&1; then
+                                    echo "⚠️  Port 4200 is still in use, waiting..."
+                                    sleep 5
+                                fi
 
                                 # Start Angular dev server in background
+                                echo "Starting Angular development server..."
+                                cd /var/lib/jenkins/workspace/Fire-Fighter_main/FF-Angular || cd FF-Angular
                                 nohup npm start > angular-server.log 2>&1 &
                                 SERVER_PID=$!
                                 echo "Started Angular server with PID: $SERVER_PID"
                                 echo $SERVER_PID > angular-server.pid
+
+                                # Give it a moment to start
+                                sleep 5
+                                echo "Initial server log:"
+                                head -n 5 angular-server.log || echo "No log yet"
                             '''
 
                             echo "⏳ Waiting for server to be ready..."
                             sh '''
                                 echo "Checking server availability..."
-                                for i in {1..60}; do
+                                ATTEMPTS=0
+                                MAX_ATTEMPTS=60
+
+                                while [ $ATTEMPTS -lt $MAX_ATTEMPTS ]; do
+                                    ATTEMPTS=$((ATTEMPTS + 1))
+
                                     if curl -f http://localhost:4200 >/dev/null 2>&1; then
-                                        echo "✅ Server is ready at http://localhost:4200"
-                                        curl -s http://localhost:4200 | head -n 5
+                                        echo "✅ Server is ready at http://localhost:4200 (attempt $ATTEMPTS)"
+                                        echo "Server response preview:"
+                                        curl -s http://localhost:4200 | head -n 3 || echo "Could not fetch preview"
                                         break
                                     fi
-                                    echo "Attempt $i/60: Waiting for server..."
-                                    sleep 3
+
+                                    echo "Attempt $ATTEMPTS/$MAX_ATTEMPTS: Waiting for server..."
 
                                     # Check if server process is still running
                                     if [ -f angular-server.pid ]; then
                                         SERVER_PID=$(cat angular-server.pid)
                                         if ! ps -p $SERVER_PID > /dev/null 2>&1; then
                                             echo "❌ Angular server process died. Check logs:"
+                                            echo "=== Angular Server Log ==="
                                             cat angular-server.log || echo "No log file found"
+                                            echo "=========================="
                                             exit 1
+                                        else
+                                            echo "Server process $SERVER_PID is still running..."
                                         fi
                                     fi
+
+                                    # Show partial logs every 10 attempts
+                                    if [ $((ATTEMPTS % 10)) -eq 0 ]; then
+                                        echo "=== Current server log (last 10 lines) ==="
+                                        tail -n 10 angular-server.log 2>/dev/null || echo "No log available yet"
+                                        echo "=========================================="
+                                    fi
+
+                                    sleep 5
                                 done
 
                                 # Final check
                                 if ! curl -f http://localhost:4200 >/dev/null 2>&1; then
-                                    echo "❌ Server failed to start after 3 minutes"
-                                    echo "Server logs:"
+                                    echo "❌ Server failed to start after 5 minutes"
+                                    echo "=== Full Angular Server Log ==="
                                     cat angular-server.log || echo "No log file found"
+                                    echo "==============================="
                                     exit 1
                                 fi
                             '''
