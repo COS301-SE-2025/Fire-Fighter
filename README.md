@@ -31,11 +31,11 @@ This repository contains the **front-end implementation** (Angular + Ionic + Fir
 ## 📃 Documentation
 🔗 Use the links below to access the key project documents:
 
-- [User Manual (PDF)](Documentation/FireFighter%20-%20User%20Manual%20v2.pdf)  
+- [User Manual (PDF)](Documentation/FireFighter%20User%20Manual%20v3.pdf)  
 - [Technical Installation Manual (PDF)](Documentation/FireFighter%20-%20Technical%20Installation%20Manual%20v1.pdf)  
-- [Coding Standards / Quality Guide (PDF)](Documentation/FireFighter%20-%20Coding%20Standards%20v2.pdf)  
-- [Testing Policy (PDF)](Documentation/FireFighter%20-%20Testing%20Policy.pdf) <!-- add your actual file -->
-- [Software Requirements Specification (SRS) (PDF)](Documentation/FireFighter%20-%20Software%20Requirements%20Specification%20v3.pdf)  
+- [Coding Standards / Quality Guide (PDF)](Documentation/FireFighter%20Coding%20Standards%20v3.pdf)  
+- [Testing Policy (PDF)](Documentation/FireFighter%20Testing%20Policy%20v1.pdf)
+- [Software Requirements Specification (SRS) (PDF)](Documentation/FireFighter%20-%20Software%20Requirements%20Specification.pdf)  
 - [Project Management Board (Scrum)](https://github.com/orgs/COS301-SE-2025/projects/107)  
 
 ---
