@@ -39,13 +39,23 @@ jobs:
         key: ${{ runner.os }}-node-${{ hashFiles('FF-Angular/package-lock.json') }}
         restore-keys: ${{ runner.os }}-node-
 
+    - name: Cache Cypress binary
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/Cypress
+        key: ${{ runner.os }}-cypress-${{ hashFiles('FF-Angular/package-lock.json') }}
+        restore-keys: ${{ runner.os }}-cypress-
+
     - name: Install Backend Dependencies
       working-directory: FF-API
       run: mvn clean compile -DskipTests=true
 
     - name: Install Frontend Dependencies
       working-directory: FF-Angular
-      run: npm install
+      run: |
+        npm install
+        # Install Cypress binary if not cached
+        npx cypress install
 
     - name: Create Firebase Service Account File
       working-directory: FF-API/src/main/resources
@@ -83,9 +93,65 @@ jobs:
         GOOGLE_GEMINI_API_KEY: ${{ secrets.GOOGLE_GEMINI_API_KEY }}
       run: mvn -Dtest=com.apex.firefighter.integration.**.*Test test -Dspring.profiles.active=test
 
-    - name: Run Frontend Tests
+    - name: Run Frontend Unit Tests
       working-directory: FF-Angular
       run: npm test -- --watch=false --browsers=ChromeHeadless
+
+    - name: Run E2E Tests
+      working-directory: FF-Angular
+      run: |
+        echo "🔧 Setting up E2E testing environment..."
+
+        # Verify Chrome is available (GitHub Actions has Chrome pre-installed)
+        if command -v google-chrome &> /dev/null; then
+          echo "✅ Google Chrome is available"
+        else
+          echo "❌ Chrome not found"
+          exit 1
+        fi
+
+        echo "🚀 Starting Angular development server for E2E tests..."
+
+        # Start Angular dev server in background
+        npm start &
+        SERVER_PID=$!
+        echo "Started Angular server with PID: $SERVER_PID"
+
+        # Wait for server to be ready
+        echo "⏳ Waiting for server to be ready..."
+        for i in {1..60}; do
+          if curl -f http://localhost:4200 >/dev/null 2>&1; then
+            echo "✅ Server is ready at http://localhost:4200"
+            break
+          fi
+          echo "Attempt $i/60: Waiting for server..."
+          sleep 3
+        done
+
+        # Final check
+        if ! curl -f http://localhost:4200 >/dev/null 2>&1; then
+          echo "❌ Server failed to start"
+          kill $SERVER_PID || true
+          exit 1
+        fi
+
+        # Run E2E tests
+        echo "🧪 Running E2E tests..."
+        npm run e2e:headless
+
+        # Cleanup
+        echo "🧹 Cleaning up..."
+        kill $SERVER_PID || true
+
+    - name: Upload E2E Test Artifacts
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: e2e-test-results
+        path: |
+          FF-Angular/cypress/screenshots/
+          FF-Angular/cypress/videos/
+        retention-days: 7
 
     - name: Build Backend
       working-directory: FF-API
