@@ -18,12 +18,10 @@ export interface UserPreferences {
 
 export interface NotificationSettings {
   criticalAlerts: boolean;
-  accessRequests: boolean;
   sessionExpiry: boolean;
   requestUpdates: boolean;
   auditAlerts: boolean;
   maintenance: boolean;
-  pushEnabled: boolean;
   emailEnabled: boolean;
 }
 
@@ -175,24 +173,20 @@ export class UserPreferencesService {
     if (!preferences) {
       return {
         criticalAlerts: true,
-        accessRequests: true,
         sessionExpiry: true,
         requestUpdates: true,
         auditAlerts: false,
         maintenance: false,
-        pushEnabled: true,
         emailEnabled: false
       };
     }
 
     return {
       criticalAlerts: true, // Always enabled for critical alerts
-      accessRequests: true, // Always enabled for access requests
       sessionExpiry: true, // Always enabled for session expiry
       requestUpdates: preferences.emailTicketCreation || preferences.emailTicketCompletion || preferences.emailTicketRevocation,
       auditAlerts: false, // Not implemented yet
       maintenance: false, // Not implemented yet
-      pushEnabled: true, // Always enabled for push notifications
       emailEnabled: preferences.emailNotificationsEnabled
     };
   }

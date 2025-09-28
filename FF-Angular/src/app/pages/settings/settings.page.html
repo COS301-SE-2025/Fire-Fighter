@@ -126,26 +126,7 @@
               </label>
             </div>
 
-            <!-- FireFighter Access Requests -->
-            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
-              <div class="flex items-center space-x-3">
-                <div class="flex-shrink-0">
-                  <div class="w-10 h-10 bg-slate-600 dark:bg-slate-600 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                    </svg>
-                  </div>
-                </div>
-                <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-white">{{ 'SETTINGS.NOTIFICATIONS.ACCESS_REQUESTS' | translate }}</p>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'SETTINGS.NOTIFICATIONS.ACCESS_REQUESTS_DESC' | translate }}</p>
-                </div>
-              </div>
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" [(ngModel)]="notificationSettings.accessRequests" class="sr-only peer">
-                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
+
 
             <!-- Session Expiry Warnings -->
             <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
@@ -175,45 +156,24 @@
           <div class="space-y-4 pt-6 border-t border-gray-200 dark:border-gray-700">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ 'SETTINGS.NOTIFICATIONS.DELIVERY_SECTION' | translate }}</h3>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <!-- Push Notifications -->
-              <div class="flex items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                <input 
-                  id="push-notifications" 
-                  type="checkbox" 
-                  [(ngModel)]="notificationSettings.pushEnabled"
-                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                >
-                <label for="push-notifications" class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">
-                  <div class="flex items-center space-x-2">
-                    <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"></path>
-                    </svg>
-                    <span>{{ 'SETTINGS.NOTIFICATIONS.PUSH_ENABLED' | translate }}</span>
-                  </div>
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ 'SETTINGS.NOTIFICATIONS.PUSH_ENABLED_DESC' | translate }}</p>
-                </label>
-              </div>
-
-              <!-- Email Notifications -->
-              <div class="flex items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                <input
-                  id="email-notifications"
-                  type="checkbox"
-                  [(ngModel)]="notificationSettings.emailEnabled"
-                  (change)="onEmailNotificationsChange()"
-                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                >
-                <label for="email-notifications" class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">
-                  <div class="flex items-center space-x-2">
-                    <svg class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                    </svg>
-                    <span>{{ 'SETTINGS.NOTIFICATIONS.EMAIL_ENABLED' | translate }}</span>
-                  </div>
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ 'SETTINGS.NOTIFICATIONS.EMAIL_ENABLED_DESC' | translate }}</p>
-                </label>
-              </div>
+            <!-- Email Notifications -->
+            <div class="flex items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <input
+                id="email-notifications"
+                type="checkbox"
+                [(ngModel)]="notificationSettings.emailEnabled"
+                (change)="onEmailNotificationsChange()"
+                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+              >
+              <label for="email-notifications" class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+                <div class="flex items-center space-x-2">
+                  <svg class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                  </svg>
+                  <span>{{ 'SETTINGS.NOTIFICATIONS.EMAIL_ENABLED' | translate }}</span>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ 'SETTINGS.NOTIFICATIONS.EMAIL_ENABLED_DESC' | translate }}</p>
+              </label>
             </div>
 
             <!-- Email Notification Details (shown when email notifications are enabled) -->

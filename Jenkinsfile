@@ -133,6 +133,50 @@ pipeline {
             }
         }
 
+        stage('JWT Token Tests') {
+            steps {
+                dir('FF-API') {
+                    echo "🔐 Running JWT token tests..."
+                    // Copy Firebase service account key from Jenkins secret to workspace
+                    withCredentials([
+                        file(credentialsId: 'firebase-service-account-key', variable: 'FIREBASE_KEY_FILE'),
+                        string(credentialsId: 'DB_HOST', variable: 'DB_HOST'),
+                        string(credentialsId: 'DB_PORT', variable: 'DB_PORT'),
+                        string(credentialsId: 'DB_NAME', variable: 'DB_NAME'),
+                        string(credentialsId: 'DOLIBARR_DB_NAME', variable: 'DOLIBARR_DB_NAME'),
+                        string(credentialsId: 'DB_USERNAME', variable: 'DB_USERNAME'),
+                        string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD'),
+                        string(credentialsId: 'DB_SSL_MODE', variable: 'DB_SSL_MODE'),
+                        string(credentialsId: 'JWT_SECRET', variable: 'JWT_SECRET'),
+                        string(credentialsId: 'JWT_EXPIRATION', variable: 'JWT_EXPIRATION'),
+                        string(credentialsId: 'GMAIL_ENABLED', variable: 'GMAIL_ENABLED'),
+                        string(credentialsId: 'GMAIL_USERNAME', variable: 'GMAIL_USERNAME'),
+                        string(credentialsId: 'GMAIL_APP_PASSWORD', variable: 'GMAIL_APP_PASSWORD'),
+                        string(credentialsId: 'GMAIL_SENDER_NAME', variable: 'GMAIL_SENDER_NAME'),
+                        string(credentialsId: 'GOOGLE_GEMINI_API_KEY', variable: 'GOOGLE_GEMINI_API_KEY'),
+                        string(credentialsId: 'DOLIBARR_API_BASE_URL', variable: 'DOLIBARR_API_BASE_URL'),
+                        string(credentialsId: 'DOLIBARR_API_KEY', variable: 'DOLIBARR_API_KEY'),
+                        string(credentialsId: 'DOLIBARR_FF_FINANCIALS_GROUP_ID', variable: 'DOLIBARR_FF_FINANCIALS_GROUP_ID'),
+                        string(credentialsId: 'DOLIBARR_FF_HR_GROUP_ID', variable: 'DOLIBARR_FF_HR_GROUP_ID'),
+                        string(credentialsId: 'DOLIBARR_FF_LOGISTICS_GROUP_ID', variable: 'DOLIBARR_FF_LOGISTICS_GROUP_ID'),
+                        string(credentialsId: 'DOLIBARR_FF_FMANAGER_GROUP_ID', variable: 'DOLIBARR_FF_FMANAGER_GROUP_ID')
+                    ]) {
+                        sh 'cp $FIREBASE_KEY_FILE src/main/resources/firebase-service-account.json'
+                        sh 'mvn -Dtest=**/JwtServiceTest,**/JwtAuthenticationFilterTest,**/JwtAuthenticationFilterExpirationTest,**/AuthControllerTest test -Dspring.profiles.active=test'
+                        // Clean up Firebase key for security
+                        sh 'rm -f src/main/resources/firebase-service-account.json'
+                    }
+                }
+            }
+            post {
+                always {
+                    dir('FF-API') {
+                        junit 'target/surefire-reports/*.xml'
+                    }
+                }
+            }
+        }
+
         stage('Integration Tests') {
             steps {
                 dir('FF-API') {
