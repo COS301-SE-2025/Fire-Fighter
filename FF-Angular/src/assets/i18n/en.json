@@ -100,8 +100,7 @@
       "DELIVERY_SECTION": "Delivery Methods",
       "CRITICAL_ALERTS": "Critical System Alerts",
       "CRITICAL_ALERTS_DESC": "System outages, security breaches, emergency incidents",
-      "ACCESS_REQUESTS": "Emergency Access Requests",
-      "ACCESS_REQUESTS_DESC": "New FireFighter role requests requiring approval",
+
       "SESSION_EXPIRY": "Session Expiry Warnings",
       "SESSION_EXPIRY_DESC": "Alerts when your FireFighter access is about to expire",
       "REQUEST_UPDATES": "Request Status Updates",
@@ -110,8 +109,7 @@
       "AUDIT_ALERTS_DESC": "Unusual activity detected in your access logs",
       "MAINTENANCE": "System Maintenance",
       "MAINTENANCE_DESC": "Scheduled maintenance and system updates",
-      "PUSH_ENABLED": "Push Notifications",
-      "PUSH_ENABLED_DESC": "Browser and mobile notifications",
+
       "EMAIL_ENABLED": "Email Notifications",
       "EMAIL_ENABLED_DESC": "Email alerts for critical events"
     },

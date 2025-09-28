@@ -100,8 +100,7 @@
       "DELIVERY_SECTION": "Zustellungsmethoden",
       "CRITICAL_ALERTS": "Kritische Systemwarnungen",
       "CRITICAL_ALERTS_DESC": "Systemausfälle, Sicherheitsverletzungen, Notfälle",
-      "ACCESS_REQUESTS": "Notfall-Zugriffsanfragen",
-      "ACCESS_REQUESTS_DESC": "Neue FireFighter-Rollenanfragen, die eine Genehmigung erfordern",
+
       "SESSION_EXPIRY": "Sitzungsablauf-Warnungen",
       "SESSION_EXPIRY_DESC": "Warnungen, wenn Ihr FireFighter-Zugriff bald abläuft",
       "REQUEST_UPDATES": "Anfrage-Status-Updates",
@@ -110,8 +109,7 @@
       "AUDIT_ALERTS_DESC": "Ungewöhnliche Aktivitäten in Ihren Zugriffsprotokollen erkannt",
       "MAINTENANCE": "Systemwartung",
       "MAINTENANCE_DESC": "Geplante Wartungsarbeiten und System-Updates",
-      "PUSH_ENABLED": "Push-Benachrichtigungen",
-      "PUSH_ENABLED_DESC": "Browser- und Mobile-Benachrichtigungen",
+
       "EMAIL_ENABLED": "E-Mail-Benachrichtigungen",
       "EMAIL_ENABLED_DESC": "E-Mail-Warnungen für kritische Ereignisse"
     },

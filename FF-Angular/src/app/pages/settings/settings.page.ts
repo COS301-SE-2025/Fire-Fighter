@@ -26,12 +26,10 @@ export class SettingsPage implements OnInit, OnDestroy {
 
   notificationSettings: NotificationSettings = {
     criticalAlerts: true,
-    accessRequests: true,
     sessionExpiry: true,
     requestUpdates: true,
     auditAlerts: false,
     maintenance: false,
-    pushEnabled: true,
     emailEnabled: false
   };
 
@@ -140,10 +138,7 @@ export class SettingsPage implements OnInit, OnDestroy {
         console.log('✅ Notification settings saved to localStorage');
       }
 
-      // Request push permission if push notifications are enabled
-      if (this.notificationSettings.pushEnabled && 'Notification' in window) {
-        await this.requestNotificationPermission();
-      }
+
 
     } catch (error) {
       console.error('❌ Error saving notification settings:', error);
@@ -222,36 +217,7 @@ export class SettingsPage implements OnInit, OnDestroy {
     }
   }
 
-  private async requestNotificationPermission() {
-    try {
-      if (Notification.permission === 'default') {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-          console.log('Push notification permission granted');
-          // You could show a test notification here
-          this.showTestNotification();
-        } else {
-          console.log('Push notification permission denied');
-          // Update the setting to reflect the denied permission
-          this.notificationSettings.pushEnabled = false;
-        }
-      } else if (Notification.permission === 'granted') {
-        this.showTestNotification();
-      }
-    } catch (error) {
-      console.error('Error requesting notification permission:', error);
-    }
-  }
 
-  private showTestNotification() {
-    if (Notification.permission === 'granted') {
-      new Notification('FireFighter Settings', {
-        body: 'Push notifications are now enabled for emergency alerts.',
-        icon: '/assets/icon/favicon.png',
-        badge: '/assets/icon/favicon.png'
-      });
-    }
-  }
 
   toggleLanguageDropdown() {
     this.languageDropdownOpen = !this.languageDropdownOpen;

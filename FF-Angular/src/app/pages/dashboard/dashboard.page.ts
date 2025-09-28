@@ -385,8 +385,9 @@ export class DashboardPage implements OnInit, OnDestroy {
     // Calculate percentage of tickets that are completed (not revoked) out of all tickets
     if (this.tickets.length === 0) return 0;
 
-    const completedTickets = this.tickets.filter(t => t.status === 'Completed').length;
+    const completedTickets = this.tickets.filter(t => t.status === 'Closed').length;
     const rate = (completedTickets / this.tickets.length) * 100;
+
     return Math.round(rate * 10) / 10;
   }
 
