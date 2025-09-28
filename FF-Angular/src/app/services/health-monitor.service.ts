@@ -101,8 +101,8 @@ export class HealthMonitorService {
     this.isInitialLoadComplete = true;
     this.startHealthSubscription();
     this.healthService.startMonitoring();
-    // Use fallback-aware health check for better connectivity testing
-    this.healthService.checkHealthWithFallback().subscribe();
+    // Use timeout health check for connectivity testing
+    this.healthService.checkHealthWithTimeout().subscribe();
   }
 
   /**

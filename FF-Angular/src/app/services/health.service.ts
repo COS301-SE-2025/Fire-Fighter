@@ -174,11 +174,10 @@ export class HealthService {
   }
 
   /**
-   * Try health check with both primary and fallback URLs
-   * Useful for service-down page to test connectivity to both endpoints
+   * Check health status with timeout
+   * Useful for service-down page to test connectivity
    */
-  checkHealthWithFallback(timeoutMs: number = 8000): Observable<ServiceHealth> {
-    // First try the current API URL
+  checkHealthWithTimeout(timeoutMs: number = 8000): Observable<ServiceHealth> {
     const currentApiUrl = this.apiConfigService.getCurrentApiUrlSync();
     const healthUrl = `${currentApiUrl}/health`;
 
@@ -196,62 +195,20 @@ export class HealthService {
         return health;
       }),
       catchError((error) => {
-        // If current URL fails and we're not already using fallback, try fallback
-        if (!this.apiConfigService.isUsingFallbackApi()) {
-          console.warn('🚨 Health check failed on primary API, trying fallback...', {
-            error: error.message,
-            primaryUrl: currentApiUrl,
-            fallbackUrl: this.apiConfigService.getFallbackApiUrl()
-          });
+        console.error('❌ Health check failed:', {
+          error: error.message,
+          url: healthUrl
+        });
 
-          // Switch to fallback for future requests
-          this.apiConfigService.switchToFallback();
+        const health: ServiceHealth = {
+          isHealthy: false,
+          status: null,
+          lastChecked: new Date(),
+          error: this.getErrorMessage(error)
+        };
 
-          // Try health check with fallback URL
-          const fallbackHealthUrl = `${this.apiConfigService.getFallbackApiUrl()}/health`;
-
-          return this.http.get<HealthStatus>(fallbackHealthUrl).pipe(
-            timeout(timeoutMs),
-            map((status: HealthStatus) => {
-              const health: ServiceHealth = {
-                isHealthy: status && status.status === 'UP',
-                status: status,
-                lastChecked: new Date(),
-                error: null
-              };
-
-              this.healthSubject.next(health);
-              return health;
-            }),
-            catchError((fallbackError) => {
-              console.error('❌ Fallback health check also failed:', {
-                error: fallbackError.message,
-                fallbackUrl: fallbackHealthUrl
-              });
-
-              const health: ServiceHealth = {
-                isHealthy: false,
-                status: null,
-                lastChecked: new Date(),
-                error: this.getErrorMessage(fallbackError)
-              };
-
-              this.healthSubject.next(health);
-              return of(health);
-            })
-          );
-        } else {
-          // Already using fallback, just return the error
-          const health: ServiceHealth = {
-            isHealthy: false,
-            status: null,
-            lastChecked: new Date(),
-            error: this.getErrorMessage(error)
-          };
-
-          this.healthSubject.next(health);
-          return of(health);
-        }
+        this.healthSubject.next(health);
+        return of(health);
       })
     );
   }

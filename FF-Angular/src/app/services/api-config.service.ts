@@ -7,7 +7,6 @@ import { environment } from '../../environments/environment';
 })
 export class ApiConfigService {
   private currentApiUrl = new BehaviorSubject<string>(environment.apiUrl);
-  private isUsingFallback = false;
 
   constructor() {}
 
@@ -26,53 +25,16 @@ export class ApiConfigService {
   }
 
   /**
-   * Switch to fallback API URL
+   * Get the API URL from environment
    */
-  switchToFallback(): void {
-    if (!this.isUsingFallback) {
-      console.warn('🔄 Switching to fallback API URL:', environment.fallbackApiUrl);
-      this.currentApiUrl.next(environment.fallbackApiUrl);
-      this.isUsingFallback = true;
-    }
-  }
-
-  /**
-   * Switch back to primary API URL
-   */
-  switchToPrimary(): void {
-    if (this.isUsingFallback) {
-      console.log('🔄 Switching back to primary API URL:', environment.apiUrl);
-      this.currentApiUrl.next(environment.apiUrl);
-      this.isUsingFallback = false;
-    }
-  }
-
-  /**
-   * Check if currently using fallback API
-   */
-  isUsingFallbackApi(): boolean {
-    return this.isUsingFallback;
-  }
-
-  /**
-   * Get the primary API URL
-   */
-  getPrimaryApiUrl(): string {
+  getApiUrl(): string {
     return environment.apiUrl;
   }
 
   /**
-   * Get the fallback API URL
-   */
-  getFallbackApiUrl(): string {
-    return environment.fallbackApiUrl;
-  }
-
-  /**
-   * Reset to primary API URL (useful for testing connectivity)
+   * Reset to environment API URL (useful for testing)
    */
   reset(): void {
     this.currentApiUrl.next(environment.apiUrl);
-    this.isUsingFallback = false;
   }
-} 
+}

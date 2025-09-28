@@ -109,7 +109,6 @@ To test the health monitoring system:
 
 The health monitoring integrates with:
 
-- **HTTP Interceptor**: Fallback API switching for connection failures
+- **HTTP Interceptor**: Basic error handling for API requests
 - **Auth Service**: Connection error handling during authentication
-- **Chatbot Service**: Existing health check functionality
 - **Router**: Automatic navigation based on service status

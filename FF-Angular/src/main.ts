@@ -69,14 +69,11 @@ bootstrapApplication(AppComponent, {
       (req, next) => {
         const apiConfigService = inject(ApiConfigService);
         const currentApiUrl = apiConfigService.getCurrentApiUrlSync();
-        
+
         // Update request URL to use current API URL
         let modifiedRequest = req;
-        if (req.url.includes(environment.apiUrl) || req.url.includes(environment.fallbackApiUrl)) {
-          const updatedUrl = req.url
-            .replace(environment.apiUrl, currentApiUrl)
-            .replace(environment.fallbackApiUrl, currentApiUrl);
-          
+        if (req.url.includes(environment.apiUrl)) {
+          const updatedUrl = req.url.replace(environment.apiUrl, currentApiUrl);
           modifiedRequest = req.clone({ url: updatedUrl });
         }
 
@@ -88,57 +85,9 @@ bootstrapApplication(AppComponent, {
               message: error.message,
               error: error.error,
               name: error.name,
-              isProgressEvent: error.error instanceof ProgressEvent,
-              isUsingFallback: apiConfigService.isUsingFallbackApi()
+              isProgressEvent: error.error instanceof ProgressEvent
             });
 
-            // Improved connection error detection
-            const isConnectionError = error.status === 0 || 
-                                    (error.status >= 500 && error.status < 600) ||
-                                    error.error instanceof ProgressEvent ||
-                                    error.message?.includes('CONNECTION_REFUSED') ||
-                                    error.message?.includes('NETWORK_ERROR') ||
-                                    error.message?.includes('net::') ||
-                                    !error.status; // Sometimes status is undefined for network errors
-
-            const isLocalhostRequest = modifiedRequest.url.includes('localhost') || 
-                                     modifiedRequest.url.includes('127.0.0.1') ||
-                                     modifiedRequest.url.includes(environment.apiUrl);
-
-            if (!apiConfigService.isUsingFallbackApi() && 
-                isConnectionError && 
-                isLocalhostRequest) {
-              
-              console.warn('🚨 API request failed, switching to fallback...', {
-                error: error.message,
-                url: modifiedRequest.url,
-                status: error.status,
-                fallbackUrl: environment.fallbackApiUrl
-              });
-
-              // Switch to fallback API
-              apiConfigService.switchToFallback();
-
-              // Retry the request with the fallback URL
-              const fallbackUrl = modifiedRequest.url.replace(environment.apiUrl, environment.fallbackApiUrl);
-              const fallbackRequest = modifiedRequest.clone({ url: fallbackUrl });
-              
-              console.log('🔄 Retrying with fallback URL:', fallbackUrl);
-              
-              return next(fallbackRequest).pipe(
-                catchError((fallbackError: HttpErrorResponse) => {
-                  console.error('❌ Fallback API also failed:', {
-                    error: fallbackError.message,
-                    url: fallbackRequest.url,
-                    status: fallbackError.status,
-                    fallbackError: fallbackError.error
-                  });
-                  return throwError(() => fallbackError);
-                })
-              );
-            }
-
-            console.log('⚠️ Error not qualifying for fallback - passing through');
             return throwError(() => error);
           })
         );
