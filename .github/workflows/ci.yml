@@ -194,15 +194,6 @@ jobs:
           # Clean up Firebase key for security
           rm -f src/main/resources/firebase-service-account.json
 
-      - name: 📊 Publish Backend Test Results
-        if: always()
-        uses: dorny/test-reporter@v1
-        with:
-          name: Backend Unit Tests
-          path: '${{ env.API_PATH }}/target/surefire-reports/*.xml'
-          reporter: java-junit
-          fail-on-error: true
-
   # Job 4: Frontend Unit Tests
   frontend-unit-tests:
     name: 🧪 Frontend Unit Tests
@@ -274,15 +265,6 @@ jobs:
           mvn -Dtest=com.apex.firefighter.integration.**.*Test test -Dspring.profiles.active=test
           # Clean up Firebase key for security
           rm -f src/main/resources/firebase-service-account.json
-
-      - name: 📊 Publish Integration Test Results
-        if: always()
-        uses: dorny/test-reporter@v1
-        with:
-          name: Integration Tests
-          path: '${{ env.API_PATH }}/target/surefire-reports/*.xml'
-          reporter: java-junit
-          fail-on-error: true
 
   # Job 6: E2E Tests
   e2e-tests:
