@@ -415,7 +415,7 @@ jobs:
         run: |
           npm install
           echo "🏗️ Building Angular application..."
-          ng build
+          npx ng build
 
       - name: 📦 Upload Backend Artifacts
         if: matrix.component == 'backend'
