@@ -229,9 +229,19 @@ pipeline {
                                     sleep 5
                                 fi
 
+                                # Show current directory and contents
+                                echo "Current working directory: $(pwd)"
+                                echo "Directory contents:"
+                                ls -la
+
+                                # Verify we have package.json
+                                if [ ! -f package.json ]; then
+                                    echo "❌ package.json not found in current directory"
+                                    exit 1
+                                fi
+
                                 # Start Angular dev server in background
                                 echo "Starting Angular development server..."
-                                cd /var/lib/jenkins/workspace/Fire-Fighter_main/FF-Angular || cd FF-Angular
                                 nohup npm start > angular-server.log 2>&1 &
                                 SERVER_PID=$!
                                 echo "Started Angular server with PID: $SERVER_PID"
