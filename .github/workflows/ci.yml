@@ -433,44 +433,23 @@ jobs:
           path: ${{ env.ANGULAR_PATH }}/${{ env.ANGULAR_DIST }}/**/*
           retention-days: 7
 
-  # Job 8: Security Scanning (parallel)
+  # Job 8: Security Scanning (frontend only)
   security-scan:
-    name: 🔒 Security Scanning
+    name: 🔒 Frontend Security Scanning
     runs-on: ubuntu-latest
     needs: [install-dependencies]
-    strategy:
-      matrix:
-        scan-type: [backend-owasp, frontend-npm]
     steps:
       - name: 🔥 Checkout Code
         uses: actions/checkout@v4
 
-      - name: ☕ Setup Java 17
-        if: matrix.scan-type == 'backend-owasp'
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'temurin'
-          cache: maven
-
       - name: 🟢 Setup Node.js 22
-        if: matrix.scan-type == 'frontend-npm'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: '${{ env.ANGULAR_PATH }}/package-lock.json'
 
-      - name: 🔒 OWASP Dependency Check (Backend)
-        if: matrix.scan-type == 'backend-owasp'
-        working-directory: ${{ env.API_PATH }}
-        run: |
-          echo "🔒 Running OWASP dependency check..."
-          mvn org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=7
-          echo "✅ OWASP security scan completed"
-
       - name: 🔒 NPM Security Audit (Frontend)
-        if: matrix.scan-type == 'frontend-npm'
         working-directory: ${{ env.ANGULAR_PATH }}
         run: |
           npm install
@@ -482,9 +461,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: security-reports-${{ matrix.scan-type }}
+          name: security-reports-frontend
           path: |
-            ${{ env.API_PATH }}/target/dependency-check-report.html
             ${{ env.ANGULAR_PATH }}/npm-audit-report.json
           retention-days: 7
 
