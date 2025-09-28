@@ -120,9 +120,9 @@ export class ServiceDownPage implements OnInit, OnDestroy {
         this.healthSubscription.unsubscribe();
       }
 
-      // Use the new health check method that supports fallback URLs
+      // Use the health check method with timeout
       const health = await firstValueFrom(
-        this.healthService.checkHealthWithFallback(10000)
+        this.healthService.checkHealthWithTimeout(10000)
       );
 
       if (health?.isHealthy) {

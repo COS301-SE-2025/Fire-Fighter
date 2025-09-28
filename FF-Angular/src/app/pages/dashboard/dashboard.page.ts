@@ -8,7 +8,7 @@ import { AdminService, AdminTicket } from '../../services/admin.service';
 import { NotificationService } from '../../services/notification.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { calculateTimeAgo } from '../../services/mock-ticket-database';
-import { catchError, finalize } from 'rxjs/operators';
+import { catchError, finalize, take } from 'rxjs/operators';
 import { of, Subscription } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 
@@ -98,12 +98,15 @@ export class DashboardPage implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    console.log('🔍 Dashboard - ngOnInit() called');
     this.subscribeToNotifications();
     this.checkForAdminAccessError();
     this.subscribeToTicketCreation();
 
     // Subscribe to user changes and load tickets when user is available
+    console.log('🔍 Dashboard - Setting up user subscription');
     this.userSubscription = this.authService.user$.subscribe(user => {
+      console.log('🔍 Dashboard - User subscription triggered:', user ? user.uid : 'null');
       if (user) {
         this.currentUserUid = user.uid;
         this.loadTickets();
@@ -179,6 +182,7 @@ export class DashboardPage implements OnInit, OnDestroy {
   }
 
   loadTickets() {
+    console.log('🔍 Dashboard - loadTickets() called');
     this.isLoading = true;
     this.error = null;
     this.loadTicketsInternal(true);
@@ -200,32 +204,15 @@ export class DashboardPage implements OnInit, OnDestroy {
     }
     this.error = null;
 
-    // Check if user is admin to determine which tickets to load
-    const isAdmin = this.authService.isCurrentUserAdmin();
+    // Use observable to ensure we have the correct admin status
+    this.authService.isAdmin$.pipe(
+      take(1) // Take only the current value
+    ).subscribe(isAdmin => {
+      console.log('🔍 Dashboard - Is admin:', isAdmin, 'Current user UID:', this.currentUserUid);
 
-    if (isAdmin) {
-      // Admin: Load all tickets from the system (last 6)
-      this.adminService.getTicketHistory()
-        .pipe(
-          catchError(err => {
-            this.error = 'Failed to load tickets. Please try again later.';
-            return of([]);
-          }),
-          finalize(() => {
-            if (showLoading) {
-              this.isLoading = false;
-            }
-          })
-        )
-        .subscribe(adminTickets => {
-          // Convert AdminTicket to Ticket format and get last 6
-          const convertedTickets = this.convertAdminTicketsToTickets(adminTickets);
-          this.processTickets(convertedTickets.slice(0, 6));
-        });
-    } else {
-      // Regular user: Load only their tickets (last 6)
-      if (this.currentUserUid) {
-        this.ticketService.getTickets()
+      if (isAdmin) {
+        // Admin: Load all tickets from the system
+        this.adminService.getTicketHistory()
           .pipe(
             catchError(err => {
               this.error = 'Failed to load tickets. Please try again later.';
@@ -237,24 +224,51 @@ export class DashboardPage implements OnInit, OnDestroy {
               }
             })
           )
-          .subscribe(tickets => {
-            // Filter tickets for current user only using user.uid
-            const userTickets = tickets.filter(ticket => ticket.userId === this.currentUserUid);
+          .subscribe(adminTickets => {
+            // Convert AdminTicket to Ticket format
+            const convertedTickets = this.convertAdminTicketsToTickets(adminTickets);
+            console.log('🔍 Dashboard - Admin loaded tickets:', convertedTickets.length, 'Active:', convertedTickets.filter(t => t.status === 'Active').length);
 
-            // Get last 6 tickets for the user, sorted by date created (newest first)
-            const sortedTickets = userTickets
-              .sort((a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime())
-              .slice(0, 6);
-            this.processTickets(sortedTickets);
+            // Store ALL tickets for active ticket filtering, but only process last 6 for dashboard stats
+            this.tickets = convertedTickets;
+            this.processTicketsForDashboard(convertedTickets.slice(0, 6));
           });
       } else {
-        // No user found, clear tickets and stop loading
-        this.tickets = [];
-        if (showLoading) {
-          this.isLoading = false;
+        // Regular user: Load only their tickets
+        if (this.currentUserUid) {
+          this.ticketService.getTickets()
+            .pipe(
+              catchError(err => {
+                this.error = 'Failed to load tickets. Please try again later.';
+                return of([]);
+              }),
+              finalize(() => {
+                if (showLoading) {
+                  this.isLoading = false;
+                }
+              })
+            )
+            .subscribe(tickets => {
+              // Filter tickets for current user only using user.uid
+              const userTickets = tickets.filter(ticket => ticket.userId === this.currentUserUid);
+              console.log('🔍 Dashboard - User loaded tickets:', userTickets.length, 'Active:', userTickets.filter(t => t.status === 'Active').length);
+              console.log('🔍 Dashboard - Current user UID:', this.currentUserUid);
+              console.log('🔍 Dashboard - All tickets user IDs:', tickets.map(t => t.userId));
+
+              // Store ALL user tickets for active ticket filtering, but only process last 6 for dashboard stats
+              const sortedTickets = userTickets.sort((a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime());
+              this.tickets = sortedTickets;
+              this.processTicketsForDashboard(sortedTickets.slice(0, 6));
+            });
+        } else {
+          // No user found, clear tickets and stop loading
+          this.tickets = [];
+          if (showLoading) {
+            this.isLoading = false;
+          }
         }
       }
-    }
+    });
   }
 
   /**
@@ -275,15 +289,10 @@ export class DashboardPage implements OnInit, OnDestroy {
   }
 
   /**
-   * Process tickets with sorting and username fetching
+   * Process tickets for dashboard stats and username fetching (not for active tickets display)
    */
-  private processTickets(tickets: Ticket[]): void {
-    // Sort tickets: newest first for recent activity display
-    this.tickets = tickets.sort((a, b) =>
-      new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime()
-    );
-
-    // Fetch usernames for unique userIds
+  private processTicketsForDashboard(tickets: Ticket[]): void {
+    // Fetch usernames for unique userIds from ALL tickets (not just the 6 for dashboard)
     const uniqueUserIds = Array.from(new Set(this.tickets.map(t => t.userId)));
     uniqueUserIds.forEach(userId => {
       if (!this.usernames[userId]) {
@@ -310,7 +319,8 @@ export class DashboardPage implements OnInit, OnDestroy {
 
   // Get active tickets for the emergency requests display (first 3 active)
   get activeTicketsForDisplay() {
-    return this.tickets.filter(t => t.status === 'Active').slice(0, 3);
+    const activeTickets = this.tickets.filter(t => t.status === 'Active');
+    return activeTickets.slice(0, 3);
   }
 
   // Emergency Response Statistics Properties

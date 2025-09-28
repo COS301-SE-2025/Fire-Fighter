@@ -170,11 +170,7 @@ export const mockChatbotService = {
 export const mockApiConfigService = {
   getCurrentApiUrl: jasmine.createSpy('getCurrentApiUrl').and.returnValue(of('http://localhost:8080/api')),
   getCurrentApiUrlSync: jasmine.createSpy('getCurrentApiUrlSync').and.returnValue('http://localhost:8080/api'),
-  switchToFallback: jasmine.createSpy('switchToFallback'),
-  switchToPrimary: jasmine.createSpy('switchToPrimary'),
-  isUsingFallbackApi: jasmine.createSpy('isUsingFallbackApi').and.returnValue(false),
-  getPrimaryApiUrl: jasmine.createSpy('getPrimaryApiUrl').and.returnValue('http://localhost:8080/api'),
-  getFallbackApiUrl: jasmine.createSpy('getFallbackApiUrl').and.returnValue('http://localhost:8080/api'),
+  getApiUrl: jasmine.createSpy('getApiUrl').and.returnValue('http://localhost:8080/api'),
   reset: jasmine.createSpy('reset'),
 };
 

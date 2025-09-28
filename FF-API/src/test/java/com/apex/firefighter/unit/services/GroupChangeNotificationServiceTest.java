@@ -1,5 +1,6 @@
 package com.apex.firefighter.unit.services;
 
+import com.apex.firefighter.config.DoliGroupConfig;
 import com.apex.firefighter.model.User;
 import com.apex.firefighter.repository.UserRepository;
 import com.apex.firefighter.service.GmailEmailService;
@@ -16,7 +17,9 @@ import org.mockito.quality.Strictness;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -32,6 +35,9 @@ class GroupChangeNotificationServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private DoliGroupConfig doliGroupConfig;
 
     @InjectMocks
     private GroupChangeNotificationService groupChangeNotificationService;
@@ -63,6 +69,15 @@ class GroupChangeNotificationServiceTest {
         admin2.setIsAdmin(true);
 
         adminUsers = Arrays.asList(admin1, admin2);
+        
+        // Mock DoliGroupConfig to return the actual group IDs from environment
+        Map<String, Integer> mockGroups = new HashMap<>();
+        mockGroups.put("hr", 7);  // HR Emergency Group has ID 7
+        mockGroups.put("financials", 6);  // Financial Emergency Group has ID 6
+        mockGroups.put("fmanager", 9);  // Management Emergency Group has ID 9
+        mockGroups.put("logistics", 8);  // Logistics Emergency Group has ID 8
+        
+        lenient().when(doliGroupConfig.getGroups()).thenReturn(mockGroups);
     }
 
     // ==================== SUSPICIOUS GROUP CHANGE DETECTION TESTS ====================
@@ -201,8 +216,8 @@ class GroupChangeNotificationServiceTest {
     @Test
     void notifyAdminsOfGroupChangeById_WithValidGroupIds_ShouldResolveNamesAndNotify() throws MessagingException {
         // Arrange
-        Integer oldGroupId = 1; // HR Emergency Group
-        Integer newGroupId = 2; // Financial Emergency Group
+        Integer oldGroupId = 7; // HR Emergency Group
+        Integer newGroupId = 6; // Financial Emergency Group
         String reason = "Emergency escalation";
         
         when(userRepository.findByIsAdminTrue()).thenReturn(adminUsers);
@@ -221,7 +236,7 @@ class GroupChangeNotificationServiceTest {
     void notifyAdminsOfGroupChangeById_WithNullOldGroupId_ShouldHandleGracefully() throws MessagingException {
         // Arrange
         Integer oldGroupId = null;
-        Integer newGroupId = 3; // Management Emergency Group
+        Integer newGroupId = 9; // Management Emergency Group
         String reason = "New user assignment";
         
         // Reset and setup mocks explicitly
@@ -242,7 +257,7 @@ class GroupChangeNotificationServiceTest {
     @Test
     void notifyAdminsOfGroupChangeById_WithUnknownGroupId_ShouldUseGroupIdFormat() throws MessagingException {
         // Arrange
-        Integer oldGroupId = 4; // Logistics Emergency Group
+        Integer oldGroupId = 8; // Logistics Emergency Group
         Integer newGroupId = 99; // Unknown group
         String reason = "System migration";
         
@@ -318,6 +333,89 @@ class GroupChangeNotificationServiceTest {
 
         // Assert - Should not crash, but may not send emails
         verify(userRepository, atMost(1)).findByIsAdminTrue();
+    }
+
+    @Test
+    void resolveGroupName_WithActualEnvironmentGroupIds_ShouldResolveCorrectly() throws MessagingException {
+        // Arrange - Test with actual environment variable values
+        Map<String, Integer> actualGroups = new HashMap<>();
+        actualGroups.put("hr", 7);  // Actual HR group ID from environment
+        actualGroups.put("financials", 6);  // Actual Financial group ID from environment
+        actualGroups.put("fmanager", 9);  // Actual Management group ID from environment
+        actualGroups.put("logistics", 8);  // Actual Logistics group ID from environment
+        
+        when(doliGroupConfig.getGroups()).thenReturn(actualGroups);
+        
+        String oldGroup = null;  // No previous group
+        String newGroup = "HR Emergency Group";  // Should resolve from ID 7
+        String reason = "Emergency ticket creation";
+        
+        when(userRepository.findByIsAdminTrue()).thenReturn(adminUsers);
+        doNothing().when(emailService).sendSuspiciousGroupChangeNotificationEmail(
+            anyString(), any(User.class), anyString(), anyString(), anyString(), anyString(), anyString());
+
+        // Act - Test group change by ID (simulating actual usage)
+        groupChangeNotificationService.notifyAdminsOfGroupChangeById(testUser, TEST_TICKET_ID, null, 7, reason);
+
+        // Assert - Should resolve ID 7 to "HR Emergency Group" and detect MEDIUM risk
+        verify(emailService, times(2)).sendSuspiciousGroupChangeNotificationEmail(
+            anyString(), eq(testUser), eq(TEST_TICKET_ID), eq(oldGroup), eq(newGroup), eq(reason), eq("MEDIUM"));
+    }
+
+    @Test
+    void resolveGroupName_WithFinancialGroupId6_ShouldResolveCorrectly() throws MessagingException {
+        // Arrange - Test Financial group with actual ID 6
+        String oldGroup = null;
+        String newGroup = "Financial Emergency Group";  // Should resolve from ID 6
+        String reason = "Financial emergency";
+        
+        when(userRepository.findByIsAdminTrue()).thenReturn(adminUsers);
+        doNothing().when(emailService).sendSuspiciousGroupChangeNotificationEmail(
+            anyString(), any(User.class), anyString(), anyString(), anyString(), anyString(), anyString());
+
+        // Act - Test group change by ID (simulating actual usage)
+        groupChangeNotificationService.notifyAdminsOfGroupChangeById(testUser, TEST_TICKET_ID, null, 6, reason);
+
+        // Assert - Should resolve ID 6 to "Financial Emergency Group" and detect HIGH risk
+        verify(emailService, times(2)).sendSuspiciousGroupChangeNotificationEmail(
+            anyString(), eq(testUser), eq(TEST_TICKET_ID), eq(oldGroup), eq(newGroup), eq(reason), eq("HIGH"));
+    }
+
+    @Test
+    void resolveGroupName_WithManagementGroupId9_ShouldResolveCorrectly() throws MessagingException {
+        // Arrange - Test Management group with actual ID 9
+        String oldGroup = null;
+        String newGroup = "Management Emergency Group";  // Should resolve from ID 9
+        String reason = "Management escalation";
+        
+        when(userRepository.findByIsAdminTrue()).thenReturn(adminUsers);
+        doNothing().when(emailService).sendSuspiciousGroupChangeNotificationEmail(
+            anyString(), any(User.class), anyString(), anyString(), anyString(), anyString(), anyString());
+
+        // Act - Test group change by ID (simulating actual usage)
+        groupChangeNotificationService.notifyAdminsOfGroupChangeById(testUser, TEST_TICKET_ID, null, 9, reason);
+
+        // Assert - Should resolve ID 9 to "Management Emergency Group" and detect HIGH risk
+        verify(emailService, times(2)).sendSuspiciousGroupChangeNotificationEmail(
+            anyString(), eq(testUser), eq(TEST_TICKET_ID), eq(oldGroup), eq(newGroup), eq(reason), eq("HIGH"));
+    }
+
+    @Test
+    void resolveGroupName_WithLogisticsGroupId8_ShouldNotBeSuspicious() throws MessagingException {
+        // Arrange - Test Logistics group with actual ID 8 (should not be suspicious)
+        String oldGroup = null;
+        String newGroup = "Logistics Emergency Group";  // Should resolve from ID 8
+        String reason = "Logistics assignment";
+        
+        when(userRepository.findByIsAdminTrue()).thenReturn(adminUsers);
+
+        // Act - Test group change by ID (simulating actual usage)
+        groupChangeNotificationService.notifyAdminsOfGroupChangeById(testUser, TEST_TICKET_ID, null, 8, reason);
+
+        // Assert - Should resolve ID 8 to "Logistics Emergency Group" but NOT send notifications (not suspicious)
+        verify(userRepository, never()).findByIsAdminTrue();
+        verify(emailService, never()).sendSuspiciousGroupChangeNotificationEmail(
+            anyString(), any(User.class), anyString(), anyString(), anyString(), anyString(), anyString());
     }
 
     @Test

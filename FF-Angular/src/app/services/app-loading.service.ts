@@ -41,8 +41,8 @@ export class AppLoadingService {
         progress: 20
       });
 
-      // Use fallback-aware health check for better initial connectivity testing
-      await firstValueFrom(this.healthService.checkHealthWithFallback(5000));
+      // Use health check with timeout for initial connectivity testing
+      await firstValueFrom(this.healthService.checkHealthWithTimeout(5000));
 
       this.updateLoadingState({
         isLoading: true,
