@@ -1,0 +1,586 @@
+name: 🔥 Fire-Fighter CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Type of build to run'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+        - full
+        - quick
+        - tests-only
+        - build-only
+      skip_tests:
+        description: 'Skip unit tests (faster build)'
+        required: false
+        default: false
+        type: boolean
+      deploy_to_staging:
+        description: 'Deploy to staging environment'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  JAVA_VERSION: '17'
+  NODE_VERSION: '22'
+  MAVEN_VERSION: '3.8'
+  API_PATH: 'FF-API'
+  ANGULAR_PATH: 'FF-Angular'
+  API_JAR: 'firefighter-platform-0.0.1-SNAPSHOT.jar'
+  ANGULAR_DIST: 'www'
+
+jobs:
+  # Job 1: Install Dependencies (parallel for backend and frontend)
+  install-dependencies:
+    name: 📦 Install Dependencies
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: [backend, frontend]
+    steps:
+      - name: 🔥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ☕ Setup Java 17
+        if: matrix.component == 'backend'
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: maven
+
+      - name: 🟢 Setup Node.js 22
+        if: matrix.component == 'frontend'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '${{ env.ANGULAR_PATH }}/package-lock.json'
+
+      - name: 🔧 Install Backend Dependencies
+        if: matrix.component == 'backend'
+        working-directory: ${{ env.API_PATH }}
+        run: |
+          echo "🔧 Installing Maven dependencies..."
+          mvn clean compile -DskipTests=true
+
+      - name: 🔧 Install Frontend Dependencies
+        if: matrix.component == 'frontend'
+        working-directory: ${{ env.ANGULAR_PATH }}
+        run: |
+          echo "🔧 Installing NPM dependencies..."
+          npm install
+
+      - name: 📦 Cache Backend Dependencies
+        if: matrix.component == 'backend'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.m2/repository
+            ${{ env.API_PATH }}/target
+          key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            maven-${{ runner.os }}-
+
+      - name: 📦 Cache Frontend Dependencies
+        if: matrix.component == 'frontend'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.ANGULAR_PATH }}/node_modules
+            ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
+
+  # Job 2: Code Quality & Linting (parallel)
+  code-quality:
+    name: 🔍 Code Quality & Linting
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+    strategy:
+      matrix:
+        component: [backend, frontend]
+    steps:
+      - name: 🔥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ☕ Setup Java 17
+        if: matrix.component == 'backend'
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: maven
+
+      - name: 🟢 Setup Node.js 22
+        if: matrix.component == 'frontend'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '${{ env.ANGULAR_PATH }}/package-lock.json'
+
+      - name: 🔍 Backend Code Quality
+        if: matrix.component == 'backend'
+        working-directory: ${{ env.API_PATH }}
+        run: |
+          echo "🔍 Running Maven validation..."
+          mvn validate compile -q
+          echo "✅ Backend code quality check passed"
+
+      - name: 🔍 Frontend Linting
+        if: matrix.component == 'frontend'
+        working-directory: ${{ env.ANGULAR_PATH }}
+        run: |
+          npm install
+          echo "🔍 Running Angular linting..."
+          npm run lint
+          echo "✅ Frontend linting passed"
+
+  # Job 3: Backend Unit Tests
+  backend-unit-tests:
+    name: 🧪 Backend Unit Tests
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+    if: ${{ !inputs.skip_tests || github.event_name != 'workflow_dispatch' }}
+    steps:
+      - name: 🔥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ☕ Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: maven
+
+      - name: 🧪 Backend Unit Tests
+        working-directory: ${{ env.API_PATH }}
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DOLIBARR_DB_NAME: ${{ secrets.DOLIBARR_DB_NAME }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_SSL_MODE: ${{ secrets.DB_SSL_MODE }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION }}
+          GMAIL_ENABLED: ${{ secrets.GMAIL_ENABLED }}
+          GMAIL_USERNAME: ${{ secrets.GMAIL_USERNAME }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          GMAIL_SENDER_NAME: ${{ secrets.GMAIL_SENDER_NAME }}
+          GOOGLE_GEMINI_API_KEY: ${{ secrets.GOOGLE_GEMINI_API_KEY }}
+          DOLIBARR_API_BASE_URL: ${{ secrets.DOLIBARR_API_BASE_URL }}
+          DOLIBARR_API_KEY: ${{ secrets.DOLIBARR_API_KEY }}
+          DOLIBARR_FF_FINANCIALS_GROUP_ID: ${{ secrets.DOLIBARR_FF_FINANCIALS_GROUP_ID }}
+          DOLIBARR_FF_HR_GROUP_ID: ${{ secrets.DOLIBARR_FF_HR_GROUP_ID }}
+          DOLIBARR_FF_LOGISTICS_GROUP_ID: ${{ secrets.DOLIBARR_FF_LOGISTICS_GROUP_ID }}
+          DOLIBARR_FF_FMANAGER_GROUP_ID: ${{ secrets.DOLIBARR_FF_FMANAGER_GROUP_ID }}
+        run: |
+          echo "🧪 Running backend unit tests (unit folder)..."
+          # Create Firebase service account file from secret
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > src/main/resources/firebase-service-account.json
+          mvn -Dtest=com.apex.firefighter.unit.**.*Test test -Dspring.profiles.active=test
+          # Clean up Firebase key for security
+          rm -f src/main/resources/firebase-service-account.json
+
+      - name: 📊 Publish Backend Test Results
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Backend Unit Tests
+          path: '${{ env.API_PATH }}/target/surefire-reports/*.xml'
+          reporter: java-junit
+          fail-on-error: true
+
+  # Job 4: Frontend Unit Tests
+  frontend-unit-tests:
+    name: 🧪 Frontend Unit Tests
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+    if: ${{ !inputs.skip_tests || github.event_name != 'workflow_dispatch' }}
+    steps:
+      - name: 🔥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '${{ env.ANGULAR_PATH }}/package-lock.json'
+
+      - name: 🧪 Frontend Unit Tests
+        working-directory: ${{ env.ANGULAR_PATH }}
+        run: |
+          npm install
+          echo "🧪 Running frontend unit tests..."
+          npm test --watch=false --browsers=ChromeHeadless
+
+  # Job 5: Integration Tests
+  integration-tests:
+    name: 🔗 Integration Tests
+    runs-on: ubuntu-latest
+    needs: [install-dependencies, backend-unit-tests]
+    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.event_name == 'pull_request' }}
+    steps:
+      - name: 🔥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ☕ Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: maven
+
+      - name: 🔗 Backend Integration Tests
+        working-directory: ${{ env.API_PATH }}
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DOLIBARR_DB_NAME: ${{ secrets.DOLIBARR_DB_NAME }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_SSL_MODE: ${{ secrets.DB_SSL_MODE }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION }}
+          GMAIL_ENABLED: ${{ secrets.GMAIL_ENABLED }}
+          GMAIL_USERNAME: ${{ secrets.GMAIL_USERNAME }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          GMAIL_SENDER_NAME: ${{ secrets.GMAIL_SENDER_NAME }}
+          GOOGLE_GEMINI_API_KEY: ${{ secrets.GOOGLE_GEMINI_API_KEY }}
+          DOLIBARR_API_BASE_URL: ${{ secrets.DOLIBARR_API_BASE_URL }}
+          DOLIBARR_API_KEY: ${{ secrets.DOLIBARR_API_KEY }}
+          DOLIBARR_FF_FINANCIALS_GROUP_ID: ${{ secrets.DOLIBARR_FF_FINANCIALS_GROUP_ID }}
+          DOLIBARR_FF_HR_GROUP_ID: ${{ secrets.DOLIBARR_FF_HR_GROUP_ID }}
+          DOLIBARR_FF_LOGISTICS_GROUP_ID: ${{ secrets.DOLIBARR_FF_LOGISTICS_GROUP_ID }}
+          DOLIBARR_FF_FMANAGER_GROUP_ID: ${{ secrets.DOLIBARR_FF_FMANAGER_GROUP_ID }}
+        run: |
+          echo "🔗 Running backend integration tests (integration folder)..."
+          # Create Firebase service account file from secret
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > src/main/resources/firebase-service-account.json
+          mvn -Dtest=com.apex.firefighter.integration.**.*Test test -Dspring.profiles.active=test
+          # Clean up Firebase key for security
+          rm -f src/main/resources/firebase-service-account.json
+
+      - name: 📊 Publish Integration Test Results
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Integration Tests
+          path: '${{ env.API_PATH }}/target/surefire-reports/*.xml'
+          reporter: java-junit
+          fail-on-error: true
+
+  # Job 6: E2E Tests
+  e2e-tests:
+    name: 🎯 E2E Tests
+    runs-on: ubuntu-latest
+    needs: [install-dependencies, frontend-unit-tests]
+    steps:
+      - name: 🔥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '${{ env.ANGULAR_PATH }}/package-lock.json'
+
+      - name: 🔧 Install E2E Dependencies
+        run: |
+          # Install system dependencies for E2E testing
+          sudo apt-get update
+          sudo apt-get install -y xvfb google-chrome-stable
+
+      - name: 🧪 Run E2E Tests
+        working-directory: ${{ env.ANGULAR_PATH }}
+        run: |
+          npm install
+          echo "🔧 Verifying E2E testing environment..."
+
+          # Verify required dependencies are available
+          echo "Checking for Xvfb..."
+          if command -v xvfb-run &> /dev/null; then
+              echo "✅ Xvfb is available"
+          else
+              echo "❌ Xvfb not found"
+              exit 1
+          fi
+
+          echo "Checking for Chrome..."
+          if command -v google-chrome &> /dev/null; then
+              echo "✅ Google Chrome is available"
+          else
+              echo "❌ No Chrome browser found"
+              exit 1
+          fi
+
+          echo "✅ E2E environment ready!"
+
+          echo "🚀 Starting Angular development server for E2E tests..."
+          # Start Angular dev server in background
+          npm start &
+          SERVER_PID=$!
+          echo "Started Angular server with PID: $SERVER_PID"
+
+          # Wait for server to be ready
+          echo "⏳ Waiting for server to be ready..."
+          timeout 300 bash -c 'until curl -f http://localhost:4200 >/dev/null 2>&1; do sleep 5; done'
+
+          if ! curl -f http://localhost:4200 >/dev/null 2>&1; then
+              echo "❌ Server failed to start after 5 minutes"
+              exit 1
+          fi
+
+          echo "✅ Server is ready at http://localhost:4200"
+
+          # Run E2E tests
+          echo "🧪 Running E2E tests..."
+          xvfb-run -a npm run e2e:headless
+
+          # Clean up
+          echo "🧹 Cleaning up Angular dev server..."
+          kill $SERVER_PID || true
+
+      - name: 📦 Archive E2E Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-artifacts
+          path: |
+            ${{ env.ANGULAR_PATH }}/cypress/screenshots/**/*
+            ${{ env.ANGULAR_PATH }}/cypress/videos/**/*
+          retention-days: 7
+
+  # Job 7: Build Applications (parallel for backend and frontend)
+  build:
+    name: 🏗️ Build Applications
+    runs-on: ubuntu-latest
+    needs: [code-quality, backend-unit-tests]
+    if: ${{ inputs.build_type == 'full' || inputs.build_type == 'quick' || inputs.build_type == 'build-only' || github.event_name != 'workflow_dispatch' }}
+    strategy:
+      matrix:
+        component: [backend, frontend]
+    steps:
+      - name: 🔥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ☕ Setup Java 17
+        if: matrix.component == 'backend'
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: maven
+
+      - name: 🟢 Setup Node.js 22
+        if: matrix.component == 'frontend'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '${{ env.ANGULAR_PATH }}/package-lock.json'
+
+      - name: 🏗️ Build Backend
+        if: matrix.component == 'backend'
+        working-directory: ${{ env.API_PATH }}
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DOLIBARR_DB_NAME: ${{ secrets.DOLIBARR_DB_NAME }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_SSL_MODE: ${{ secrets.DB_SSL_MODE }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION }}
+          GMAIL_ENABLED: ${{ secrets.GMAIL_ENABLED }}
+          GMAIL_USERNAME: ${{ secrets.GMAIL_USERNAME }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          GMAIL_SENDER_NAME: ${{ secrets.GMAIL_SENDER_NAME }}
+          GOOGLE_GEMINI_API_KEY: ${{ secrets.GOOGLE_GEMINI_API_KEY }}
+          DOLIBARR_API_BASE_URL: ${{ secrets.DOLIBARR_API_BASE_URL }}
+          DOLIBARR_API_KEY: ${{ secrets.DOLIBARR_API_KEY }}
+          DOLIBARR_FF_FINANCIALS_GROUP_ID: ${{ secrets.DOLIBARR_FF_FINANCIALS_GROUP_ID }}
+          DOLIBARR_FF_HR_GROUP_ID: ${{ secrets.DOLIBARR_FF_HR_GROUP_ID }}
+          DOLIBARR_FF_LOGISTICS_GROUP_ID: ${{ secrets.DOLIBARR_FF_LOGISTICS_GROUP_ID }}
+          DOLIBARR_FF_FMANAGER_GROUP_ID: ${{ secrets.DOLIBARR_FF_FMANAGER_GROUP_ID }}
+        run: |
+          echo "🏗️ Building Spring Boot application..."
+          # Create Firebase service account file from secret
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > src/main/resources/firebase-service-account.json
+          mvn package -DskipTests=true
+          # Clean up Firebase key for security
+          rm -f src/main/resources/firebase-service-account.json
+
+      - name: 🏗️ Build Frontend
+        if: matrix.component == 'frontend'
+        working-directory: ${{ env.ANGULAR_PATH }}
+        run: |
+          npm install
+          echo "🏗️ Building Angular application..."
+          ng build
+
+      - name: 📦 Upload Backend Artifacts
+        if: matrix.component == 'backend'
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: ${{ env.API_PATH }}/target/${{ env.API_JAR }}
+          retention-days: 7
+
+      - name: 📦 Upload Frontend Artifacts
+        if: matrix.component == 'frontend'
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: ${{ env.ANGULAR_PATH }}/${{ env.ANGULAR_DIST }}/**/*
+          retention-days: 7
+
+  # Job 8: Security Scanning (parallel)
+  security-scan:
+    name: 🔒 Security Scanning
+    runs-on: ubuntu-latest
+    needs: [install-dependencies]
+    strategy:
+      matrix:
+        scan-type: [backend-owasp, frontend-npm]
+    steps:
+      - name: 🔥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ☕ Setup Java 17
+        if: matrix.scan-type == 'backend-owasp'
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: maven
+
+      - name: 🟢 Setup Node.js 22
+        if: matrix.scan-type == 'frontend-npm'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '${{ env.ANGULAR_PATH }}/package-lock.json'
+
+      - name: 🔒 OWASP Dependency Check (Backend)
+        if: matrix.scan-type == 'backend-owasp'
+        working-directory: ${{ env.API_PATH }}
+        run: |
+          echo "🔒 Running OWASP dependency check..."
+          mvn org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=7
+          echo "✅ OWASP security scan completed"
+
+      - name: 🔒 NPM Security Audit (Frontend)
+        if: matrix.scan-type == 'frontend-npm'
+        working-directory: ${{ env.ANGULAR_PATH }}
+        run: |
+          npm install
+          echo "🔒 Running NPM security audit..."
+          npm audit --audit-level=moderate
+          echo "✅ NPM security scan completed"
+
+      - name: 📊 Upload Security Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports-${{ matrix.scan-type }}
+          path: |
+            ${{ env.API_PATH }}/target/dependency-check-report.html
+            ${{ env.ANGULAR_PATH }}/npm-audit-report.json
+          retention-days: 7
+
+  # Job 9: Build Mobile App (conditional)
+  build-mobile:
+    name: 📱 Build Mobile App
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/') }}
+    steps:
+      - name: 🔥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '${{ env.ANGULAR_PATH }}/package-lock.json'
+
+      - name: ☕ Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+
+      - name: 🤖 Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: 📱 Build Android APK
+        working-directory: ${{ env.ANGULAR_PATH }}
+        run: |
+          npm install
+          echo "📱 Building Android APK..."
+          npx ionic capacitor build android --prod
+          echo "✅ Android APK build completed"
+
+      - name: 📦 Upload Mobile Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-apk
+          path: ${{ env.ANGULAR_PATH }}/android/app/build/outputs/apk/debug/*.apk
+          retention-days: 7
+
+  # Job 10: Notification and Summary
+  notify:
+    name: 📧 Notify Results
+    runs-on: ubuntu-latest
+    needs: [backend-unit-tests, frontend-unit-tests, integration-tests, e2e-tests, build, security-scan]
+    if: always()
+    steps:
+      - name: 📧 Send Success Notification
+        if: ${{ needs.backend-unit-tests.result == 'success' && needs.frontend-unit-tests.result == 'success' && needs.integration-tests.result == 'success' && needs.e2e-tests.result == 'success' && needs.build.result == 'success' }}
+        run: |
+          echo "✅ Build completed successfully!"
+          echo "📦 JAR file: target/${{ env.API_JAR }}"
+          echo "🌐 Frontend build: ${{ env.ANGULAR_DIST }}/"
+          echo "🧪 Backend unit tests: ✅ Passed"
+          echo "🧪 Frontend unit tests: ✅ Passed"
+          echo "🔗 Integration tests: ✅ Passed"
+          echo "🎯 E2E tests: ✅ Passed"
+          echo "🐳 Ready for Portainer deployment!"
+
+      - name: 📧 Send Failure Notification
+        if: ${{ needs.backend-unit-tests.result == 'failure' || needs.frontend-unit-tests.result == 'failure' || needs.integration-tests.result == 'failure' || needs.e2e-tests.result == 'failure' || needs.build.result == 'failure' }}
+        run: |
+          echo "❌ Build failed!"
+          echo "Check the workflow logs for details."
+
+      - name: 📊 Build Summary
+        if: always()
+        run: |
+          echo "🔥 Fire-Fighter CI/CD Pipeline Summary"
+          echo "======================================="
+          echo "🧪 Backend Unit Tests: ${{ needs.backend-unit-tests.result }}"
+          echo "🧪 Frontend Unit Tests: ${{ needs.frontend-unit-tests.result }}"
+          echo "🔗 Integration Tests: ${{ needs.integration-tests.result }}"
+          echo "🎯 E2E Tests: ${{ needs.e2e-tests.result }}"
+          echo "🏗️ Build: ${{ needs.build.result }}"
+          echo "🔒 Security Scan: ${{ needs.security-scan.result }}"
+          echo "======================================="
