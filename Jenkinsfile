@@ -192,19 +192,7 @@ pipeline {
                     script {
                         try {
                             echo "🔧 Setting up E2E testing environment..."
-                            sh '''
-                                # Install required dependencies
-                                sudo apt-get update -qq
-                                sudo apt-get install -y xvfb libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth
-
-                                # Install Chrome if not present
-                                if ! command -v google-chrome &> /dev/null; then
-                                    wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-                                    echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
-                                    sudo apt-get update -qq
-                                    sudo apt-get install -y google-chrome-stable
-                                fi
-                            '''
+                            sh './setup-e2e-ci.sh'
 
                             echo "🚀 Starting Angular development server for E2E tests..."
                             sh 'npm start &'
@@ -222,7 +210,16 @@ pipeline {
                             '''
 
                             echo "🧪 Running E2E tests..."
-                            sh 'xvfb-run -a npm run e2e:headless'
+                            sh '''
+                                # Try to run with xvfb-run if available, otherwise run directly
+                                if command -v xvfb-run &> /dev/null; then
+                                    echo "Running E2E tests with Xvfb..."
+                                    xvfb-run -a npm run e2e:headless
+                                else
+                                    echo "Running E2E tests without Xvfb (using Electron headless)..."
+                                    npm run e2e:headless
+                                fi
+                            '''
 
                         } catch (Exception e) {
                             echo "❌ E2E tests failed: ${e.getMessage()}"

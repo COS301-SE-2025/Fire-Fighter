@@ -40,9 +40,9 @@ describe('Login Flow', () => {
 
   it('should have link to register page', () => {
     cy.visit('/login');
-    
-    // Look for register/signup link
-    cy.get('a, ion-button, button').contains(/register|sign up|create account/i)
+
+    // Look for register/signup link - check for "Create an account" text
+    cy.get('a').contains('Create an account')
       .should('exist');
   });
 });
