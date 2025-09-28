@@ -191,8 +191,29 @@ pipeline {
                 dir('FF-Angular') {
                     script {
                         try {
-                            echo "🔧 Setting up E2E testing environment..."
-                            sh './setup-e2e-ci.sh'
+                            echo "🔧 Verifying E2E testing environment..."
+                            sh '''
+                                # Verify required dependencies are available
+                                echo "Checking for Xvfb..."
+                                if command -v xvfb-run &> /dev/null; then
+                                    echo "✅ Xvfb is available"
+                                else
+                                    echo "❌ Xvfb not found"
+                                    exit 1
+                                fi
+
+                                echo "Checking for Chrome..."
+                                if command -v google-chrome &> /dev/null; then
+                                    echo "✅ Google Chrome is available"
+                                elif command -v chromium-browser &> /dev/null; then
+                                    echo "✅ Chromium is available"
+                                else
+                                    echo "❌ No Chrome/Chromium browser found"
+                                    exit 1
+                                fi
+
+                                echo "✅ E2E environment ready!"
+                            '''
 
                             echo "🚀 Starting Angular development server for E2E tests..."
                             sh 'npm start &'
@@ -210,16 +231,7 @@ pipeline {
                             '''
 
                             echo "🧪 Running E2E tests..."
-                            sh '''
-                                # Try to run with xvfb-run if available, otherwise run directly
-                                if command -v xvfb-run &> /dev/null; then
-                                    echo "Running E2E tests with Xvfb..."
-                                    xvfb-run -a npm run e2e:headless
-                                else
-                                    echo "Running E2E tests without Xvfb (using Electron headless)..."
-                                    npm run e2e:headless
-                                fi
-                            '''
+                            sh 'xvfb-run -a npm run e2e:headless'
 
                         } catch (Exception e) {
                             echo "❌ E2E tests failed: ${e.getMessage()}"
