@@ -20,6 +20,26 @@ interface User {
   dolibarrId?: string;
 }
 
+interface PendingApproval {
+  userId: string;
+  username: string;
+  email: string;
+  department: string;
+  contactNumber: string;
+  createdAt: string;
+  registrationMethod: string;
+  requestedAccess: string;
+  businessJustification: string;
+  priorityLevel: 'High' | 'Medium' | 'Low';
+}
+
+interface AccessGroup {
+  id: string;
+  name: string;
+  description: string;
+  enabled: boolean;
+}
+
 @Component({
   selector: 'app-user-management',
   templateUrl: './user-management.page.html',
@@ -61,6 +81,37 @@ interface User {
 })
 export class UserManagementPage implements OnInit {
 
+  // Tab management
+  activeTab = 'users';
+
+  // Mock pending approval data
+  pendingApprovals: PendingApproval[] = [
+    {
+      userId: 'pending_001',
+      username: 'sarah.mueller',
+      email: 'sarah.mueller@bmw.com',
+      department: 'Financial Emergency Response',
+      contactNumber: '+49 89 382 12345',
+      createdAt: '2025-01-15T09:23:45Z',
+      registrationMethod: 'Google SSO',
+      requestedAccess: 'Financial Emergency Group Access',
+      businessJustification: 'Need emergency access for financial crisis management and budget approval workflows during out-of-hours incidents. Request is for accessing critical financial systems during potential BMW Group emergency situations that require immediate budget approvals and resource allocation.',
+      priorityLevel: 'High'
+    },
+    {
+      userId: 'pending_002',
+      username: 'marcus.schmidt',
+      email: 'm.schmidt@bmw.com',
+      department: 'IT Infrastructure Support',
+      contactNumber: '+49 89 382 67890',
+      createdAt: '2025-01-14T14:17:32Z',
+      registrationMethod: 'Azure AD',
+      requestedAccess: 'Logistics Emergency Group Access',
+      businessJustification: 'Required access to coordinate emergency logistics and supply chain responses. Will be supporting critical infrastructure maintenance and ensuring business continuity during emergency situations.',
+      priorityLevel: 'Medium'
+    }
+  ];
+
   // Statistics
   normalUsers = 0;
   adminUsers = 0;
@@ -88,6 +139,48 @@ export class UserManagementPage implements OnInit {
   dolibarrModalAnimationState = 'hidden';
   selectedUser: User | null = null;
 
+  // Department management
+  isDepartmentModalOpen = false;
+  selectedUserDepartment = '';
+  isUpdatingDepartment = false;
+  departmentModalAnimationState = 'hidden';
+
+  // Access Groups management
+  isAccessGroupsModalOpen = false;
+  isUpdatingAccessGroups = false;
+  accessGroupsModalAnimationState = 'hidden';
+
+  // Account status management
+  isAccountStatusModalOpen = false;
+  accountStatusModalAnimationState = 'hidden';
+  isUpdatingAccountStatus = false;
+  availableAccessGroups: AccessGroup[] = [
+    {
+      id: 'financial',
+      name: 'Financial Emergency Group',
+      description: 'Budget approvals, financial crisis management, monetary systems access',
+      enabled: false
+    },
+    {
+      id: 'hr',
+      name: 'HR Emergency Group',
+      description: 'Human resources emergency protocols, employee data access, privacy-sensitive operations',
+      enabled: false
+    },
+    {
+      id: 'management',
+      name: 'Management Emergency Group',
+      description: 'Executive-level emergency protocols, strategic decision making, high-level coordination',
+      enabled: false
+    },
+    {
+      id: 'logistics',
+      name: 'Logistics Emergency Group',
+      description: 'Supply chain coordination, infrastructure maintenance, business continuity',
+      enabled: false
+    }
+  ];
+
   constructor(
     private authService: AuthService,
     private languageService: LanguageService
@@ -101,6 +194,16 @@ export class UserManagementPage implements OnInit {
     this.loadUsers().then(() => {
       event.target.complete();
     });
+  }
+
+  // Tab management methods
+  switchTab(tabId: string) {
+    this.activeTab = tabId;
+    console.log('Switched to tab:', tabId);
+  }
+
+  isTabActive(tabId: string): boolean {
+    return this.activeTab === tabId;
   }
 
   async loadUsers() {
@@ -390,6 +493,186 @@ export class UserManagementPage implements OnInit {
       alert(errorMessage);
     } finally {
       this.isUpdatingDolibarrId = false;
+    }
+  }
+
+  // Department management methods
+  manageDepartment(user: User) {
+    this.selectedUser = user;
+    this.selectedUserDepartment = user.department || '';
+    this.isDepartmentModalOpen = true;
+    // Trigger animation after DOM update
+    setTimeout(() => {
+      this.departmentModalAnimationState = 'visible';
+    }, 10);
+  }
+
+  closeDepartmentModal() {
+    this.departmentModalAnimationState = 'hidden';
+    setTimeout(() => {
+      this.isDepartmentModalOpen = false;
+      this.selectedUserDepartment = '';
+      this.selectedUser = null;
+    }, 150);
+  }
+
+  async saveDepartment() {
+    if (!this.selectedUser || !this.selectedUserDepartment.trim()) {
+      return;
+    }
+
+    this.isUpdatingDepartment = true;
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Update local user data
+      if (this.selectedUser) {
+        this.selectedUser.department = this.selectedUserDepartment.trim();
+
+        // Update the user in the users array
+        const userIndex = this.users.findIndex(u => u.userId === this.selectedUser!.userId);
+        if (userIndex !== -1) {
+          this.users[userIndex].department = this.selectedUserDepartment.trim();
+        }
+
+        // Update filtered users
+        this.filterUsers();
+      }
+
+      // Close the modal
+      this.closeDepartmentModal();
+      alert('Department updated successfully!');
+
+    } catch (error: any) {
+      console.error('Failed to update department:', error);
+      alert('Failed to update department. Please try again.');
+    } finally {
+      this.isUpdatingDepartment = false;
+    }
+  }
+
+  // Access Groups management methods
+  manageAccessGroups(user: User) {
+    this.selectedUser = user;
+    
+    // Reset all groups to unchecked
+    this.availableAccessGroups.forEach(group => {
+      group.enabled = false;
+    });
+
+    // TODO: Load user's current access groups from API
+    // For now, simulate some enabled groups
+    if (user.department.includes('Financial')) {
+      const financialGroup = this.availableAccessGroups.find(g => g.id === 'financial');
+      if (financialGroup) financialGroup.enabled = true;
+    }
+    
+    this.isAccessGroupsModalOpen = true;
+    // Trigger animation after DOM update
+    setTimeout(() => {
+      this.accessGroupsModalAnimationState = 'visible';
+    }, 10);
+  }
+
+  closeAccessGroupsModal() {
+    this.accessGroupsModalAnimationState = 'hidden';
+    setTimeout(() => {
+      this.isAccessGroupsModalOpen = false;
+      this.selectedUser = null;
+      // Reset all groups
+      this.availableAccessGroups.forEach(group => {
+        group.enabled = false;
+      });
+    }, 150);
+  }
+
+  async saveAccessGroups() {
+    if (!this.selectedUser) {
+      return;
+    }
+
+    this.isUpdatingAccessGroups = true;
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      const enabledGroups = this.availableAccessGroups.filter(g => g.enabled);
+      console.log('Saving access groups for user:', this.selectedUser.username, enabledGroups);
+
+      // TODO: Send to API
+      // await this.authService.updateUserAccessGroups(this.selectedUser.userId, enabledGroups);
+
+      // Close the modal
+      this.closeAccessGroupsModal();
+      alert(`Access groups updated successfully for ${this.selectedUser.username}!`);
+
+    } catch (error: any) {
+      console.error('Failed to update access groups:', error);
+      alert('Failed to update access groups. Please try again.');
+    } finally {
+      this.isUpdatingAccessGroups = false;
+    }
+  }
+
+  // Account Status Management Methods
+  toggleAccountStatus(user: any) {
+    this.selectedUser = user;
+    this.isAccountStatusModalOpen = true;
+    // Trigger animation after DOM update
+    setTimeout(() => {
+      this.accountStatusModalAnimationState = 'visible';
+    }, 10);
+  }
+
+  closeAccountStatusModal() {
+    this.accountStatusModalAnimationState = 'hidden';
+    setTimeout(() => {
+      this.isAccountStatusModalOpen = false;
+      this.selectedUser = null;
+    }, 150);
+  }
+
+  async confirmAccountStatusChange() {
+    if (!this.selectedUser) {
+      return;
+    }
+
+    this.isUpdatingAccountStatus = true;
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      const action = this.selectedUser.isAuthorized ? 'disabled' : 'enabled';
+      console.log(`Account ${action} for user:`, this.selectedUser.username);
+
+      // TODO: Send to API
+      // await this.authService.updateUserAccountStatus(this.selectedUser.userId, !this.selectedUser.isAuthorized);
+
+      // Update the user's status locally for demo purposes
+      this.selectedUser.isAuthorized = !this.selectedUser.isAuthorized;
+      
+      // Find and update the user in the users array
+      const userIndex = this.users.findIndex(u => u.userId === this.selectedUser?.userId);
+      if (userIndex !== -1) {
+        this.users[userIndex].isAuthorized = this.selectedUser.isAuthorized;
+      }
+
+      // Close the modal
+      this.closeAccountStatusModal();
+      
+      // Show success message
+      const statusText = this.selectedUser.isAuthorized ? 'enabled' : 'disabled';
+      alert(`Account ${statusText} successfully for ${this.selectedUser.username}!`);
+
+    } catch (error: any) {
+      console.error('Failed to update account status:', error);
+      alert('Failed to update account status. Please try again.');
+    } finally {
+      this.isUpdatingAccountStatus = false;
     }
   }
 

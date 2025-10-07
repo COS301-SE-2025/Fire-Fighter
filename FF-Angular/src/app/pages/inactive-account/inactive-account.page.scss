@@ -1,0 +1,112 @@
+// Inactive Account Page Styles
+// Force dark theme consistency
+
+// Override Ionic default background
+ion-content {
+  --background: #111827 !important;
+  --color: #ffffff !important;
+}
+
+// Ensure all elements respect dark theme
+* {
+  color-scheme: dark;
+}
+
+// Force dark theme for main content text elements (but not footer)
+h1, h2, h3, h4, h5, h6 {
+  color: inherit;
+}
+
+// Allow footer to use its own text color classes
+.text-gray-500 {
+  color: #6b7280 !important;
+}
+
+// Custom animations for buttons
+.btn-animate {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Status alert animation
+.status-alert {
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Warning icon pulse animation
+.warning-icon {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+// Custom toast styling
+:host ::ng-deep .custom-toast {
+  --background: #374151;
+  --color: #ffffff;
+  --border-radius: 8px;
+  --box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  
+  .toast-wrapper {
+    border-left: 4px solid #3b82f6;
+  }
+  
+  .toast-button {
+    --color: #93c5fd;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  // Stack the process steps vertically on mobile
+  .grid-cols-1.md\\:grid-cols-3 {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  // Adjust icon and text sizes for mobile
+  .warning-icon {
+    width: 6rem !important;
+    height: 6rem !important;
+  }
+  
+  .warning-icon svg {
+    width: 3rem !important;
+    height: 3rem !important;
+  }
+  
+  // Adjust text sizes for mobile
+  h1 {
+    font-size: 2rem !important;
+  }
+  
+  p {
+    font-size: 1rem !important;
+  }
+}
