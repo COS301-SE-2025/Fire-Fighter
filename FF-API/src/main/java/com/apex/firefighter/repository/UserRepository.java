@@ -53,4 +53,8 @@ public interface UserRepository extends JpaRepository<User, String> {
     
     // Find authorized admin users
     List<User> findByIsAdminTrueAndIsAuthorizedTrue();
+    
+    // Count methods for statistics
+    long countByIsAdmin(Boolean isAdmin);
+    long countByIsAuthorized(Boolean isAuthorized);
 }

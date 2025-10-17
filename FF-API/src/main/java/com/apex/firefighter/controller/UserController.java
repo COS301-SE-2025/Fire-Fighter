@@ -433,4 +433,122 @@ public class UserController {
         List<User> users = userService.getAuthorizedUsersByRole(roleName);
         return ResponseEntity.ok(users);
     }
+
+    /**
+     * ENHANCED USER MANAGEMENT ENDPOINTS (Admin Only)
+     */
+
+    /**
+     * UPDATE USER DEPARTMENT (ADMIN ONLY)
+     * PUT /api/users/{firebaseUid}/admin/department
+     */
+    @Operation(summary = "Update user department (Admin Only)",
+               description = "Updates the department for a specified user. Requires admin privileges.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Department updated successfully"),
+        @ApiResponse(responseCode = "403", description = "Admin privileges required"),
+        @ApiResponse(responseCode = "404", description = "User not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PutMapping("/{firebaseUid}/admin/department")
+    public ResponseEntity<?> updateUserDepartment(
+            @Parameter(description = "Admin Firebase UID") 
+            @RequestHeader("X-Firebase-UID") String adminUid,
+            @PathVariable String firebaseUid,
+            @RequestParam String department) {
+        try {
+            System.out.println("🔵 UPDATE USER DEPARTMENT:");
+            System.out.println("  Admin UID: " + adminUid);
+            System.out.println("  Target UID: " + firebaseUid);
+            System.out.println("  New Department: " + department);
+
+            User updatedUser = userService.updateUserDepartment(adminUid, firebaseUid, department);
+            
+            System.out.println("✅ DEPARTMENT UPDATED");
+            return ResponseEntity.ok(updatedUser);
+        } catch (SecurityException e) {
+            System.err.println("⚠️ ACCESS DENIED: " + e.getMessage());
+            return ResponseEntity.status(403)
+                .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            System.err.println("❌ UPDATE FAILED: " + e.getMessage());
+            return ResponseEntity.status(500)
+                .body(Map.of("error", "Failed to update department"));
+        }
+    }
+
+    /**
+     * UPDATE USER ACCOUNT STATUS (ADMIN ONLY)
+     * PUT /api/users/{firebaseUid}/admin/status
+     */
+    @Operation(summary = "Update user account status (Admin Only)",
+               description = "Enable or disable a user account. Requires admin privileges.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Account status updated successfully"),
+        @ApiResponse(responseCode = "403", description = "Admin privileges required"),
+        @ApiResponse(responseCode = "404", description = "User not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PutMapping("/{firebaseUid}/admin/status")
+    public ResponseEntity<?> updateUserAccountStatus(
+            @Parameter(description = "Admin Firebase UID") 
+            @RequestHeader("X-Firebase-UID") String adminUid,
+            @PathVariable String firebaseUid,
+            @RequestParam Boolean isAuthorized) {
+        try {
+            System.out.println("🔵 UPDATE ACCOUNT STATUS:");
+            System.out.println("  Admin UID: " + adminUid);
+            System.out.println("  Target UID: " + firebaseUid);
+            System.out.println("  New Status: " + (isAuthorized ? "ACTIVE" : "INACTIVE"));
+
+            User updatedUser = userService.updateUserAccountStatus(adminUid, firebaseUid, isAuthorized);
+            
+            System.out.println("✅ ACCOUNT STATUS UPDATED");
+            return ResponseEntity.ok(updatedUser);
+        } catch (SecurityException e) {
+            System.err.println("⚠️ ACCESS DENIED: " + e.getMessage());
+            return ResponseEntity.status(403)
+                .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            System.err.println("❌ UPDATE FAILED: " + e.getMessage());
+            return ResponseEntity.status(500)
+                .body(Map.of("error", "Failed to update account status"));
+        }
+    }
+
+    /**
+     * GET ALL USERS WITH STATISTICS (ADMIN ONLY)
+     * GET /api/users/admin/all
+     */
+    @Operation(summary = "Get all users (Admin Only)",
+               description = "Retrieve all users in the system. Requires admin privileges.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Users retrieved successfully"),
+        @ApiResponse(responseCode = "403", description = "Admin privileges required"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @GetMapping("/admin/all")
+    public ResponseEntity<?> getAllUsers(
+            @Parameter(description = "Admin Firebase UID") 
+            @RequestHeader("X-Firebase-UID") String adminUid) {
+        try {
+            System.out.println("🔵 GET ALL USERS: Admin=" + adminUid);
+
+            Map<String, Object> result = userService.getAllUsersAsAdmin(adminUid);
+            
+            System.out.println("✅ RETRIEVED USERS WITH STATISTICS");
+            return ResponseEntity.ok(result);
+        } catch (SecurityException e) {
+            System.err.println("⚠️ ACCESS DENIED: " + e.getMessage());
+            return ResponseEntity.status(403)
+                .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            System.err.println("❌ GET USERS FAILED: " + e.getMessage());
+            return ResponseEntity.status(500)
+                .body(Map.of("error", "Failed to retrieve users"));
+        }
+    }
 } 
