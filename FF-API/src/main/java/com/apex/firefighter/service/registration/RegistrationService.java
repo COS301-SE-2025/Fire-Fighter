@@ -5,6 +5,7 @@ import com.apex.firefighter.model.User;
 import com.apex.firefighter.model.registration.PendingApproval;
 import com.apex.firefighter.repository.UserRepository;
 import com.apex.firefighter.repository.registration.PendingApprovalRepository;
+import com.apex.firefighter.service.DolibarrUserGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.sql.SQLException;
 import java.util.stream.Collectors;
 
 /**
@@ -26,14 +28,17 @@ public class RegistrationService {
     private final PendingApprovalRepository pendingApprovalRepository;
     private final UserRepository userRepository;
     private final RegistrationNotificationService notificationService;
+    private final DolibarrUserGroupService dolibarrUserGroupService;
 
     @Autowired
     public RegistrationService(PendingApprovalRepository pendingApprovalRepository,
-                              UserRepository userRepository,
-                              RegistrationNotificationService notificationService) {
+                             UserRepository userRepository,
+                             RegistrationNotificationService notificationService,
+                             DolibarrUserGroupService dolibarrUserGroupService) {
         this.pendingApprovalRepository = pendingApprovalRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
+        this.dolibarrUserGroupService = dolibarrUserGroupService;
     }
 
     /**
@@ -143,6 +148,27 @@ public class RegistrationService {
         Optional<User> adminUser = userRepository.findByUserId(adminUid);
         String adminName = adminUser.map(User::getUsername).orElse("Administrator");
         notificationService.notifyUserOfApproval(newUser, adminName);
+
+        // Sync with Dolibarr if dolibarrId is provided
+        if (dolibarrId != null && !dolibarrId.trim().isEmpty()) {
+            try {
+                System.out.println("🔄 Syncing user with Dolibarr ID: " + dolibarrId);
+                
+                // Sync user's assigned access groups to Dolibarr
+                for (String groupId : assignedAccessGroups) {
+                    try {
+                        dolibarrUserGroupService.addUserToGroup(dolibarrId, groupId, adminUid);
+                        System.out.println("✅ Added user to Dolibarr group: " + groupId);
+                    } catch (SQLException e) {
+                        System.err.println("⚠️ Failed to add user to Dolibarr group " + groupId + ": " + e.getMessage());
+                        // Continue with other groups even if one fails
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("⚠️ Error syncing with Dolibarr: " + e.getMessage());
+                // Don't fail the approval process if Dolibarr sync fails
+            }
+        }
 
         System.out.println("✅ APPROVAL COMPLETED");
         return convertToDto(updated);
