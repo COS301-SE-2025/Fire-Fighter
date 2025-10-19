@@ -58,10 +58,7 @@ export class RegisterPage implements OnInit {
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]],
       department: ['', [Validators.required]],
-      contactNumber: [''],
-      requestedAccessGroups: [[]],
-      businessJustification: ['', [Validators.maxLength(1000)]],
-      priorityLevel: ['MEDIUM']
+      contactNumber: ['']
     }, { validator: this.passwordMatchValidator });
   }
 
@@ -85,7 +82,7 @@ export class RegisterPage implements OnInit {
         this.errorMsg = null;
         
         console.log('🔄 Step 1: Creating Firebase account...');
-        const { email, username, password, department, contactNumber, requestedAccessGroups, businessJustification, priorityLevel } = this.registerForm.value;
+        const { email, username, password, department, contactNumber } = this.registerForm.value;
         
         // Step 1: Create Firebase account WITHOUT backend verification
         // We'll use the Firebase SDK directly to avoid triggering verifyUserWithBackend
@@ -94,8 +91,8 @@ export class RegisterPage implements OnInit {
         const user = userCredential.user;
         console.log('✅ Firebase account created:', user.uid);
         
-        // Step 2: Submit registration request to backend (pending approval)
-        console.log('🔄 Step 2: Submitting registration request to backend...');
+        // Step 2: Submit initial registration request to backend (pending approval)
+        console.log('🔄 Step 2: Submitting initial registration request to backend...');
         const registrationData = {
           firebaseUid: user.uid,
           username: username,
@@ -103,16 +100,19 @@ export class RegisterPage implements OnInit {
           department: department,
           contactNumber: contactNumber || '',
           registrationMethod: 'email',
-          requestedAccessGroups: requestedAccessGroups || [],
-          businessJustification: businessJustification || '',
-          priorityLevel: priorityLevel || 'MEDIUM'
+          requestedAccessGroups: [],
+          businessJustification: '',
+          priorityLevel: 'MEDIUM'
         };
         
         await this.auth.submitRegistrationRequest(registrationData).toPromise();
-        console.log('✅ Registration request submitted successfully');
+        console.log('✅ Initial registration request submitted successfully');
         
-        // Step 3: Navigate to access-request page to collect additional information
-        this.router.navigate(['/access-request']);
+        // Step 3: Navigate to access-request page to collect justification and access groups
+        console.log('🔄 Step 3: Navigating to access-request page...');
+        this.router.navigate(['/access-request'], { 
+          queryParams: { firebaseUid: user.uid }
+        });
         
       } catch (err: any) {
         console.error('❌ Registration failed:', err);
@@ -154,8 +154,8 @@ export class RegisterPage implements OnInit {
       const user = credential.user;
       console.log('✅ Google sign-in successful:', user.displayName);
       
-      // Step 2: Submit registration request to backend for approval
-      console.log('🔄 Step 2: Submitting registration request to backend...');
+      // Step 2: Submit initial registration request to backend for approval
+      console.log('🔄 Step 2: Submitting initial registration request to backend...');
       const registrationData = {
         firebaseUid: user.uid,
         username: user.displayName || user.email?.split('@')[0] || 'user',
@@ -163,16 +163,19 @@ export class RegisterPage implements OnInit {
         department: this.registerForm.get('department')?.value || 'Not specified',
         contactNumber: this.registerForm.get('contactNumber')?.value || '',
         registrationMethod: 'google_sso',
-        requestedAccessGroups: this.registerForm.get('requestedAccessGroups')?.value || [],
-        businessJustification: this.registerForm.get('businessJustification')?.value || '',
-        priorityLevel: this.registerForm.get('priorityLevel')?.value || 'MEDIUM'
+        requestedAccessGroups: [],
+        businessJustification: '',
+        priorityLevel: 'MEDIUM'
       };
       
       await this.auth.submitRegistrationRequest(registrationData).toPromise();
-      console.log('✅ Registration request submitted successfully');
+      console.log('✅ Initial registration request submitted successfully');
       
-      // Step 3: Navigate to access-request page to collect additional information
-      this.router.navigate(['/access-request']);
+      // Step 3: Navigate to access-request page to collect justification and access groups
+      console.log('🔄 Step 3: Navigating to access-request page...');
+      this.router.navigate(['/access-request'], { 
+        queryParams: { firebaseUid: user.uid }
+      });
       
     } catch (err: any) {
       console.error('❌ Google registration failed:', err);

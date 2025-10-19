@@ -289,32 +289,43 @@ public class RegistrationService {
     }
 
     /**
-     * Submit system access request details
+     * Submit or update system access request details
+     * This is called after initial registration to add priority, justification, and access groups
      */
     public SystemAccessRequestDto submitSystemAccessRequest(SystemAccessRequestDto request) {
-        System.out.println("🔵 SUBMIT SYSTEM ACCESS REQUEST: " + request.getFirebaseUid());
+        System.out.println("🔵 UPDATE SYSTEM ACCESS REQUEST: " + request.getFirebaseUid());
 
-        // Check if user exists
-        Optional<User> user = userRepository.findByUserId(request.getFirebaseUid());
-        if (user.isEmpty()) {
-            throw new IllegalArgumentException("User not found for this Firebase UID");
+        // Find existing access request (should exist from registration)
+        Optional<SystemAccessRequest> existingRequest = systemAccessRequestRepository.findByFirebaseUid(request.getFirebaseUid());
+        
+        if (existingRequest.isEmpty()) {
+            throw new IllegalArgumentException("No pending registration found for this Firebase UID. Please register first.");
         }
 
-        // Check if access request already exists
-        if (systemAccessRequestRepository.existsByFirebaseUid(request.getFirebaseUid())) {
-            throw new IllegalStateException("System access request already exists for this Firebase UID");
+        SystemAccessRequest accessRequest = existingRequest.get();
+        
+        // Update with additional information from access request form
+        if (request.getRequestPriority() != null) {
+            accessRequest.setRequestPriority(request.getRequestPriority());
         }
-
-        // Create system access request
-        SystemAccessRequest accessRequest = new SystemAccessRequest();
-        accessRequest.setFirebaseUid(request.getFirebaseUid());
-        accessRequest.setRequestPriority(request.getRequestPriority());
-        accessRequest.setRequestDepartment(request.getRequestDepartment());
-        accessRequest.setPhoneNumber(request.getPhoneNumber());
-        accessRequest.setJustification(request.getJustification());
+        if (request.getRequestDepartment() != null) {
+            accessRequest.setRequestDepartment(request.getRequestDepartment());
+        }
+        if (request.getPhoneNumber() != null) {
+            accessRequest.setPhoneNumber(request.getPhoneNumber());
+        }
+        if (request.getJustification() != null) {
+            accessRequest.setJustification(request.getJustification());
+        }
+        if (request.getRequestedAccessGroups() != null && !request.getRequestedAccessGroups().isEmpty()) {
+            accessRequest.setRequestedAccessGroups(request.getRequestedAccessGroups());
+        }
 
         SystemAccessRequest saved = systemAccessRequestRepository.save(accessRequest);
-        System.out.println("✅ SYSTEM ACCESS REQUEST SAVED: ID=" + saved.getRequestId());
+        System.out.println("✅ SYSTEM ACCESS REQUEST UPDATED: ID=" + saved.getRequestId());
+        System.out.println("  Priority: " + saved.getRequestPriority());
+        System.out.println("  Justification: " + (saved.getJustification() != null ? saved.getJustification().substring(0, Math.min(50, saved.getJustification().length())) + "..." : "None"));
+        System.out.println("  Access Groups: " + saved.getRequestedAccessGroups());
 
         return request;
     }

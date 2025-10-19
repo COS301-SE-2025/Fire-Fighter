@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IonContent } from '@ionic/angular/standalone';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { Auth } from '@angular/fire/auth';
 
 @Component({
   selector: 'app-access-request',
@@ -21,6 +22,8 @@ export class AccessRequestPage implements OnInit {
   isSubmitting = false;
   errorMsg: string | null = null;
   successMsg: string | null = null;
+  firebaseUid: string | null = null;
+  private firebaseAuth = inject(Auth);
 
   // Priority levels
   priorityLevels = [
@@ -56,45 +59,79 @@ export class AccessRequestPage implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
+    private route: ActivatedRoute,
     private authService: AuthService
   ) {}
 
   ngOnInit() {
+    // Get Firebase UID from query params or current user
+    this.route.queryParams.subscribe(params => {
+      this.firebaseUid = params['firebaseUid'] || this.firebaseAuth.currentUser?.uid || null;
+      
+      if (!this.firebaseUid) {
+        console.error('❌ No Firebase UID found');
+        this.errorMsg = 'Session expired. Please register again.';
+        setTimeout(() => this.router.navigate(['/register']), 3000);
+      } else {
+        console.log('✅ Firebase UID:', this.firebaseUid);
+      }
+    });
+
     this.accessRequestForm = this.fb.group({
-      contactNumber: ['', [Validators.required, Validators.pattern(/^\+?[1-9]\d{1,14}$/)]],
-      priorityLevel: ['', Validators.required],
+      contactNumber: ['', [Validators.pattern(/^\+?[1-9]\d{1,14}$/)]],
+      priorityLevel: ['MEDIUM', Validators.required],
       accessGroup: ['', Validators.required],
       businessJustification: ['', [Validators.required, Validators.minLength(50), Validators.maxLength(500)]]
     });
   }
 
   async onSubmit() {
-    if (this.accessRequestForm.valid && !this.isSubmitting) {
+    if (this.accessRequestForm.valid && !this.isSubmitting && this.firebaseUid) {
       this.isSubmitting = true;
       this.errorMsg = null;
       this.successMsg = null;
 
       try {
         const formData = this.accessRequestForm.value;
-        console.log('Access Request Data:', formData);
+        console.log('🔄 Submitting access request with justification...');
         
-        // Here you would typically send the request to your backend API
-        // For now, we'll simulate a successful submission
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
+        // Prepare request data for backend
+        const requestData = {
+          firebaseUid: this.firebaseUid,
+          requestPriority: formData.priorityLevel,
+          phoneNumber: formData.contactNumber || '',
+          justification: formData.businessJustification,
+          requestedAccessGroups: [formData.accessGroup] // Convert single selection to array
+        };
         
-        this.successMsg = 'Access request submitted successfully! Your request is now pending approval.';
+        console.log('Request data:', requestData);
         
-        // Redirect to dashboard after a short delay
+        // Submit to backend API
+        await this.authService.submitAccessRequest(requestData).toPromise();
+        
+        console.log('✅ Access request updated successfully');
+        this.successMsg = 'Access request submitted successfully! Your request is now pending approval. You will be notified once an administrator reviews your request.';
+        
+        // Sign out the user since they're not approved yet
+        await this.authService.logout();
+        
+        // Redirect to login page after a short delay
         setTimeout(() => {
-          this.router.navigate(['/dashboard']);
-        }, 3000);
+          this.router.navigate(['/login'], {
+            queryParams: { 
+              message: 'Registration complete. Please wait for admin approval before logging in.' 
+            }
+          });
+        }, 4000);
         
       } catch (error: any) {
-        console.error('Access request submission error:', error);
-        this.errorMsg = error.message || 'Failed to submit access request. Please try again.';
+        console.error('❌ Access request submission error:', error);
+        this.errorMsg = error.error?.error || error.message || 'Failed to submit access request. Please try again.';
       } finally {
         this.isSubmitting = false;
       }
+    } else if (!this.firebaseUid) {
+      this.errorMsg = 'Session expired. Please register again.';
     }
   }
 
