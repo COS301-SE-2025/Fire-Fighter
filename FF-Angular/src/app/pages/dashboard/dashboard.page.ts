@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
-import { TicketService, Ticket } from '../../services/ticket.service';
+import { TicketService, Ticket, EmergencyStatistics } from '../../services/ticket.service';
 import { AdminService, AdminTicket } from '../../services/admin.service';
 import { NotificationService } from '../../services/notification.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
@@ -54,6 +54,11 @@ export class DashboardPage implements OnInit, OnDestroy {
   // Add a public usernames map for template access
   public usernames: { [userId: string]: string } = {};
 
+  // Backend statistics
+  emergencyStatistics: EmergencyStatistics | null = null;
+  statisticsLoading = false;
+  statisticsError: string | null = null;
+
   // Add calculateTimeAgo function
   calculateTimeAgo = calculateTimeAgo;
 
@@ -102,6 +107,7 @@ export class DashboardPage implements OnInit, OnDestroy {
     this.subscribeToNotifications();
     this.checkForAdminAccessError();
     this.subscribeToTicketCreation();
+    this.loadEmergencyStatistics();
 
     // Subscribe to user changes and load tickets when user is available
     console.log('🔍 Dashboard - Setting up user subscription');
@@ -186,6 +192,34 @@ export class DashboardPage implements OnInit, OnDestroy {
     this.isLoading = true;
     this.error = null;
     this.loadTicketsInternal(true);
+    // Refresh statistics when tickets are loaded
+    this.loadEmergencyStatistics();
+  }
+
+  /**
+   * Load emergency statistics from backend
+   */
+  loadEmergencyStatistics() {
+    this.statisticsLoading = true;
+    this.statisticsError = null;
+    
+    this.ticketService.getEmergencyStatistics()
+      .pipe(
+        catchError(err => {
+          console.error('Failed to load emergency statistics:', err);
+          this.statisticsError = 'Failed to load statistics';
+          return of(null);
+        }),
+        finalize(() => {
+          this.statisticsLoading = false;
+        })
+      )
+      .subscribe(stats => {
+        if (stats) {
+          this.emergencyStatistics = stats;
+          console.log('✅ Dashboard - Emergency statistics loaded:', stats);
+        }
+      });
   }
 
   /**
@@ -323,83 +357,34 @@ export class DashboardPage implements OnInit, OnDestroy {
     return activeTickets.slice(0, 3);
   }
 
-  // Emergency Response Statistics Properties
+  // Emergency Response Statistics Properties - now using backend data
   get emergencyTypeBreakdown(): { [key: string]: number } {
-    const breakdown: { [key: string]: number } = {
+    return this.emergencyStatistics?.emergencyTypeBreakdown || {
       'hr-emergency': 0,
       'financial-emergency': 0,
       'management-emergency': 0,
       'logistics-emergency': 0
     };
-
-    this.tickets.forEach(ticket => {
-      if (ticket.emergencyType && breakdown.hasOwnProperty(ticket.emergencyType)) {
-        breakdown[ticket.emergencyType]++;
-      }
-    });
-
-    return breakdown;
   }
 
   get mostCommonEmergencyType(): string {
-    const breakdown = this.emergencyTypeBreakdown;
-    const maxType = Object.keys(breakdown).reduce((a, b) =>
-      breakdown[a] > breakdown[b] ? a : b
-    );
-
-    // Convert to display format
-    const typeMap: { [key: string]: string } = {
-      'hr-emergency': 'HR',
-      'financial-emergency': 'Financial',
-      'management-emergency': 'Management',
-      'logistics-emergency': 'Logistics'
-    };
-
-    return typeMap[maxType] || 'N/A';
+    return this.emergencyStatistics?.mostCommonEmergencyType || 'N/A';
   }
 
   get averageResponseTime(): number {
-    // Calculate average duration of all requested tickets
-    if (this.tickets.length === 0) return 0;
-
-    const totalDuration = this.tickets.reduce((sum, ticket) => sum + ticket.duration, 0);
-    return Math.round(totalDuration / this.tickets.length);
+    return this.emergencyStatistics?.averageResponseTime || 0;
   }
 
   get systemHealthScore(): number {
-    const totalTickets = this.tickets.length;
-    if (totalTickets === 0) return 100;
-
-    const activeTickets = this.tickets.filter(t => t.status === 'Active').length;
-    const rejectedTickets = this.tickets.filter(t => t.status === 'Rejected').length;
-
-    // Calculate health score: 100% - (active tickets weight + rejected tickets weight)
-    const activeWeight = (activeTickets / totalTickets) * 30; // Active tickets reduce health by up to 30%
-    const rejectedWeight = (rejectedTickets / totalTickets) * 20; // Rejected tickets reduce health by up to 20%
-
-    const healthScore = Math.max(50, 100 - activeWeight - rejectedWeight);
-    return Math.round(healthScore);
+    return this.emergencyStatistics?.systemHealthScore || 100;
   }
 
   get completionRate(): number {
-    // Calculate percentage of tickets that are completed (not revoked) out of all tickets
-    if (this.tickets.length === 0) return 0;
-
-    const completedTickets = this.tickets.filter(t => t.status === 'Closed').length;
-    const rate = (completedTickets / this.tickets.length) * 100;
-
-    return Math.round(rate * 10) / 10;
+    return this.emergencyStatistics?.completionRate || 0;
   }
 
   get currentMonthTickets(): number {
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-
-    return this.tickets.filter(ticket => {
-      const ticketDate = new Date(ticket.dateCreated);
-      return ticketDate.getMonth() === currentMonth &&
-             ticketDate.getFullYear() === currentYear;
-    }).length;
+    return this.emergencyStatistics?.currentMonthTickets || 0;
   }
 
   // Generate recent activities from tickets

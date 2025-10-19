@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppLoadingService, AppLoadingState } from '../../services/app-loading.service';
+import { ThemeService } from '../../services/theme.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -17,11 +18,18 @@ export class AppLoadingScreenComponent implements OnInit, OnDestroy {
     progress: 0
   };
 
+  isDarkMode = false;
   private subscription?: Subscription;
 
-  constructor(private appLoadingService: AppLoadingService) {}
+  constructor(
+    private appLoadingService: AppLoadingService,
+    private themeService: ThemeService
+  ) {}
 
   ngOnInit(): void {
+    // Get current theme
+    this.isDarkMode = this.themeService.getCurrentTheme();
+    
     // Subscribe to loading state changes
     this.subscription = this.appLoadingService.loadingState$.subscribe(
       (state: AppLoadingState) => {

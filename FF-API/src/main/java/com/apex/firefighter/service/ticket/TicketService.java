@@ -8,11 +8,14 @@ import com.apex.firefighter.service.NotificationService;
 import com.apex.firefighter.service.DolibarrUserGroupService;
 import com.apex.firefighter.service.AnomalyNotificationService;
 import com.apex.firefighter.service.anomaly.AnomalyDetectionService;
+import com.apex.firefighter.dto.EmergencyStatisticsResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -324,5 +327,126 @@ public class TicketService {
             return ticketRepository.save(ticket);
         }
         throw new RuntimeException("Ticket not found with ID: " + id);
+    }
+
+    /**
+     * Calculate emergency response statistics from all tickets in the system
+     * This provides accurate system-wide statistics regardless of user role
+     * 
+     * @return EmergencyStatisticsResponse containing all calculated statistics
+     */
+    public EmergencyStatisticsResponse calculateEmergencyStatistics() {
+        List<Ticket> allTickets = ticketRepository.findAll();
+        
+        // Initialize response object
+        EmergencyStatisticsResponse response = new EmergencyStatisticsResponse();
+        
+        // Total tickets count
+        int totalTickets = allTickets.size();
+        response.setTotalTickets(totalTickets);
+        
+        // If no tickets, return default values
+        if (totalTickets == 0) {
+            response.setEmergencyTypeBreakdown(new HashMap<>());
+            response.setMostCommonEmergencyType("N/A");
+            response.setSystemHealthScore(100);
+            response.setAverageResponseTime(0);
+            response.setCompletionRate(0.0);
+            response.setCurrentMonthTickets(0);
+            response.setActiveTickets(0);
+            return response;
+        }
+        
+        // Calculate emergency type breakdown
+        Map<String, Integer> emergencyTypeBreakdown = new HashMap<>();
+        emergencyTypeBreakdown.put("hr-emergency", 0);
+        emergencyTypeBreakdown.put("financial-emergency", 0);
+        emergencyTypeBreakdown.put("management-emergency", 0);
+        emergencyTypeBreakdown.put("logistics-emergency", 0);
+        
+        int activeTicketsCount = 0;
+        int rejectedTicketsCount = 0;
+        int closedTicketsCount = 0;
+        int totalDuration = 0;
+        int currentMonthTicketsCount = 0;
+        
+        LocalDateTime now = LocalDateTime.now();
+        int currentMonth = now.getMonthValue();
+        int currentYear = now.getYear();
+        
+        // Process all tickets
+        for (Ticket ticket : allTickets) {
+            // Emergency type breakdown
+            String emergencyType = ticket.getEmergencyType();
+            if (emergencyType != null && emergencyTypeBreakdown.containsKey(emergencyType)) {
+                emergencyTypeBreakdown.put(emergencyType, emergencyTypeBreakdown.get(emergencyType) + 1);
+            }
+            
+            // Status counts
+            String status = ticket.getStatus();
+            if ("Active".equals(status)) {
+                activeTicketsCount++;
+            } else if ("Rejected".equals(status)) {
+                rejectedTicketsCount++;
+            } else if ("Closed".equals(status)) {
+                closedTicketsCount++;
+            }
+            
+            // Duration sum for average
+            Integer duration = ticket.getDuration();
+            if (duration != null) {
+                totalDuration += duration;
+            }
+            
+            // Current month tickets
+            LocalDateTime dateCreated = ticket.getDateCreated();
+            if (dateCreated != null && 
+                dateCreated.getMonthValue() == currentMonth && 
+                dateCreated.getYear() == currentYear) {
+                currentMonthTicketsCount++;
+            }
+        }
+        
+        response.setEmergencyTypeBreakdown(emergencyTypeBreakdown);
+        response.setActiveTickets(activeTicketsCount);
+        
+        // Calculate most common emergency type
+        String mostCommonType = "N/A";
+        int maxCount = 0;
+        for (Map.Entry<String, Integer> entry : emergencyTypeBreakdown.entrySet()) {
+            if (entry.getValue() > maxCount) {
+                maxCount = entry.getValue();
+                mostCommonType = entry.getKey();
+            }
+        }
+        
+        // Convert to display format
+        Map<String, String> typeDisplayMap = new HashMap<>();
+        typeDisplayMap.put("hr-emergency", "HR");
+        typeDisplayMap.put("financial-emergency", "Financial");
+        typeDisplayMap.put("management-emergency", "Management");
+        typeDisplayMap.put("logistics-emergency", "Logistics");
+        
+        response.setMostCommonEmergencyType(typeDisplayMap.getOrDefault(mostCommonType, "N/A"));
+        
+        // Calculate system health score
+        // Health score: 100% - (active tickets weight + rejected tickets weight)
+        double activeWeight = ((double) activeTicketsCount / totalTickets) * 30; // Active tickets reduce health by up to 30%
+        double rejectedWeight = ((double) rejectedTicketsCount / totalTickets) * 20; // Rejected tickets reduce health by up to 20%
+        int healthScore = Math.max(50, (int) Math.round(100 - activeWeight - rejectedWeight));
+        response.setSystemHealthScore(healthScore);
+        
+        // Calculate average response time (average duration)
+        int averageResponseTime = totalTickets > 0 ? Math.round((float) totalDuration / totalTickets) : 0;
+        response.setAverageResponseTime(averageResponseTime);
+        
+        // Calculate completion rate (percentage of closed tickets)
+        double completionRate = ((double) closedTicketsCount / totalTickets) * 100;
+        response.setCompletionRate(Math.round(completionRate * 10) / 10.0); // Round to 1 decimal place
+        
+        // Set current month tickets count
+        response.setCurrentMonthTickets(currentMonthTicketsCount);
+        
+        return response;
     }
 }

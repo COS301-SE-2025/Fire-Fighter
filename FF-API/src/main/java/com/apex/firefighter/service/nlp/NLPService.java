@@ -91,19 +91,21 @@ public class NLPService {
             // Step 2: Recognize intent
             IntentRecognitionService.Intent intent = recognizeIntent(query);
             if (intent == null) {
-                return new NLPResponse("Could not understand query: " + query, false);
+                return generateUnknownCommandResponse(userId, isAdminFromJWT);
             }
 
             // Step 3: Determine user authorization
             String userRole = determineUserRole(userId, isAdminFromJWT);
             if (!isIntentAllowed(intent, userRole)) {
-                return new NLPResponse("Permission denied for intent: " + intent.getType().getCode(), false);
+                return new NLPResponse("I'm sorry, but you don't have permission to perform that action. " +
+                    "Please contact an administrator if you need access to this feature.", false);
             }
 
             // Step 4: Extract and validate entities
             EntityExtractionService.ExtractedEntities entities = extractAndValidateEntities(query, intent);
             if (entities == null) {
-                return new NLPResponse("Failed to extract or validate entities", false);
+                return new NLPResponse("I couldn't understand all the details in your request. " +
+                    "Could you please rephrase it or provide more specific information?", false);
             }
 
             // Step 5: Process query
@@ -118,11 +120,11 @@ public class NLPService {
             return new NLPResponse(responseText, true, result.getData());
 
         } catch (IllegalArgumentException e) {
-            return new NLPResponse("Invalid input: " + e.getMessage(), false);
+            return new NLPResponse("I couldn't process that request. Please check your input and try again.", false);
         } catch (SecurityException e) {
-            return new NLPResponse("Access denied: " + e.getMessage(), false);
+            return new NLPResponse("I'm sorry, but you don't have permission to access that information.", false);
         } catch (Exception e) {
-            return new NLPResponse("Error processing query: " + e.getMessage(), false);
+            return new NLPResponse("I encountered an issue while processing your request. Please try again or contact support if the problem persists.", false);
         }
     }
 
@@ -295,6 +297,50 @@ public class NLPService {
     }
 
     /**
+     * Generate a helpful response when Ada doesn't understand a command
+     * Includes a list of available commands based on user role
+     */
+    private NLPResponse generateUnknownCommandResponse(String userId, Boolean isAdminFromJWT) {
+        String userRole = determineUserRole(userId, isAdminFromJWT);
+        boolean isAdmin = "ADMIN".equals(userRole);
+        
+        StringBuilder response = new StringBuilder();
+        response.append("I'm Ada, your Natural Language Processor. I didn't quite understand that command.\n\n");
+        response.append("Here are some commands I can help you with:\n\n");
+        
+        // Basic commands available to all users
+        response.append("📋 View Tickets:\n");
+        response.append("  • \"Show my active tickets\"\n");
+        response.append("  • \"Show my closed tickets\"\n");
+        response.append("  • \"Show my rejected tickets\"\n");
+        response.append("  • \"Show all my tickets\"\n\n");
+        
+        response.append("🎫 Ticket Management:\n");
+        response.append("  • \"Create a new ticket\"\n");
+        response.append("  • \"Create an HR emergency ticket\"\n");
+        response.append("  • \"Show details for ticket [ID]\"\n\n");
+        
+        // Admin-only commands
+        if (isAdmin) {
+            response.append("👑 Admin Commands:\n");
+            response.append("  • \"Show all tickets in the system\"\n");
+            response.append("  • \"Update ticket [ID] status to [status]\"\n");
+            response.append("  • \"Close ticket [ID]\"\n");
+            response.append("  • \"Search for tickets\"\n\n");
+        }
+        
+        response.append("❓ Help:\n");
+        response.append("  • \"Help\" - Get more information\n");
+        response.append("  • \"What can you do?\" - See all capabilities\n\n");
+        
+        response.append("💡 Tip: Try to be specific with ticket IDs and statuses. For example:\n");
+        response.append("   \"Show details for ticket BMW-FF-12345\"\n");
+        response.append("   \"Create a financial emergency ticket\"");
+        
+        return new NLPResponse(response.toString(), false);
+    }
+
+    /**
      * Process an admin-level natural language query with elevated privileges
      * 
      * @param query The natural language query
@@ -322,12 +368,8 @@ public class NLPService {
             }
 
             IntentRecognitionService.Intent intent = intentRecognitionService.recognizeIntent(query);
-            if (intent == null) {
-                return new NLPResponse("Failed to recognize intent from admin query", false);
-            }
-
-            if (!intent.isSuccess()) {
-                return new NLPResponse("Could not understand admin query: " + query, false);
+            if (intent == null || !intent.isSuccess()) {
+                return generateUnknownCommandResponse(userId, true);
             }
 
             // Step 3: Extract entities
@@ -337,20 +379,24 @@ public class NLPService {
 
             EntityExtractionService.ExtractedEntities entities = entityExtractionService.extractEntities(query);
             if (entities == null) {
-                return new NLPResponse("Failed to extract entities from admin query", false);
+                return new NLPResponse("I couldn't understand all the details in your request. " +
+                    "Could you please rephrase it or provide more specific information?", false);
             }
 
             // Skip entity validation for CREATE_TICKET operations since ticket ID is auto-generated
             if (intent.getType() != IntentRecognitionService.IntentType.CREATE_TICKET) {
                 EntityExtractionService.ValidationResult validation = entityExtractionService.validateEntities(entities);
                 if (validation == null) {
-                    return new NLPResponse("Failed to validate extracted entities", false);
+                    return new NLPResponse("I couldn't validate the information in your request. " +
+                        "Please check your input and try again.", false);
                 }
 
                 if (!validation.isValid()) {
-                    String errorMessage = "Invalid entities in admin query";
+                    String errorMessage = "I found some issues with your request. ";
                     if (validation.getErrors() != null && !validation.getErrors().isEmpty()) {
-                        errorMessage += ": " + String.join(", ", validation.getErrors());
+                        errorMessage += "Please check: " + String.join(", ", validation.getErrors());
+                    } else {
+                        errorMessage += "Please verify your input and try again.";
                     }
                     return new NLPResponse(errorMessage, false);
                 }
@@ -363,7 +409,7 @@ public class NLPService {
 
             QueryProcessingService.QueryResult result = queryProcessingService.processQuery(intent, entities, userId, true);
             if (result == null) {
-                return new NLPResponse("Failed to process admin query", false);
+                return new NLPResponse("I couldn't complete that operation. Please try again or contact support if the issue persists.", false);
             }
 
             // Step 5: Generate response
@@ -379,11 +425,11 @@ public class NLPService {
             return new NLPResponse(responseText, true, result.getData());
 
         } catch (IllegalArgumentException e) {
-            return new NLPResponse("Invalid admin query input: " + e.getMessage(), false);
+            return new NLPResponse("I couldn't process that request. Please check your input and try again.", false);
         } catch (SecurityException e) {
-            return new NLPResponse("Admin access denied: " + e.getMessage(), false);
+            return new NLPResponse("I'm sorry, but you don't have permission to perform that action.", false);
         } catch (Exception e) {
-            return new NLPResponse("Error processing admin query: " + e.getMessage(), false);
+            return new NLPResponse("I encountered an issue while processing your request. Please try again or contact support if the problem persists.", false);
         }
     }
 
