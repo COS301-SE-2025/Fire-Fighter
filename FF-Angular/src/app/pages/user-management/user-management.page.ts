@@ -196,7 +196,12 @@ export class UserManagementPage implements OnInit {
       const response = await this.authService.getAllUsersAsAdmin().toPromise();
 
       if (response && response.users) {
-        this.users = response.users;
+        // Sort users alphabetically by username
+        this.users = response.users.sort((a: any, b: any) => {
+          const nameA = (a.username || '').toLowerCase();
+          const nameB = (b.username || '').toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
 
         // Update statistics from API response if available, otherwise calculate locally
         if (response.statistics) {
