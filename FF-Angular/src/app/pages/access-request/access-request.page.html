@@ -1,0 +1,261 @@
+<ion-content [fullscreen]="true" class="bg-gray-900" style="--background: #111827;">
+  <div class="min-h-screen flex items-center justify-center px-4 py-8 bg-gray-900">
+    <div class="w-full max-w-2xl">
+      
+      <!-- Header Section -->
+      <div class="text-center mb-8">
+        <!-- Emergency Icon -->
+        <div class="mx-auto flex items-center justify-center w-16 h-16 bg-red-900/50 rounded-full mb-4">
+          <svg class="w-10 h-10 text-red-400" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"></path>
+          </svg>
+        </div>
+        
+        <!-- App Title -->
+        <h1 class="text-3xl font-bold text-white mb-2">
+          FireFighter
+        </h1>
+        <p class="text-gray-400">
+          System Access Request
+        </p>
+      </div>
+
+      <!-- Access Request Card -->
+      <div class="bg-gray-800 shadow-lg rounded-lg border border-gray-700 p-6">
+        
+        <!-- Card Header -->
+        <div class="mb-6">
+          <h2 class="text-xl font-semibold text-white mb-2">
+            Request Access to FireFighter
+          </h2>
+          <p class="text-sm text-gray-400">
+            Submit your emergency access request for approval by administrators
+          </p>
+        </div>
+
+        <!-- Success Message -->
+        <div *ngIf="successMsg" class="mb-6 flex p-4 text-sm text-green-300 rounded-lg bg-gray-700 border border-green-800">
+          <svg class="flex-shrink-0 inline w-4 h-4 mr-3 mt-[2px]" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          <div>
+            <span class="font-medium">Success!</span> {{ successMsg }}
+          </div>
+        </div>
+
+        <!-- Access Request Form -->
+        <form [formGroup]="accessRequestForm" (ngSubmit)="onSubmit()" class="space-y-6 mb-6">
+          
+          <!-- Contact Information Section -->
+          <div class="bg-gray-700/50 rounded-lg border border-gray-600 p-4">
+            <h3 class="text-lg font-medium text-white mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+              </svg>
+              Contact Information
+            </h3>
+            
+            <!-- Contact Number Field -->
+            <div>
+              <label for="contactNumber" class="block text-sm font-medium text-white mb-2">
+                Contact Number
+                <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="tel"
+                id="contactNumber"
+                formControlName="contactNumber"
+                placeholder="+49 89 382 12345"
+                class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 placeholder-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                [ngClass]="{
+                  'border-red-500': accessRequestForm.get('contactNumber')?.touched && accessRequestForm.get('contactNumber')?.invalid,
+                  'border-gray-600': !(accessRequestForm.get('contactNumber')?.touched && accessRequestForm.get('contactNumber')?.invalid)
+                }"
+              />
+              <div *ngIf="accessRequestForm.get('contactNumber')?.touched && accessRequestForm.get('contactNumber')?.invalid" class="mt-1 text-sm text-red-400">
+                <p *ngIf="accessRequestForm.get('contactNumber')?.errors?.['required']">
+                  Contact number is required
+                </p>
+                <p *ngIf="accessRequestForm.get('contactNumber')?.errors?.['pattern']">
+                  Please enter a valid phone number (e.g., +49 89 382 12345)
+                </p>
+              </div>
+              <p class="mt-1 text-xs text-gray-400">
+                Include country code for international numbers
+              </p>
+            </div>
+          </div>
+
+          <!-- Request Details Section -->
+          <div class="bg-gray-700/50 rounded-lg border border-gray-600 p-4">
+            <h3 class="text-lg font-medium text-white mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+              Request Details
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Priority Level Field -->
+              <div>
+                <label for="priorityLevel" class="block text-sm font-medium text-white mb-2">
+                  Priority Level
+                  <span class="text-red-500">*</span>
+                </label>
+                <select
+                  id="priorityLevel"
+                  formControlName="priorityLevel"
+                  class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                  [ngClass]="{
+                    'border-red-500': accessRequestForm.get('priorityLevel')?.touched && accessRequestForm.get('priorityLevel')?.invalid,
+                    'border-gray-600': !(accessRequestForm.get('priorityLevel')?.touched && accessRequestForm.get('priorityLevel')?.invalid)
+                  }"
+                >
+                  <option value="" disabled selected>Select priority level</option>
+                  <option *ngFor="let priority of priorityLevels" [value]="priority.value">
+                    {{ priority.label }}
+                  </option>
+                </select>
+                <div *ngIf="accessRequestForm.get('priorityLevel')?.touched && accessRequestForm.get('priorityLevel')?.invalid" class="mt-1 text-sm text-red-400">
+                  <p *ngIf="accessRequestForm.get('priorityLevel')?.errors?.['required']">
+                    Priority level is required
+                  </p>
+                </div>
+                <!-- Priority description -->
+                <div *ngIf="accessRequestForm.get('priorityLevel')?.value" class="mt-1 text-xs text-gray-400">
+                  {{ getPriorityDescription() }}
+                </div>
+              </div>
+
+              <!-- Access Group Field -->
+              <div>
+                <label for="accessGroup" class="block text-sm font-medium text-white mb-2">
+                  Access Request Group
+                  <span class="text-red-500">*</span>
+                </label>
+                <select
+                  id="accessGroup"
+                  formControlName="accessGroup"
+                  class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                  [ngClass]="{
+                    'border-red-500': accessRequestForm.get('accessGroup')?.touched && accessRequestForm.get('accessGroup')?.invalid,
+                    'border-gray-600': !(accessRequestForm.get('accessGroup')?.touched && accessRequestForm.get('accessGroup')?.invalid)
+                  }"
+                >
+                  <option value="" disabled selected>Select access group</option>
+                  <option *ngFor="let group of accessGroups" [value]="group.value">
+                    {{ group.label }}
+                  </option>
+                </select>
+                <div *ngIf="accessRequestForm.get('accessGroup')?.touched && accessRequestForm.get('accessGroup')?.invalid" class="mt-1 text-sm text-red-400">
+                  <p *ngIf="accessRequestForm.get('accessGroup')?.errors?.['required']">
+                    Access group is required
+                  </p>
+                </div>
+                <!-- Access group description -->
+                <div *ngIf="accessRequestForm.get('accessGroup')?.value" class="mt-1 text-xs text-gray-400">
+                  {{ getAccessGroupDescription() }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Business Justification Section -->
+          <div class="bg-gray-700/50 rounded-lg border border-gray-600 p-4">
+            <h3 class="text-lg font-medium text-white mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              Business Justification
+            </h3>
+
+            <div>
+              <label for="businessJustification" class="block text-sm font-medium text-white mb-2">
+                Business Justification
+                <span class="text-red-500">*</span>
+              </label>
+              <textarea
+                id="businessJustification"
+                formControlName="businessJustification"
+                rows="4"
+                placeholder="Explain why you need access to FireFighter and how it relates to your department's responsibilities. Include your role, specific use cases, and how this access will support your work..."
+                class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 placeholder-gray-400 disabled:opacity-50 disabled:cursor-not-allowed resize-none"
+                [ngClass]="{
+                  'border-red-500': accessRequestForm.get('businessJustification')?.touched && accessRequestForm.get('businessJustification')?.invalid,
+                  'border-gray-600': !(accessRequestForm.get('businessJustification')?.touched && accessRequestForm.get('businessJustification')?.invalid)
+                }"
+              ></textarea>
+              <div class="flex justify-between items-start mt-1">
+                <div *ngIf="accessRequestForm.get('businessJustification')?.touched && accessRequestForm.get('businessJustification')?.invalid" class="text-sm text-red-400">
+                  <p *ngIf="accessRequestForm.get('businessJustification')?.errors?.['required']">
+                    Business justification is required
+                  </p>
+                  <p *ngIf="accessRequestForm.get('businessJustification')?.errors?.['minlength']">
+                    Please provide at least 50 characters
+                  </p>
+                  <p *ngIf="accessRequestForm.get('businessJustification')?.errors?.['maxlength']">
+                    Maximum 500 characters allowed
+                  </p>
+                </div>
+                <div class="text-xs text-gray-400 ml-auto">
+                  {{ getCharacterCount() }}/500
+                </div>
+              </div>
+              <p class="mt-1 text-xs text-gray-400">
+                Be specific about why you need access to FireFighter and how it relates to your department's responsibilities
+              </p>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            [disabled]="accessRequestForm.invalid || isSubmitting"
+            class="w-full text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center focus:ring-red-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span *ngIf="!isSubmitting" class="flex items-center justify-center">
+              <svg class="w-4 h-4 mr-2 rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+              </svg>
+              Submit Access Request
+            </span>
+            <span *ngIf="isSubmitting" class="flex items-center justify-center">
+              <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Submitting request...
+            </span>
+          </button>
+
+        </form>
+
+        <!-- Error Message -->
+        <div *ngIf="errorMsg" class="mt-4 flex p-4 text-sm text-red-300 rounded-lg bg-gray-700 border border-red-800">
+          <svg class="flex-shrink-0 inline w-4 h-4 mr-3 mt-[2px]" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+          </svg>
+          <div>
+            <span class="font-medium">Request failed!</span> {{ errorMsg }}
+          </div>
+        </div>
+
+        <!-- Important Notice -->
+        <div class="mt-4 flex p-3 text-xs text-gray-300 rounded-lg bg-gray-700 border border-gray-600">
+          <svg class="flex-shrink-0 inline w-3 h-3 mr-2 mt-[2px]" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+          </svg>
+          <div>
+            <strong>Important:</strong> Your emergency access request will be reviewed by administrators. All access activities are logged and monitored for security purposes. False or misused emergency requests may result in disciplinary action.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer Info -->
+      <div class="text-center mt-8 text-xs text-gray-500">
+        <p>Developed for BMW Group</p>
+        <p class="mt-1">in collaboration with the University of Pretoria</p>
+        <p class="mt-2">© 2025 Team Apex. All rights reserved.</p>
+      </div>
+
+    </div>
+  </div>
+</ion-content>

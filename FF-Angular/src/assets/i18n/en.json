@@ -366,6 +366,10 @@
       "ADMIN_USERS": "Admin Users",
       "ADMIN_USERS_DESC": "With admin privileges"
     },
+    "TABS": {
+      "USERS": "Users",
+      "PENDING_APPROVALS": "Pending Approvals"
+    },
     "TABLE": {
       "TITLE": "All Users",
       "SUBTITLE": "Manage user accounts and permissions",
@@ -378,6 +382,14 @@
         "DOLIBARR_ID": "Dolibarr ID",
         "LAST_LOGIN": "Last Login",
         "ACTIONS": "Actions"
+      }
+    },
+    "PENDING_APPROVALS": {
+      "TITLE": "Pending User Approvals",
+      "SUBTITLE": "Review and approve new user registrations",
+      "EMPTY_STATE": {
+        "TITLE": "No pending approvals",
+        "MESSAGE": "All user registrations have been processed."
       }
     },
     "ROLES": {

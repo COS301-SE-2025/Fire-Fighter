@@ -9,13 +9,21 @@
 
     <!-- Professional Brand Section -->
     <div class="mb-8">
-      <!-- FF Icon with Professional Styling (matching navbar) -->
+      <!-- BMW Logo with Professional Styling -->
       <div class="relative mb-6">
-        <div class="w-20 h-20 mx-auto bg-red-600 dark:bg-red-500 rounded-2xl flex items-center justify-center shadow-lg brand-icon-shadow">
-          <span class="text-white font-bold text-3xl font-bmw">FF</span>
-        </div>
-        <!-- Subtle pulse animation -->
-        <div class="absolute inset-0 w-20 h-20 mx-auto bg-red-600 dark:bg-red-500 rounded-2xl animate-pulse opacity-20"></div>
+        <!-- BMW Logo - switches based on theme -->
+        <img 
+          *ngIf="!isDarkMode" 
+          src="assets/icon/BMW_logo_light.png" 
+          alt="BMW Logo" 
+          class="w-20 h-20 mx-auto"
+        />
+        <img 
+          *ngIf="isDarkMode" 
+          src="assets/icon/BMW_logo_dark.png" 
+          alt="BMW Logo" 
+          class="w-20 h-20 mx-auto"
+        />
       </div>
 
       <!-- Brand Text -->

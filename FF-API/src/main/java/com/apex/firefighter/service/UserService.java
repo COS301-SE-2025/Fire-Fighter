@@ -216,4 +216,22 @@ public class UserService {
     public Map<String, Object> getAllUsersAsAdmin(String adminFirebaseUid) {
         return userProfileService.getAllUsersAsAdmin(adminFirebaseUid);
     }
+
+    /**
+     * ENHANCED USER MANAGEMENT (Admin Only)
+     */
+
+    /**
+     * Update user department as admin - Delegates to UserProfileService with admin check
+     */
+    public User updateUserDepartment(String adminFirebaseUid, String targetFirebaseUid, String department) {
+        return userProfileService.updateUserDepartment(adminFirebaseUid, targetFirebaseUid, department);
+    }
+
+    /**
+     * Update user account status as admin - Delegates to UserProfileService with admin check
+     */
+    public User updateUserAccountStatus(String adminFirebaseUid, String targetFirebaseUid, Boolean isAuthorized) {
+        return userProfileService.updateUserAccountStatus(adminFirebaseUid, targetFirebaseUid, isAuthorized);
+    }
 } 

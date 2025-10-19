@@ -14,6 +14,10 @@ export const routes: Routes = [
     canActivate: [redirectLoggedInToHome]
   },
   {
+    path: 'inactive-account',
+    loadComponent: () => import('./pages/inactive-account/inactive-account.page').then( m => m.InactiveAccountPage)
+  },
+  {
     path: 'dashboard',
     loadComponent: () =>
       import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage),
@@ -71,6 +75,11 @@ export const routes: Routes = [
     path: 'user-management',
     loadComponent: () => import('./pages/user-management/user-management.page').then( m => m.UserManagementPage),
     canActivate: [adminGuard]
+  },
+  {
+    path: 'access-request',
+    loadComponent: () => import('./pages/access-request/access-request.page').then( m => m.AccessRequestPage)
+    // No auth guard - new users need to access this page to complete registration
   },
   {
     path: '',

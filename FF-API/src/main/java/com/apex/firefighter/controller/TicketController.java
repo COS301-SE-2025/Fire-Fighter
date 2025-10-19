@@ -5,6 +5,7 @@ import com.apex.firefighter.service.ticket.TicketService;
 import com.apex.firefighter.service.GmailEmailService;
 import com.apex.firefighter.service.UserService;
 import com.apex.firefighter.model.User;
+import com.apex.firefighter.dto.EmergencyStatisticsResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -389,6 +390,26 @@ public class TicketController {
             System.err.println("Controller caught exception: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Failed to send email: " + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "Get emergency response statistics",
+               description = "Calculates and returns system-wide emergency response statistics including emergency type breakdown, system health score, average response time, and completion rate. Available to all authenticated users.",
+               security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Statistics calculated successfully"),
+        @ApiResponse(responseCode = "500", description = "Internal server error during calculation"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    @GetMapping("/statistics")
+    public ResponseEntity<EmergencyStatisticsResponse> getEmergencyStatistics() {
+        try {
+            EmergencyStatisticsResponse statistics = ticketService.calculateEmergencyStatistics();
+            return ResponseEntity.ok(statistics);
+        } catch (Exception e) {
+            System.err.println("Error calculating emergency statistics: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

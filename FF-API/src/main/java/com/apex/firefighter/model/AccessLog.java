@@ -20,6 +20,9 @@ public class AccessLog {
     @Column(name = "session_id")
     private Long sessionId; // Link to AccessSession
 
+    @Column(name = "user_role")
+    private String userRole; // Role of the user at the time of access (for audit trail)
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -32,26 +35,39 @@ public class AccessLog {
         action = null;
         ticketId = null;
         sessionId = null;
+        userRole = null;
         //timestamp null or LocalDateTime.now()?
         timestamp = null;
     }
 
-    // Parameterized constructor
+    // Parameterized constructor (backward compatible - extracts role from user)
     public AccessLog(User user, String action, String ticketId, LocalDateTime timestamp) {
         this.user = user;
         this.action = action;
         this.ticketId = ticketId;
         this.timestamp = timestamp;
         this.sessionId = null;
+        this.userRole = user != null ? user.getRole() : null;
     }
 
-    // Constructor with session ID
+    // Constructor with session ID (backward compatible - extracts role from user)
     public AccessLog(User user, String action, String ticketId, LocalDateTime timestamp, Long sessionId) {
         this.user = user;
         this.action = action;
         this.ticketId = ticketId;
         this.timestamp = timestamp;
         this.sessionId = sessionId;
+        this.userRole = user != null ? user.getRole() : null;
+    }
+
+    // Full constructor with explicit role (for cases where role might change or needs to be explicitly set)
+    public AccessLog(User user, String action, String ticketId, LocalDateTime timestamp, Long sessionId, String userRole) {
+        this.user = user;
+        this.action = action;
+        this.ticketId = ticketId;
+        this.timestamp = timestamp;
+        this.sessionId = sessionId;
+        this.userRole = userRole;
     }
 
     public void setUser(User user) {
@@ -72,6 +88,10 @@ public class AccessLog {
 
     public void setSessionId(Long sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public void setUserRole(String userRole) {
+        this.userRole = userRole;
     }
 
     public Long getId() {
@@ -96,5 +116,9 @@ public class AccessLog {
 
     public User getUser() {
         return user;
+    }
+
+    public String getUserRole() {
+        return userRole;
     }
 }

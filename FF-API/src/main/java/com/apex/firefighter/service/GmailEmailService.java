@@ -1000,4 +1000,412 @@ public class GmailEmailService {
         };
     }
 
+    // ========================================
+    // REGISTRATION NOTIFICATION EMAILS
+    // ========================================
+
+    /**
+     * Send notification to admins about new registration request
+     */
+    public void sendNewRegistrationNotification(String adminEmail, String adminName, 
+                                               com.apex.firefighter.model.registration.SystemAccessRequest accessRequest) 
+            throws MessagingException {
+        if (!isEmailServiceEnabled()) {
+            logEmailDisabled("New Registration", adminEmail);
+            return;
+        }
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        helper.setTo(adminEmail);
+        helper.setSubject("🔔 New User Registration Request - Action Required");
+
+        String htmlContent = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                    .header { background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); 
+                             color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+                    .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+                    .info-box { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; 
+                               border-left: 4px solid #667eea; }
+                    .info-row { margin: 10px 0; }
+                    .label { font-weight: bold; color: #667eea; }
+                    .value { color: #333; }
+                    .button { display: inline-block; padding: 12px 30px; background: #667eea; 
+                             color: white; text-decoration: none; border-radius: 5px; margin: 10px 5px; }
+                    .footer { text-align: center; margin-top: 30px; color: #6c757d; font-size: 12px; }
+                    .priority-high { color: #dc3545; font-weight: bold; }
+                    .priority-medium { color: #fd7e14; font-weight: bold; }
+                    .priority-low { color: #28a745; font-weight: bold; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>🔔 New Registration Request</h1>
+                        <p>Action Required</p>
+                    </div>
+                    <div class="content">
+                        <p>Hello <strong>%s</strong>,</p>
+                        <p>A new user has requested access to the FireFighter Platform and requires your review.</p>
+                        
+                        <div class="info-box">
+                            <h3>📋 Registration Details</h3>
+                            <div class="info-row">
+                                <span class="label">Username:</span> 
+                                <span class="value">%s</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">Email:</span> 
+                                <span class="value">%s</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">Department:</span> 
+                                <span class="value">%s</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">Contact:</span> 
+                                <span class="value">%s</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">Registration Method:</span> 
+                                <span class="value">%s</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">Priority:</span> 
+                                <span class="value %s">%s</span>
+                            </div>
+                            %s
+                            %s
+                        </div>
+                        
+                        <div style="text-align: center; margin: 30px 0;">
+                            <p><strong>Please review this request in the admin panel.</strong></p>
+                        </div>
+                        
+                        <div class="footer">
+                            <p>This is an automated notification from FireFighter Platform</p>
+                            <p>Please do not reply to this email</p>
+                        </div>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """.formatted(
+                adminName,
+                accessRequest.getUsername(),
+                accessRequest.getEmail(),
+                accessRequest.getRequestDepartment() != null ? accessRequest.getRequestDepartment() : "Not specified",
+                accessRequest.getPhoneNumber() != null ? accessRequest.getPhoneNumber() : "Not provided",
+                accessRequest.getRegistrationMethod(),
+                getPriorityClass(accessRequest.getRequestPriority()),
+                accessRequest.getRequestPriority() != null ? accessRequest.getRequestPriority() : "MEDIUM",
+                accessRequest.getRequestedAccessGroups() != null && !accessRequest.getRequestedAccessGroups().isEmpty() 
+                    ? "<div class=\"info-row\"><span class=\"label\">Requested Access:</span> <span class=\"value\">" 
+                      + String.join(", ", accessRequest.getRequestedAccessGroups()) + "</span></div>"
+                    : "",
+                accessRequest.getJustification() != null 
+                    ? "<div class=\"info-row\"><span class=\"label\">Justification:</span> <span class=\"value\">" 
+                      + accessRequest.getJustification() + "</span></div>"
+                    : ""
+            );
+
+        helper.setText(htmlContent, true);
+        mailSender.send(message);
+    }
+
+    /**
+     * Send approval notification to user
+     */
+    public void sendRegistrationApprovedNotification(String userEmail, String username, String approvedBy) 
+            throws MessagingException {
+        if (!isEmailServiceEnabled()) {
+            logEmailDisabled("Registration Approved", userEmail);
+            return;
+        }
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        helper.setTo(userEmail);
+        helper.setSubject("✅ Registration Approved - Welcome to FireFighter Platform");
+
+        String htmlContent = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                    .header { background: linear-gradient(135deg, #28a745 0%%, #20c997 100%%); 
+                             color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+                    .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+                    .success-icon { font-size: 64px; margin: 20px 0; }
+                    .button { display: inline-block; padding: 12px 30px; background: #28a745; 
+                             color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+                    .footer { text-align: center; margin-top: 30px; color: #6c757d; font-size: 12px; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <div class="success-icon">✅</div>
+                        <h1>Registration Approved!</h1>
+                    </div>
+                    <div class="content">
+                        <p>Hello <strong>%s</strong>,</p>
+                        <p>Great news! Your registration request has been <strong>approved</strong> by the administrator.</p>
+                        
+                        <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #28a745;">
+                            <p><strong>You now have access to the FireFighter Platform!</strong></p>
+                            <p>You can log in using your registered credentials and start using the system.</p>
+                        </div>
+                        
+                        <div style="text-align: center;">
+                            <p>If you have any questions, please contact our support team.</p>
+                        </div>
+                        
+                        <div class="footer">
+                            <p>Approved by: %s</p>
+                            <p>This is an automated notification from FireFighter Platform</p>
+                        </div>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """.formatted(username, approvedBy);
+
+        helper.setText(htmlContent, true);
+        mailSender.send(message);
+    }
+
+    /**
+     * Send rejection notification to user
+     */
+    public void sendRegistrationRejectedNotification(String userEmail, String username, 
+                                                     String rejectedBy, String reason) 
+            throws MessagingException {
+        if (!isEmailServiceEnabled()) {
+            logEmailDisabled("Registration Rejected", userEmail);
+            return;
+        }
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        helper.setTo(userEmail);
+        helper.setSubject("Registration Request - Update Required");
+
+        String htmlContent = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                    .header { background: linear-gradient(135deg, #fd7e14 0%%, #dc3545 100%%); 
+                             color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+                    .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+                    .footer { text-align: center; margin-top: 30px; color: #6c757d; font-size: 12px; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>Registration Request Update</h1>
+                    </div>
+                    <div class="content">
+                        <p>Hello <strong>%s</strong>,</p>
+                        <p>Thank you for your interest in the FireFighter Platform. Unfortunately, your registration request could not be approved at this time.</p>
+                        
+                        %s
+                        
+                        <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 8px;">
+                            <p>If you believe this was a mistake or would like to discuss your application, please contact our support team.</p>
+                        </div>
+                        
+                        <div class="footer">
+                            <p>Reviewed by: %s</p>
+                            <p>This is an automated notification from FireFighter Platform</p>
+                        </div>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """.formatted(
+                username,
+                reason != null && !reason.trim().isEmpty() 
+                    ? "<div style=\"background: #fff3cd; padding: 15px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #ffc107;\">" +
+                      "<strong>Reason:</strong> " + reason + "</div>"
+                    : "",
+                rejectedBy
+            );
+
+        helper.setText(htmlContent, true);
+        mailSender.send(message);
+    }
+
+    /**
+     * Send department change notification to user
+     */
+    public void sendDepartmentChangeNotification(String userEmail, String username, 
+                                                 String oldDepartment, String newDepartment, String changedBy) 
+            throws MessagingException {
+        if (!isEmailServiceEnabled()) {
+            logEmailDisabled("Department Change", userEmail);
+            return;
+        }
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        helper.setTo(userEmail);
+        helper.setSubject("📋 Department Assignment Updated");
+
+        String htmlContent = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                    .header { background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); 
+                             color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+                    .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+                    .change-box { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; text-align: center; }
+                    .old-value { color: #6c757d; text-decoration: line-through; }
+                    .new-value { color: #28a745; font-weight: bold; font-size: 18px; }
+                    .footer { text-align: center; margin-top: 30px; color: #6c757d; font-size: 12px; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>📋 Department Update</h1>
+                    </div>
+                    <div class="content">
+                        <p>Hello <strong>%s</strong>,</p>
+                        <p>Your department assignment has been updated by an administrator.</p>
+                        
+                        <div class="change-box">
+                            <p class="old-value">Previous: %s</p>
+                            <p>↓</p>
+                            <p class="new-value">New Department: %s</p>
+                        </div>
+                        
+                        <p style="text-align: center;">If you have any questions about this change, please contact your administrator.</p>
+                        
+                        <div class="footer">
+                            <p>Changed by: %s</p>
+                            <p>This is an automated notification from FireFighter Platform</p>
+                        </div>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """.formatted(
+                username,
+                oldDepartment != null ? oldDepartment : "Not assigned",
+                newDepartment,
+                changedBy
+            );
+
+        helper.setText(htmlContent, true);
+        mailSender.send(message);
+    }
+
+    /**
+     * Send account status change notification to user
+     */
+    public void sendAccountStatusChangeNotification(String userEmail, String username, 
+                                                    boolean isAuthorized, String changedBy) 
+            throws MessagingException {
+        if (!isEmailServiceEnabled()) {
+            logEmailDisabled("Account Status Change", userEmail);
+            return;
+        }
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        helper.setTo(userEmail);
+        helper.setSubject(isAuthorized ? "✅ Account Activated" : "⚠️ Account Status Update");
+
+        String statusColor = isAuthorized ? "#28a745" : "#dc3545";
+        String statusText = isAuthorized ? "ACTIVE" : "INACTIVE";
+        String statusIcon = isAuthorized ? "✅" : "⚠️";
+
+        String htmlContent = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                    .header { background: linear-gradient(135deg, %s 0%%, %s 100%%); 
+                             color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+                    .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+                    .status-box { background: white; padding: 30px; margin: 20px 0; border-radius: 8px; 
+                                 border: 2px solid %s; text-align: center; }
+                    .status-text { font-size: 24px; font-weight: bold; color: %s; }
+                    .footer { text-align: center; margin-top: 30px; color: #6c757d; font-size: 12px; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>%s Account Status Update</h1>
+                    </div>
+                    <div class="content">
+                        <p>Hello <strong>%s</strong>,</p>
+                        <p>Your account status has been updated by an administrator.</p>
+                        
+                        <div class="status-box">
+                            <p class="status-text">Account Status: %s</p>
+                        </div>
+                        
+                        %s
+                        
+                        <div class="footer">
+                            <p>Changed by: %s</p>
+                            <p>This is an automated notification from FireFighter Platform</p>
+                        </div>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """.formatted(
+                statusColor, statusColor,
+                statusColor,
+                statusColor,
+                statusIcon,
+                username,
+                statusText,
+                isAuthorized 
+                    ? "<p style=\"text-align: center;\">You can now access all authorized features of the platform.</p>"
+                    : "<p style=\"text-align: center; color: #dc3545;\"><strong>Your access has been temporarily suspended.</strong> Please contact your administrator for more information.</p>",
+                changedBy
+            );
+
+        helper.setText(htmlContent, true);
+        mailSender.send(message);
+    }
+
+    /**
+     * Helper method to get CSS class for priority level
+     */
+    private String getPriorityClass(String priority) {
+        if (priority == null) return "priority-medium";
+        return switch (priority.toUpperCase()) {
+            case "HIGH" -> "priority-high";
+            case "LOW" -> "priority-low";
+            default -> "priority-medium";
+        };
+    }
+
 }

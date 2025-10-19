@@ -64,16 +64,16 @@ public class QueryProcessingService {
                                    boolean isAdmin) {
         // Empty or unknown intent
         if (intent == null || intent.getType() == IntentRecognitionService.IntentType.UNKNOWN) {
-            return new QueryResult(false, "Invalid or unknown intent", null, QueryResultType.ERROR);
+            return new QueryResult(false, "I didn't understand that command. Please try rephrasing or type 'help' to see available commands.", null, QueryResultType.ERROR);
         }
         // Check if user has permission to perform the query
         if (!intentRecognitionService.isIntentAllowed(intent.getType(), isAdmin ? "ADMIN" : "USER")) {
-            return new QueryResult(false, "Permission denied for intent: " + intent.getType().getCode(), null, QueryResultType.ERROR); 
+            return new QueryResult(false, "I'm sorry, but you don't have permission to perform that action. Please contact an administrator if you need access.", null, QueryResultType.ERROR); 
         }
 
         // Check if query is within max length
         if (intent.getOriginalQuery() != null && intent.getOriginalQuery().length() > nlpConfig.getMaxQueryLength()) {
-            return new QueryResult(false, "Query exceeds maximum length of " + nlpConfig.getMaxQueryLength() + " characters.", null, QueryResultType.ERROR);
+            return new QueryResult(false, "Your request is too long. Please try to make it more concise and try again.", null, QueryResultType.ERROR);
         }
 
         try {
@@ -160,14 +160,15 @@ public class QueryProcessingService {
                 // ----------- Fallback -----------
                 default:
                     System.out.println("❌ QUERY PROCESSING: Unsupported intent reached default case: " + intent.getType().getCode());
-                    return new QueryResult(false, "Unsupported intent: " + intent.getType().getCode(), null, QueryResultType.ERROR);
+                    return new QueryResult(false, "I'm not sure how to handle that request yet. Please try a different command or type 'help' for assistance.", null, QueryResultType.ERROR);
             }
         } catch (Exception e) {
-            QueryResult qr = new QueryResult(false, "Error processing query: " + e.getMessage(), null, QueryResultType.ERROR);
+            System.err.println("❌ QUERY PROCESSING: Exception occurred: " + e.getMessage());
+            QueryResult qr = new QueryResult(false, "I encountered an issue while processing your request. Please try again or contact support if the problem persists.", null, QueryResultType.ERROR);
             if (qr.getErrors() == null) {
                 qr.setErrors(new ArrayList<>());
             }
-            qr.getErrors().add(e.getMessage());
+            qr.getErrors().add("Internal processing error");
             return qr;
         }
     }

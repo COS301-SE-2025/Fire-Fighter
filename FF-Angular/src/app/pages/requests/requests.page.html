@@ -442,11 +442,156 @@
                 [disabled]="isLoading"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-red-500 dark:focus:border-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <option value="">{{ 'REQUESTS.MODAL.EMERGENCY_TYPE.PLACEHOLDER' | translate }}</option>
-                <option value="hr-emergency">{{ 'REQUESTS.MODAL.EMERGENCY_TYPE.HR' | translate }}</option>
-                <option value="financial-emergency">{{ 'REQUESTS.MODAL.EMERGENCY_TYPE.FINANCIAL' | translate }}</option>
-                <option value="management-emergency">{{ 'REQUESTS.MODAL.EMERGENCY_TYPE.MANAGEMENT' | translate }}</option>
-                <option value="logistics-emergency">{{ 'REQUESTS.MODAL.EMERGENCY_TYPE.LOGISTICS' | translate }}</option>
+              <option value="">{{ 'REQUESTS.MODAL.EMERGENCY_TYPE.PLACEHOLDER' | translate }}</option>
+                
+              <!-- User Management (IDs 12-18) -->
+              <optgroup label="User Management">
+                <option value="user-read-users-groups">Read Users & Groups</option>
+                <option value="user-modify-users-groups">Create/Modify Users & Groups</option>
+                <option value="user-modify-password">Modify User Passwords</option>
+                <option value="user-delete-users">Delete/Disable Users</option>
+                <option value="user-modify-own">Modify Own User Info</option>
+                <option value="user-modify-own-password">Modify Own Password</option>
+                <option value="user-export-users">Export Users</option>
+              </optgroup>
+              
+              <!-- Third Parties (IDs 19-23) -->
+              <optgroup label="Third Party Management">
+                <option value="third-party-read">Read Third Parties</option>
+                <option value="third-party-modify">Create/Modify Third Parties</option>
+                <option value="third-party-delete">Delete Third Parties</option>
+                <option value="third-party-export">Export Third Parties</option>
+                <option value="third-party-extend-access">Extend Access to All Third Parties</option>
+              </optgroup>
+              
+              <!-- Contacts (IDs 24-27) -->
+              <optgroup label="Contact Management">
+                <option value="contacts-read">Read Contacts</option>
+                <option value="contacts-modify">Create/Modify Contacts</option>
+                <option value="contacts-delete">Delete Contacts</option>
+                <option value="contacts-export">Export Contacts</option>
+              </optgroup>
+              
+              <!-- Customer Orders (IDs 28-31) -->
+              <optgroup label="Customer Orders">
+                <option value="orders-read">Read Customer Orders</option>
+                <option value="orders-modify">Create/Modify Customer Orders</option>
+                <option value="orders-delete">Delete Customer Orders</option>
+                <option value="orders-export">Export Sales Orders</option>
+              </optgroup>
+              
+              <!-- Actions/Events - Own (IDs 32-34) -->
+              <optgroup label="Actions/Events (Own)">
+                <option value="actions-own-read">Read Own Actions/Events</option>
+                <option value="actions-own-modify">Create/Modify Own Actions/Events</option>
+                <option value="actions-own-delete">Delete Own Actions/Events</option>
+              </optgroup>
+              
+              <!-- Actions/Events - Others (IDs 35-38) -->
+              <optgroup label="Actions/Events (Others)">
+                <option value="actions-others-read">Read Others' Actions/Events</option>
+                <option value="actions-others-modify">Create/Modify Others' Actions/Events</option>
+                <option value="actions-others-delete">Delete Others' Actions/Events</option>
+                <option value="actions-export">Export Actions/Tasks</option>
+              </optgroup>
+              
+              <!-- API Keys (ID 39) -->
+              <optgroup label="API Management">
+                <option value="api-generate-key">Generate/Modify API Keys</option>
+              </optgroup>
+              
+              <!-- Products (IDs 40-43) -->
+              <optgroup label="Product Management">
+                <option value="products-read">Read Products</option>
+                <option value="products-modify">Create/Modify Products</option>
+                <option value="products-delete">Delete Products</option>
+                <option value="products-export">Export Products</option>
+              </optgroup>
+              
+              <!-- Warehouses/Stock (IDs 44-48) -->
+              <optgroup label="Warehouse & Stock">
+                <option value="warehouse-read">Read Warehouses & Stocks</option>
+                <option value="warehouse-modify">Create/Modify Warehouses</option>
+                <option value="warehouse-delete">Delete Warehouses</option>
+                <option value="stock-read">Read Stock Movements</option>
+                <option value="stock-modify">Create/Modify Stock Movements</option>
+              </optgroup>
+              
+              <!-- Shipping/Delivery (IDs 49-55) -->
+              <optgroup label="Shipping & Delivery">
+                <option value="shipping-read">Read Sendings</option>
+                <option value="shipping-modify">Create/Modify Sendings</option>
+                <option value="shipping-export">Export Sendings</option>
+                <option value="shipping-delete">Delete Sendings</option>
+                <option value="delivery-read">Read Delivery Receipts</option>
+                <option value="delivery-modify">Create/Modify Delivery Receipts</option>
+                <option value="delivery-delete">Delete Delivery Receipts</option>
+              </optgroup>
+              
+              <!-- HR - Skills/Jobs (IDs 56-58) -->
+              <optgroup label="HR - Skills & Jobs">
+                <option value="hr-skills-read">Read Skills/Jobs/Positions</option>
+                <option value="hr-skills-modify">Create/Modify Skills/Jobs/Positions</option>
+                <option value="hr-skills-delete">Delete Skills/Jobs/Positions</option>
+              </optgroup>
+              
+              <!-- HR - Evaluations (IDs 59-62) -->
+              <optgroup label="HR - Evaluations">
+                <option value="hr-eval-read">Read Evaluations (Own & Subordinates)</option>
+                <option value="hr-eval-modify">Create/Modify Evaluations</option>
+                <option value="hr-eval-delete">Delete Evaluations</option>
+                <option value="hr-eval-read-all">Read All Evaluations</option>
+              </optgroup>
+              
+              <!-- HR - Personal Info (IDs 63-64) -->
+              <optgroup label="HR - Personal Information">
+                <option value="hr-personal-read">Read Personal Information</option>
+                <option value="hr-personal-write">Write Personal Information</option>
+              </optgroup>
+              
+              <!-- HR - Salaries (IDs 65-69) -->
+              <optgroup label="HR - Salaries & Payments">
+                <option value="hr-salary-read">Read Salaries (Own & Subordinates)</option>
+                <option value="hr-salary-modify">Create/Modify Salaries & Payments</option>
+                <option value="hr-salary-delete">Delete Salaries & Payments</option>
+                <option value="hr-salary-read-all">Read All Salaries</option>
+                <option value="hr-salary-export">Export Salaries</option>
+              </optgroup>
+              
+              <!-- Tickets (IDs 70-74) -->
+              <optgroup label="Ticket Management">
+                <option value="tickets-see">See Tickets</option>
+                <option value="tickets-modify">Modify Tickets</option>
+                <option value="tickets-delete">Delete Tickets</option>
+                <option value="tickets-manage">Manage Tickets</option>
+                <option value="tickets-export">Export Tickets</option>
+              </optgroup>
+              
+              <!-- Manufacturing - BOM (IDs 75-77) -->
+              <optgroup label="Manufacturing - Bills of Materials">
+                <option value="bom-read">Read Bills of Materials</option>
+                <option value="bom-modify">Create/Update Bills of Materials</option>
+                <option value="bom-delete">Delete Bills of Materials</option>
+              </optgroup>
+              
+              <!-- Manufacturing - MO (IDs 78-80) -->
+              <optgroup label="Manufacturing - Orders">
+                <option value="mo-read">Read Manufacturing Orders</option>
+                <option value="mo-modify">Create/Update Manufacturing Orders</option>
+                <option value="mo-delete">Delete Manufacturing Orders</option>
+              </optgroup>
+              
+              <!-- Data Import/Export (IDs 81-83) -->
+              <optgroup label="Data Import/Export">
+                <option value="data-import">Run Mass Data Imports</option>
+                <option value="data-export-get">Get Export Results</option>
+                <option value="data-export-modify">Create/Modify Exports</option>
+              </optgroup>
+              
+              <!-- Module Development (ID 84) -->
+              <optgroup label="System Development">
+                <option value="system-generate-modules">Generate New Modules</option>
+              </optgroup>
               </select>
             </div>
 

@@ -42,4 +42,28 @@ public interface AccessLogRepository extends JpaRepository<AccessLog, Long> {
     // Find most recent login for a user
     @Query("SELECT al FROM AccessLog al WHERE al.user.userId = :userId AND al.action = 'LOGIN' ORDER BY al.timestamp DESC")
     List<AccessLog> findMostRecentLoginByUser(@Param("userId") String userId);
+    
+    // ========================================
+    // ROLE-BASED QUERIES (for audit trail)
+    // ========================================
+    
+    // Find all logs for a specific user role
+    @Query("SELECT al FROM AccessLog al WHERE al.userRole = :role ORDER BY al.timestamp DESC")
+    List<AccessLog> findByUserRole(@Param("role") String role);
+    
+    // Find logs by user and role (track what a specific user did while having a specific role)
+    @Query("SELECT al FROM AccessLog al WHERE al.user.userId = :userId AND al.userRole = :role ORDER BY al.timestamp DESC")
+    List<AccessLog> findByUserIdAndRole(@Param("userId") String userId, @Param("role") String role);
+    
+    // Find logs by role and action (e.g., all LOGIN attempts by ADMIN role)
+    @Query("SELECT al FROM AccessLog al WHERE al.userRole = :role AND al.action = :action ORDER BY al.timestamp DESC")
+    List<AccessLog> findByRoleAndAction(@Param("role") String role, @Param("action") String action);
+    
+    // Find logs by role within a time range (for compliance reporting)
+    @Query("SELECT al FROM AccessLog al WHERE al.userRole = :role AND al.timestamp BETWEEN :startTime AND :endTime ORDER BY al.timestamp DESC")
+    List<AccessLog> findByRoleAndTimestampBetween(@Param("role") String role, @Param("startTime") ZonedDateTime startTime, @Param("endTime") ZonedDateTime endTime);
+    
+    // Find logs where user's role changed (by comparing consecutive logs for same user)
+    @Query("SELECT al FROM AccessLog al WHERE al.user.userId = :userId ORDER BY al.timestamp ASC")
+    List<AccessLog> findAllByUserIdOrderedByTime(@Param("userId") String userId);
 }

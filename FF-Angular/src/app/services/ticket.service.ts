@@ -20,6 +20,17 @@ export interface Ticket {
   dateCompleted?: Date; // Date when ticket was completed/resolved
 }
 
+export interface EmergencyStatistics {
+  emergencyTypeBreakdown: { [key: string]: number };
+  mostCommonEmergencyType: string;
+  systemHealthScore: number;
+  averageResponseTime: number;
+  completionRate: number;
+  currentMonthTickets: number;
+  totalTickets: number;
+  activeTickets: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -181,9 +192,18 @@ export class TicketService {
       })
     );
   }
+
+  /**
+   * Get emergency response statistics from the backend
+   * @returns Observable of emergency statistics
+   */
+  getEmergencyStatistics(): Observable<EmergencyStatistics> {
+    return this.http.get<EmergencyStatistics>(`${this.apiUrl}/statistics`);
+  }
 }
 
 function generateTicketId(): string {
   // Example: BMW-FF-<timestamp>
-  return `BMW-FF-${Date.now()}`;
+  const timestamp = Date.now().toString(36);
+  return `BMW-FF-${timestamp.toUpperCase()}`;
 }

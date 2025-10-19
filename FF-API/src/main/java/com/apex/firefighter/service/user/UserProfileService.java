@@ -2,6 +2,7 @@ package com.apex.firefighter.service.user;
 
 import com.apex.firefighter.model.User;
 import com.apex.firefighter.repository.UserRepository;
+import com.apex.firefighter.service.registration.RegistrationNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,10 +24,13 @@ import java.util.Optional;
 public class UserProfileService {
 
     private final UserRepository userRepository;
+    private final RegistrationNotificationService notificationService;
 
     @Autowired
-    public UserProfileService(UserRepository userRepository) {
+    public UserProfileService(UserRepository userRepository,
+                             RegistrationNotificationService notificationService) {
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     /**
@@ -282,5 +286,85 @@ public class UserProfileService {
         System.out.println("  Admin Users: " + adminUsers);
 
         return response;
+    }
+
+    /**
+     * ENHANCED USER MANAGEMENT (Admin Only)
+     */
+
+    /**
+     * Update user department as admin
+     */
+    public User updateUserDepartment(String adminFirebaseUid, String targetFirebaseUid, String department) {
+        System.out.println("🔵 ADMIN UPDATE DEPARTMENT:");
+        System.out.println("  Admin UID: " + adminFirebaseUid);
+        System.out.println("  Target UID: " + targetFirebaseUid);
+        System.out.println("  New Department: " + department);
+
+        // Verify admin
+        Optional<User> adminUserOpt = userRepository.findByUserId(adminFirebaseUid);
+        if (adminUserOpt.isEmpty() || !adminUserOpt.get().isAdmin()) {
+            throw new SecurityException("Administrator privileges required");
+        }
+
+        // Find target user
+        Optional<User> targetUserOpt = userRepository.findByUserId(targetFirebaseUid);
+        if (targetUserOpt.isEmpty()) {
+            throw new RuntimeException("Target user not found with Firebase UID: " + targetFirebaseUid);
+        }
+
+        // Update department
+        User targetUser = targetUserOpt.get();
+        String oldDepartment = targetUser.getDepartment();
+        targetUser.setDepartment(department);
+        User updatedUser = userRepository.save(targetUser);
+
+        // Send notification to user
+        Optional<User> adminUser = userRepository.findByUserId(adminFirebaseUid);
+        String adminName = adminUser.map(User::getUsername).orElse("Administrator");
+        notificationService.notifyUserOfDepartmentChange(updatedUser, oldDepartment, department, adminName);
+
+        System.out.println("✅ DEPARTMENT UPDATED: " + updatedUser.getDepartment());
+        return updatedUser;
+    }
+
+    /**
+     * Update user account status (authorized/unauthorized) as admin
+     */
+    public User updateUserAccountStatus(String adminFirebaseUid, String targetFirebaseUid, Boolean isAuthorized) {
+        System.out.println("🔵 ADMIN UPDATE ACCOUNT STATUS:");
+        System.out.println("  Admin UID: " + adminFirebaseUid);
+        System.out.println("  Target UID: " + targetFirebaseUid);
+        System.out.println("  New Status: " + (isAuthorized ? "AUTHORIZED" : "UNAUTHORIZED"));
+
+        // Verify admin
+        Optional<User> adminUserOpt = userRepository.findByUserId(adminFirebaseUid);
+        if (adminUserOpt.isEmpty() || !adminUserOpt.get().isAdmin()) {
+            throw new SecurityException("Administrator privileges required");
+        }
+
+        // Prevent admin from disabling themselves
+        if (adminFirebaseUid.equals(targetFirebaseUid) && !isAuthorized) {
+            throw new SecurityException("Cannot disable your own admin account");
+        }
+
+        // Find target user
+        Optional<User> targetUserOpt = userRepository.findByUserId(targetFirebaseUid);
+        if (targetUserOpt.isEmpty()) {
+            throw new RuntimeException("Target user not found with Firebase UID: " + targetFirebaseUid);
+        }
+
+        // Update status
+        User targetUser = targetUserOpt.get();
+        targetUser.setIsAuthorized(isAuthorized);
+        User updatedUser = userRepository.save(targetUser);
+
+        // Send notification to user
+        Optional<User> adminUser = userRepository.findByUserId(adminFirebaseUid);
+        String adminName = adminUser.map(User::getUsername).orElse("Administrator");
+        notificationService.notifyUserOfStatusChange(updatedUser, isAuthorized, adminName);
+
+        System.out.println("✅ ACCOUNT STATUS UPDATED: " + (isAuthorized ? "AUTHORIZED" : "UNAUTHORIZED"));
+        return updatedUser;
     }
 }

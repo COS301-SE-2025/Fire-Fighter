@@ -1,0 +1,39 @@
+// Access Request Page Styles
+// Inherits from the global Tailwind CSS styles
+
+// Custom scrollbar for textarea
+textarea::-webkit-scrollbar {
+  width: 6px;
+}
+
+textarea::-webkit-scrollbar-track {
+  background-color: rgb(75 85 99);
+  border-radius: 0.25rem;
+}
+
+textarea::-webkit-scrollbar-thumb {
+  background-color: rgb(107 114 128);
+  border-radius: 0.25rem;
+}
+
+textarea::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(156 163 175);
+}
+
+// Animation for form submission
+.form-section {
+  transition: all 0.3s ease-in-out;
+}
+
+// Focus states for better accessibility
+select:focus,
+input:focus,
+textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+// Character counter animation
+.character-counter {
+  transition: color 0.2s ease-in-out;
+}

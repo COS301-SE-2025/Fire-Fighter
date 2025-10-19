@@ -366,6 +366,10 @@
       "ADMIN_USERS": "Admin-Benutzer",
       "ADMIN_USERS_DESC": "Mit Admin-Berechtigungen"
     },
+    "TABS": {
+      "USERS": "Benutzer",
+      "PENDING_APPROVALS": "Ausstehende Genehmigungen"
+    },
     "TABLE": {
       "TITLE": "Alle Benutzer",
       "SUBTITLE": "Benutzerkonten und Berechtigungen verwalten",
@@ -378,6 +382,14 @@
         "DOLIBARR_ID": "Dolibarr-ID",
         "LAST_LOGIN": "Letzte Anmeldung",
         "ACTIONS": "Aktionen"
+      }
+    },
+    "PENDING_APPROVALS": {
+      "TITLE": "Ausstehende Benutzergenehmigungen",
+      "SUBTITLE": "Neue Benutzerregistrierungen überprüfen und genehmigen",
+      "EMPTY_STATE": {
+        "TITLE": "Keine ausstehenden Genehmigungen",
+        "MESSAGE": "Alle Benutzerregistrierungen wurden bearbeitet."
       }
     },
     "ROLES": {
