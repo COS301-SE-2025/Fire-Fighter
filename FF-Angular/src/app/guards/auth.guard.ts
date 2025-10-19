@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateFn } from '@angular/router';
 import { map, take, filter, timeout, catchError } from 'rxjs/operators';
 import { combineLatest, of, timer } from 'rxjs';
 import { AuthService } from '../services/auth.service';
@@ -10,17 +10,24 @@ export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const navCtrl = inject(NavController);
 
-  return authService.user$.pipe(
+  return combineLatest([authService.user$, authService.userProfile$]).pipe(
     take(1),
-    map(user => {
-      // If there's a user, they're authenticated, allow access
-      if (user) {
-        return true;
+    map(([user, userProfile]) => {
+      // User isn't authenticated, redirect to login
+      if (!user) {
+        navCtrl.navigateRoot('/login', { animationDirection: 'forward' });
+        return false;
       }
 
-      // User isn't authenticated, redirect to login
-      navCtrl.navigateRoot('/login', { animationDirection: 'forward' });
-      return false;
+      // User is authenticated, check if they're authorized
+      if (userProfile && !userProfile.isAuthorized) {
+        console.log('⚠️ User not authorized, redirecting to inactive-account');
+        navCtrl.navigateRoot('/inactive-account', { animationDirection: 'forward' });
+        return false;
+      }
+
+      // User is authenticated and authorized, allow access
+      return true;
     })
   );
 };
