@@ -818,14 +818,10 @@ export class AuthService {
    * Get pending user approvals (Admin Only)
    * Endpoint: GET /api/registration/admin/pending
    */
-  getPendingApprovals(adminUid: string): Observable<any> {
+  getPendingApprovals(): Observable<any> {
     console.log('🔵 GET PENDING APPROVALS REQUEST');
 
-    const headers = new HttpHeaders({
-      'X-Firebase-UID': adminUid
-    });
-
-    return this.http.get(`${environment.apiUrl}/registration/admin/pending`, { headers }).pipe(
+    return this.http.get(`${environment.apiUrl}/registration/admin/pending`).pipe(
       tap((response: any) => {
         console.log('✅ Get pending approvals successful:', response);
       }),
@@ -856,15 +852,10 @@ export class AuthService {
    * Approve user registration (Admin Only)
    * Endpoint: PUT /api/registration/admin/approve
    */
-  approveUserRegistration(adminUid: string, decision: any): Observable<any> {
+  approveUserRegistration(decision: any): Observable<any> {
     console.log('🔵 APPROVE USER REGISTRATION REQUEST:', decision);
-    console.log('👤 Admin UID:', adminUid);
 
-    const headers = new HttpHeaders({
-      'X-Firebase-UID': adminUid
-    });
-
-    return this.http.put(`${environment.apiUrl}/registration/admin/approve`, decision, { headers }).pipe(
+    return this.http.put(`${environment.apiUrl}/registration/admin/approve`, decision).pipe(
       tap((response: any) => {
         console.log('✅ Approve user registration successful:', response);
       }),
@@ -895,15 +886,10 @@ export class AuthService {
    * Reject user registration (Admin Only)
    * Endpoint: PUT /api/registration/admin/reject
    */
-  rejectUserRegistration(adminUid: string, decision: any): Observable<any> {
+  rejectUserRegistration(decision: any): Observable<any> {
     console.log('🔵 REJECT USER REGISTRATION REQUEST:', decision);
-    console.log('👤 Admin UID:', adminUid);
 
-    const headers = new HttpHeaders({
-      'X-Firebase-UID': adminUid
-    });
-
-    return this.http.put(`${environment.apiUrl}/registration/admin/reject`, decision, { headers }).pipe(
+    return this.http.put(`${environment.apiUrl}/registration/admin/reject`, decision).pipe(
       tap((response: any) => {
         console.log('✅ Reject user registration successful:', response);
       }),
