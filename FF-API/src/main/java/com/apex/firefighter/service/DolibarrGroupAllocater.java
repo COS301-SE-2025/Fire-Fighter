@@ -1,7 +1,9 @@
 package com.apex.firefighter.service;
 
 import com.apex.firefighter.config.DoliGroupConfig;
+import com.apex.firefighter.config.DolibarrPermissionsConfig;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
@@ -9,9 +11,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class DolibarrGroupAllocater {
     private final DoliGroupConfig properties;
+    private final DolibarrPermissionsConfig permissionsConfig;
 
-    public DolibarrGroupAllocater(DoliGroupConfig properties) {
+    public DolibarrGroupAllocater(DoliGroupConfig properties, DolibarrPermissionsConfig permissionsConfig) {
         this.properties = properties;
+        this.permissionsConfig = permissionsConfig;
     }
 
     /*
@@ -72,5 +76,24 @@ public class DolibarrGroupAllocater {
             case 4 -> Integer.valueOf(groups.get("logistics"));
             default -> throw new IllegalArgumentException("Invalid group list number: " + listNumber);
         };
+    }
+
+    /**
+     * Get fine-grained permission group IDs for a specific category
+     * This returns multiple permission groups instead of a single legacy group
+     * 
+     * @param description The emergency description/category
+     * @return List of permission group IDs to assign
+     */
+    public List<Integer> getFineGrainedPermissions(String description) {
+        if (description == null || description.isEmpty()) {
+            throw new IllegalArgumentException("Description cannot be null or empty");
+        }
+
+        List<Integer> permissions = permissionsConfig.getPermissionsForCategory(description);
+        
+        System.out.println("🔍 FINE-GRAINED ALLOCATOR: Category '" + description + "' -> " + permissions.size() + " permission groups");
+        
+        return permissions;
     }
 }
