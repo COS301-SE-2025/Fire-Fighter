@@ -76,52 +76,26 @@ export class AccessRequestPage implements OnInit {
 
       try {
         const formData = this.accessRequestForm.value;
-        console.log('🔄 Submitting access request:', formData);
+        console.log('Access Request Data:', formData);
         
-        // Get current user's Firebase UID from the auth service
-        const currentUser = await this.getCurrentUser();
-        if (!currentUser) {
-          throw new Error('No authenticated user found. Please register again.');
-        }
-        
-        // Prepare access request data
-        const accessRequestData = {
-          firebaseUid: currentUser.uid,
-          requestPriority: formData.priorityLevel,
-          requestDepartment: formData.accessGroup,
-          phoneNumber: formData.contactNumber,
-          justification: formData.businessJustification
-        };
-        
-        // Submit to backend
-        await this.authService.submitAccessRequest(accessRequestData).toPromise();
-        console.log('✅ Access request submitted successfully');
+        // Here you would typically send the request to your backend API
+        // For now, we'll simulate a successful submission
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
         
         this.successMsg = 'Access request submitted successfully! Your request is now pending approval.';
         
-        // Redirect to inactive-account page after a short delay
+        // Redirect to dashboard after a short delay
         setTimeout(() => {
-          this.router.navigate(['/inactive-account']);
-        }, 2000);
+          this.router.navigate(['/dashboard']);
+        }, 3000);
         
       } catch (error: any) {
-        console.error('❌ Access request submission error:', error);
-        this.errorMsg = error.error?.error || error.message || 'Failed to submit access request. Please try again.';
+        console.error('Access request submission error:', error);
+        this.errorMsg = error.message || 'Failed to submit access request. Please try again.';
       } finally {
         this.isSubmitting = false;
       }
     }
-  }
-  
-  /**
-   * Get current authenticated user from AuthService
-   */
-  private getCurrentUser(): Promise<any> {
-    return new Promise((resolve) => {
-      this.authService.user$.subscribe((user) => {
-        resolve(user);
-      });
-    });
   }
 
   getCharacterCount(): number {

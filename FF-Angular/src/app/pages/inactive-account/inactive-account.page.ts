@@ -1,10 +1,8 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
-import { Auth } from '@angular/fire/auth';
-import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-inactive-account',
@@ -16,8 +14,6 @@ import { AuthService } from '../../services/auth.service';
 export class InactiveAccountPage implements OnInit {
 
   isCheckingStatus = false;
-  private auth = inject(Auth);
-  private authService = inject(AuthService);
 
   constructor(
     private router: Router,
@@ -31,42 +27,27 @@ export class InactiveAccountPage implements OnInit {
   }
 
   /**
-   * Check the current account status from backend
+   * Check the current account status (simulate API call)
    */
   async checkStatus() {
     this.isCheckingStatus = true;
     
     try {
-      // Get current user from Firebase
-      const currentUser = this.auth.currentUser;
+      // Simulate API call to check account status
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      if (!currentUser) {
-        this.showStatusAlert('No authenticated user found. Please try logging in again.');
-        return;
-      }
+      // For demo purposes, show different messages based on random status
+      const statuses = [
+        'Your account is still pending administrator approval.',
+        'Your account is under review. Please check back in 24-48 hours.',
+        'Your account has been approved! Please try logging in again.',
+        'Additional information is required. Please contact your administrator.'
+      ];
       
-      // Check registration status from backend
-      const status: any = await this.authService.getRegistrationStatus(currentUser.uid).toPromise();
-      console.log('📊 Registration status:', status);
+      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
       
-      let message = '';
-      if (status.status === 'PENDING') {
-        message = 'Your account is still pending administrator approval. You will receive an email once your account has been reviewed.';
-      } else if (status.status === 'APPROVED') {
-        message = 'Your account has been approved! Please try logging in again.';
-      } else if (status.status === 'REJECTED') {
-        message = `Your account request was rejected. Reason: ${status.rejectionReason || 'Not specified'}`;
-      } else if (status.status === 'REGISTERED') {
-        if (status.authorized) {
-          message = 'Your account is active and authorized. You can now log in.';
-        } else {
-          message = 'Your account exists but is not yet authorized. Please contact an administrator.';
-        }
-      } else {
-        message = 'Your account status could not be determined. Please contact support.';
-      }
-      
-      this.showStatusAlert(message);
+      // Show status message
+      this.showStatusAlert(randomStatus);
       
     } catch (error) {
       console.error('Error checking account status:', error);

@@ -31,11 +31,6 @@ interface PendingApproval {
   requestedAccess: string;
   businessJustification: string;
   priorityLevel: 'High' | 'Medium' | 'Low';
-  // System Access Request fields
-  systemAccessPriority?: string;
-  systemAccessDepartment?: string;
-  systemAccessPhoneNumber?: string;
-  systemAccessJustification?: string;
 }
 
 interface AccessGroup {
@@ -89,9 +84,33 @@ export class UserManagementPage implements OnInit {
   // Tab management
   activeTab = 'users';
 
-  // Pending approval data
-  pendingApprovals: PendingApproval[] = [];
-  loadingPendingApprovals = false;
+  // Mock pending approval data
+  pendingApprovals: PendingApproval[] = [
+    {
+      userId: 'pending_001',
+      username: 'sarah.mueller',
+      email: 'sarah.mueller@bmw.com',
+      department: 'Financial Emergency Response',
+      contactNumber: '+49 89 382 12345',
+      createdAt: '2025-01-15T09:23:45Z',
+      registrationMethod: 'Google SSO',
+      requestedAccess: 'Financial Emergency Group Access',
+      businessJustification: 'Need emergency access for financial crisis management and budget approval workflows during out-of-hours incidents. Request is for accessing critical financial systems during potential BMW Group emergency situations that require immediate budget approvals and resource allocation.',
+      priorityLevel: 'High'
+    },
+    {
+      userId: 'pending_002',
+      username: 'marcus.schmidt',
+      email: 'm.schmidt@bmw.com',
+      department: 'IT Infrastructure Support',
+      contactNumber: '+49 89 382 67890',
+      createdAt: '2025-01-14T14:17:32Z',
+      registrationMethod: 'Azure AD',
+      requestedAccess: 'Logistics Emergency Group Access',
+      businessJustification: 'Required access to coordinate emergency logistics and supply chain responses. Will be supporting critical infrastructure maintenance and ensuring business continuity during emergency situations.',
+      priorityLevel: 'Medium'
+    }
+  ];
 
   // Statistics
   normalUsers = 0;
@@ -181,11 +200,6 @@ export class UserManagementPage implements OnInit {
   switchTab(tabId: string) {
     this.activeTab = tabId;
     console.log('Switched to tab:', tabId);
-    
-    // Load pending approvals when switching to that tab
-    if (tabId === 'pending-approvals') {
-      this.loadPendingApprovals();
-    }
   }
 
   isTabActive(tabId: string): boolean {
@@ -241,124 +255,6 @@ export class UserManagementPage implements OnInit {
   updateStatistics() {
     this.adminUsers = this.users.filter(user => user.isAdmin).length;
     this.normalUsers = this.users.filter(user => !user.isAdmin).length;
-  }
-
-  async loadPendingApprovals() {
-    this.loadingPendingApprovals = true;
-    try {
-      // Call the real API to get pending approvals
-      const response = await this.authService.getPendingApprovals().toPromise();
-
-      if (response && Array.isArray(response)) {
-        // Map backend DTO to frontend interface
-        this.pendingApprovals = response.map((dto: any) => ({
-          userId: dto.firebaseUid,
-          username: dto.username,
-          email: dto.email,
-          department: dto.department,
-          contactNumber: dto.contactNumber,
-          createdAt: dto.createdAt,
-          registrationMethod: dto.registrationMethod,
-          requestedAccess: dto.requestedAccessGroups ? dto.requestedAccessGroups.join(', ') : '',
-          businessJustification: dto.businessJustification,
-          priorityLevel: dto.priorityLevel,
-          // Include system access request fields if available
-          systemAccessPriority: dto.systemAccessPriority,
-          systemAccessDepartment: dto.systemAccessDepartment,
-          systemAccessPhoneNumber: dto.systemAccessPhoneNumber,
-          systemAccessJustification: dto.systemAccessJustification
-        }));
-        console.log('✅ Pending approvals loaded successfully:', this.pendingApprovals.length, 'approvals');
-      } else {
-        console.error('❌ Invalid response format from getPendingApprovals');
-        this.pendingApprovals = [];
-      }
-    } catch (error: any) {
-      console.error('❌ Error loading pending approvals:', error);
-
-      // Handle specific error cases
-      if (error.message === 'Service temporarily unavailable') {
-        console.log('🔌 Service is down, user will be redirected');
-      } else {
-        alert('Failed to load pending approvals. Please try again or contact support if the problem persists.');
-      }
-
-      // Reset to empty state
-      this.pendingApprovals = [];
-    } finally {
-      this.loadingPendingApprovals = false;
-    }
-  }
-
-  async approveApproval(approval: PendingApproval) {
-    // Confirm approval with user
-    const confirmed = confirm(`Are you sure you want to approve access for ${approval.username}?`);
-    if (!confirmed) return;
-
-    try {
-      // Prepare the decision payload
-      const decision = {
-        firebaseUid: approval.userId,
-        assignedAccessGroups: approval.requestedAccess.split(', ').filter((g: string) => g.trim() !== ''),
-        department: approval.department,
-        dolibarrId: '' // Can be added later if needed
-      };
-
-      // Call the approve API
-      const response = await this.authService.approveUserRegistration(decision).toPromise();
-      console.log('✅ User approved successfully:', response);
-
-      // Show success message
-      alert(`✅ User ${approval.username} has been approved successfully!`);
-
-      // Reload pending approvals to reflect changes
-      await this.loadPendingApprovals();
-    } catch (error: any) {
-      console.error('❌ Error approving user:', error);
-
-      // Handle specific error cases
-      if (error.message === 'Service temporarily unavailable') {
-        console.log('🔌 Service is down, user will be redirected');
-      } else {
-        alert('Failed to approve user. Please try again or contact support if the problem persists.');
-      }
-    }
-  }
-
-  async rejectApproval(approval: PendingApproval) {
-    // Prompt for rejection reason
-    const reason = prompt(`Please provide a reason for rejecting ${approval.username}'s access request:`);
-    if (!reason || reason.trim() === '') {
-      alert('Rejection reason is required.');
-      return;
-    }
-
-    try {
-      // Prepare the decision payload
-      const decision = {
-        firebaseUid: approval.userId,
-        rejectionReason: reason
-      };
-
-      // Call the reject API
-      const response = await this.authService.rejectUserRegistration(decision).toPromise();
-      console.log('✅ User rejected successfully:', response);
-
-      // Show success message
-      alert(`✅ User ${approval.username} has been rejected.`);
-
-      // Reload pending approvals to reflect changes
-      await this.loadPendingApprovals();
-    } catch (error: any) {
-      console.error('❌ Error rejecting user:', error);
-
-      // Handle specific error cases
-      if (error.message === 'Service temporarily unavailable') {
-        console.log('🔌 Service is down, user will be redirected');
-      } else {
-        alert('Failed to reject user. Please try again or contact support if the problem persists.');
-      }
-    }
   }
 
   filterUsers() {

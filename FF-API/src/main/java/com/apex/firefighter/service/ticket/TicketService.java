@@ -330,8 +330,59 @@ public class TicketService {
     }
 
     /**
+     * Normalize emergency type to a standard format
+     * Handles both legacy format (hr-emergency) and new format (hr, financial, management, logistics)
+     * 
+     * @param emergencyType The raw emergency type string
+     * @return Normalized emergency type key
+     */
+    private String normalizeEmergencyType(String emergencyType) {
+        if (emergencyType == null) {
+            return null;
+        }
+        
+        String normalized = emergencyType.toLowerCase().trim();
+        
+        // Map various formats to standardized keys
+        if (normalized.equals("hr") || normalized.equals("hr-emergency")) {
+            return "hr";
+        } else if (normalized.equals("financial") || normalized.equals("financials") || 
+                   normalized.equals("financial-emergency")) {
+            return "financial";
+        } else if (normalized.equals("management") || normalized.equals("fmanager") || 
+                   normalized.equals("manager") || normalized.equals("management-emergency")) {
+            return "management";
+        } else if (normalized.equals("logistics") || normalized.equals("logistics-emergency")) {
+            return "logistics";
+        }
+        
+        return null; // Unknown type
+    }
+    
+    /**
+     * Get display name for emergency type
+     * 
+     * @param normalizedType The normalized emergency type key
+     * @return Display-friendly name
+     */
+    private String getEmergencyTypeDisplayName(String normalizedType) {
+        if (normalizedType == null) {
+            return "N/A";
+        }
+        
+        return switch (normalizedType) {
+            case "hr" -> "HR";
+            case "financial" -> "Financial";
+            case "management" -> "Management";
+            case "logistics" -> "Logistics";
+            default -> "N/A";
+        };
+    }
+
+    /**
      * Calculate emergency response statistics from all tickets in the system
      * This provides accurate system-wide statistics regardless of user role
+     * Supports both legacy emergency type format (hr-emergency) and new format (hr, financial, etc.)
      * 
      * @return EmergencyStatisticsResponse containing all calculated statistics
      */
@@ -357,12 +408,12 @@ public class TicketService {
             return response;
         }
         
-        // Calculate emergency type breakdown
+        // Calculate emergency type breakdown with normalized keys
         Map<String, Integer> emergencyTypeBreakdown = new HashMap<>();
-        emergencyTypeBreakdown.put("hr-emergency", 0);
-        emergencyTypeBreakdown.put("financial-emergency", 0);
-        emergencyTypeBreakdown.put("management-emergency", 0);
-        emergencyTypeBreakdown.put("logistics-emergency", 0);
+        emergencyTypeBreakdown.put("hr", 0);
+        emergencyTypeBreakdown.put("financial", 0);
+        emergencyTypeBreakdown.put("management", 0);
+        emergencyTypeBreakdown.put("logistics", 0);
         
         int activeTicketsCount = 0;
         int rejectedTicketsCount = 0;
@@ -376,10 +427,12 @@ public class TicketService {
         
         // Process all tickets
         for (Ticket ticket : allTickets) {
-            // Emergency type breakdown
-            String emergencyType = ticket.getEmergencyType();
-            if (emergencyType != null && emergencyTypeBreakdown.containsKey(emergencyType)) {
-                emergencyTypeBreakdown.put(emergencyType, emergencyTypeBreakdown.get(emergencyType) + 1);
+            // Emergency type breakdown - normalize the type first
+            String rawEmergencyType = ticket.getEmergencyType();
+            String normalizedType = normalizeEmergencyType(rawEmergencyType);
+            
+            if (normalizedType != null && emergencyTypeBreakdown.containsKey(normalizedType)) {
+                emergencyTypeBreakdown.put(normalizedType, emergencyTypeBreakdown.get(normalizedType) + 1);
             }
             
             // Status counts
@@ -411,7 +464,7 @@ public class TicketService {
         response.setActiveTickets(activeTicketsCount);
         
         // Calculate most common emergency type
-        String mostCommonType = "N/A";
+        String mostCommonType = null;
         int maxCount = 0;
         for (Map.Entry<String, Integer> entry : emergencyTypeBreakdown.entrySet()) {
             if (entry.getValue() > maxCount) {
@@ -420,14 +473,8 @@ public class TicketService {
             }
         }
         
-        // Convert to display format
-        Map<String, String> typeDisplayMap = new HashMap<>();
-        typeDisplayMap.put("hr-emergency", "HR");
-        typeDisplayMap.put("financial-emergency", "Financial");
-        typeDisplayMap.put("management-emergency", "Management");
-        typeDisplayMap.put("logistics-emergency", "Logistics");
-        
-        response.setMostCommonEmergencyType(typeDisplayMap.getOrDefault(mostCommonType, "N/A"));
+        // Convert to display format using the helper method
+        response.setMostCommonEmergencyType(getEmergencyTypeDisplayName(mostCommonType));
         
         // Calculate system health score
         // Health score: 100% - (active tickets weight + rejected tickets weight)
