@@ -47,9 +47,19 @@
             <!-- Professional FireFighter Logo -->
             <div class="flex shrink-0 items-center">
               <div class="flex items-center">
-                <div class="flex items-center justify-center w-10 h-10 bg-red-600 rounded-lg mr-3">
-                  <span class="text-white font-bold text-lg">FF</span>
-                </div>
+                <!-- BMW Logo - switches based on theme -->
+                <img 
+                  *ngIf="!isDarkMode" 
+                  src="assets/icon/BMW_logo_light.png" 
+                  alt="BMW Logo" 
+                  class="w-10 h-10 mr-3"
+                />
+                <img 
+                  *ngIf="isDarkMode" 
+                  src="assets/icon/BMW_logo_dark.png" 
+                  alt="BMW Logo" 
+                  class="w-10 h-10 mr-3"
+                />
                 <div class="hidden sm:block">
                   <span class="text-gray-900 dark:text-white text-xl font-semibold">FireFighter</span>
                   <div class="text-xs text-gray-500 dark:text-gray-400 -mt-1">{{ 'NAVBAR.BRAND.SUBTITLE' | translate }}</div>
