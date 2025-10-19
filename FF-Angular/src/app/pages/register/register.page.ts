@@ -26,6 +26,21 @@ export class RegisterPage implements OnInit {
   errorMsg: string | null = null;
   private firebaseAuth = inject(Auth);
 
+  // Department options
+  departments = [
+    { value: 'it', label: 'Information Technology (IT)' },
+    { value: 'hr', label: 'Human Resources (HR)' },
+    { value: 'finance', label: 'Finance & Accounting' },
+    { value: 'operations', label: 'Operations' },
+    { value: 'sales', label: 'Sales & Marketing' },
+    { value: 'logistics', label: 'Logistics & Supply Chain' },
+    { value: 'management', label: 'Management & Executive' },
+    { value: 'customer-service', label: 'Customer Service' },
+    { value: 'legal', label: 'Legal & Compliance' },
+    { value: 'admin', label: 'Administration' },
+    { value: 'other', label: 'Other' }
+  ];
+
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,

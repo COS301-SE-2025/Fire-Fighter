@@ -1,7 +1,7 @@
 package com.apex.firefighter.service.registration;
 
 import com.apex.firefighter.model.User;
-import com.apex.firefighter.model.registration.PendingApproval;
+import com.apex.firefighter.model.registration.SystemAccessRequest;
 import com.apex.firefighter.repository.UserRepository;
 import com.apex.firefighter.service.GmailEmailService;
 import jakarta.mail.MessagingException;
@@ -28,7 +28,7 @@ public class RegistrationNotificationService {
     /**
      * Notify admins when a new registration request is submitted
      */
-    public void notifyAdminsOfNewRegistration(PendingApproval approval) {
+    public void notifyAdminsOfNewRegistration(SystemAccessRequest accessRequest) {
         try {
             List<User> admins = userRepository.findByIsAdminTrue();
             
@@ -44,7 +44,7 @@ public class RegistrationNotificationService {
                     emailService.sendNewRegistrationNotification(
                         admin.getEmail(),
                         admin.getUsername(),
-                        approval
+                        accessRequest
                     );
                     System.out.println("✅ Sent registration notification to admin: " + admin.getEmail());
                 } catch (MessagingException e) {
@@ -75,15 +75,15 @@ public class RegistrationNotificationService {
     /**
      * Notify user when their registration is rejected
      */
-    public void notifyUserOfRejection(PendingApproval approval, String rejectedBy, String reason) {
+    public void notifyUserOfRejection(SystemAccessRequest accessRequest, String rejectedBy, String reason) {
         try {
             emailService.sendRegistrationRejectedNotification(
-                approval.getEmail(),
-                approval.getUsername(),
+                accessRequest.getEmail(),
+                accessRequest.getUsername(),
                 rejectedBy,
                 reason
             );
-            System.out.println("✅ Sent rejection notification to user: " + approval.getEmail());
+            System.out.println("✅ Sent rejection notification to user: " + accessRequest.getEmail());
         } catch (MessagingException e) {
             System.err.println("❌ Failed to send rejection notification: " + e.getMessage());
         }

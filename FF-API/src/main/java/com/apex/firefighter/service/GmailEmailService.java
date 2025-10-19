@@ -1008,7 +1008,7 @@ public class GmailEmailService {
      * Send notification to admins about new registration request
      */
     public void sendNewRegistrationNotification(String adminEmail, String adminName, 
-                                               com.apex.firefighter.model.registration.PendingApproval approval) 
+                                               com.apex.firefighter.model.registration.SystemAccessRequest accessRequest) 
             throws MessagingException {
         if (!isEmailServiceEnabled()) {
             logEmailDisabled("New Registration", adminEmail);
@@ -1098,20 +1098,20 @@ public class GmailEmailService {
             </html>
             """.formatted(
                 adminName,
-                approval.getUsername(),
-                approval.getEmail(),
-                approval.getDepartment() != null ? approval.getDepartment() : "Not specified",
-                approval.getContactNumber() != null ? approval.getContactNumber() : "Not provided",
-                approval.getRegistrationMethod(),
-                getPriorityClass(approval.getPriorityLevel()),
-                approval.getPriorityLevel() != null ? approval.getPriorityLevel() : "MEDIUM",
-                approval.getRequestedAccessGroups() != null && !approval.getRequestedAccessGroups().isEmpty() 
+                accessRequest.getUsername(),
+                accessRequest.getEmail(),
+                accessRequest.getRequestDepartment() != null ? accessRequest.getRequestDepartment() : "Not specified",
+                accessRequest.getPhoneNumber() != null ? accessRequest.getPhoneNumber() : "Not provided",
+                accessRequest.getRegistrationMethod(),
+                getPriorityClass(accessRequest.getRequestPriority()),
+                accessRequest.getRequestPriority() != null ? accessRequest.getRequestPriority() : "MEDIUM",
+                accessRequest.getRequestedAccessGroups() != null && !accessRequest.getRequestedAccessGroups().isEmpty() 
                     ? "<div class=\"info-row\"><span class=\"label\">Requested Access:</span> <span class=\"value\">" 
-                      + String.join(", ", approval.getRequestedAccessGroups()) + "</span></div>"
+                      + String.join(", ", accessRequest.getRequestedAccessGroups()) + "</span></div>"
                     : "",
-                approval.getBusinessJustification() != null 
+                accessRequest.getJustification() != null 
                     ? "<div class=\"info-row\"><span class=\"label\">Justification:</span> <span class=\"value\">" 
-                      + approval.getBusinessJustification() + "</span></div>"
+                      + accessRequest.getJustification() + "</span></div>"
                     : ""
             );
 

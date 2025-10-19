@@ -2,10 +2,8 @@ package com.apex.firefighter.service.registration;
 
 import com.apex.firefighter.dto.registration.*;
 import com.apex.firefighter.model.User;
-import com.apex.firefighter.model.registration.PendingApproval;
 import com.apex.firefighter.model.registration.SystemAccessRequest;
 import com.apex.firefighter.repository.UserRepository;
-import com.apex.firefighter.repository.registration.PendingApprovalRepository;
 import com.apex.firefighter.repository.SystemAccessRequestRepository;
 import com.apex.firefighter.service.DolibarrUserGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,37 +11,35 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Optional;
 import java.sql.SQLException;
 import java.util.stream.Collectors;
 
 /**
  * Service for handling user registration and approval workflows
+ * Uses system_access_requests table as the single source of truth for new user registrations
  */
 @Service
 @Transactional
 public class RegistrationService {
 
-    private final PendingApprovalRepository pendingApprovalRepository;
+    private final SystemAccessRequestRepository systemAccessRequestRepository;
     private final UserRepository userRepository;
     private final RegistrationNotificationService notificationService;
     private final DolibarrUserGroupService dolibarrUserGroupService;
-    private final SystemAccessRequestRepository systemAccessRequestRepository;
 
     @Autowired
-    public RegistrationService(PendingApprovalRepository pendingApprovalRepository,
+    public RegistrationService(SystemAccessRequestRepository systemAccessRequestRepository,
                              UserRepository userRepository,
                              RegistrationNotificationService notificationService,
-                             DolibarrUserGroupService dolibarrUserGroupService,
-                             SystemAccessRequestRepository systemAccessRequestRepository) {
-        this.pendingApprovalRepository = pendingApprovalRepository;
+                             DolibarrUserGroupService dolibarrUserGroupService) {
+        this.systemAccessRequestRepository = systemAccessRequestRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
         this.dolibarrUserGroupService = dolibarrUserGroupService;
-        this.systemAccessRequestRepository = systemAccessRequestRepository;
     }
 
     /**
@@ -64,30 +60,30 @@ public class RegistrationService {
             throw new IllegalStateException("User already registered with this email");
         }
 
-        // Check if pending approval already exists
-        if (pendingApprovalRepository.existsByFirebaseUid(request.getFirebaseUid())) {
+        // Check if pending access request already exists
+        if (systemAccessRequestRepository.existsByFirebaseUid(request.getFirebaseUid())) {
             throw new IllegalStateException("Registration request already pending for this Firebase UID");
         }
 
-        if (pendingApprovalRepository.existsByEmail(request.getEmail())) {
+        if (systemAccessRequestRepository.existsByEmail(request.getEmail())) {
             throw new IllegalStateException("Registration request already pending for this email");
         }
 
-        // Create pending approval
-        PendingApproval approval = new PendingApproval();
-        approval.setFirebaseUid(request.getFirebaseUid());
-        approval.setUsername(request.getUsername());
-        approval.setEmail(request.getEmail());
-        approval.setDepartment(request.getDepartment());
-        approval.setContactNumber(request.getContactNumber());
-        approval.setRegistrationMethod(request.getRegistrationMethod());
-        approval.setRequestedAccessGroups(request.getRequestedAccessGroups());
-        approval.setBusinessJustification(request.getBusinessJustification());
-        approval.setPriorityLevel(request.getPriorityLevel() != null ? request.getPriorityLevel() : "MEDIUM");
-        approval.setDolibarrId(request.getDolibarrId());
+        // Create system access request
+        SystemAccessRequest accessRequest = new SystemAccessRequest();
+        accessRequest.setFirebaseUid(request.getFirebaseUid());
+        accessRequest.setUsername(request.getUsername());
+        accessRequest.setEmail(request.getEmail());
+        accessRequest.setRequestDepartment(request.getDepartment());
+        accessRequest.setPhoneNumber(request.getContactNumber());
+        accessRequest.setRegistrationMethod(request.getRegistrationMethod());
+        accessRequest.setRequestedAccessGroups(request.getRequestedAccessGroups());
+        accessRequest.setJustification(request.getBusinessJustification());
+        accessRequest.setRequestPriority(request.getPriorityLevel() != null ? request.getPriorityLevel() : "MEDIUM");
+        accessRequest.setDolibarrId(request.getDolibarrId());
 
-        PendingApproval saved = pendingApprovalRepository.save(approval);
-        System.out.println("✅ REGISTRATION SAVED: ID=" + saved.getId());
+        SystemAccessRequest saved = systemAccessRequestRepository.save(accessRequest);
+        System.out.println("✅ REGISTRATION SAVED: ID=" + saved.getRequestId());
 
         // Send notification to admins
         notificationService.notifyAdminsOfNewRegistration(saved);
@@ -96,16 +92,16 @@ public class RegistrationService {
     }
 
     /**
-     * Get all pending approvals (Admin only)
+     * Get all pending access requests (Admin only)
      */
     public List<PendingApprovalDto> getPendingApprovals(String adminUid) {
-        System.out.println("🔵 GET PENDING APPROVALS: Admin=" + adminUid);
+        System.out.println("🔵 GET PENDING REQUESTS: Admin=" + adminUid);
 
         // Verify admin
         verifyAdmin(adminUid);
 
-        List<PendingApproval> pending = pendingApprovalRepository.findByStatusOrderByCreatedAtDesc("PENDING");
-        System.out.println("✅ FOUND " + pending.size() + " PENDING APPROVALS");
+        List<SystemAccessRequest> pending = systemAccessRequestRepository.findByStatusOrderByCreatedAtDesc("PENDING");
+        System.out.println("✅ FOUND " + pending.size() + " PENDING REQUESTS");
 
         return pending.stream()
                 .map(this::convertToDto)
@@ -123,18 +119,18 @@ public class RegistrationService {
         // Verify admin
         verifyAdmin(adminUid);
 
-        // Find pending approval
-        PendingApproval approval = pendingApprovalRepository.findByFirebaseUidAndStatus(targetUid, "PENDING")
-                .orElseThrow(() -> new IllegalArgumentException("No pending approval found for Firebase UID: " + targetUid));
+        // Find pending access request
+        SystemAccessRequest accessRequest = systemAccessRequestRepository.findByFirebaseUidAndStatus(targetUid, "PENDING")
+                .orElseThrow(() -> new IllegalArgumentException("No pending access request found for Firebase UID: " + targetUid));
 
         // Create user account
         User newUser = new User();
-        newUser.setUserId(approval.getFirebaseUid());
-        newUser.setUsername(approval.getUsername());
-        newUser.setEmail(approval.getEmail());
-        newUser.setDepartment(department != null ? department : approval.getDepartment());
-        newUser.setContactNumber(approval.getContactNumber());
-        newUser.setDolibarrId(dolibarrId != null ? dolibarrId : approval.getDolibarrId());
+        newUser.setUserId(accessRequest.getFirebaseUid());
+        newUser.setUsername(accessRequest.getUsername());
+        newUser.setEmail(accessRequest.getEmail());
+        newUser.setDepartment(department != null ? department : accessRequest.getRequestDepartment());
+        newUser.setContactNumber(accessRequest.getPhoneNumber());
+        newUser.setDolibarrId(dolibarrId != null ? dolibarrId : accessRequest.getDolibarrId());
         newUser.setIsAuthorized(true);
         newUser.setRole("USER");
         newUser.setIsAdmin(false);
@@ -143,11 +139,11 @@ public class RegistrationService {
         userRepository.save(newUser);
         System.out.println("✅ USER CREATED: " + newUser.getUsername());
 
-        // Update approval status
-        approval.setStatus("APPROVED");
-        approval.setReviewedBy(adminUid);
-        approval.setReviewedAt(ZonedDateTime.now());
-        PendingApproval updated = pendingApprovalRepository.save(approval);
+        // Update request status
+        accessRequest.setStatus("APPROVED");
+        accessRequest.setReviewedBy(adminUid);
+        accessRequest.setReviewedAt(ZonedDateTime.now());
+        SystemAccessRequest updated = systemAccessRequestRepository.save(accessRequest);
 
         // Send notification to user
         Optional<User> adminUser = userRepository.findByUserId(adminUid);
@@ -189,28 +185,28 @@ public class RegistrationService {
         // Verify admin
         verifyAdmin(adminUid);
 
-        // Find pending approval
-        PendingApproval approval = pendingApprovalRepository.findByFirebaseUidAndStatus(targetUid, "PENDING")
-                .orElseThrow(() -> new IllegalArgumentException("No pending approval found for Firebase UID: " + targetUid));
+        // Find pending access request
+        SystemAccessRequest accessRequest = systemAccessRequestRepository.findByFirebaseUidAndStatus(targetUid, "PENDING")
+                .orElseThrow(() -> new IllegalArgumentException("No pending access request found for Firebase UID: " + targetUid));
 
-        // Update approval status
-        approval.setStatus("REJECTED");
-        approval.setReviewedBy(adminUid);
-        approval.setReviewedAt(ZonedDateTime.now());
-        approval.setRejectionReason(reason);
-        PendingApproval updated = pendingApprovalRepository.save(approval);
+        // Update request status
+        accessRequest.setStatus("REJECTED");
+        accessRequest.setReviewedBy(adminUid);
+        accessRequest.setReviewedAt(ZonedDateTime.now());
+        accessRequest.setRejectionReason(reason);
+        SystemAccessRequest updated = systemAccessRequestRepository.save(accessRequest);
 
         // Send notification to user
         Optional<User> adminUser = userRepository.findByUserId(adminUid);
         String adminName = adminUser.map(User::getUsername).orElse("Administrator");
-        notificationService.notifyUserOfRejection(approval, adminName, reason);
+        notificationService.notifyUserOfRejection(accessRequest, adminName, reason);
 
         System.out.println("✅ USER REJECTED");
         return convertToDto(updated);
     }
 
     /**
-     * Delete a pending approval (Admin only)
+     * Delete a pending access request (Admin only)
      */
     public void deletePendingApproval(String adminUid, String targetUid) {
         System.out.println("🔵 DELETE PENDING: Admin=" + adminUid + ", Target=" + targetUid);
@@ -218,12 +214,12 @@ public class RegistrationService {
         // Verify admin
         verifyAdmin(adminUid);
 
-        // Find and delete pending approval
-        PendingApproval approval = pendingApprovalRepository.findByFirebaseUid(targetUid)
-                .orElseThrow(() -> new IllegalArgumentException("No pending approval found for Firebase UID: " + targetUid));
+        // Find and delete pending access request
+        SystemAccessRequest accessRequest = systemAccessRequestRepository.findByFirebaseUid(targetUid)
+                .orElseThrow(() -> new IllegalArgumentException("No pending access request found for Firebase UID: " + targetUid));
 
-        pendingApprovalRepository.delete(approval);
-        System.out.println("✅ PENDING APPROVAL DELETED");
+        systemAccessRequestRepository.delete(accessRequest);
+        System.out.println("✅ PENDING ACCESS REQUEST DELETED");
     }
 
     /**
@@ -238,15 +234,15 @@ public class RegistrationService {
         long totalUsers = userRepository.count();
         long adminUsers = userRepository.countByIsAdmin(true);
         long regularUsers = totalUsers - adminUsers;
-        long pendingApprovals = pendingApprovalRepository.countByStatus("PENDING");
+        long pendingRequests = systemAccessRequestRepository.countByStatus("PENDING");
         long activeUsers = userRepository.countByIsAuthorized(true);
         long inactiveUsers = totalUsers - activeUsers;
 
         UserManagementStatisticsDto stats = new UserManagementStatisticsDto(
-            totalUsers, adminUsers, regularUsers, pendingApprovals, activeUsers, inactiveUsers
+            totalUsers, adminUsers, regularUsers, pendingRequests, activeUsers, inactiveUsers
         );
 
-        System.out.println("✅ STATISTICS: Total=" + totalUsers + ", Pending=" + pendingApprovals);
+        System.out.println("✅ STATISTICS: Total=" + totalUsers + ", Pending=" + pendingRequests);
         return stats;
     }
 
@@ -267,13 +263,13 @@ public class RegistrationService {
             return status;
         }
 
-        // Check if pending approval exists
-        Optional<PendingApproval> pending = pendingApprovalRepository.findByFirebaseUid(firebaseUid);
-        if (pending.isPresent()) {
-            status.put("status", pending.get().getStatus());
-            status.put("createdAt", pending.get().getCreatedAt());
-            if ("REJECTED".equals(pending.get().getStatus())) {
-                status.put("rejectionReason", pending.get().getRejectionReason());
+        // Check if access request exists
+        Optional<SystemAccessRequest> accessRequest = systemAccessRequestRepository.findByFirebaseUid(firebaseUid);
+        if (accessRequest.isPresent()) {
+            status.put("status", accessRequest.get().getStatus());
+            status.put("createdAt", accessRequest.get().getCreatedAt());
+            if ("REJECTED".equals(accessRequest.get().getStatus())) {
+                status.put("rejectionReason", accessRequest.get().getRejectionReason());
             }
             return status;
         }
@@ -298,10 +294,10 @@ public class RegistrationService {
     public SystemAccessRequestDto submitSystemAccessRequest(SystemAccessRequestDto request) {
         System.out.println("🔵 SUBMIT SYSTEM ACCESS REQUEST: " + request.getFirebaseUid());
 
-        // Check if user or pending approval exists
-        Optional<PendingApproval> pending = pendingApprovalRepository.findByFirebaseUid(request.getFirebaseUid());
-        if (pending.isEmpty()) {
-            throw new IllegalArgumentException("No pending registration found for this Firebase UID");
+        // Check if user exists
+        Optional<User> user = userRepository.findByUserId(request.getFirebaseUid());
+        if (user.isEmpty()) {
+            throw new IllegalArgumentException("User not found for this Firebase UID");
         }
 
         // Check if access request already exists
@@ -331,35 +327,32 @@ public class RegistrationService {
     }
 
     /**
-     * Convert PendingApproval entity to DTO
+     * Convert SystemAccessRequest entity to DTO
      */
-    private PendingApprovalDto convertToDto(PendingApproval approval) {
+    private PendingApprovalDto convertToDto(SystemAccessRequest accessRequest) {
         PendingApprovalDto dto = new PendingApprovalDto();
-        dto.setId(approval.getId());
-        dto.setFirebaseUid(approval.getFirebaseUid());
-        dto.setUsername(approval.getUsername());
-        dto.setEmail(approval.getEmail());
-        dto.setDepartment(approval.getDepartment());
-        dto.setContactNumber(approval.getContactNumber());
-        dto.setRegistrationMethod(approval.getRegistrationMethod());
-        dto.setRequestedAccessGroups(approval.getRequestedAccessGroups());
-        dto.setBusinessJustification(approval.getBusinessJustification());
-        dto.setPriorityLevel(approval.getPriorityLevel());
-        dto.setStatus(approval.getStatus());
-        dto.setCreatedAt(approval.getCreatedAt());
-        dto.setReviewedBy(approval.getReviewedBy());
-        dto.setReviewedAt(approval.getReviewedAt());
+        dto.setId(accessRequest.getRequestId());
+        dto.setFirebaseUid(accessRequest.getFirebaseUid());
+        dto.setUsername(accessRequest.getUsername());
+        dto.setEmail(accessRequest.getEmail());
+        dto.setDepartment(accessRequest.getRequestDepartment());
+        dto.setContactNumber(accessRequest.getPhoneNumber());
+        dto.setRegistrationMethod(accessRequest.getRegistrationMethod());
+        dto.setRequestedAccessGroups(accessRequest.getRequestedAccessGroups());
+        dto.setBusinessJustification(accessRequest.getJustification());
+        dto.setPriorityLevel(accessRequest.getRequestPriority());
+        dto.setStatus(accessRequest.getStatus());
+        dto.setCreatedAt(accessRequest.getCreatedAt());
+        dto.setReviewedBy(accessRequest.getReviewedBy());
+        dto.setReviewedAt(accessRequest.getReviewedAt());
+        dto.setDolibarrId(accessRequest.getDolibarrId());
         
-        // Include system access request data if available
-        Optional<SystemAccessRequest> accessRequest = systemAccessRequestRepository.findByFirebaseUid(approval.getFirebaseUid());
-        if (accessRequest.isPresent()) {
-            SystemAccessRequest req = accessRequest.get();
-            dto.setSystemAccessPriority(req.getRequestPriority());
-            dto.setSystemAccessDepartment(req.getRequestDepartment());
-            dto.setSystemAccessPhoneNumber(req.getPhoneNumber());
-            dto.setSystemAccessJustification(req.getJustification());
-        }
-        dto.setDolibarrId(approval.getDolibarrId());
+        // Set system access fields (for backward compatibility with DTO)
+        dto.setSystemAccessPriority(accessRequest.getRequestPriority());
+        dto.setSystemAccessDepartment(accessRequest.getRequestDepartment());
+        dto.setSystemAccessPhoneNumber(accessRequest.getPhoneNumber());
+        dto.setSystemAccessJustification(accessRequest.getJustification());
+        
         return dto;
     }
 }
