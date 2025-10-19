@@ -8,12 +8,13 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   
   console.log('🔒 JWT INTERCEPTOR: Processing request to:', req.url);
   
-  // Skip adding token for authentication endpoints to avoid loops
-  const isAuthEndpoint = req.url.includes('/api/auth/');
-  console.log('🔒 JWT INTERCEPTOR: Is auth endpoint:', isAuthEndpoint);
+  // Skip adding token for public endpoints (authentication and registration)
+  const isPublicEndpoint = req.url.includes('/api/auth/') || 
+                          req.url.includes('/api/registration/submit');
+  console.log('🔒 JWT INTERCEPTOR: Is public endpoint:', isPublicEndpoint);
 
-  if (isAuthEndpoint) {
-    console.log('🔒 JWT INTERCEPTOR: Skipping token for auth endpoint');
+  if (isPublicEndpoint) {
+    console.log('🔒 JWT INTERCEPTOR: Skipping token for public endpoint');
     return next(req);
   }
 

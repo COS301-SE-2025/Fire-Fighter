@@ -815,6 +815,142 @@ export class AuthService {
   }
 
   /**
+   * Get pending user approvals (Admin Only)
+   * Endpoint: GET /api/registration/admin/pending
+   */
+  getPendingApprovals(): Observable<any> {
+    console.log('🔵 GET PENDING APPROVALS REQUEST');
+
+    return this.http.get(`${environment.apiUrl}/registration/admin/pending`).pipe(
+      tap((response: any) => {
+        console.log('✅ Get pending approvals successful:', response);
+      }),
+      catchError((error: any) => {
+        console.error('❌ Get pending approvals failed:', error);
+
+        // Check for connection errors
+        if (this.isConnectionError(error)) {
+          console.error('🔌 Connection error detected in getPendingApprovals - redirecting to service down page');
+
+          // Store the last successful connection time
+          localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
+
+          // Redirect to service down page
+          this.router.navigate(['/service-down']);
+
+          // Return a specific error for connection issues
+          return throwError(() => new Error('Service temporarily unavailable'));
+        }
+
+        // For other errors, return the original error
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Approve user registration (Admin Only)
+   * Endpoint: PUT /api/registration/admin/approve
+   */
+  approveUserRegistration(decision: any): Observable<any> {
+    console.log('🔵 APPROVE USER REGISTRATION REQUEST:', decision);
+
+    return this.http.put(`${environment.apiUrl}/registration/admin/approve`, decision).pipe(
+      tap((response: any) => {
+        console.log('✅ Approve user registration successful:', response);
+      }),
+      catchError((error: any) => {
+        console.error('❌ Approve user registration failed:', error);
+
+        // Check for connection errors
+        if (this.isConnectionError(error)) {
+          console.error('🔌 Connection error detected in approveUserRegistration - redirecting to service down page');
+
+          // Store the last successful connection time
+          localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
+
+          // Redirect to service down page
+          this.router.navigate(['/service-down']);
+
+          // Return a specific error for connection issues
+          return throwError(() => new Error('Service temporarily unavailable'));
+        }
+
+        // For other errors, return the original error
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Reject user registration (Admin Only)
+   * Endpoint: PUT /api/registration/admin/reject
+   */
+  rejectUserRegistration(decision: any): Observable<any> {
+    console.log('🔵 REJECT USER REGISTRATION REQUEST:', decision);
+
+    return this.http.put(`${environment.apiUrl}/registration/admin/reject`, decision).pipe(
+      tap((response: any) => {
+        console.log('✅ Reject user registration successful:', response);
+      }),
+      catchError((error: any) => {
+        console.error('❌ Reject user registration failed:', error);
+
+        // Check for connection errors
+        if (this.isConnectionError(error)) {
+          console.error('🔌 Connection error detected in rejectUserRegistration - redirecting to service down page');
+
+          // Store the last successful connection time
+          localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
+
+          // Redirect to service down page
+          this.router.navigate(['/service-down']);
+
+          // Return a specific error for connection issues
+          return throwError(() => new Error('Service temporarily unavailable'));
+        }
+
+        // For other errors, return the original error
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Submit user registration request (for new users)
+   * Endpoint: POST /api/registration/submit
+   */
+  submitRegistrationRequest(registrationData: any): Observable<any> {
+    console.log('🔵 SUBMIT REGISTRATION REQUEST:', registrationData);
+
+    return this.http.post(`${environment.apiUrl}/registration/submit`, registrationData).pipe(
+      tap((response: any) => {
+        console.log('✅ Registration submitted successfully:', response);
+      }),
+      catchError((error: any) => {
+        console.error('❌ Registration submission failed:', error);
+
+        // Check for connection errors
+        if (this.isConnectionError(error)) {
+          console.error('🔌 Connection error detected in submitRegistrationRequest - redirecting to service down page');
+
+          // Store the last successful connection time
+          localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
+
+          // Redirect to service down page
+          this.router.navigate(['/service-down']);
+
+          // Return a specific error for connection issues
+          return throwError(() => new Error('Service temporarily unavailable'));
+        }
+
+        // For other errors, return the original error
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
    * Update user Dolibarr ID as Admin
    * Endpoint: PUT /api/users/{firebaseUid}/admin/dolibarr-id
    */
