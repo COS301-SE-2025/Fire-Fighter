@@ -88,33 +88,8 @@ export class UserManagementPage implements OnInit {
   // Tab management
   activeTab = 'users';
 
-  // Mock pending approval data
-  pendingApprovals: PendingApproval[] = [
-    {
-      userId: 'pending_001',
-      username: 'sarah.mueller',
-      email: 'sarah.mueller@bmw.com',
-      department: 'Financial Emergency Response',
-      contactNumber: '+49 89 382 12345',
-      createdAt: '2025-01-15T09:23:45Z',
-      registrationMethod: 'Google SSO',
-      requestedAccess: 'Financial Emergency Group Access',
-      businessJustification: 'Need emergency access for financial crisis management and budget approval workflows during out-of-hours incidents. Request is for accessing critical financial systems during potential BMW Group emergency situations that require immediate budget approvals and resource allocation.',
-      priorityLevel: 'High'
-    },
-    {
-      userId: 'pending_002',
-      username: 'marcus.schmidt',
-      email: 'm.schmidt@bmw.com',
-      department: 'IT Infrastructure Support',
-      contactNumber: '+49 89 382 67890',
-      createdAt: '2025-01-14T14:17:32Z',
-      registrationMethod: 'Azure AD',
-      requestedAccess: 'Logistics Emergency Group Access',
-      businessJustification: 'Required access to coordinate emergency logistics and supply chain responses. Will be supporting critical infrastructure maintenance and ensuring business continuity during emergency situations.',
-      priorityLevel: 'Medium'
-    }
-  ];
+  // Pending approval data (loaded from backend)
+  pendingApprovals: PendingApproval[] = [];
 
   // Statistics
   normalUsers = 0;
@@ -192,10 +167,14 @@ export class UserManagementPage implements OnInit {
 
   ngOnInit() {
     this.loadUsers();
+    this.loadPendingApprovals();
   }
 
   doRefresh(event: any) {
-    this.loadUsers().then(() => {
+    Promise.all([
+      this.loadUsers(),
+      this.loadPendingApprovals()
+    ]).then(() => {
       event.target.complete();
     });
   }
@@ -253,6 +232,45 @@ export class UserManagementPage implements OnInit {
       this.filterUsers();
     } finally {
       this.loading = false;
+    }
+  }
+
+  async loadPendingApprovals() {
+    try {
+      console.log('🔄 Loading pending approvals from backend...');
+      const response = await this.authService.getPendingApprovals().toPromise();
+      
+      if (response && Array.isArray(response)) {
+        // Map backend response to frontend PendingApproval interface
+        this.pendingApprovals = response.map((approval: any) => ({
+          userId: approval.firebaseUid,
+          username: approval.username,
+          email: approval.email,
+          department: approval.department || approval.systemAccessDepartment || 'Not specified',
+          contactNumber: approval.contactNumber || approval.systemAccessPhoneNumber || 'Not provided',
+          createdAt: approval.createdAt,
+          registrationMethod: approval.registrationMethod || 'Email/Password',
+          requestedAccess: approval.requestedAccessGroups ? approval.requestedAccessGroups.join(', ') : 'Not specified',
+          businessJustification: approval.businessJustification || approval.systemAccessJustification || 'No justification provided',
+          priorityLevel: approval.priorityLevel || approval.systemAccessPriority || 'Medium'
+        }));
+        
+        console.log('✅ Loaded', this.pendingApprovals.length, 'pending approvals');
+      } else {
+        console.log('✅ No pending approvals found');
+        this.pendingApprovals = [];
+      }
+    } catch (error: any) {
+      console.error('❌ Error loading pending approvals:', error);
+      
+      // Handle specific error cases
+      if (error.message === 'Service temporarily unavailable') {
+        console.log('🔌 Service is down, user will be redirected');
+      } else {
+        alert('Failed to load pending approvals. Please try again or contact support if the problem persists.');
+      }
+      
+      this.pendingApprovals = [];
     }
   }
 
@@ -702,6 +720,138 @@ export class UserManagementPage implements OnInit {
       alert(errorMessage);
     } finally {
       this.isUpdatingAccountStatus = false;
+    }
+  }
+
+  // Pending Approvals Management Methods
+  async approveUserRegistration(approval: PendingApproval) {
+    try {
+      // Get the current admin user's Firebase UID
+      const currentUser = this.auth.currentUser;
+      if (!currentUser) {
+        throw new Error('No authenticated user found');
+      }
+
+      const confirmed = confirm(
+        `Are you sure you want to APPROVE access for ${approval.username}?\n\n` +
+        `This will:\n` +
+        `✓ Grant system access\n` +
+        `✓ Assign requested access groups\n` +
+        `✓ Send approval notification email`
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      console.log('🔄 Approving user registration...', {
+        firebaseUid: approval.userId,
+        username: approval.username,
+        email: approval.email
+      });
+
+      // Parse requested access groups from string
+      const requestedGroups = approval.requestedAccess
+        .split(',')
+        .map(g => g.trim())
+        .filter(g => g.length > 0);
+
+      // Prepare approval decision
+      const decision = {
+        firebaseUid: approval.userId,
+        assignedAccessGroups: requestedGroups,
+        department: approval.department
+      };
+
+      // Call the backend API to approve user
+      await this.authService.approveUserRegistration(decision).toPromise();
+
+      console.log('✅ User registration approved:', approval.username);
+      
+      // Remove from pending approvals list
+      this.pendingApprovals = this.pendingApprovals.filter(a => a.userId !== approval.userId);
+      
+      // Reload users list to show the newly approved user
+      await this.loadUsers();
+      
+      // Show success message
+      alert(`✅ Access approved for ${approval.username}!\n\nThe user has been notified via email and can now log in.`);
+
+    } catch (error: any) {
+      console.error('❌ Failed to approve user registration:', error);
+      
+      let errorMessage = 'Failed to approve user registration. Please try again.';
+      
+      if (error.status === 403) {
+        errorMessage = 'You do not have permission to perform this action.';
+      } else if (error.error?.error) {
+        errorMessage = error.error.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      alert(errorMessage);
+    }
+  }
+
+  async rejectUserRegistration(approval: PendingApproval) {
+    try {
+      // Get the current admin user's Firebase UID
+      const currentUser = this.auth.currentUser;
+      if (!currentUser) {
+        throw new Error('No authenticated user found');
+      }
+
+      // Ask for rejection reason
+      const rejectionReason = prompt(
+        `You are about to REJECT access for ${approval.username}.\n\n` +
+        `Please provide a reason for the rejection:\n` +
+        `(This will be included in the notification email)`
+      );
+
+      if (!rejectionReason || rejectionReason.trim().length === 0) {
+        alert('Rejection cancelled. A reason is required.');
+        return;
+      }
+
+      console.log('🔄 Rejecting user registration...', {
+        firebaseUid: approval.userId,
+        username: approval.username,
+        email: approval.email,
+        reason: rejectionReason
+      });
+
+      // Prepare rejection decision
+      const decision = {
+        firebaseUid: approval.userId,
+        rejectionReason: rejectionReason.trim()
+      };
+
+      // Call the backend API to reject user
+      await this.authService.rejectUserRegistration(decision).toPromise();
+
+      console.log('✅ User registration rejected:', approval.username);
+      
+      // Remove from pending approvals list
+      this.pendingApprovals = this.pendingApprovals.filter(a => a.userId !== approval.userId);
+      
+      // Show success message
+      alert(`❌ Access denied for ${approval.username}.\n\nThe user has been notified via email.`);
+
+    } catch (error: any) {
+      console.error('❌ Failed to reject user registration:', error);
+      
+      let errorMessage = 'Failed to reject user registration. Please try again.';
+      
+      if (error.status === 403) {
+        errorMessage = 'You do not have permission to perform this action.';
+      } else if (error.error?.error) {
+        errorMessage = error.error.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      alert(errorMessage);
     }
   }
 

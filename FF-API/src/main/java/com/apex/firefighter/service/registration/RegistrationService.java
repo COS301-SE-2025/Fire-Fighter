@@ -85,6 +85,22 @@ public class RegistrationService {
         SystemAccessRequest saved = systemAccessRequestRepository.save(accessRequest);
         System.out.println("✅ REGISTRATION SAVED: ID=" + saved.getRequestId());
 
+        // Create user account immediately with is_authorized = false
+        // This allows the user to exist in the system but not access it until approved
+        User newUser = new User();
+        newUser.setUserId(request.getFirebaseUid());
+        newUser.setUsername(request.getUsername());
+        newUser.setEmail(request.getEmail());
+        newUser.setDepartment(request.getDepartment());
+        newUser.setContactNumber(request.getContactNumber());
+        newUser.setIsAuthorized(false); // NOT authorized until admin approves
+        newUser.setRole("USER");
+        newUser.setIsAdmin(false);
+        newUser.setCreatedAt(ZonedDateTime.now());
+
+        userRepository.save(newUser);
+        System.out.println("✅ USER CREATED (UNAUTHORIZED): " + newUser.getUsername());
+
         // Send notification to admins
         notificationService.notifyAdminsOfNewRegistration(saved);
 
@@ -123,21 +139,17 @@ public class RegistrationService {
         SystemAccessRequest accessRequest = systemAccessRequestRepository.findByFirebaseUidAndStatus(targetUid, "PENDING")
                 .orElseThrow(() -> new IllegalArgumentException("No pending access request found for Firebase UID: " + targetUid));
 
-        // Create user account
-        User newUser = new User();
-        newUser.setUserId(accessRequest.getFirebaseUid());
-        newUser.setUsername(accessRequest.getUsername());
-        newUser.setEmail(accessRequest.getEmail());
-        newUser.setDepartment(department != null ? department : accessRequest.getRequestDepartment());
-        newUser.setContactNumber(accessRequest.getPhoneNumber());
-        newUser.setDolibarrId(dolibarrId != null ? dolibarrId : accessRequest.getDolibarrId());
-        newUser.setIsAuthorized(true);
-        newUser.setRole("USER");
-        newUser.setIsAdmin(false);
-        newUser.setCreatedAt(ZonedDateTime.now());
+        // Find and update existing user (created during registration with is_authorized = false)
+        User user = userRepository.findByUserId(accessRequest.getFirebaseUid())
+                .orElseThrow(() -> new IllegalArgumentException("User not found for Firebase UID: " + targetUid));
 
-        userRepository.save(newUser);
-        System.out.println("✅ USER CREATED: " + newUser.getUsername());
+        // Update user with approval details
+        user.setDepartment(department != null ? department : accessRequest.getRequestDepartment());
+        user.setDolibarrId(dolibarrId != null ? dolibarrId : accessRequest.getDolibarrId());
+        user.setIsAuthorized(true); // NOW authorized!
+
+        userRepository.save(user);
+        System.out.println("✅ USER AUTHORIZED: " + user.getUsername());
 
         // Update request status
         accessRequest.setStatus("APPROVED");
@@ -148,7 +160,7 @@ public class RegistrationService {
         // Send notification to user
         Optional<User> adminUser = userRepository.findByUserId(adminUid);
         String adminName = adminUser.map(User::getUsername).orElse("Administrator");
-        notificationService.notifyUserOfApproval(newUser, adminName);
+        notificationService.notifyUserOfApproval(user, adminName);
 
         // Sync with Dolibarr if dolibarrId is provided
         if (dolibarrId != null && !dolibarrId.trim().isEmpty() && 

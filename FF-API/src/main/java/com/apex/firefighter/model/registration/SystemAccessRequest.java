@@ -41,7 +41,7 @@ public class SystemAccessRequest {
     @Column(name = "registration_method", nullable = false, length = 50)
     private String registrationMethod; // google_sso, email, azure_ad
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "system_access_request_groups", schema = "firefighter",
                     joinColumns = @JoinColumn(name = "request_id"))
     @Column(name = "access_group")
