@@ -21,6 +21,7 @@ class AccessLogTest {
         testUser = new User();
         testUser.setUserId("test-user-123");
         testUser.setUsername("testuser");
+        testUser.setRole("USER"); // Set role for testing
     }
 
     @Test
@@ -32,6 +33,7 @@ class AccessLogTest {
         assertThat(accessLog.getTicketId()).isNull();
         assertThat(accessLog.getSessionId()).isNull();
         assertThat(accessLog.getUser()).isNull();
+        assertThat(accessLog.getUserRole()).isNull();
     }
 
     @Test
@@ -51,6 +53,7 @@ class AccessLogTest {
         assertThat(paramAccessLog.getTicketId()).isEqualTo(ticketId);
         assertThat(paramAccessLog.getTimestamp()).isEqualTo(timestamp);
         assertThat(paramAccessLog.getSessionId()).isNull();
+        assertThat(paramAccessLog.getUserRole()).isEqualTo("USER"); // Should extract from user
     }
 
     @Test
@@ -71,6 +74,29 @@ class AccessLogTest {
         assertThat(paramAccessLog.getTicketId()).isEqualTo(ticketId);
         assertThat(paramAccessLog.getTimestamp()).isEqualTo(timestamp);
         assertThat(paramAccessLog.getSessionId()).isEqualTo(sessionId);
+        assertThat(paramAccessLog.getUserRole()).isEqualTo("USER"); // Should extract from user
+    }
+
+    @Test
+    void fullConstructor_WithExplicitRole_ShouldInitializeAllFields() {
+        // Arrange
+        String action = "Access Modified";
+        String ticketId = "TICKET-002";
+        LocalDateTime timestamp = LocalDateTime.now();
+        Long sessionId = 2L;
+        String explicitRole = "ADMIN";
+
+        // Act
+        AccessLog paramAccessLog = new AccessLog(testUser, action, ticketId, timestamp, sessionId, explicitRole);
+
+        // Assert
+        assertThat(paramAccessLog.getId()).isNull();
+        assertThat(paramAccessLog.getUser()).isEqualTo(testUser);
+        assertThat(paramAccessLog.getAction()).isEqualTo(action);
+        assertThat(paramAccessLog.getTicketId()).isEqualTo(ticketId);
+        assertThat(paramAccessLog.getTimestamp()).isEqualTo(timestamp);
+        assertThat(paramAccessLog.getSessionId()).isEqualTo(sessionId);
+        assertThat(paramAccessLog.getUserRole()).isEqualTo(explicitRole); // Should use explicit role
     }
 
     @Test
@@ -80,6 +106,7 @@ class AccessLogTest {
         LocalDateTime timestamp = LocalDateTime.now();
         String ticketId = "TICKET-001";
         Long sessionId = 1L;
+        String userRole = "MANAGER";
 
         // Act
         accessLog.setAction(action);
@@ -87,6 +114,7 @@ class AccessLogTest {
         accessLog.setTicketId(ticketId);
         accessLog.setSessionId(sessionId);
         accessLog.setUser(testUser);
+        accessLog.setUserRole(userRole);
 
         // Assert
         assertThat(accessLog.getId()).isNull(); // ID is auto-generated, starts as null
@@ -95,6 +123,7 @@ class AccessLogTest {
         assertThat(accessLog.getTicketId()).isEqualTo(ticketId);
         assertThat(accessLog.getSessionId()).isEqualTo(sessionId);
         assertThat(accessLog.getUser()).isEqualTo(testUser);
+        assertThat(accessLog.getUserRole()).isEqualTo(userRole);
     }
 
     @Test

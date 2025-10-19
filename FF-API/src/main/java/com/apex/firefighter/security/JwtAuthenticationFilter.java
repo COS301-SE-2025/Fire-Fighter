@@ -35,6 +35,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         System.out.println("🔒 JWT FILTER: Processing request to: " + request.getRequestURI());
         System.out.println("🔒 JWT FILTER: Authorization header: " + (authHeader != null ? "Present" : "Missing"));
 
+        // Create wrapper to potentially add headers
+        HeaderMapRequestWrapper requestWrapper = new HeaderMapRequestWrapper(request);
+        String extractedFirebaseUid = null;
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             System.out.println("🔒 JWT FILTER: No Bearer token found, continuing filter chain");
             filterChain.doFilter(request, response);
@@ -78,11 +82,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             SecurityContextHolder.getContext().setAuthentication(authToken);
 
                             // Set request attributes for controllers to access
-                            request.setAttribute("firebaseUid", firebaseUid);
-                            request.setAttribute("isAdmin", isAdmin != null ? isAdmin : false);
+                            requestWrapper.setAttribute("firebaseUid", firebaseUid);
+                            requestWrapper.setAttribute("isAdmin", isAdmin != null ? isAdmin : false);
+                            
+                            // Add X-Firebase-UID header for backward compatibility with controllers
+                            requestWrapper.addHeader("X-Firebase-UID", firebaseUid);
+                            extractedFirebaseUid = firebaseUid;
 
                             System.out.println("🔒 JWT FILTER: ✅ Authentication set in SecurityContext");
                             System.out.println("🔒 JWT FILTER: ✅ User: " + firebaseUid + ", Admin: " + isAdmin);
+                            System.out.println("🔒 JWT FILTER: ✅ X-Firebase-UID header injected: " + firebaseUid);
                         } else {
                             System.out.println("🔒 JWT FILTER: ❌ Custom JWT token validation failed");
                             System.out.println("🔒 JWT FILTER: ❌ Token invalid for user: " + firebaseUid);
@@ -120,10 +129,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             SecurityContextHolder.getContext().setAuthentication(authToken);
                             
                             // Add Firebase info to request attributes
-                            request.setAttribute("firebaseUid", firebaseUid);
-                            request.setAttribute("email", email);
+                            requestWrapper.setAttribute("firebaseUid", firebaseUid);
+                            requestWrapper.setAttribute("email", email);
+                            
+                            // Add X-Firebase-UID header for backward compatibility with controllers
+                            requestWrapper.addHeader("X-Firebase-UID", firebaseUid);
+                            extractedFirebaseUid = firebaseUid;
                             
                             System.out.println("🔒 JWT FILTER: Firebase authentication set in SecurityContext for user: " + firebaseUid);
+                            System.out.println("🔒 JWT FILTER: ✅ X-Firebase-UID header injected: " + firebaseUid);
                         }
                     } catch (Exception e) {
                         System.out.println("🔒 JWT FILTER: Firebase token verification failed: " + e.getMessage());
@@ -138,7 +152,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             logger.error("Cannot set user authentication: " + e.getMessage());
         }
 
-        filterChain.doFilter(request, response);
+        // Use wrapper if we extracted a Firebase UID, otherwise use original request
+        if (extractedFirebaseUid != null) {
+            System.out.println("🔒 JWT FILTER: Forwarding request with injected X-Firebase-UID header");
+            filterChain.doFilter(requestWrapper, response);
+        } else {
+            filterChain.doFilter(request, response);
+        }
     }
 
     //Send standardized token expired response

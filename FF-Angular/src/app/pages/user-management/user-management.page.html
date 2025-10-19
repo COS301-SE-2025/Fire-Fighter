@@ -492,8 +492,13 @@
 
           <!-- Pending Approvals Content -->
           <div class="p-6">
+            <!-- Loading State -->
+            <div *ngIf="loadingPendingApprovals" class="flex justify-center items-center py-12">
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+
             <!-- Pending Approvals List -->
-            <div *ngIf="pendingApprovals.length > 0; else noPendingApprovals" class="space-y-6">
+            <div *ngIf="!loadingPendingApprovals && pendingApprovals.length > 0; else noPendingApprovals" class="space-y-6">
               <div *ngFor="let approval of pendingApprovals" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm overflow-hidden">
                 <!-- Header Section -->
                 <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-b border-amber-200 dark:border-amber-800 p-4">
@@ -615,13 +620,19 @@
 
                   <!-- Action Buttons -->
                   <div class="flex flex-col sm:flex-row gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                    <button class="flex-1 flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 font-medium">
+                    <button 
+                      (click)="approveApproval(approval)"
+                      [disabled]="loadingPendingApprovals"
+                      class="flex-1 flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
                       <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                       </svg>
                       Approve Access
                     </button>
-                    <button class="flex-1 flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 font-medium">
+                    <button 
+                      (click)="rejectApproval(approval)"
+                      [disabled]="loadingPendingApprovals"
+                      class="flex-1 flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
                       <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                       </svg>

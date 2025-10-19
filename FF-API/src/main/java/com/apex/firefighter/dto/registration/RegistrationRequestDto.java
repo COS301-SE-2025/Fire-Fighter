@@ -12,7 +12,8 @@ import java.util.List;
  */
 public class RegistrationRequestDto {
 
-    @NotBlank(message = "Firebase UID is required")
+    // Firebase UID is optional during initial registration
+    // It will be created during the approval process
     private String firebaseUid;
 
     @NotBlank(message = "Username is required")

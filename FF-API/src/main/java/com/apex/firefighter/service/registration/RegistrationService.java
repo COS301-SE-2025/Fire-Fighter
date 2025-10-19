@@ -150,7 +150,8 @@ public class RegistrationService {
         notificationService.notifyUserOfApproval(newUser, adminName);
 
         // Sync with Dolibarr if dolibarrId is provided
-        if (dolibarrId != null && !dolibarrId.trim().isEmpty()) {
+        if (dolibarrId != null && !dolibarrId.trim().isEmpty() && 
+            assignedAccessGroups != null && !assignedAccessGroups.isEmpty()) {
             try {
                 System.out.println("🔄 Syncing user with Dolibarr ID: " + dolibarrId);
                 
