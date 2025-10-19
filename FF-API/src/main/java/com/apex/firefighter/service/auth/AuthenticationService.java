@@ -107,6 +107,14 @@ public class AuthenticationService {
         String email = token.getEmail();
         String username = token.getName();
         
+        // If username is null (happens with email/password registration), extract from email
+        if (username == null || username.trim().isEmpty()) {
+            username = email != null && email.contains("@") 
+                ? email.split("@")[0] 
+                : "user";
+            System.out.println("⚠️ Firebase token has no displayName, using email prefix as username: " + username);
+        }
+        
         // Find or create user
         User user = verifyOrCreateUser(firebaseUid, username, email, null);
         
