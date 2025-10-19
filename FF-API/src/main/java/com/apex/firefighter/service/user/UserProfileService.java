@@ -263,27 +263,31 @@ public class UserProfileService {
             throw new SecurityException("Administrator privileges required to access all users");
         }
 
-        // Get all users
+        // Get all users and filter to only show authorized users (is_authorized = true)
         List<User> allUsers = userRepository.findAll();
+        List<User> authorizedUsers = allUsers.stream()
+                .filter(user -> user.getIsAuthorized() != null && user.getIsAuthorized())
+                .collect(java.util.stream.Collectors.toList());
 
-        // Calculate statistics
-        long normalUsers = allUsers.stream().filter(user -> !user.isAdmin()).count();
-        long adminUsers = allUsers.stream().filter(User::isAdmin).count();
+        // Calculate statistics (only from authorized users)
+        long normalUsers = authorizedUsers.stream().filter(user -> !user.isAdmin()).count();
+        long adminUsers = authorizedUsers.stream().filter(User::isAdmin).count();
 
         // Create response with users and statistics
         Map<String, Object> response = new HashMap<>();
-        response.put("users", allUsers);
+        response.put("users", authorizedUsers);
         response.put("statistics", Map.of(
             "normalUsers", normalUsers,
             "adminUsers", adminUsers,
-            "totalUsers", allUsers.size()
+            "totalUsers", authorizedUsers.size()
         ));
 
-        System.out.println("✅ ADMIN ALL USERS RETRIEVED:");
+        System.out.println("✅ ADMIN ALL USERS RETRIEVED (authorized only):");
         System.out.println("  Admin: " + adminUser.getUsername() + " (" + adminFirebaseUid + ")");
-        System.out.println("  Total Users: " + allUsers.size());
+        System.out.println("  Total Authorized Users: " + authorizedUsers.size());
         System.out.println("  Normal Users: " + normalUsers);
         System.out.println("  Admin Users: " + adminUsers);
+        System.out.println("  Filtered out: " + (allUsers.size() - authorizedUsers.size()) + " unauthorized users");
 
         return response;
     }
