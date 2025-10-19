@@ -24,6 +24,12 @@ public class PendingApprovalDto {
     private String reviewedBy;
     private ZonedDateTime reviewedAt;
     private String dolibarrId;
+    
+    // System Access Request fields (additional information provided by user)
+    private String systemAccessPriority;
+    private String systemAccessDepartment;
+    private String systemAccessPhoneNumber;
+    private String systemAccessJustification;
 
     // Constructors
     public PendingApprovalDto() {}
@@ -147,5 +153,37 @@ public class PendingApprovalDto {
 
     public void setDolibarrId(String dolibarrId) {
         this.dolibarrId = dolibarrId;
+    }
+
+    public String getSystemAccessPriority() {
+        return systemAccessPriority;
+    }
+
+    public void setSystemAccessPriority(String systemAccessPriority) {
+        this.systemAccessPriority = systemAccessPriority;
+    }
+
+    public String getSystemAccessDepartment() {
+        return systemAccessDepartment;
+    }
+
+    public void setSystemAccessDepartment(String systemAccessDepartment) {
+        this.systemAccessDepartment = systemAccessDepartment;
+    }
+
+    public String getSystemAccessPhoneNumber() {
+        return systemAccessPhoneNumber;
+    }
+
+    public void setSystemAccessPhoneNumber(String systemAccessPhoneNumber) {
+        this.systemAccessPhoneNumber = systemAccessPhoneNumber;
+    }
+
+    public String getSystemAccessJustification() {
+        return systemAccessJustification;
+    }
+
+    public void setSystemAccessJustification(String systemAccessJustification) {
+        this.systemAccessJustification = systemAccessJustification;
     }
 }

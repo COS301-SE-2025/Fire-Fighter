@@ -283,6 +283,45 @@ public class RegistrationController {
     }
 
     /**
+     * Submit system access request details
+     * POST /api/registration/access-request
+     */
+    @Operation(summary = "Submit system access request",
+               description = "Submit additional access request details after registration")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Access request submitted successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid request data"),
+        @ApiResponse(responseCode = "409", description = "Access request already exists"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PostMapping("/access-request")
+    public ResponseEntity<?> submitAccessRequest(@Valid @RequestBody SystemAccessRequestDto request) {
+        try {
+            System.out.println("🔵 SYSTEM ACCESS REQUEST:");
+            System.out.println("  Firebase UID: " + request.getFirebaseUid());
+            System.out.println("  Priority: " + request.getRequestPriority());
+            
+            SystemAccessRequestDto result = registrationService.submitSystemAccessRequest(request);
+            
+            System.out.println("✅ ACCESS REQUEST SUBMITTED");
+            return ResponseEntity.status(HttpStatus.CREATED).body(result);
+        } catch (IllegalArgumentException e) {
+            System.err.println("⚠️ INVALID REQUEST: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", e.getMessage()));
+        } catch (IllegalStateException e) {
+            System.err.println("⚠️ REQUEST CONFLICT: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            System.err.println("❌ ACCESS REQUEST FAILED: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Failed to submit access request"));
+        }
+    }
+
+    /**
      * Check registration status for a Firebase UID
      * GET /api/registration/status/{firebaseUid}
      */

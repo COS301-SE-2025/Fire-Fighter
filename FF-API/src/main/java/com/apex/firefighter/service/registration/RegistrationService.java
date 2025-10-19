@@ -3,8 +3,10 @@ package com.apex.firefighter.service.registration;
 import com.apex.firefighter.dto.registration.*;
 import com.apex.firefighter.model.User;
 import com.apex.firefighter.model.registration.PendingApproval;
+import com.apex.firefighter.model.registration.SystemAccessRequest;
 import com.apex.firefighter.repository.UserRepository;
 import com.apex.firefighter.repository.registration.PendingApprovalRepository;
+import com.apex.firefighter.repository.SystemAccessRequestRepository;
 import com.apex.firefighter.service.DolibarrUserGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,16 +31,19 @@ public class RegistrationService {
     private final UserRepository userRepository;
     private final RegistrationNotificationService notificationService;
     private final DolibarrUserGroupService dolibarrUserGroupService;
+    private final SystemAccessRequestRepository systemAccessRequestRepository;
 
     @Autowired
     public RegistrationService(PendingApprovalRepository pendingApprovalRepository,
                              UserRepository userRepository,
                              RegistrationNotificationService notificationService,
-                             DolibarrUserGroupService dolibarrUserGroupService) {
+                             DolibarrUserGroupService dolibarrUserGroupService,
+                             SystemAccessRequestRepository systemAccessRequestRepository) {
         this.pendingApprovalRepository = pendingApprovalRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
         this.dolibarrUserGroupService = dolibarrUserGroupService;
+        this.systemAccessRequestRepository = systemAccessRequestRepository;
     }
 
     /**
@@ -288,6 +293,44 @@ public class RegistrationService {
     }
 
     /**
+     * Submit system access request details
+     */
+    public SystemAccessRequestDto submitSystemAccessRequest(SystemAccessRequestDto request) {
+        System.out.println("🔵 SUBMIT SYSTEM ACCESS REQUEST: " + request.getFirebaseUid());
+
+        // Check if user or pending approval exists
+        Optional<PendingApproval> pending = pendingApprovalRepository.findByFirebaseUid(request.getFirebaseUid());
+        if (pending.isEmpty()) {
+            throw new IllegalArgumentException("No pending registration found for this Firebase UID");
+        }
+
+        // Check if access request already exists
+        if (systemAccessRequestRepository.existsByFirebaseUid(request.getFirebaseUid())) {
+            throw new IllegalStateException("System access request already exists for this Firebase UID");
+        }
+
+        // Create system access request
+        SystemAccessRequest accessRequest = new SystemAccessRequest();
+        accessRequest.setFirebaseUid(request.getFirebaseUid());
+        accessRequest.setRequestPriority(request.getRequestPriority());
+        accessRequest.setRequestDepartment(request.getRequestDepartment());
+        accessRequest.setPhoneNumber(request.getPhoneNumber());
+        accessRequest.setJustification(request.getJustification());
+
+        SystemAccessRequest saved = systemAccessRequestRepository.save(accessRequest);
+        System.out.println("✅ SYSTEM ACCESS REQUEST SAVED: ID=" + saved.getRequestId());
+
+        return request;
+    }
+
+    /**
+     * Get system access request by Firebase UID
+     */
+    public Optional<SystemAccessRequest> getSystemAccessRequest(String firebaseUid) {
+        return systemAccessRequestRepository.findByFirebaseUid(firebaseUid);
+    }
+
+    /**
      * Convert PendingApproval entity to DTO
      */
     private PendingApprovalDto convertToDto(PendingApproval approval) {
@@ -306,6 +349,16 @@ public class RegistrationService {
         dto.setCreatedAt(approval.getCreatedAt());
         dto.setReviewedBy(approval.getReviewedBy());
         dto.setReviewedAt(approval.getReviewedAt());
+        
+        // Include system access request data if available
+        Optional<SystemAccessRequest> accessRequest = systemAccessRequestRepository.findByFirebaseUid(approval.getFirebaseUid());
+        if (accessRequest.isPresent()) {
+            SystemAccessRequest req = accessRequest.get();
+            dto.setSystemAccessPriority(req.getRequestPriority());
+            dto.setSystemAccessDepartment(req.getRequestDepartment());
+            dto.setSystemAccessPhoneNumber(req.getPhoneNumber());
+            dto.setSystemAccessJustification(req.getJustification());
+        }
         dto.setDolibarrId(approval.getDolibarrId());
         return dto;
     }
