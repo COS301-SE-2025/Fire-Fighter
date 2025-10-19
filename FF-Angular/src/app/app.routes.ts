@@ -78,8 +78,8 @@ export const routes: Routes = [
   },
   {
     path: 'access-request',
-    loadComponent: () => import('./pages/access-request/access-request.page').then( m => m.AccessRequestPage),
-    canActivate: [authGuard]
+    loadComponent: () => import('./pages/access-request/access-request.page').then( m => m.AccessRequestPage)
+    // No auth guard - this page is accessed after registration before approval
   },
   {
     path: '',

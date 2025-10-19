@@ -951,6 +951,74 @@ export class AuthService {
   }
 
   /**
+   * Submit system access request details
+   * Endpoint: POST /api/registration/access-request
+   */
+  submitAccessRequest(accessRequestData: any): Observable<any> {
+    console.log('🔵 SUBMIT ACCESS REQUEST:', accessRequestData);
+
+    return this.http.post(`${environment.apiUrl}/registration/access-request`, accessRequestData).pipe(
+      tap((response: any) => {
+        console.log('✅ Access request submitted successfully:', response);
+      }),
+      catchError((error: any) => {
+        console.error('❌ Access request submission failed:', error);
+
+        // Check for connection errors
+        if (this.isConnectionError(error)) {
+          console.error('🔌 Connection error detected in submitAccessRequest - redirecting to service down page');
+
+          // Store the last successful connection time
+          localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
+
+          // Redirect to service down page
+          this.router.navigate(['/service-down']);
+
+          // Return a specific error for connection issues
+          return throwError(() => new Error('Service temporarily unavailable'));
+        }
+
+        // For other errors, return the original error
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Get registration status for current user
+   * Endpoint: GET /api/registration/status/{firebaseUid}
+   */
+  getRegistrationStatus(firebaseUid: string): Observable<any> {
+    console.log('🔵 GET REGISTRATION STATUS:', firebaseUid);
+
+    return this.http.get(`${environment.apiUrl}/registration/status/${firebaseUid}`).pipe(
+      tap((response: any) => {
+        console.log('✅ Registration status retrieved:', response);
+      }),
+      catchError((error: any) => {
+        console.error('❌ Get registration status failed:', error);
+
+        // Check for connection errors
+        if (this.isConnectionError(error)) {
+          console.error('🔌 Connection error detected in getRegistrationStatus - redirecting to service down page');
+
+          // Store the last successful connection time
+          localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
+
+          // Redirect to service down page
+          this.router.navigate(['/service-down']);
+
+          // Return a specific error for connection issues
+          return throwError(() => new Error('Service temporarily unavailable'));
+        }
+
+        // For other errors, return the original error
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
    * Update user Dolibarr ID as Admin
    * Endpoint: PUT /api/users/{firebaseUid}/admin/dolibarr-id
    */

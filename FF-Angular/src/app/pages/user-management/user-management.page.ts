@@ -31,6 +31,11 @@ interface PendingApproval {
   requestedAccess: string;
   businessJustification: string;
   priorityLevel: 'High' | 'Medium' | 'Low';
+  // System Access Request fields
+  systemAccessPriority?: string;
+  systemAccessDepartment?: string;
+  systemAccessPhoneNumber?: string;
+  systemAccessJustification?: string;
 }
 
 interface AccessGroup {
@@ -256,7 +261,12 @@ export class UserManagementPage implements OnInit {
           registrationMethod: dto.registrationMethod,
           requestedAccess: dto.requestedAccessGroups ? dto.requestedAccessGroups.join(', ') : '',
           businessJustification: dto.businessJustification,
-          priorityLevel: dto.priorityLevel
+          priorityLevel: dto.priorityLevel,
+          // Include system access request fields if available
+          systemAccessPriority: dto.systemAccessPriority,
+          systemAccessDepartment: dto.systemAccessDepartment,
+          systemAccessPhoneNumber: dto.systemAccessPhoneNumber,
+          systemAccessJustification: dto.systemAccessJustification
         }));
         console.log('✅ Pending approvals loaded successfully:', this.pendingApprovals.length, 'approvals');
       } else {

@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IonContent } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
 import { Router, RouterLink } from '@angular/router';
+import { Auth } from '@angular/fire/auth';
 
 @Component({
   selector: 'app-register',
@@ -23,6 +24,7 @@ export class RegisterPage implements OnInit {
   registerForm!: FormGroup;
   isSubmitting = false;
   errorMsg: string | null = null;
+  private firebaseAuth = inject(Auth);
 
   constructor(
     private fb: FormBuilder,
@@ -67,13 +69,20 @@ export class RegisterPage implements OnInit {
         this.isSubmitting = true;
         this.errorMsg = null;
         
-        console.log('🔄 Submitting registration request to backend...');
-        const { email, username, department, contactNumber, requestedAccessGroups, businessJustification, priorityLevel } = this.registerForm.value;
+        console.log('🔄 Step 1: Creating Firebase account...');
+        const { email, username, password, department, contactNumber, requestedAccessGroups, businessJustification, priorityLevel } = this.registerForm.value;
         
-        // Submit registration request to backend WITHOUT creating Firebase account
-        // Firebase account will be created by admin during approval process
+        // Step 1: Create Firebase account WITHOUT backend verification
+        // We'll use the Firebase SDK directly to avoid triggering verifyUserWithBackend
+        const { createUserWithEmailAndPassword } = await import('firebase/auth');
+        const userCredential = await createUserWithEmailAndPassword(this.firebaseAuth, email, password);
+        const user = userCredential.user;
+        console.log('✅ Firebase account created:', user.uid);
+        
+        // Step 2: Submit registration request to backend (pending approval)
+        console.log('🔄 Step 2: Submitting registration request to backend...');
         const registrationData = {
-          firebaseUid: null, // Will be created during approval
+          firebaseUid: user.uid,
           username: username,
           email: email,
           department: department,
@@ -87,9 +96,8 @@ export class RegisterPage implements OnInit {
         await this.auth.submitRegistrationRequest(registrationData).toPromise();
         console.log('✅ Registration request submitted successfully');
         
-        // Show success message and redirect
-        alert('✅ Registration submitted successfully!\n\nYour account request is pending admin approval. Once approved, you will receive an email with instructions to set up your password and access the system.');
-        this.router.navigate(['/login']);
+        // Step 3: Navigate to access-request page to collect additional information
+        this.router.navigate(['/access-request']);
         
       } catch (err: any) {
         console.error('❌ Registration failed:', err);
@@ -101,6 +109,8 @@ export class RegisterPage implements OnInit {
           this.errorMsg = 'Invalid registration data. Please check all fields and try again.';
         } else if (err.message === 'Service temporarily unavailable') {
           this.errorMsg = 'Unable to connect to the server. Please try again later.';
+        } else if (err.code === 'auth/email-already-in-use') {
+          this.errorMsg = 'This email address is already in use. Please use a different email or try logging in.';
         } else {
           this.errorMsg = 'Registration failed: ' + (err.error?.error || err.message || 'Please try again.');
         }
@@ -118,13 +128,21 @@ export class RegisterPage implements OnInit {
       this.errorMsg = null;
       
       console.log('🔄 Step 1: Signing in with Google...');
-      const user = await this.auth.signInWithGoogle();
+      // Sign in with Google WITHOUT triggering backend verification
+      const { signInWithPopup, GoogleAuthProvider } = await import('firebase/auth');
+      const provider = new GoogleAuthProvider();
+      provider.addScope('email');
+      provider.addScope('profile');
+      provider.setCustomParameters({ prompt: 'select_account' });
+      
+      const credential = await signInWithPopup(this.firebaseAuth, provider);
+      const user = credential.user;
       console.log('✅ Google sign-in successful:', user.displayName);
       
       // Step 2: Submit registration request to backend for approval
       console.log('🔄 Step 2: Submitting registration request to backend...');
       const registrationData = {
-        firebaseUid: user.uid, // Google SSO requires Firebase account to exist
+        firebaseUid: user.uid,
         username: user.displayName || user.email?.split('@')[0] || 'user',
         email: user.email,
         department: this.registerForm.get('department')?.value || 'Not specified',
@@ -138,12 +156,8 @@ export class RegisterPage implements OnInit {
       await this.auth.submitRegistrationRequest(registrationData).toPromise();
       console.log('✅ Registration request submitted successfully');
       
-      // Show success message and redirect
-      alert('✅ Registration submitted successfully!\n\nYour Google account has been linked, but access is pending admin approval. You will not be able to log in until an administrator approves your request.');
-      
-      // Sign out the user since they need approval first
-      await this.auth.signOut();
-      this.router.navigate(['/login']);
+      // Step 3: Navigate to access-request page to collect additional information
+      this.router.navigate(['/access-request']);
       
     } catch (err: any) {
       console.error('❌ Google registration failed:', err);
