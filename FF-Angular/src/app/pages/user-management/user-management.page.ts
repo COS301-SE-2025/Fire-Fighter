@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
@@ -7,6 +7,7 @@ import { AuthService } from '../../services/auth.service';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../services/language.service';
+import { Auth } from '@angular/fire/auth';
 
 interface User {
   userId: string;
@@ -80,6 +81,9 @@ interface AccessGroup {
   ]
 })
 export class UserManagementPage implements OnInit {
+
+  // Firebase Auth
+  private auth = inject(Auth);
 
   // Tab management
   activeTab = 'users';
@@ -643,17 +647,31 @@ export class UserManagementPage implements OnInit {
     this.isUpdatingAccountStatus = true;
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Get the current admin user's Firebase UID
+      const currentUser = this.auth.currentUser;
+      if (!currentUser) {
+        throw new Error('No authenticated user found');
+      }
 
-      const action = this.selectedUser.isAuthorized ? 'disabled' : 'enabled';
-      console.log(`Account ${action} for user:`, this.selectedUser.username);
+      const adminUid = currentUser.uid;
+      const targetUid = this.selectedUser.userId;
+      const newStatus = !this.selectedUser.isAuthorized;
 
-      // TODO: Send to API
-      // await this.authService.updateUserAccountStatus(this.selectedUser.userId, !this.selectedUser.isAuthorized);
+      console.log('🔄 Updating account status...', {
+        adminUid,
+        targetUid,
+        currentStatus: this.selectedUser.isAuthorized,
+        newStatus
+      });
 
-      // Update the user's status locally for demo purposes
-      this.selectedUser.isAuthorized = !this.selectedUser.isAuthorized;
+      // Call the backend API to update account status
+      await this.authService.updateUserAccountStatus(adminUid, targetUid, newStatus).toPromise();
+
+      const action = newStatus ? 'enabled' : 'disabled';
+      console.log(`✅ Account ${action} for user:`, this.selectedUser.username);
+
+      // Update the user's status locally
+      this.selectedUser.isAuthorized = newStatus;
       
       // Find and update the user in the users array
       const userIndex = this.users.findIndex(u => u.userId === this.selectedUser?.userId);
@@ -665,12 +683,23 @@ export class UserManagementPage implements OnInit {
       this.closeAccountStatusModal();
       
       // Show success message
-      const statusText = this.selectedUser.isAuthorized ? 'enabled' : 'disabled';
+      const statusText = newStatus ? 'enabled' : 'disabled';
       alert(`Account ${statusText} successfully for ${this.selectedUser.username}!`);
 
     } catch (error: any) {
-      console.error('Failed to update account status:', error);
-      alert('Failed to update account status. Please try again.');
+      console.error('❌ Failed to update account status:', error);
+      
+      let errorMessage = 'Failed to update account status. Please try again.';
+      
+      if (error.status === 403) {
+        errorMessage = 'You do not have permission to perform this action.';
+      } else if (error.error?.error) {
+        errorMessage = error.error.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      alert(errorMessage);
     } finally {
       this.isUpdatingAccountStatus = false;
     }

@@ -1,6 +1,6 @@
 // src/app/services/auth.service.ts
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Auth, authState }    from '@angular/fire/auth';
 import {
   GoogleAuthProvider,
@@ -1001,6 +1001,52 @@ export class AuthService {
         // Check for connection errors
         if (this.isConnectionError(error)) {
           console.error('🔌 Connection error detected in getRegistrationStatus - redirecting to service down page');
+
+          // Store the last successful connection time
+          localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
+
+          // Redirect to service down page
+          this.router.navigate(['/service-down']);
+
+          // Return a specific error for connection issues
+          return throwError(() => new Error('Service temporarily unavailable'));
+        }
+
+        // For other errors, return the original error
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Update user account status (Enable/Disable)
+   * Endpoint: PUT /api/users/{firebaseUid}/admin/status
+   */
+  updateUserAccountStatus(adminUid: string, targetUid: string, isAuthorized: boolean): Observable<any> {
+    console.log('🔵 UPDATE USER ACCOUNT STATUS:', {
+      adminUid,
+      targetUid,
+      isAuthorized
+    });
+
+    const headers = new HttpHeaders({
+      'X-Firebase-UID': adminUid
+    });
+
+    return this.http.put(
+      `${environment.apiUrl}/users/${targetUid}/admin/status?isAuthorized=${isAuthorized}`,
+      {},
+      { headers }
+    ).pipe(
+      tap((response: any) => {
+        console.log('✅ Account status updated successfully:', response);
+      }),
+      catchError((error: any) => {
+        console.error('❌ Update account status failed:', error);
+
+        // Check for connection errors
+        if (this.isConnectionError(error)) {
+          console.error('🔌 Connection error detected in updateUserAccountStatus - redirecting to service down page');
 
           // Store the last successful connection time
           localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());

@@ -59,9 +59,19 @@ export class InactiveAccountPage implements OnInit {
 
   /**
    * Navigate back to the login page
+   * Clear all authentication tokens and sign out the user
    */
-  backToLogin() {
-    this.router.navigate(['/login']);
+  async backToLogin() {
+    try {
+      console.log('🔄 Signing out and clearing tokens...');
+      // Use the AuthService logout method which signs out and clears all tokens
+      await this.authService.logout();
+      console.log('✅ Successfully signed out and redirected to login');
+    } catch (error) {
+      console.error('❌ Error during sign out:', error);
+      // Even if there's an error, navigate to login page
+      this.router.navigate(['/login']);
+    }
   }
 
   /**

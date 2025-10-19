@@ -20,13 +20,14 @@ export const authGuard: CanActivateFn = () => {
       }
 
       // User is authenticated, check if they're authorized
-      if (userProfile && !userProfile.isAuthorized) {
-        console.log('⚠️ User not authorized, redirecting to inactive-account');
+      // Allow access if user is admin OR authorized
+      if (userProfile && !userProfile.isAuthorized && !userProfile.isAdmin) {
+        console.log('⚠️ User not authorized and not admin, redirecting to inactive-account');
         navCtrl.navigateRoot('/inactive-account', { animationDirection: 'forward' });
         return false;
       }
 
-      // User is authenticated and authorized, allow access
+      // User is authenticated and (authorized OR admin), allow access
       return true;
     })
   );
