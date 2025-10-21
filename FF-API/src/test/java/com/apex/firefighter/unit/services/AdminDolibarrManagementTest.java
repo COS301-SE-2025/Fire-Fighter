@@ -47,6 +47,7 @@ class AdminDolibarrManagementTest {
         adminUser.setUsername("admin");
         adminUser.setEmail("admin@example.com");
         adminUser.setIsAdmin(true);
+        adminUser.setIsAuthorized(true);
 
         // Create regular user
         regularUser = new User();
@@ -54,6 +55,7 @@ class AdminDolibarrManagementTest {
         regularUser.setUsername("user");
         regularUser.setEmail("user@example.com");
         regularUser.setIsAdmin(false);
+        regularUser.setIsAuthorized(true);
 
         // Create target user
         targetUser = new User();
@@ -61,6 +63,7 @@ class AdminDolibarrManagementTest {
         targetUser.setUsername("target");
         targetUser.setEmail("target@example.com");
         targetUser.setIsAdmin(false);
+        targetUser.setIsAuthorized(true);
     }
 
     @Test

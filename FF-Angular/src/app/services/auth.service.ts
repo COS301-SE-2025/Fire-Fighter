@@ -1065,6 +1065,118 @@ export class AuthService {
   }
 
   /**
+   * Update user department as Admin
+   * Endpoint: PUT /api/users/{firebaseUid}/admin/department
+   */
+  updateUserDepartmentAsAdmin(adminUid: string, targetUid: string, department: string): Observable<any> {
+    console.log('🔵 UPDATE USER DEPARTMENT AS ADMIN:', {
+      adminUid,
+      targetUid,
+      department
+    });
+
+    const headers = new HttpHeaders({
+      'X-Firebase-UID': adminUid
+    });
+
+    return this.http.put(
+      `${environment.apiUrl}/users/${targetUid}/admin/department?department=${encodeURIComponent(department)}`,
+      {},
+      { headers }
+    ).pipe(
+      tap((response: any) => {
+        console.log('✅ Department updated successfully:', response);
+      }),
+      catchError((error: any) => {
+        console.error('❌ Update department failed:', error);
+
+        // Check for connection errors
+        if (this.isConnectionError(error)) {
+          console.error('🔌 Connection error detected in updateUserDepartmentAsAdmin - redirecting to service down page');
+
+          // Store the last successful connection time
+          localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
+
+          // Redirect to service down page
+          this.router.navigate(['/service-down']);
+
+          // Return a specific error for connection issues
+          return throwError(() => new Error('Service temporarily unavailable'));
+        }
+
+        // For other errors, return the original error
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Get user's access groups
+   * Endpoint: GET /api/users/{firebaseUid}/access-groups
+   */
+  getUserAccessGroups(firebaseUid: string): Observable<any> {
+    console.log('🔵 GET USER ACCESS GROUPS:', { firebaseUid });
+
+    return this.http.get(
+      `${environment.apiUrl}/users/${firebaseUid}/access-groups`
+    ).pipe(
+      tap((response: any) => {
+        console.log('✅ Access groups retrieved:', response);
+      }),
+      catchError((error: any) => {
+        console.error('❌ Get access groups failed:', error);
+
+        if (this.isConnectionError(error)) {
+          console.error('🔌 Connection error detected in getUserAccessGroups - redirecting to service down page');
+          localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
+          this.router.navigate(['/service-down']);
+          return throwError(() => new Error('Service temporarily unavailable'));
+        }
+
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Update user's access groups as Admin
+   * Endpoint: PUT /api/users/{firebaseUid}/admin/access-groups
+   */
+  updateUserAccessGroupsAsAdmin(adminUid: string, targetUid: string, groupIds: string[]): Observable<any> {
+    console.log('🔵 UPDATE USER ACCESS GROUPS AS ADMIN:', {
+      adminUid,
+      targetUid,
+      groupIds
+    });
+
+    const headers = new HttpHeaders({
+      'X-Firebase-UID': adminUid
+    });
+
+    return this.http.put(
+      `${environment.apiUrl}/users/${targetUid}/admin/access-groups`,
+      { groupIds },
+      { headers }
+    ).pipe(
+      tap((response: any) => {
+        console.log('✅ Access groups updated successfully:', response);
+      }),
+      catchError((error: any) => {
+        console.error('❌ Update access groups failed:', error);
+
+        if (this.isConnectionError(error)) {
+          console.error('🔌 Connection error detected in updateUserAccessGroupsAsAdmin - redirecting to service down page');
+          localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
+          this.router.navigate(['/service-down']);
+          return throwError(() => new Error('Service temporarily unavailable'));
+        }
+
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
    * Update user Dolibarr ID as Admin
    * Endpoint: PUT /api/users/{firebaseUid}/admin/dolibarr-id
    */
