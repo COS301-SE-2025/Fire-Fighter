@@ -811,7 +811,13 @@ class UserProfileServiceTest {
         // Arrange
         User normalUser = new User();
         normalUser.setIsAdmin(false);
-        List<User> allUsers = Arrays.asList(adminUser, normalUser);
+        normalUser.setIsAuthorized(true); // Only authorized users should be returned
+        
+        User unauthorizedUser = new User();
+        unauthorizedUser.setIsAdmin(false);
+        unauthorizedUser.setIsAuthorized(false); // This user should be filtered out
+        
+        List<User> allUsers = Arrays.asList(adminUser, normalUser, unauthorizedUser);
         
         when(userRepository.findByUserId(ADMIN_FIREBASE_UID)).thenReturn(Optional.of(adminUser));
         when(userRepository.findAll()).thenReturn(allUsers);
@@ -825,11 +831,13 @@ class UserProfileServiceTest {
         
         @SuppressWarnings("unchecked")
         List<User> users = (List<User>) result.get("users");
-        assertThat(users).hasSize(2);
+        assertThat(users).hasSize(2); // Should only return authorized users (admin and normalUser)
+        assertThat(users).contains(adminUser, normalUser);
+        assertThat(users).doesNotContain(unauthorizedUser); // Unauthorized user should not be in the list
         
         @SuppressWarnings("unchecked")
         java.util.Map<String, Object> statistics = (java.util.Map<String, Object>) result.get("statistics");
-        assertThat(statistics.get("totalUsers")).isEqualTo(2);
+        assertThat(statistics.get("totalUsers")).isEqualTo(2); // Only authorized users counted
         assertThat(statistics.get("adminUsers")).isEqualTo(1L);
         assertThat(statistics.get("normalUsers")).isEqualTo(1L);
         

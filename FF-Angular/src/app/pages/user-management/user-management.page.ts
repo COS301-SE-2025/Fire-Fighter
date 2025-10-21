@@ -8,6 +8,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
 import { TranslateModule } from '@ngx-translate/core';
 import { LanguageService } from '../../services/language.service';
 import { Auth } from '@angular/fire/auth';
+import { firstValueFrom } from 'rxjs';
 
 interface User {
   userId: string;
@@ -551,17 +552,36 @@ export class UserManagementPage implements OnInit {
     this.isUpdatingDepartment = true;
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Get the current admin user's Firebase UID
+      const currentUser = this.auth.currentUser;
+      if (!currentUser) {
+        throw new Error('No authenticated user found');
+      }
+
+      const adminUid = currentUser.uid;
+      const targetUid = this.selectedUser.userId;
+      const newDepartment = this.selectedUserDepartment.trim();
+
+      console.log('🔄 Updating department...', {
+        adminUid,
+        targetUid,
+        oldDepartment: this.selectedUser.department,
+        newDepartment
+      });
+
+      // Call the real API to update user department
+      await this.authService.updateUserDepartmentAsAdmin(adminUid, targetUid, newDepartment).toPromise();
+
+      console.log('✅ Department updated successfully');
 
       // Update local user data
       if (this.selectedUser) {
-        this.selectedUser.department = this.selectedUserDepartment.trim();
+        this.selectedUser.department = newDepartment;
 
         // Update the user in the users array
         const userIndex = this.users.findIndex(u => u.userId === this.selectedUser!.userId);
         if (userIndex !== -1) {
-          this.users[userIndex].department = this.selectedUserDepartment.trim();
+          this.users[userIndex].department = newDepartment;
         }
 
         // Update filtered users
@@ -573,15 +593,28 @@ export class UserManagementPage implements OnInit {
       alert('Department updated successfully!');
 
     } catch (error: any) {
-      console.error('Failed to update department:', error);
-      alert('Failed to update department. Please try again.');
+      console.error('❌ Failed to update department:', error);
+      
+      let errorMessage = 'Failed to update department. Please try again.';
+      
+      if (error.message === 'Service temporarily unavailable') {
+        errorMessage = 'Service is temporarily unavailable. Please try again later.';
+      } else if (error.status === 403) {
+        errorMessage = 'You do not have permission to update user departments. Administrator privileges required.';
+      } else if (error.status === 404) {
+        errorMessage = 'User not found. Please refresh the page and try again.';
+      } else if (error.error?.error) {
+        errorMessage = error.error.error;
+      }
+      
+      alert(errorMessage);
     } finally {
       this.isUpdatingDepartment = false;
     }
   }
 
   // Access Groups management methods
-  manageAccessGroups(user: User) {
+  async manageAccessGroups(user: User) {
     this.selectedUser = user;
     
     // Reset all groups to unchecked
@@ -589,11 +622,23 @@ export class UserManagementPage implements OnInit {
       group.enabled = false;
     });
 
-    // TODO: Load user's current access groups from API
-    // For now, simulate some enabled groups
-    if (user.department.includes('Financial')) {
-      const financialGroup = this.availableAccessGroups.find(g => g.id === 'financial');
-      if (financialGroup) financialGroup.enabled = true;
+    // Load user's current access groups from API
+    try {
+      const response = await firstValueFrom(this.authService.getUserAccessGroups(user.userId));
+      const userGroupIds = response.groupIds || [];
+      
+      console.log('User current access groups:', userGroupIds);
+      
+      // Enable the groups that the user has
+      userGroupIds.forEach((groupId: string) => {
+        const group = this.availableAccessGroups.find(g => g.id === groupId);
+        if (group) {
+          group.enabled = true;
+        }
+      });
+    } catch (error: any) {
+      console.error('Failed to load user access groups:', error);
+      // Continue to show modal even if loading fails
     }
     
     this.isAccessGroupsModalOpen = true;
@@ -623,22 +668,48 @@ export class UserManagementPage implements OnInit {
     this.isUpdatingAccessGroups = true;
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Get the admin's Firebase UID
+      const currentUser = this.auth.currentUser;
+      if (!currentUser) {
+        throw new Error('Admin user not authenticated');
+      }
 
-      const enabledGroups = this.availableAccessGroups.filter(g => g.enabled);
-      console.log('Saving access groups for user:', this.selectedUser.username, enabledGroups);
+      const adminUid = currentUser.uid;
 
-      // TODO: Send to API
-      // await this.authService.updateUserAccessGroups(this.selectedUser.userId, enabledGroups);
+      // Get enabled group IDs
+      const enabledGroupIds = this.availableAccessGroups
+        .filter(g => g.enabled)
+        .map(g => g.id);
+
+      console.log('Saving access groups for user:', this.selectedUser.username, enabledGroupIds);
+
+      // Call the API to update access groups
+      await firstValueFrom(
+        this.authService.updateUserAccessGroupsAsAdmin(
+          adminUid,
+          this.selectedUser.userId,
+          enabledGroupIds
+        )
+      );
 
       // Close the modal
       this.closeAccessGroupsModal();
-      alert(`Access groups updated successfully for ${this.selectedUser.username}!`);
+      
+      // Show success message using the language service
+      const currentLang = this.languageService.getCurrentLanguage();
+      const successMsg = currentLang === 'en' 
+        ? `Access groups updated successfully for ${this.selectedUser.username}!`
+        : `Toegangsgroepe suksesvol opgedateer vir ${this.selectedUser.username}!`;
+      alert(successMsg);
 
     } catch (error: any) {
       console.error('Failed to update access groups:', error);
-      alert('Failed to update access groups. Please try again.');
+      
+      const currentLang = this.languageService.getCurrentLanguage();
+      const errorMsg = currentLang === 'en'
+        ? 'Failed to update access groups. Please try again.'
+        : 'Kon nie toegangsgroepe opdateer nie. Probeer asseblief weer.';
+      alert(errorMsg);
     } finally {
       this.isUpdatingAccessGroups = false;
     }
@@ -693,21 +764,16 @@ export class UserManagementPage implements OnInit {
       const action = newStatus ? 'enabled' : 'disabled';
       console.log(`✅ Account ${action} for user:`, this.selectedUser.username);
 
-      // Update the user's status locally
-      this.selectedUser.isAuthorized = newStatus;
-      
-      // Find and update the user in the users array
-      const userIndex = this.users.findIndex(u => u.userId === this.selectedUser?.userId);
-      if (userIndex !== -1) {
-        this.users[userIndex].isAuthorized = this.selectedUser.isAuthorized;
-      }
-
-      // Close the modal
+      // Close the modal first
       this.closeAccountStatusModal();
       
       // Show success message
       const statusText = newStatus ? 'enabled' : 'disabled';
       alert(`Account ${statusText} successfully for ${this.selectedUser.username}!`);
+
+      // Reload the user list from the backend to ensure we have the latest data
+      // This will automatically filter out disabled users (isAuthorized = false)
+      await this.loadUsers();
 
     } catch (error: any) {
       console.error('❌ Failed to update account status:', error);

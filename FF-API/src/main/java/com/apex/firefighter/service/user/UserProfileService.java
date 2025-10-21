@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * UserProfileService handles user profile operations and queries.
@@ -246,6 +247,7 @@ public class UserProfileService {
     /**
      * Get all users as admin with statistics
      * Only administrators can access this endpoint
+     * Only returns authorized users (isAuthorized = true)
      */
     public Map<String, Object> getAllUsersAsAdmin(String adminFirebaseUid) {
         System.out.println("🔵 ADMIN GET ALL USERS: Admin " + adminFirebaseUid + " requesting all users");
@@ -263,25 +265,28 @@ public class UserProfileService {
             throw new SecurityException("Administrator privileges required to access all users");
         }
 
-        // Get all users
+        // Get all users and filter by authorized status
         List<User> allUsers = userRepository.findAll();
+        List<User> authorizedUsers = allUsers.stream()
+            .filter(User::isAuthorized)
+            .collect(Collectors.toList());
 
-        // Calculate statistics
-        long normalUsers = allUsers.stream().filter(user -> !user.isAdmin()).count();
-        long adminUsers = allUsers.stream().filter(User::isAdmin).count();
+        // Calculate statistics for authorized users only
+        long normalUsers = authorizedUsers.stream().filter(user -> !user.isAdmin()).count();
+        long adminUsers = authorizedUsers.stream().filter(User::isAdmin).count();
 
-        // Create response with users and statistics
+        // Create response with authorized users and statistics
         Map<String, Object> response = new HashMap<>();
-        response.put("users", allUsers);
+        response.put("users", authorizedUsers);
         response.put("statistics", Map.of(
             "normalUsers", normalUsers,
             "adminUsers", adminUsers,
-            "totalUsers", allUsers.size()
+            "totalUsers", authorizedUsers.size()
         ));
 
         System.out.println("✅ ADMIN ALL USERS RETRIEVED:");
         System.out.println("  Admin: " + adminUser.getUsername() + " (" + adminFirebaseUid + ")");
-        System.out.println("  Total Users: " + allUsers.size());
+        System.out.println("  Total Authorized Users: " + authorizedUsers.size());
         System.out.println("  Normal Users: " + normalUsers);
         System.out.println("  Admin Users: " + adminUsers);
 
