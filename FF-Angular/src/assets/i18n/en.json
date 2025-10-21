@@ -375,7 +375,11 @@
       "SUBTITLE": "Manage user accounts and permissions",
       "SEARCH_PLACEHOLDER": "Search users...",
       "FILTER_ALL": "All Users",
+      "FILTER_NORMAL": "Normal Users",
       "FILTER_ADMIN": "Admins",
+      "FILTER_ALL_STATUS": "All Status",
+      "FILTER_ACTIVE": "Active Only",
+      "FILTER_DISABLED": "Disabled Only",
       "HEADERS": {
         "USER": "User",
         "ROLE": "Role",
@@ -411,6 +415,10 @@
     },
     "MOBILE": {
       "USER_COUNT": "users"
+    },
+    "STATUS": {
+      "ACTIVE": "Active",
+      "DISABLED": "Disabled"
     },
     "EMPTY_STATE": {
       "TITLE": "No users found",

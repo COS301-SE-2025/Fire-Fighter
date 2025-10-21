@@ -375,7 +375,11 @@
       "SUBTITLE": "Benutzerkonten und Berechtigungen verwalten",
       "SEARCH_PLACEHOLDER": "Benutzer suchen...",
       "FILTER_ALL": "Alle Benutzer",
+      "FILTER_NORMAL": "Normale Benutzer",
       "FILTER_ADMIN": "Admins",
+      "FILTER_ALL_STATUS": "Alle Status",
+      "FILTER_ACTIVE": "Nur Aktive",
+      "FILTER_DISABLED": "Nur Deaktivierte",
       "HEADERS": {
         "USER": "Benutzer",
         "ROLE": "Rolle",
@@ -411,6 +415,10 @@
     },
     "MOBILE": {
       "USER_COUNT": "Benutzer"
+    },
+    "STATUS": {
+      "ACTIVE": "Aktiv",
+      "DISABLED": "Deaktiviert"
     },
     "EMPTY_STATE": {
       "TITLE": "Keine Benutzer gefunden",

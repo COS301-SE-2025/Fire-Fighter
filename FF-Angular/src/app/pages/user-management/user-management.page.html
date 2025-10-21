@@ -126,7 +126,7 @@
               </div>
               <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
                 <!-- Search Input -->
-                <div class="relative">
+                <div class="relative w-full sm:w-80 md:w-96">
                   <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -134,10 +134,17 @@
                   </div>
                   <input type="text" [(ngModel)]="searchTerm" (input)="filterUsers()" [placeholder]="'USER_MANAGEMENT.TABLE.SEARCH_PLACEHOLDER' | translate" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                 </div>
-                <!-- Filter Dropdown -->
-                <select [(ngModel)]="selectedFilter" (change)="filterUsers()" class="block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                <!-- Role Filter Dropdown -->
+                <select [(ngModel)]="selectedFilter" (change)="filterUsers()" class="block w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                   <option value="all">{{ 'USER_MANAGEMENT.TABLE.FILTER_ALL' | translate }}</option>
+                  <option value="normal">{{ 'USER_MANAGEMENT.TABLE.FILTER_NORMAL' | translate }}</option>
                   <option value="admin">{{ 'USER_MANAGEMENT.TABLE.FILTER_ADMIN' | translate }}</option>
+                </select>
+                <!-- Status Filter Dropdown -->
+                <select [(ngModel)]="selectedStatusFilter" (change)="filterUsers()" class="block w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  <option value="all">{{ 'USER_MANAGEMENT.TABLE.FILTER_ALL_STATUS' | translate }}</option>
+                  <option value="active">{{ 'USER_MANAGEMENT.TABLE.FILTER_ACTIVE' | translate }}</option>
+                  <option value="disabled">{{ 'USER_MANAGEMENT.TABLE.FILTER_DISABLED' | translate }}</option>
                 </select>
               </div>
             </div>
@@ -157,14 +164,24 @@
           </thead>
           <tbody>
             <ng-container *ngFor="let user of filteredUsers">
-              <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+              <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                  [ngClass]="{'opacity-60': !user.isAuthorized}">
                 <td class="px-6 py-4">
                   <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center"
+                         [ngClass]="{
+                           'bg-gray-300 dark:bg-gray-600': user.isAuthorized,
+                           'bg-gray-200 dark:bg-gray-700': !user.isAuthorized
+                         }">
                       <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ getUserInitials(user.username) }}</span>
                     </div>
                     <div>
-                      <div class="text-base font-semibold text-gray-900 dark:text-white">{{ user.username }}</div>
+                      <div class="flex items-center gap-2">
+                        <span class="text-base font-semibold text-gray-900 dark:text-white">{{ user.username }}</span>
+                        <span *ngIf="!user.isAuthorized" class="px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300 rounded-full">
+                          {{ 'USER_MANAGEMENT.STATUS.DISABLED' | translate }}
+                        </span>
+                      </div>
                       <div class="text-sm text-gray-500 dark:text-gray-400">{{ user.email }}</div>
                     </div>
                   </div>
@@ -209,7 +226,7 @@
                       </h4>
 
                       <!-- Professional Action Buttons Grid -->
-                      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <!-- Manage Dolibarr ID -->
                         <button (click)="manageDolibarrId(user)" class="flex items-center p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 shadow-sm group">
                           <div class="flex-shrink-0 w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center group-hover:bg-purple-200 dark:group-hover:bg-purple-900/50 transition-colors duration-200">
@@ -236,22 +253,6 @@
                           <div class="ml-3 flex-1 text-left">
                             <p class="text-sm font-medium text-gray-900 dark:text-white">Department</p>
                             <p class="text-xs text-gray-500 dark:text-gray-400">Update user department</p>
-                          </div>
-                          <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                          </svg>
-                        </button>
-
-                        <!-- Manage Access Groups -->
-                        <button (click)="manageAccessGroups(user)" class="flex items-center p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 shadow-sm group">
-                          <div class="flex-shrink-0 w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center group-hover:bg-green-200 dark:group-hover:bg-green-900/50 transition-colors duration-200">
-                            <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                            </svg>
-                          </div>
-                          <div class="ml-3 flex-1 text-left">
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">Access Groups</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Manage requestable groups</p>
                           </div>
                           <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -307,16 +308,26 @@
 
         <!-- User Cards -->
         <ng-container *ngFor="let user of filteredUsers">
-          <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50 overflow-hidden">
+          <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm dark:shadow-gray-900/50 overflow-hidden"
+               [ngClass]="{'opacity-60': !user.isAuthorized}">
             <!-- Card Header -->
             <div class="p-4 border-b border-gray-200 dark:border-gray-700">
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
+                  <div class="w-10 h-10 rounded-full flex items-center justify-center"
+                       [ngClass]="{
+                         'bg-gray-300 dark:bg-gray-600': user.isAuthorized,
+                         'bg-gray-200 dark:bg-gray-700': !user.isAuthorized
+                       }">
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ getUserInitials(user.username) }}</span>
                   </div>
                   <div>
-                    <div class="font-semibold text-gray-900 dark:text-white">{{ user.username }}</div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="font-semibold text-gray-900 dark:text-white">{{ user.username }}</span>
+                      <span *ngIf="!user.isAuthorized" class="px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300 rounded-full">
+                        {{ 'USER_MANAGEMENT.STATUS.DISABLED' | translate }}
+                      </span>
+                    </div>
                     <div class="text-sm text-gray-600 dark:text-gray-400">{{ user.email }}</div>
                   </div>
                 </div>
@@ -398,22 +409,6 @@
                   <div class="ml-3 flex-1 text-left">
                     <p class="text-sm font-medium text-gray-900 dark:text-white">Department</p>
                     <p class="text-xs text-gray-500 dark:text-gray-400">Update user department</p>
-                  </div>
-                  <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                  </svg>
-                </button>
-
-                <!-- Manage Access Groups -->
-                <button (click)="manageAccessGroups(user)" class="w-full flex items-center p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200 shadow-sm">
-                  <div class="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                    <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                    </svg>
-                  </div>
-                  <div class="ml-3 flex-1 text-left">
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">Access Groups</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Manage requestable groups</p>
                   </div>
                   <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -836,89 +831,6 @@
     </div>
   </div>
 
-  <!-- Access Groups Management Modal -->
-  <div *ngIf="isAccessGroupsModalOpen" class="fixed inset-0 z-[9999] overflow-y-auto" aria-labelledby="access-groups-modal-title" role="dialog" aria-modal="true" (click)="closeAccessGroupsModal()">
-    <!-- Background overlay -->
-    <div [@modalBackdrop]="accessGroupsModalAnimationState" class="fixed inset-0 bg-black bg-opacity-50" aria-hidden="true"></div>
-
-    <!-- Modal panel -->
-    <div class="flex min-h-full items-center justify-center p-4">
-      <div [@modalPanel]="accessGroupsModalAnimationState" (click)="$event.stopPropagation()" class="relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
-
-        <!-- Modal Content -->
-        <div class="p-6">
-          <!-- Modal Header -->
-          <div class="flex items-start justify-between mb-4">
-            <div>
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="access-groups-modal-title">
-                Manage Access Groups
-              </h3>
-              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Configure which groups {{ selectedUser?.username }} can request access to
-              </p>
-            </div>
-            <button (click)="closeAccessGroupsModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
-          </div>
-
-          <!-- Access Groups Form -->
-          <form (ngSubmit)="saveAccessGroups()">
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-900 dark:text-white mb-3">
-                Available Access Groups
-              </label>
-              <div class="space-y-3">
-                <div *ngFor="let group of availableAccessGroups" class="flex items-start">
-                  <div class="flex items-center h-5">
-                    <input 
-                      [id]="'group-' + group.id"
-                      [(ngModel)]="group.enabled"
-                      [name]="'group-' + group.id"
-                      type="checkbox"
-                      class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                    />
-                  </div>
-                  <div class="ml-3 text-sm">
-                    <label [for]="'group-' + group.id" class="font-medium text-gray-900 dark:text-white cursor-pointer">
-                      {{ group.name }}
-                    </label>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ group.description }}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex justify-end space-x-3">
-              <button
-                type="button"
-                (click)="closeAccessGroupsModal()"
-                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                [disabled]="isUpdatingAccessGroups"
-                class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-300 dark:bg-green-700 dark:hover:bg-green-800 dark:focus:ring-green-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 inline-flex items-center"
-              >
-                <svg *ngIf="isUpdatingAccessGroups" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span *ngIf="!isUpdatingAccessGroups">Save Access Groups</span>
-                <span *ngIf="isUpdatingAccessGroups">Saving...</span>
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Account Status Confirmation Modal -->
   <div *ngIf="isAccountStatusModalOpen" class="fixed inset-0 z-[9999] overflow-y-auto" aria-labelledby="account-status-modal-title" role="dialog" aria-modal="true" (click)="closeAccountStatusModal()">
     <!-- Background overlay -->
@@ -1055,6 +967,47 @@
               <span *ngIf="isUpdatingAccountStatus">
                 {{ selectedUser?.isAuthorized ? 'Disabling...' : 'Enabling...' }}
               </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div *ngIf="isSuccessModalOpen" class="fixed inset-0 z-[9999] overflow-y-auto" aria-labelledby="success-modal-title" role="dialog" aria-modal="true" (click)="closeSuccessModal()">
+    <!-- Background overlay -->
+    <div [@modalBackdrop]="successModalAnimationState" class="fixed inset-0 bg-black bg-opacity-50" aria-hidden="true"></div>
+
+    <!-- Modal panel -->
+    <div class="flex min-h-full items-center justify-center p-4">
+      <div [@modalPanel]="successModalAnimationState" (click)="$event.stopPropagation()" class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
+
+        <!-- Modal Content -->
+        <div class="p-6">
+          <!-- Success Icon and Header -->
+          <div class="flex flex-col items-center text-center mb-6">
+            <div class="flex-shrink-0 w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
+              <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2" id="success-modal-title">
+              {{ successTitle }}
+            </h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              {{ successMessage }}
+            </p>
+          </div>
+
+          <!-- Action Button -->
+          <div class="flex justify-center">
+            <button
+              type="button"
+              (click)="closeSuccessModal()"
+              class="px-6 py-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-300 dark:bg-green-700 dark:hover:bg-green-800 dark:focus:ring-green-800 transition-colors duration-200"
+            >
+              Got it!
             </button>
           </div>
         </div>

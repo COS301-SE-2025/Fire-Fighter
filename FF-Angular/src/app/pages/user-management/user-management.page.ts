@@ -103,6 +103,7 @@ export class UserManagementPage implements OnInit {
   // Search and filter
   searchTerm = '';
   selectedFilter = 'all';
+  selectedStatusFilter = 'all';
 
   // Expandable user details
   expandedUserId: string | null = null;
@@ -134,6 +135,13 @@ export class UserManagementPage implements OnInit {
   isAccountStatusModalOpen = false;
   accountStatusModalAnimationState = 'hidden';
   isUpdatingAccountStatus = false;
+
+  // Success modal management
+  isSuccessModalOpen = false;
+  successModalAnimationState = 'hidden';
+  successMessage = '';
+  successTitle = '';
+
   availableAccessGroups: AccessGroup[] = [
     {
       id: 'financial',
@@ -286,29 +294,49 @@ export class UserManagementPage implements OnInit {
   }
 
   filterUsers() {
-    let filtered = this.users;
+    // Start with a copy of all users
+    let filtered = [...this.users];
 
     // Apply search filter
-    if (this.searchTerm.trim()) {
-      const searchLower = this.searchTerm.toLowerCase();
+    if (this.searchTerm && this.searchTerm.trim()) {
+      const searchLower = this.searchTerm.toLowerCase().trim();
       filtered = filtered.filter(user =>
-        user.username.toLowerCase().includes(searchLower) ||
-        user.email.toLowerCase().includes(searchLower) ||
-        user.department.toLowerCase().includes(searchLower)
+        (user.username && user.username.toLowerCase().includes(searchLower)) ||
+        (user.email && user.email.toLowerCase().includes(searchLower)) ||
+        (user.department && user.department.toLowerCase().includes(searchLower))
       );
     }
 
     // Apply role filter
     switch (this.selectedFilter) {
       case 'admin':
-        filtered = filtered.filter(user => user.isAdmin);
+        filtered = filtered.filter(user => user.isAdmin === true);
         break;
+      case 'normal':
+        filtered = filtered.filter(user => user.isAdmin === false);
+        break;
+      case 'all':
       default:
         // 'all' - no additional filtering
         break;
     }
 
+    // Apply status filter (active/disabled)
+    switch (this.selectedStatusFilter) {
+      case 'active':
+        filtered = filtered.filter(user => user.isAuthorized === true);
+        break;
+      case 'disabled':
+        filtered = filtered.filter(user => user.isAuthorized === false);
+        break;
+      case 'all':
+      default:
+        // 'all' - show both active and disabled
+        break;
+    }
+
     this.filteredUsers = filtered;
+    console.log('🔍 Filter applied - Search:', this.searchTerm, 'Role:', this.selectedFilter, 'Status:', this.selectedStatusFilter, 'Results:', filtered.length, '/', this.users.length);
   }
 
   getUserInitials(username: string): string {
@@ -419,6 +447,27 @@ export class UserManagementPage implements OnInit {
     }
   }
 
+  // Success modal methods
+  showSuccessModal(title: string, message: string) {
+    this.successTitle = title;
+    this.successMessage = message;
+    this.isSuccessModalOpen = true;
+    // Trigger animation
+    setTimeout(() => {
+      this.successModalAnimationState = 'visible';
+    }, 10);
+  }
+
+  closeSuccessModal() {
+    this.successModalAnimationState = 'hidden';
+    // Wait for animation to complete before hiding modal
+    setTimeout(() => {
+      this.isSuccessModalOpen = false;
+      this.successTitle = '';
+      this.successMessage = '';
+    }, 150);
+  }
+
   // Dolibarr ID management methods
   manageDolibarrId(user: User) {
     this.selectedUser = user;
@@ -504,7 +553,11 @@ export class UserManagementPage implements OnInit {
           this.selectedUser = null;
         }, 150);
 
-        alert('Dolibarr ID updated successfully!');
+        // Show success modal
+        this.showSuccessModal(
+          'Dolibarr ID Updated',
+          `Dolibarr ID has been successfully updated for ${this.selectedUser.username}.`
+        );
       }
     } catch (error: any) {
       console.error('Failed to update Dolibarr ID:', error);
@@ -590,7 +643,12 @@ export class UserManagementPage implements OnInit {
 
       // Close the modal
       this.closeDepartmentModal();
-      alert('Department updated successfully!');
+      
+      // Show success modal
+      this.showSuccessModal(
+        'Department Updated',
+        `Department has been successfully updated to "${newDepartment}" for ${this.selectedUser?.username}.`
+      );
 
     } catch (error: any) {
       console.error('❌ Failed to update department:', error);
@@ -767,12 +825,16 @@ export class UserManagementPage implements OnInit {
       // Close the modal first
       this.closeAccountStatusModal();
       
-      // Show success message
+      // Show success modal
       const statusText = newStatus ? 'enabled' : 'disabled';
-      alert(`Account ${statusText} successfully for ${this.selectedUser.username}!`);
+      const statusCapitalized = newStatus ? 'Enabled' : 'Disabled';
+      this.showSuccessModal(
+        `Account ${statusCapitalized}`,
+        `The account has been successfully ${statusText} for ${this.selectedUser.username}.`
+      );
 
       // Reload the user list from the backend to ensure we have the latest data
-      // This will automatically filter out disabled users (isAuthorized = false)
+      // Note: Backend should return all users (both active and disabled)
       await this.loadUsers();
 
     } catch (error: any) {
