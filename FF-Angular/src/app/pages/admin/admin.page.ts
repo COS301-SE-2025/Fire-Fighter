@@ -35,6 +35,7 @@ interface EmergencyRequestHistory {
   reason: string;
   status: string;
   completedAt: string;
+  emergencyType?: string;
   auditLog?: AuditLogEntry[];
   lastAction?: string;
   actionBy?: string;
@@ -429,6 +430,7 @@ export class AdminPage implements OnInit {
       reason: ticket.description,
       status: this.adminService.mapTicketStatus(ticket.status),
       completedAt: completedTimestamp,
+      emergencyType: ticket.emergencyType,
       auditLog: auditLog
     };
   }
@@ -736,11 +738,12 @@ export class AdminPage implements OnInit {
   // Direct download methods (existing functionality)
   private downloadActiveTicketsCSV() {
     const headers = [
-      'ID', 'Requester', 'Reason', 'Status', 'Access Start', 'Access End', 'System/Resource', 'Justification/Notes', 'Revoked By', 'Revoked At', 'Reject Reason', 'Email', 'Phone'
+      'ID', 'Requester', 'Emergency Type', 'Reason', 'Status', 'Access Start', 'Access End', 'System/Resource', 'Justification/Notes', 'Revoked By', 'Revoked At', 'Reject Reason', 'Email', 'Phone'
     ];
     const rows = this.filteredAndSortedRequests.map(req => [
       req.id,
       this.usernames[req.requester] || req.requester,
+      this.formatEmergencyType(req.system),
       req.reason,
       req.status,
       req.accessStart,
@@ -758,11 +761,12 @@ export class AdminPage implements OnInit {
 
   private downloadHistoryCSV() {
     const headers = [
-      'ID', 'Requester', 'Reason', 'Status', 'Completed At', 'Last Action', 'Action By', 'Action At'
+      'ID', 'Requester', 'Emergency Type', 'Reason', 'Status', 'Completed At', 'Last Action', 'Action By', 'Action At'
     ];
     const rows = this.filteredAndSortedHistory.map(req => [
       req.id,
       this.usernames[req.requester] || req.requester,
+      this.formatEmergencyType(req.emergencyType),
       req.reason,
       req.status,
       req.completedAt,
@@ -773,8 +777,19 @@ export class AdminPage implements OnInit {
     this.downloadCSV(headers, rows, 'requests-history.csv');
   }
 
+  private formatEmergencyType(type: string | undefined): string {
+    if (!type) return 'N/A';
+    
+    // Convert kebab-case to Title Case
+    // e.g., "user-read-users-groups" -> "User Read Users Groups"
+    return type
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
   private downloadAuditLogsCSV() {
-    const headers = ['Request ID', 'Requester', 'Action', 'By', 'At', 'Reason'];
+    const headers = ['Request ID', 'Requester', 'Emergency Type', 'Action', 'By', 'At', 'Reason'];
     const rows: string[][] = [];
     this.requestHistory.forEach(req => {
       if (Array.isArray(req.auditLog)) {
@@ -782,6 +797,7 @@ export class AdminPage implements OnInit {
           rows.push([
             req.id,
             this.usernames[req.requester] || req.requester,
+            this.formatEmergencyType(req.emergencyType),
             log.action,
             this.usernames[log.by] || log.by,
             log.at,
