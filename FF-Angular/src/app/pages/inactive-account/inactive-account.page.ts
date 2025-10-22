@@ -1,20 +1,63 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { Auth } from '@angular/fire/auth';
+import { inject } from '@angular/core';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-inactive-account',
   templateUrl: './inactive-account.page.html',
   styleUrls: ['./inactive-account.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [IonicModule, CommonModule, FormsModule],
+  animations: [
+    trigger('modalBackdrop', [
+      state('hidden', style({
+        opacity: 0
+      })),
+      state('visible', style({
+        opacity: 1
+      })),
+      transition('hidden => visible', [
+        animate('200ms ease-out')
+      ]),
+      transition('visible => hidden', [
+        animate('150ms ease-in')
+      ])
+    ]),
+    trigger('modalPanel', [
+      state('hidden', style({
+        opacity: 0,
+        transform: 'scale(0.95) translateY(-10px)'
+      })),
+      state('visible', style({
+        opacity: 1,
+        transform: 'scale(1) translateY(0)'
+      })),
+      transition('hidden => visible', [
+        animate('200ms ease-out')
+      ]),
+      transition('visible => hidden', [
+        animate('150ms ease-in')
+      ])
+    ])
+  ]
 })
-export class InactiveAccountPage implements OnInit {
+export class InactiveAccountPage implements OnInit, OnDestroy {
 
   isCheckingStatus = false;
+  private auth = inject(Auth);
+
+  // Success modal management
+  isSuccessModalOpen = false;
+  successModalAnimationState = 'hidden';
+
+  // Store original theme state
+  private hadDarkClass = false;
 
   constructor(
     private router: Router,
@@ -23,37 +66,62 @@ export class InactiveAccountPage implements OnInit {
   ) { }
 
   ngOnInit() {
-    // Force dark theme
+    // Store original theme state
+    this.hadDarkClass = document.documentElement.classList.contains('dark');
+    
+    // Force dark theme for this page
     document.documentElement.classList.add('dark');
     document.body.classList.add('dark');
   }
 
+  ngOnDestroy() {
+    // Restore original theme state when leaving the page
+    if (!this.hadDarkClass) {
+      document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark');
+    }
+  }
+
   /**
-   * Check the current account status (simulate API call)
+   * Check the current account status with backend API
    */
   async checkStatus() {
     this.isCheckingStatus = true;
     
     try {
-      // Simulate API call to check account status
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Get current user from Firebase
+      const currentUser = this.auth.currentUser;
       
-      // For demo purposes, show different messages based on random status
-      const statuses = [
-        'Your account is still pending administrator approval.',
-        'Your account is under review. Please check back in 24-48 hours.',
-        'Your account has been approved! Please try logging in again.',
-        'Additional information is required. Please contact your administrator.'
-      ];
+      if (!currentUser) {
+        console.error('❌ No authenticated user found');
+        await this.showStatusAlert('Authentication error. Please log in again.');
+        await this.backToLogin();
+        return;
+      }
+
+      console.log('🔵 Checking account status for user:', currentUser.uid);
+
+      // Call backend API to check if user is now authorized
+      const isAuthorized = await this.authService.checkUserAuthorization(currentUser.uid).toPromise();
+
+      if (isAuthorized) {
+        console.log('✅ Account has been activated!');
+        
+        // Show success modal
+        this.showSuccessModal();
+      } else {
+        console.log('⚠️ Account is still pending approval');
+        await this.showStatusAlert('Your account is still pending administrator approval. You will receive an email notification once your account has been activated.');
+      }
       
-      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+    } catch (error: any) {
+      console.error('❌ Error checking account status:', error);
       
-      // Show status message
-      this.showStatusAlert(randomStatus);
-      
-    } catch (error) {
-      console.error('Error checking account status:', error);
-      this.showStatusAlert('Unable to check account status at this time. Please try again later or contact support.');
+      if (error.message === 'Service temporarily unavailable') {
+        await this.showStatusAlert('Unable to connect to the server. Please check your internet connection and try again.');
+      } else {
+        await this.showStatusAlert('Unable to check account status at this time. Please try again later or contact support.');
+      }
     } finally {
       this.isCheckingStatus = false;
     }
@@ -74,6 +142,28 @@ export class InactiveAccountPage implements OnInit {
       // Even if there's an error, navigate to login page
       this.router.navigate(['/login']);
     }
+  }
+
+  /**
+   * Show account activated success modal
+   */
+  showSuccessModal() {
+    this.isSuccessModalOpen = true;
+    // Trigger animation
+    setTimeout(() => {
+      this.successModalAnimationState = 'visible';
+    }, 10);
+  }
+
+  /**
+   * Close success modal and navigate to login
+   */
+  closeSuccessModal() {
+    this.successModalAnimationState = 'hidden';
+    setTimeout(() => {
+      this.isSuccessModalOpen = false;
+      this.backToLogin();
+    }, 200);
   }
 
   /**

@@ -1065,6 +1065,36 @@ export class AuthService {
   }
 
   /**
+   * Check user authorization status
+   * Endpoint: GET /api/users/{firebaseUid}/authorized
+   */
+  checkUserAuthorization(firebaseUid: string): Observable<boolean> {
+    console.log('🔵 CHECK USER AUTHORIZATION:', firebaseUid);
+
+    return this.http.get<boolean>(
+      `${environment.apiUrl}/users/${firebaseUid}/authorized`
+    ).pipe(
+      tap((isAuthorized: boolean) => {
+        console.log('✅ User authorization check:', isAuthorized);
+      }),
+      catchError((error: any) => {
+        console.error('❌ Check user authorization failed:', error);
+
+        // Check for connection errors
+        if (this.isConnectionError(error)) {
+          console.error('🔌 Connection error detected in checkUserAuthorization - service unavailable');
+
+          // Return a specific error for connection issues
+          return throwError(() => new Error('Service temporarily unavailable'));
+        }
+
+        // For other errors, return the original error
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
    * Update user department as Admin
    * Endpoint: PUT /api/users/{firebaseUid}/admin/department
    */
