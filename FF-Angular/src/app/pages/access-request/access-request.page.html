@@ -59,29 +59,26 @@
             <div>
               <label for="contactNumber" class="block text-sm font-medium text-white mb-2">
                 Contact Number
-                <span class="text-red-500">*</span>
+                <span class="text-gray-400 text-xs">(Optional)</span>
               </label>
               <input
                 type="tel"
                 id="contactNumber"
                 formControlName="contactNumber"
-                placeholder="+49 89 382 12345"
-                class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 placeholder-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                placeholder="89 382 12345"
+                class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 placeholder-gray-400"
                 [ngClass]="{
                   'border-red-500': accessRequestForm.get('contactNumber')?.touched && accessRequestForm.get('contactNumber')?.invalid,
                   'border-gray-600': !(accessRequestForm.get('contactNumber')?.touched && accessRequestForm.get('contactNumber')?.invalid)
                 }"
               />
               <div *ngIf="accessRequestForm.get('contactNumber')?.touched && accessRequestForm.get('contactNumber')?.invalid" class="mt-1 text-sm text-red-400">
-                <p *ngIf="accessRequestForm.get('contactNumber')?.errors?.['required']">
-                  Contact number is required
-                </p>
                 <p *ngIf="accessRequestForm.get('contactNumber')?.errors?.['pattern']">
-                  Please enter a valid phone number (e.g., +49 89 382 12345)
+                  Please enter a valid phone number
                 </p>
               </div>
               <p class="mt-1 text-xs text-gray-400">
-                Include country code for international numbers
+                Enter your local phone number (country code not required)
               </p>
             </div>
           </div>

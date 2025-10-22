@@ -45,8 +45,7 @@ export class RegisterPage implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', Validators.required],
-      department: ['', Validators.required],
-      contactNumber: ['']
+      department: ['', Validators.required]
     }, { validator: this.passwordMatchValidator });
   }
 
@@ -69,7 +68,7 @@ export class RegisterPage implements OnInit {
     this.errorMsg = null;
     
     try {
-      const { email, username, password, department, contactNumber } = this.registerForm.value;
+      const { email, username, password, department } = this.registerForm.value;
       
       // Create Firebase account
       const userCredential = await createUserWithEmailAndPassword(this.firebaseAuth, email, password);
@@ -81,7 +80,7 @@ export class RegisterPage implements OnInit {
         username,
         email,
         department,
-        contactNumber: contactNumber || '',
+        contactNumber: '',
         registrationMethod: 'email',
         requestedAccessGroups: [],
         businessJustification: '',
@@ -125,7 +124,7 @@ export class RegisterPage implements OnInit {
         username: user.displayName || user.email?.split('@')[0] || 'user',
         email: user.email,
         department: this.registerForm.get('department')?.value || 'Not specified',
-        contactNumber: this.registerForm.get('contactNumber')?.value || '',
+        contactNumber: '',
         registrationMethod: 'google_sso',
         requestedAccessGroups: [],
         businessJustification: '',

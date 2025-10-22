@@ -75,7 +75,7 @@ export class AccessRequestPage implements OnInit {
     });
 
     this.accessRequestForm = this.fb.group({
-      contactNumber: ['', Validators.pattern(/^\+?[1-9]\d{1,14}$/)],
+      contactNumber: ['', Validators.pattern(/^[0-9\s\-\(\)\.]+$/)],
       priorityLevel: ['MEDIUM', Validators.required],
       accessGroup: ['', Validators.required],
       businessJustification: ['', [Validators.required, Validators.minLength(50), Validators.maxLength(500)]]
