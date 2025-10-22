@@ -921,30 +921,13 @@ export class AuthService {
    * Endpoint: POST /api/registration/submit
    */
   submitRegistrationRequest(registrationData: any): Observable<any> {
-    console.log('🔵 SUBMIT REGISTRATION REQUEST:', registrationData);
-
     return this.http.post(`${environment.apiUrl}/registration/submit`, registrationData).pipe(
-      tap((response: any) => {
-        console.log('✅ Registration submitted successfully:', response);
-      }),
       catchError((error: any) => {
-        console.error('❌ Registration submission failed:', error);
-
-        // Check for connection errors
         if (this.isConnectionError(error)) {
-          console.error('🔌 Connection error detected in submitRegistrationRequest - redirecting to service down page');
-
-          // Store the last successful connection time
           localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
-
-          // Redirect to service down page
           this.router.navigate(['/service-down']);
-
-          // Return a specific error for connection issues
           return throwError(() => new Error('Service temporarily unavailable'));
         }
-
-        // For other errors, return the original error
         return throwError(() => error);
       })
     );
@@ -955,30 +938,13 @@ export class AuthService {
    * Endpoint: POST /api/registration/access-request
    */
   submitAccessRequest(accessRequestData: any): Observable<any> {
-    console.log('🔵 SUBMIT ACCESS REQUEST:', accessRequestData);
-
     return this.http.post(`${environment.apiUrl}/registration/access-request`, accessRequestData).pipe(
-      tap((response: any) => {
-        console.log('✅ Access request submitted successfully:', response);
-      }),
       catchError((error: any) => {
-        console.error('❌ Access request submission failed:', error);
-
-        // Check for connection errors
         if (this.isConnectionError(error)) {
-          console.error('🔌 Connection error detected in submitAccessRequest - redirecting to service down page');
-
-          // Store the last successful connection time
           localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
-
-          // Redirect to service down page
           this.router.navigate(['/service-down']);
-
-          // Return a specific error for connection issues
           return throwError(() => new Error('Service temporarily unavailable'));
         }
-
-        // For other errors, return the original error
         return throwError(() => error);
       })
     );
@@ -1069,26 +1035,13 @@ export class AuthService {
    * Endpoint: GET /api/users/{firebaseUid}/authorized
    */
   checkUserAuthorization(firebaseUid: string): Observable<boolean> {
-    console.log('🔵 CHECK USER AUTHORIZATION:', firebaseUid);
-
     return this.http.get<boolean>(
       `${environment.apiUrl}/users/${firebaseUid}/authorized`
     ).pipe(
-      tap((isAuthorized: boolean) => {
-        console.log('✅ User authorization check:', isAuthorized);
-      }),
       catchError((error: any) => {
-        console.error('❌ Check user authorization failed:', error);
-
-        // Check for connection errors
         if (this.isConnectionError(error)) {
-          console.error('🔌 Connection error detected in checkUserAuthorization - service unavailable');
-
-          // Return a specific error for connection issues
           return throwError(() => new Error('Service temporarily unavailable'));
         }
-
-        // For other errors, return the original error
         return throwError(() => error);
       })
     );
@@ -1328,18 +1281,14 @@ export class AuthService {
     if (this.initialized) return;
     this.initialized = true;
 
-    console.log('🔄 Initializing auth state...');
-
     // Subscribe to Firebase auth state changes
     this.user$.subscribe(async (firebaseUser) => {
       if (firebaseUser) {
-        console.log('🔥 Firebase user found on init:', firebaseUser.email);
-        
-        // Skip verification if user is on access-request or register page (completing registration)
+        // Skip verification if user is on registration flow pages
         const currentUrl = this.router.url;
-        console.log('📍 Current URL:', currentUrl);
-        if (currentUrl.includes('/access-request') || currentUrl.includes('/register')) {
-          console.log('📝 User on registration flow page, skipping verification');
+        if (currentUrl.includes('/access-request') || 
+            currentUrl.includes('/register') || 
+            currentUrl.includes('/inactive-account')) {
           return;
         }
         
@@ -1348,36 +1297,19 @@ export class AuthService {
         
         if (restoredProfile) {
           // We have cached data, verify it's still valid by checking with backend
-          console.log('📋 User data restored from cache, verifying with backend...');
-          
           try {
             // Re-verify with backend to ensure data is current
             const freshProfile = await this.verifyUserWithBackend(firebaseUser);
-
-            // Update cache with fresh data
             this.storeUserData(freshProfile);
-
-            console.log('✅ User data verified and updated');
           } catch (error: any) {
-            console.warn('⚠️ Backend verification failed during init:', error);
-
             // Check if it's a connection error
             if (this.isConnectionError(error)) {
-              console.warn('🔌 Connection error during initialization - keeping cached data and showing service down page');
-
-              // Store the last successful connection time
               localStorage.setItem('lastSuccessfulConnection', new Date().toISOString());
-
-              // Redirect to service down page
               this.router.navigate(['/service-down']);
-            } else {
-              // Keep using restored data if backend is temporarily unavailable for other reasons
-              console.warn('⚠️ Non-connection error during init, using cached data');
             }
           }
         } else {
           // No cached data, verify with backend
-          console.log('🌐 No cached data found, verifying with backend...');
           
           try {
             await this.verifyUserWithBackend(firebaseUser);

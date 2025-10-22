@@ -69,16 +69,13 @@ export class AccessRequestPage implements OnInit {
       this.firebaseUid = params['firebaseUid'] || this.firebaseAuth.currentUser?.uid || null;
       
       if (!this.firebaseUid) {
-        console.error('❌ No Firebase UID found');
         this.errorMsg = 'Session expired. Please register again.';
         setTimeout(() => this.router.navigate(['/register']), 3000);
-      } else {
-        console.log('✅ Firebase UID:', this.firebaseUid);
       }
     });
 
     this.accessRequestForm = this.fb.group({
-      contactNumber: ['', [Validators.pattern(/^\+?[1-9]\d{1,14}$/)]],
+      contactNumber: ['', Validators.pattern(/^\+?[1-9]\d{1,14}$/)],
       priorityLevel: ['MEDIUM', Validators.required],
       accessGroup: ['', Validators.required],
       businessJustification: ['', [Validators.required, Validators.minLength(50), Validators.maxLength(500)]]
@@ -86,50 +83,45 @@ export class AccessRequestPage implements OnInit {
   }
 
   async onSubmit() {
-    if (this.accessRequestForm.valid && !this.isSubmitting && this.firebaseUid) {
-      this.isSubmitting = true;
-      this.errorMsg = null;
-      this.successMsg = null;
-
-      try {
-        const formData = this.accessRequestForm.value;
-        console.log('🔄 Submitting access request with justification...');
-        
-        // Prepare request data for backend
-        const requestData = {
-          firebaseUid: this.firebaseUid,
-          requestPriority: formData.priorityLevel,
-          phoneNumber: formData.contactNumber || '',
-          justification: formData.businessJustification,
-          requestedAccessGroups: [formData.accessGroup] // Convert single selection to array
-        };
-        
-        console.log('Request data:', requestData);
-        
-        // Submit to backend API
-        await this.authService.submitAccessRequest(requestData).toPromise();
-        
-        console.log('✅ Access request updated successfully');
-        this.successMsg = 'Access request submitted successfully! Redirecting to account status page...';
-        
-        // Sign out the user since they're not approved yet
-        await this.authService.logout();
-        
-        // Redirect to inactive-account page after a short delay
-        setTimeout(() => {
-          this.router.navigate(['/inactive-account'], {
-            replaceUrl: true
-          });
-        }, 2000);
-        
-      } catch (error: any) {
-        console.error('❌ Access request submission error:', error);
-        this.errorMsg = error.error?.error || error.message || 'Failed to submit access request. Please try again.';
-      } finally {
-        this.isSubmitting = false;
+    if (!this.accessRequestForm.valid || this.isSubmitting || !this.firebaseUid) {
+      if (!this.firebaseUid) {
+        this.errorMsg = 'Session expired. Please register again.';
       }
-    } else if (!this.firebaseUid) {
-      this.errorMsg = 'Session expired. Please register again.';
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.errorMsg = null;
+    this.successMsg = null;
+
+    try {
+      const formData = this.accessRequestForm.value;
+      
+      // Prepare request data for backend
+      const requestData = {
+        firebaseUid: this.firebaseUid,
+        requestPriority: formData.priorityLevel,
+        phoneNumber: formData.contactNumber || '',
+        justification: formData.businessJustification,
+        requestedAccessGroups: [formData.accessGroup]
+      };
+      
+      await this.authService.submitAccessRequest(requestData).toPromise();
+      
+      this.successMsg = 'Access request submitted successfully! Redirecting to account status page...';
+      
+      // DO NOT sign out the user - keep them logged in with Firebase
+      // so they can check their authorization status on the inactive-account page
+      
+      // Redirect to inactive-account page
+      setTimeout(() => {
+        this.router.navigate(['/inactive-account'], { replaceUrl: true });
+      }, 2000);
+      
+    } catch (error: any) {
+      this.errorMsg = error.error?.error || error.message || 'Failed to submit access request. Please try again.';
+    } finally {
+      this.isSubmitting = false;
     }
   }
 

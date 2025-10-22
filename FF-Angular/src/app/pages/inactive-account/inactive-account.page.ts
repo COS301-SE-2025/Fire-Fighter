@@ -93,30 +93,22 @@ export class InactiveAccountPage implements OnInit, OnDestroy {
       const currentUser = this.auth.currentUser;
       
       if (!currentUser) {
-        console.error('❌ No authenticated user found');
         await this.showStatusAlert('Authentication error. Please log in again.');
         await this.backToLogin();
         return;
       }
 
-      console.log('🔵 Checking account status for user:', currentUser.uid);
-
       // Call backend API to check if user is now authorized
       const isAuthorized = await this.authService.checkUserAuthorization(currentUser.uid).toPromise();
 
       if (isAuthorized) {
-        console.log('✅ Account has been activated!');
-        
         // Show success modal
         this.showSuccessModal();
       } else {
-        console.log('⚠️ Account is still pending approval');
         await this.showStatusAlert('Your account is still pending administrator approval. You will receive an email notification once your account has been activated.');
       }
       
     } catch (error: any) {
-      console.error('❌ Error checking account status:', error);
-      
       if (error.message === 'Service temporarily unavailable') {
         await this.showStatusAlert('Unable to connect to the server. Please check your internet connection and try again.');
       } else {
@@ -133,12 +125,9 @@ export class InactiveAccountPage implements OnInit, OnDestroy {
    */
   async backToLogin() {
     try {
-      console.log('🔄 Signing out and clearing tokens...');
       // Use the AuthService logout method which signs out and clears all tokens
       await this.authService.logout();
-      console.log('✅ Successfully signed out and redirected to login');
     } catch (error) {
-      console.error('❌ Error during sign out:', error);
       // Even if there's an error, navigate to login page
       this.router.navigate(['/login']);
     }
@@ -178,10 +167,7 @@ export class InactiveAccountPage implements OnInit, OnDestroy {
       buttons: [
         {
           text: 'Dismiss',
-          role: 'cancel',
-          handler: () => {
-            console.log('Toast dismissed');
-          }
+          role: 'cancel'
         }
       ]
     });
