@@ -93,7 +93,7 @@ export class AccessRequestPage implements OnInit {
       // Prepare request data for backend
       const requestData = {
         firebaseUid: this.firebaseUid,
-        department: formData.department,
+        requestDepartment: formData.department,
         requestPriority: formData.priorityLevel,
         phoneNumber: formData.contactNumber || '',
         justification: formData.businessJustification,

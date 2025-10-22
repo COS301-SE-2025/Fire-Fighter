@@ -819,9 +819,20 @@ export class AuthService {
    * Endpoint: GET /api/registration/admin/pending
    */
   getPendingApprovals(): Observable<any> {
-    console.log('🔵 GET PENDING APPROVALS REQUEST');
+    const currentUser = this.auth.currentUser;
+    if (!currentUser) {
+      console.error('❌ No authenticated user found');
+      return throwError(() => new Error('User not authenticated'));
+    }
 
-    return this.http.get(`${environment.apiUrl}/registration/admin/pending`).pipe(
+    const adminUid = currentUser.uid;
+    console.log('🔵 GET PENDING APPROVALS REQUEST:', { adminUid });
+
+    const headers = new HttpHeaders({
+      'X-Firebase-UID': adminUid
+    });
+
+    return this.http.get(`${environment.apiUrl}/registration/admin/pending`, { headers }).pipe(
       tap((response: any) => {
         console.log('✅ Get pending approvals successful:', response);
       }),

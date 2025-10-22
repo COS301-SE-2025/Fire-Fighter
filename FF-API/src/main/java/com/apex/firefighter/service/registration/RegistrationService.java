@@ -339,6 +339,21 @@ public class RegistrationService {
         System.out.println("  Justification: " + (saved.getJustification() != null ? saved.getJustification().substring(0, Math.min(50, saved.getJustification().length())) + "..." : "None"));
         System.out.println("  Access Groups: " + saved.getRequestedAccessGroups());
 
+        // Also update the User entity with the department and phone number
+        Optional<User> userOptional = userRepository.findByUserId(request.getFirebaseUid());
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            if (request.getRequestDepartment() != null) {
+                user.setDepartment(request.getRequestDepartment());
+                System.out.println("  Updated User Department: " + request.getRequestDepartment());
+            }
+            if (request.getPhoneNumber() != null) {
+                user.setContactNumber(request.getPhoneNumber());
+            }
+            userRepository.save(user);
+            System.out.println("✅ USER ENTITY UPDATED with department and contact info");
+        }
+
         return request;
     }
 
