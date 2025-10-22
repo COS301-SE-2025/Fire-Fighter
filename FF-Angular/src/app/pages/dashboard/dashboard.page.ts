@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { TicketService, Ticket, EmergencyStatistics } from '../../services/ticket.service';
@@ -39,6 +39,7 @@ export interface Activity {
 })
 export class DashboardPage implements OnInit, OnDestroy {
   user$ = this.authService.user$;
+  isAdmin$ = this.authService.isAdmin$;
   mobileMenuOpen = false;
   profileMenuOpen = false;
   tickets: Ticket[] = [];
@@ -98,7 +99,8 @@ export class DashboardPage implements OnInit, OnDestroy {
     private ticketService: TicketService,
     private adminService: AdminService,
     private notificationService: NotificationService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router
   ) {
   }
 
@@ -194,6 +196,14 @@ export class DashboardPage implements OnInit, OnDestroy {
     this.loadTicketsInternal(true);
     // Refresh statistics when tickets are loaded
     this.loadEmergencyStatistics();
+  }
+
+  /**
+   * Navigate to admin console audit logs
+   * Only accessible by admin users
+   */
+  navigateToAuditLogs() {
+    this.router.navigate(['/admin']);
   }
 
   /**
