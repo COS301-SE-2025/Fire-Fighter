@@ -1335,6 +1335,14 @@ export class AuthService {
       if (firebaseUser) {
         console.log('🔥 Firebase user found on init:', firebaseUser.email);
         
+        // Skip verification if user is on access-request or register page (completing registration)
+        const currentUrl = this.router.url;
+        console.log('📍 Current URL:', currentUrl);
+        if (currentUrl.includes('/access-request') || currentUrl.includes('/register')) {
+          console.log('📝 User on registration flow page, skipping verification');
+          return;
+        }
+        
         // Try to restore from localStorage first
         const restoredProfile = this.restoreUserData();
         

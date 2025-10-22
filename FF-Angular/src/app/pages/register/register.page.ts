@@ -110,9 +110,11 @@ export class RegisterPage implements OnInit {
         
         // Step 3: Navigate to access-request page to collect justification and access groups
         console.log('🔄 Step 3: Navigating to access-request page...');
-        this.router.navigate(['/access-request'], { 
-          queryParams: { firebaseUid: user.uid }
+        await this.router.navigate(['/access-request'], { 
+          queryParams: { firebaseUid: user.uid },
+          replaceUrl: true
         });
+        console.log('✅ Navigation completed');
         
       } catch (err: any) {
         console.error('❌ Registration failed:', err);
@@ -173,9 +175,11 @@ export class RegisterPage implements OnInit {
       
       // Step 3: Navigate to access-request page to collect justification and access groups
       console.log('🔄 Step 3: Navigating to access-request page...');
-      this.router.navigate(['/access-request'], { 
-        queryParams: { firebaseUid: user.uid }
+      await this.router.navigate(['/access-request'], { 
+        queryParams: { firebaseUid: user.uid },
+        replaceUrl: true
       });
+      console.log('✅ Navigation completed');
       
     } catch (err: any) {
       console.error('❌ Google registration failed:', err);

@@ -110,19 +110,17 @@ export class AccessRequestPage implements OnInit {
         await this.authService.submitAccessRequest(requestData).toPromise();
         
         console.log('✅ Access request updated successfully');
-        this.successMsg = 'Access request submitted successfully! Your request is now pending approval. You will be notified once an administrator reviews your request.';
+        this.successMsg = 'Access request submitted successfully! Redirecting to account status page...';
         
         // Sign out the user since they're not approved yet
         await this.authService.logout();
         
-        // Redirect to login page after a short delay
+        // Redirect to inactive-account page after a short delay
         setTimeout(() => {
-          this.router.navigate(['/login'], {
-            queryParams: { 
-              message: 'Registration complete. Please wait for admin approval before logging in.' 
-            }
+          this.router.navigate(['/inactive-account'], {
+            replaceUrl: true
           });
-        }, 4000);
+        }, 2000);
         
       } catch (error: any) {
         console.error('❌ Access request submission error:', error);

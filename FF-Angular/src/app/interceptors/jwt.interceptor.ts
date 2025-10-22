@@ -1,12 +1,24 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { from, switchMap } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
+  const router = inject(Router);
   
   console.log('🔒 JWT INTERCEPTOR: Processing request to:', req.url);
+  console.log('🔒 JWT INTERCEPTOR: Current route:', router.url);
+  
+  // Skip token refresh during registration flow
+  const isRegistrationRoute = router.url.includes('/register') || 
+                              router.url.includes('/access-request');
+  
+  if (isRegistrationRoute) {
+    console.log('🔒 JWT INTERCEPTOR: User on registration flow, skipping token operations');
+    return next(req);
+  }
   
   // Skip adding token for public endpoints (authentication and registration)
   const isPublicEndpoint = req.url.includes('/api/auth/') || 
