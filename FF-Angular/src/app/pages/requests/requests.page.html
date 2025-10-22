@@ -433,13 +433,14 @@
             <!-- Emergency Type Selection -->
             <div>
               <label for="emergency-type" class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                {{ 'REQUESTS.MODAL.EMERGENCY_TYPE.LABEL' | translate }}
+                {{ 'REQUESTS.MODAL.EMERGENCY_TYPE.LABEL' | translate }} <span class="text-red-500">*</span>
               </label>
               <select
                 id="emergency-type"
                 [(ngModel)]="newTicket.emergencyType"
                 name="emergencyType"
                 [disabled]="isLoading"
+                required
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-red-500 dark:focus:border-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
               <option value="">{{ 'REQUESTS.MODAL.EMERGENCY_TYPE.PLACEHOLDER' | translate }}</option>

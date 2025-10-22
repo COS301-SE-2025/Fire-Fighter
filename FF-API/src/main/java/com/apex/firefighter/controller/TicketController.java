@@ -52,23 +52,27 @@ public class TicketController {
     })
     @PostMapping
     public ResponseEntity<Ticket> createTicket(@RequestBody Map<String, Object> payload) {
-        String description = (String) payload.get("description");
-        String userId = (String) payload.get("userId");
-        String emergencyType = (String) payload.get("emergencyType");
-        String emergencyContact = (String) payload.get("emergencyContact");
+        try {
+            String description = (String) payload.get("description");
+            String userId = (String) payload.get("userId");
+            String emergencyType = (String) payload.get("emergencyType");
+            String emergencyContact = (String) payload.get("emergencyContact");
 
-        // Extract duration from payload (default to 60 minutes if not provided)
-        Integer duration = 60; // Default duration
-        if (payload.get("duration") != null) {
-            if (payload.get("duration") instanceof Integer) {
-                duration = (Integer) payload.get("duration");
-            } else if (payload.get("duration") instanceof Number) {
-                duration = ((Number) payload.get("duration")).intValue();
+            // Extract duration from payload (default to 60 minutes if not provided)
+            Integer duration = 60; // Default duration
+            if (payload.get("duration") != null) {
+                if (payload.get("duration") instanceof Integer) {
+                    duration = (Integer) payload.get("duration");
+                } else if (payload.get("duration") instanceof Number) {
+                    duration = ((Number) payload.get("duration")).intValue();
+                }
             }
-        }
 
-        Ticket ticket = ticketService.createTicket(description, userId, emergencyType, emergencyContact, duration);
-        return ResponseEntity.ok(ticket);
+            Ticket ticket = ticketService.createTicket(description, userId, emergencyType, emergencyContact, duration);
+            return ResponseEntity.ok(ticket);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @Operation(summary = "Get all tickets",

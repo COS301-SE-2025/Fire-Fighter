@@ -42,6 +42,15 @@ public class TicketService {
     }
 
     public Ticket createTicket(String description, String userId, String emergencyType, String emergencyContact, Integer duration) {
+        // Validate required fields
+        if (description == null || description.trim().isEmpty()) {
+            throw new IllegalArgumentException("Description is required");
+        }
+        
+        if (emergencyType == null || emergencyType.trim().isEmpty()) {
+            throw new IllegalArgumentException("Emergency type is required");
+        }
+        
         String ticketId = generateTicketId();
 
         Ticket ticket = new Ticket(ticketId, description, "Active", userId, emergencyType, emergencyContact);

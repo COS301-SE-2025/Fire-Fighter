@@ -313,6 +313,17 @@ export class RequestsPage implements OnInit {
       return;
     }
 
+    if (!this.newTicket.emergencyType || !this.newTicket.emergencyType.trim()) {
+      const toast = await this.toastController.create({
+        message: 'Please select an emergency type',
+        duration: 3000,
+        position: 'bottom',
+        color: 'warning',
+      });
+      await toast.present();
+      return;
+    }
+
      // Set userId to current user's uid
      this.newTicket.userId = this.currentUid;
 
