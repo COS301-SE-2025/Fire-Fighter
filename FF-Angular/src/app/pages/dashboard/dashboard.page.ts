@@ -106,6 +106,16 @@ export class DashboardPage implements OnInit, OnDestroy {
 
   ngOnInit() {
     console.log('🔍 Dashboard - ngOnInit() called');
+    
+    // Security check: Verify user is authorized before allowing access
+    this.authService.userProfile$.pipe(take(1)).subscribe(profile => {
+      if (profile && !profile.isAuthorized && !profile.isAdmin) {
+        console.warn('⚠️ Security: Unauthorized user attempted to access dashboard');
+        this.router.navigate(['/inactive-account']);
+        return;
+      }
+    });
+    
     this.subscribeToNotifications();
     this.checkForAdminAccessError();
     this.subscribeToTicketCreation();

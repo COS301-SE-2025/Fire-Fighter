@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IonContent } from '@ionic/angular/standalone';
 import { Router, ActivatedRoute } from '@angular/router';
+import { NavController } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { Auth } from '@angular/fire/auth';
 
@@ -24,6 +25,7 @@ export class AccessRequestPage implements OnInit {
   successMsg: string | null = null;
   firebaseUid: string | null = null;
   private firebaseAuth = inject(Auth);
+  private navCtrl = inject(NavController);
 
   // Priority levels
   priorityLevels = [
@@ -113,14 +115,17 @@ export class AccessRequestPage implements OnInit {
       // DO NOT sign out the user - keep them logged in with Firebase
       // so they can check their authorization status on the inactive-account page
       
-      // Redirect to inactive-account page
+      // Use navigateRoot to clear navigation history and prevent back navigation
+      // This prevents security issue where user can go back and access dashboard
       setTimeout(() => {
-        this.router.navigate(['/inactive-account'], { replaceUrl: true });
+        this.navCtrl.navigateRoot('/inactive-account', { 
+          animationDirection: 'forward' 
+        });
       }, 2000);
       
     } catch (error: any) {
       this.errorMsg = error.error?.error || error.message || 'Failed to submit access request. Please try again.';
-    } finally {
+      // Only reset isSubmitting on error so user can try again
       this.isSubmitting = false;
     }
   }

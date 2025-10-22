@@ -2,11 +2,13 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
-import { Router } from '@angular/router';
+import { Router, NavigationStart } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Auth } from '@angular/fire/auth';
 import { inject } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
+import { Location } from '@angular/common';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-inactive-account',
@@ -51,6 +53,7 @@ export class InactiveAccountPage implements OnInit, OnDestroy {
 
   isCheckingStatus = false;
   private auth = inject(Auth);
+  private location = inject(Location);
 
   // Success modal management
   isSuccessModalOpen = false;
@@ -58,6 +61,9 @@ export class InactiveAccountPage implements OnInit, OnDestroy {
 
   // Store original theme state
   private hadDarkClass = false;
+  
+  // Subscription for router events
+  private routerSubscription?: Subscription;
 
   constructor(
     private router: Router,
@@ -72,6 +78,23 @@ export class InactiveAccountPage implements OnInit, OnDestroy {
     // Force dark theme for this page
     document.documentElement.classList.add('dark');
     document.body.classList.add('dark');
+    
+    // Prevent browser back button navigation
+    // Push a dummy state to prevent going back to registration flow
+    history.pushState(null, '', location.href);
+    
+    // Listen for popstate (back button) and prevent navigation
+    window.addEventListener('popstate', this.preventBackNavigation);
+    
+    // Also monitor router navigation to prevent programmatic back navigation
+    this.routerSubscription = this.router.events.subscribe(event => {
+      if (event instanceof NavigationStart) {
+        // If trying to navigate back to registration pages, redirect to login instead
+        if (event.url.includes('/access-request') || event.url.includes('/register')) {
+          this.router.navigate(['/login']);
+        }
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -80,7 +103,23 @@ export class InactiveAccountPage implements OnInit, OnDestroy {
       document.documentElement.classList.remove('dark');
       document.body.classList.remove('dark');
     }
+    
+    // Clean up event listener and subscription
+    window.removeEventListener('popstate', this.preventBackNavigation);
+    this.routerSubscription?.unsubscribe();
   }
+  
+  /**
+   * Prevent back navigation to registration flow pages
+   * This is a security measure to prevent unauthorized access
+   */
+  private preventBackNavigation = (event: PopStateEvent) => {
+    // Push state again to prevent actual navigation
+    history.pushState(null, '', location.href);
+    
+    // Optionally show a message to the user
+    this.showStatusAlert('Please use the "Back to Login" button to navigate away from this page.');
+  };
 
   /**
    * Check the current account status with backend API
