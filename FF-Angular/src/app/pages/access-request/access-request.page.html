@@ -124,34 +124,30 @@
                 </div>
               </div>
 
-              <!-- Access Group Field -->
+              <!-- Department Field -->
               <div>
-                <label for="accessGroup" class="block text-sm font-medium text-white mb-2">
-                  Access Request Group
+                <label for="department" class="block text-sm font-medium text-white mb-2">
+                  Department
                   <span class="text-red-500">*</span>
                 </label>
                 <select
-                  id="accessGroup"
-                  formControlName="accessGroup"
+                  id="department"
+                  formControlName="department"
                   class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
                   [ngClass]="{
-                    'border-red-500': accessRequestForm.get('accessGroup')?.touched && accessRequestForm.get('accessGroup')?.invalid,
-                    'border-gray-600': !(accessRequestForm.get('accessGroup')?.touched && accessRequestForm.get('accessGroup')?.invalid)
+                    'border-red-500': accessRequestForm.get('department')?.touched && accessRequestForm.get('department')?.invalid,
+                    'border-gray-600': !(accessRequestForm.get('department')?.touched && accessRequestForm.get('department')?.invalid)
                   }"
                 >
-                  <option value="" disabled selected>Select access group</option>
-                  <option *ngFor="let group of accessGroups" [value]="group.value">
-                    {{ group.label }}
+                  <option value="" disabled selected>Select your department</option>
+                  <option *ngFor="let dept of departments" [value]="dept.value">
+                    {{ dept.label }}
                   </option>
                 </select>
-                <div *ngIf="accessRequestForm.get('accessGroup')?.touched && accessRequestForm.get('accessGroup')?.invalid" class="mt-1 text-sm text-red-400">
-                  <p *ngIf="accessRequestForm.get('accessGroup')?.errors?.['required']">
-                    Access group is required
+                <div *ngIf="accessRequestForm.get('department')?.touched && accessRequestForm.get('department')?.invalid" class="mt-1 text-sm text-red-400">
+                  <p *ngIf="accessRequestForm.get('department')?.errors?.['required']">
+                    Department is required
                   </p>
-                </div>
-                <!-- Access group description -->
-                <div *ngIf="accessRequestForm.get('accessGroup')?.value" class="mt-1 text-xs text-gray-400">
-                  {{ getAccessGroupDescription() }}
                 </div>
               </div>
             </div>

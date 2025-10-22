@@ -103,33 +103,6 @@
             </div>
           </div>
 
-          <!-- Department Field -->
-          <div>
-            <label for="department" class="block text-sm font-medium text-white mb-2">
-              Department
-              <span class="text-red-500">*</span>
-            </label>
-            <select
-              id="department"
-              formControlName="department"
-              class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
-              [ngClass]="{
-                'border-red-500': registerForm.get('department')?.touched && registerForm.get('department')?.invalid,
-                'border-gray-600': !(registerForm.get('department')?.touched && registerForm.get('department')?.invalid)
-              }"
-            >
-              <option value="" disabled selected>Select your department</option>
-              <option *ngFor="let dept of departments" [value]="dept.value">
-                {{ dept.label }}
-              </option>
-            </select>
-            <div *ngIf="registerForm.get('department')?.touched && registerForm.get('department')?.invalid" class="mt-1 text-sm text-red-400">
-              <p *ngIf="registerForm.get('department')?.errors?.['required']">
-                Department is required
-              </p>
-            </div>
-          </div>
-
           <!-- Password Field -->
           <div>
             <label for="password" class="block text-sm font-medium text-white mb-2">

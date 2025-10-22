@@ -34,28 +34,19 @@ export class AccessRequestPage implements OnInit {
     { value: 'Low', label: 'Low Priority', description: 'Routine access request' }
   ];
 
-  // Access request groups based on FireFighter emergency groups
-  accessGroups = [
-    { 
-      value: 'financial', 
-      label: 'Financial Emergency Group', 
-      description: 'Budget approvals, financial crisis management, monetary systems access' 
-    },
-    { 
-      value: 'hr', 
-      label: 'HR Emergency Group', 
-      description: 'Human resources emergency protocols, employee data access, privacy-sensitive operations' 
-    },
-    { 
-      value: 'management', 
-      label: 'Management Emergency Group', 
-      description: 'Executive-level emergency protocols, strategic decision making, high-level coordination' 
-    },
-    { 
-      value: 'logistics', 
-      label: 'Logistics Emergency Group', 
-      description: 'Supply chain coordination, infrastructure maintenance, business continuity' 
-    }
+  // Departments from registration flow
+  departments = [
+    { value: 'it', label: 'Information Technology (IT)' },
+    { value: 'hr', label: 'Human Resources (HR)' },
+    { value: 'finance', label: 'Finance & Accounting' },
+    { value: 'operations', label: 'Operations' },
+    { value: 'sales', label: 'Sales & Marketing' },
+    { value: 'logistics', label: 'Logistics & Supply Chain' },
+    { value: 'management', label: 'Management & Executive' },
+    { value: 'customer-service', label: 'Customer Service' },
+    { value: 'legal', label: 'Legal & Compliance' },
+    { value: 'admin', label: 'Administration' },
+    { value: 'other', label: 'Other' }
   ];
 
   constructor(
@@ -77,9 +68,9 @@ export class AccessRequestPage implements OnInit {
     });
 
     this.accessRequestForm = this.fb.group({
+      department: ['', Validators.required],
       contactNumber: ['', Validators.pattern(/^[0-9\s\-\(\)\.]+$/)],
       priorityLevel: ['MEDIUM', Validators.required],
-      accessGroup: ['', Validators.required],
       businessJustification: ['', [Validators.required, Validators.minLength(50), Validators.maxLength(500)]]
     });
   }
@@ -102,10 +93,11 @@ export class AccessRequestPage implements OnInit {
       // Prepare request data for backend
       const requestData = {
         firebaseUid: this.firebaseUid,
+        department: formData.department,
         requestPriority: formData.priorityLevel,
         phoneNumber: formData.contactNumber || '',
         justification: formData.businessJustification,
-        requestedAccessGroups: [formData.accessGroup]
+        requestedAccessGroups: []
       };
       
       await this.authService.submitAccessRequest(requestData).toPromise();
@@ -140,9 +132,4 @@ export class AccessRequestPage implements OnInit {
     return priority?.description || '';
   }
 
-  getAccessGroupDescription(): string {
-    const selectedValue = this.accessRequestForm.get('accessGroup')?.value;
-    const group = this.accessGroups.find(g => g.value === selectedValue);
-    return group?.description || '';
-  }
 }

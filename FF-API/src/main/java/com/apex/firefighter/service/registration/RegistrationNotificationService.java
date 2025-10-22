@@ -6,6 +6,7 @@ import com.apex.firefighter.repository.UserRepository;
 import com.apex.firefighter.service.GmailEmailService;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,7 +28,9 @@ public class RegistrationNotificationService {
 
     /**
      * Notify admins when a new registration request is submitted
+     * This method runs asynchronously to avoid blocking the registration request
      */
+    @Async
     public void notifyAdminsOfNewRegistration(SystemAccessRequest accessRequest) {
         try {
             List<User> admins = userRepository.findByIsAdminTrue();
@@ -58,7 +61,9 @@ public class RegistrationNotificationService {
 
     /**
      * Notify user when their registration is approved
+     * This method runs asynchronously to avoid blocking the approval request
      */
+    @Async
     public void notifyUserOfApproval(User user, String approvedBy) {
         try {
             emailService.sendRegistrationApprovedNotification(
@@ -74,7 +79,9 @@ public class RegistrationNotificationService {
 
     /**
      * Notify user when their registration is rejected
+     * This method runs asynchronously to avoid blocking the rejection request
      */
+    @Async
     public void notifyUserOfRejection(SystemAccessRequest accessRequest, String rejectedBy, String reason) {
         try {
             emailService.sendRegistrationRejectedNotification(
@@ -91,7 +98,9 @@ public class RegistrationNotificationService {
 
     /**
      * Notify user when their department is changed
+     * This method runs asynchronously to avoid blocking the department change request
      */
+    @Async
     public void notifyUserOfDepartmentChange(User user, String oldDepartment, String newDepartment, String changedBy) {
         try {
             emailService.sendDepartmentChangeNotification(
@@ -109,7 +118,9 @@ public class RegistrationNotificationService {
 
     /**
      * Notify user when their account status is changed
+     * This method runs asynchronously to avoid blocking the status change request
      */
+    @Async
     public void notifyUserOfStatusChange(User user, boolean isAuthorized, String changedBy) {
         try {
             emailService.sendAccountStatusChangeNotification(

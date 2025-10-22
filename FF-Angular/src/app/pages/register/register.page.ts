@@ -44,8 +44,7 @@ export class RegisterPage implements OnInit {
       username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', Validators.required],
-      department: ['', Validators.required]
+      confirmPassword: ['', Validators.required]
     }, { validator: this.passwordMatchValidator });
   }
 
@@ -68,7 +67,7 @@ export class RegisterPage implements OnInit {
     this.errorMsg = null;
     
     try {
-      const { email, username, password, department } = this.registerForm.value;
+      const { email, username, password } = this.registerForm.value;
       
       // Create Firebase account
       const userCredential = await createUserWithEmailAndPassword(this.firebaseAuth, email, password);
@@ -79,7 +78,7 @@ export class RegisterPage implements OnInit {
         firebaseUid,
         username,
         email,
-        department,
+        department: '',
         contactNumber: '',
         registrationMethod: 'email',
         requestedAccessGroups: [],
